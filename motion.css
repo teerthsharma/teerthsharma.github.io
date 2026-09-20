@@ -46,38 +46,13 @@
   .proj__art .pop:nth-of-type(4n+3) { animation-delay: -2.10s; }
   .proj__art .pop:nth-of-type(4n+4) { animation-delay: -3.15s; }
 
-  /* --- 3. A signal travelling each curve ------------------------------
-     Every .draw element carries pathLength="1", so one keyframe works on
-     any path regardless of its real length. A short bright segment runs
-     along the stroke on a loop. The stroke itself stays solid because the
-     dash pattern covers the whole path and only the highlight moves. */
-  @keyframes trace-run {
-    from { stroke-dashoffset: 1; }
-    to   { stroke-dashoffset: 0; }
-  }
-  .card__art .draw,
-  .proj__art .draw,
-  .hero__art .draw {
-    /* .85/.15, not .14/.86. A short lit dash chasing round an otherwise
-       invisible path would erase the drawing: the hero curve would become a
-       fragment sliding along nothing. Keeping the stroke 85 percent solid
-       means a small gap travels the line instead, so the shape is always
-       fully readable and only a highlight moves. */
-    stroke-dasharray: .85 .15;
-    animation: trace-run 3.2s linear infinite;
-  }
-  .card__art .draw:nth-of-type(2n),
-  .proj__art .draw:nth-of-type(2n) { animation-delay: -1.2s; }
-
-  /* Keep a solid copy of the line underneath the travelling segment, so
-     the shape is never lost while the highlight moves. An author marks
-     the solid copy with class "draw-base". Where none exists the dashed
-     stroke is the whole line, which still reads because the gap is small. */
-  .draw-base {
-    stroke-dasharray: none !important;
-    animation: none !important;
-    opacity: .28;
-  }
+  /* --- 3. The travelling gap: removed --------------------------------
+     A 0.85/0.15 dash moving along a stroke is a highlight on a curve and a
+     missing segment on a straight data line. Every chart here draws its
+     series as a polyline, so two of the mujoco series were rendering as
+     broken lines. A measured number drawn on a broken line is a number
+     nobody believes. The strokes are solid, and motion is carried by the
+     things that can afford it: the point fields and the schedule scan. */
 
   /* --- 4. Endpoint pulse ----------------------------------------------
      The marker a diagram wants you to end on breathes gently. Radius is
