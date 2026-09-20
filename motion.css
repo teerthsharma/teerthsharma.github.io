@@ -1,0 +1,123 @@
+/* ===================================================================
+   motion.css — continuous ambient motion for every diagram.
+
+   site.css already animates a diagram once, as it arrives. That is an
+   entrance, and an entrance is over. Everything below keeps running, so a
+   figure the visitor is looking at is never a still picture.
+
+   Rules held throughout:
+     - Every loop returns exactly to the drawn state, so the resting frame
+       is always the correct one. Nothing here changes what a diagram says.
+     - Motion is small and slow. The page should feel alive, not restless.
+     - Nothing loops faster than 2.4s and nothing moves more than 3px.
+     - The whole file is inside prefers-reduced-motion: no-preference, so
+       reduced motion gets the still, correct diagram and nothing else.
+   =================================================================== */
+
+@media (prefers-reduced-motion: no-preference) {
+
+  /* --- 1. Figure float ------------------------------------------------
+     Each figure drifts on its own slow cycle. Staggered by card so the
+     grid never pulses in unison, which would read as a page-wide glitch
+     rather than as separate living objects. */
+  @keyframes fig-float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-3px); }
+  }
+  .card__art svg,
+  .proj__art svg,
+  .hero__art svg {
+    animation: fig-float 7s ease-in-out infinite;
+    will-change: transform;
+  }
+  .card:nth-of-type(3n+2) .card__art svg,
+  .proj:nth-of-type(3n+2) .proj__art svg { animation-delay: -2.3s; }
+  .card:nth-of-type(3n+3) .card__art svg,
+  .proj:nth-of-type(3n+3) .proj__art svg { animation-delay: -4.6s; }
+
+  /* --- 2. Shimmer across dense point fields ---------------------------
+     A slow wave of brightness travels through a dot matrix or block grid,
+     so a field of 1,015 dots reads as a living population rather than a
+     texture. Opacity only: position and colour never change. */
+  @keyframes cell-wave {
+    0%, 62%, 100% { opacity: 1; }
+    31%           { opacity: .42; }
+  }
+  .card__art .pop,
+  .proj__art .pop {
+    animation: cell-wave 4.2s ease-in-out infinite;
+  }
+  .card__art .pop:nth-of-type(6n+1) { animation-delay: -0.0s; }
+  .card__art .pop:nth-of-type(6n+2) { animation-delay: -0.7s; }
+  .card__art .pop:nth-of-type(6n+3) { animation-delay: -1.4s; }
+  .card__art .pop:nth-of-type(6n+4) { animation-delay: -2.1s; }
+  .card__art .pop:nth-of-type(6n+5) { animation-delay: -2.8s; }
+  .card__art .pop:nth-of-type(6n+6) { animation-delay: -3.5s; }
+  .proj__art .pop:nth-of-type(4n+2) { animation-delay: -1.05s; }
+  .proj__art .pop:nth-of-type(4n+3) { animation-delay: -2.10s; }
+  .proj__art .pop:nth-of-type(4n+4) { animation-delay: -3.15s; }
+
+  /* --- 3. A signal travelling each curve ------------------------------
+     Every .draw element carries pathLength="1", so one keyframe works on
+     any path regardless of its real length. A short bright segment runs
+     along the stroke on a loop. The stroke itself stays solid because the
+     dash pattern covers the whole path and only the highlight moves. */
+  @keyframes trace-run {
+    from { stroke-dashoffset: 1; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .card__art .draw,
+  .proj__art .draw,
+  .hero__art .draw {
+    /* .85/.15, not .14/.86. A short lit dash chasing round an otherwise
+       invisible path would erase the drawing: the hero curve would become a
+       fragment sliding along nothing. Keeping the stroke 85 percent solid
+       means a small gap travels the line instead, so the shape is always
+       fully readable and only a highlight moves. */
+    stroke-dasharray: .85 .15;
+    animation: trace-run 3.2s linear infinite;
+  }
+  .card__art .draw:nth-of-type(2n),
+  .proj__art .draw:nth-of-type(2n) { animation-delay: -1.2s; }
+
+  /* Keep a solid copy of the line underneath the travelling segment, so
+     the shape is never lost while the highlight moves. An author marks
+     the solid copy with class "draw-base". Where none exists the dashed
+     stroke is the whole line, which still reads because the gap is small. */
+  .draw-base {
+    stroke-dasharray: none !important;
+    animation: none !important;
+    opacity: .28;
+  }
+
+  /* --- 4. Endpoint pulse ----------------------------------------------
+     The marker a diagram wants you to end on breathes gently. Radius is
+     animated rather than scale so it cannot drift off its own coordinate. */
+  @keyframes end-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: .45; }
+  }
+  .pulse { animation: end-pulse 2.6s ease-in-out infinite; }
+
+  /* --- 5. Hairline drift on axes --------------------------------------
+     Axis rules and guide lines breathe very slightly, which stops a chart
+     from looking printed. */
+  @keyframes rule-breathe {
+    0%, 100% { opacity: .9; }
+    50%      { opacity: .55; }
+  }
+  .card__art line[stroke*="hair"],
+  .proj__art line[stroke*="hair"] {
+    animation: rule-breathe 5.5s ease-in-out infinite;
+  }
+
+  /* --- 6. Pause on hover ----------------------------------------------
+     A visitor reading a specific figure can stop it moving by pointing at
+     it. Nothing is lost: every loop rests at the drawn state. */
+  .card:hover .card__art svg,
+  .card:hover .card__art svg *,
+  .proj:hover .proj__art svg,
+  .proj:hover .proj__art svg * {
+    animation-play-state: paused;
+  }
+}

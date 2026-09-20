@@ -18,7 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=3">
+<link rel="stylesheet" href="site.css?v=4">
+<link rel="stylesheet" href="motion.css?v=4">
 
 <script type="application/ld+json">
 {
@@ -152,17 +153,17 @@
         <p class="proj__claim">shapely.polygonize_full returns 336 wrong answers on the files where planimeter returns none.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 260" role="img" aria-labelledby="t2-title t2-desc">
+            <svg viewBox="0 0 400 310" role="img" aria-labelledby="t2-title t2-desc">
               <title id="t2-title">A closed outline with an enclosed hole, and planimeter's tally against shapely</title>
               <desc id="t2-desc">A hand drawn boundary with a lightly shaded enclosed face around a hole, annotated with the pieces, enclosed faces and Euler characteristic it returns, and a tally of planimeter's 495 exact and 33 refused against shapely's 336 wrong.</desc>
               <path pathLength="1" class="draw" d="M200,20 C235,17 262,38 270,72 C278,105 265,138 235,157 C208,174 172,172 148,151 C124,131 118,95 133,65 C146,39 168,23 200,20 Z M200,74 C216,73 228,83 230,98 C232,112 222,124 207,128 C193,132 178,126 172,113 C167,101 172,86 186,78 C191,75 195,74 200,74 Z" fill-rule="evenodd" fill="var(--green-100)" stroke="var(--ink)" stroke-width="3"/>
               <text x="200" y="192" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="12">pieces 1 &#183; enclosed faces 1 &#183; &#967; = 0</text>
-              <line x1="20" y1="208" x2="380" y2="208" stroke="var(--hair2)" stroke-width="1"/>
-              <rect x="20" y="222" width="168.75" height="16" fill="var(--green-500)"/>
-              <rect x="188.75" y="222" width="11.25" height="16" fill="var(--hair2)"/>
-              <text x="20" y="216" fill="var(--green-700)" font-family="var(--font-mono)" font-size="12" font-weight="700">planimeter: 495 exact, 33 refused, 0 wrong</text>
-              <rect x="20" y="246" width="200" height="16" fill="var(--coral-500)"/>
-              <text x="20" y="245" fill="var(--coral-700)" font-family="var(--font-mono)" font-size="12" font-weight="700">shapely.polygonize_full: 336 wrong, 0 refused</text>
+              <line x1="20" y1="210" x2="380" y2="210" stroke="var(--hair2)" stroke-width="1"/>
+              <text x="20" y="228" fill="var(--green-700)" font-family="var(--font-mono)" font-size="12" font-weight="700">planimeter: 495 exact, 33 refused, 0 wrong</text>
+              <rect x="20" y="236" width="168.75" height="16" fill="var(--green-500)"/>
+              <rect x="188.75" y="236" width="11.25" height="16" fill="var(--hair2)"/>
+              <text x="20" y="270" fill="var(--coral-700)" font-family="var(--font-mono)" font-size="12" font-weight="700">shapely.polygonize_full: 336 wrong, 0 refused</text>
+              <rect x="20" y="278" width="200" height="16" fill="var(--coral-500)"/>
             </svg>
             <figcaption class="fig__cap">I set my tally against shapely's.</figcaption>
           </figure>
@@ -528,6 +529,6 @@
 
 </main>
 
-<script src="site.js?v=3" defer></script>
+<script src="site.js?v=4" defer></script>
 </body>
 </html>
