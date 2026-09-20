@@ -55,6 +55,7 @@
   }
 
   function fit(c, vbw, vbh) {
+    /* vbh is used for the letterbox; see the note below. */
     var r = c.getBoundingClientRect();
     var w = Math.max(1, Math.round(r.width));
     var h = Math.max(1, Math.round(r.height));
@@ -62,8 +63,10 @@
     c._w = w; c._h = h; c._dpr = DPR;
     c.width = Math.round(w * DPR);
     c.height = Math.round(h * DPR);
-    var s = (w / vbw) * DPR;
-    c.getContext('2d').setTransform(s, 0, 0, s, 0, 0);
+    var vbh = arguments[2] || vbw;
+    var s = Math.min(w / vbw, h / vbh);
+    var ox = (w - vbw * s) / 2, oy = (h - vbh * s) / 2;
+    c.getContext('2d').setTransform(s * DPR, 0, 0, s * DPR, ox * DPR, oy * DPR);
     return true;
   }
 
@@ -537,9 +540,136 @@
     g.setLineDash([]);
   }
 
+  /* ==================================================================== */
+  /* refuse — planimeter                                                  */
+  /* ==================================================================== */
+  /* The strongest evidence on the site had the emptiest figure: one drawn
+     element. On the same 528 files, planimeter refuses 33 and returns a wrong
+     answer zero times, and shapely.polygonize_full refuses nothing and gets
+     336 wrong. Both fields are drawn at once, one mark per file, so the trade
+     is visible without a word: the amber band is what refusing costs, and the
+     coral block is what answering anyway costs. */
+  function refuse(g, vb, t) {
+    var N = 528, COLS = 22;
+    var green = token('--green-500', '#146a32');
+    var amber = token('--amber-500', '#d96a06');
+    var coral = token('--coral-500', '#d9376e');
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    var cyc = REDUCED ? 1 : (t % 6400) / 6400;
+
+    function field(ox, oy, kind) {
+      var pitch = 8.6, size = 6.6;
+      for (var i = 0; i < N; i++) {
+        var c = i % COLS, r = (i / COLS) | 0;
+        var col, a = 1;
+        if (kind === 'mine') {
+          /* 33 refused, and they are the last 33 so they read as one band */
+          col = i >= N - 33 ? amber : green;
+        } else {
+          /* 336 wrong, spread through the field because a wrong answer does
+             not announce itself, which is the entire problem */
+          col = ((i * 7) % 528) < 336 ? coral : green;
+        }
+        if (!REDUCED) {
+          var w = 0.86 + 0.14 * Math.sin(cyc * Math.PI * 2 - (r * 0.18));
+          a = 0.62 + 0.38 * w;
+        }
+        g.fillStyle = rgba(col, a);
+        g.fillRect(ox + c * pitch, oy + r * pitch, size, size);
+      }
+    }
+
+    field(26, 150, 'mine');
+    field(255, 150, 'theirs');
+  }
+
+  /* ==================================================================== */
+  /* cut — topological-ml-toolkit                                         */
+  /* ==================================================================== */
+  /* The point is a cut that separates structure from noise, and the previous
+     drawing gave it fourteen bars, which is not a population and cannot show
+     a separation. Two hundred and forty bars, one cut, and the bars that
+     cross it are the feature while the ones that do not are noise. */
+  function cut(g, vb, t) {
+    var N = 240, X0 = 34, X1 = 436, BASE = 388, CUT = 208;
+    var violet = token('--violet-500', '#a66cf0');
+    var violet7 = token('--violet-700', '#6b35c4');
+    var hair = token('--hair2', '#cfcbc1');
+    var ink = token('--ink', '#1c1b19');
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    var pitch = (X1 - X0) / N;
+    var drift = REDUCED ? 0 : Math.sin(t / 4200) * 9;
+
+    for (var i = 0; i < N; i++) {
+      /* a stable height per bar: a long tail of noise and a few that persist,
+         which is the shape a barcode actually has */
+      var s = Math.sin(i * 12.9898) * 43758.5453;
+      var u = s - Math.floor(s);
+      var h = Math.pow(u, 3.1) * (BASE - 96) + 6;
+      var top = BASE - h;
+      var lives = top < CUT + drift;
+      g.fillStyle = lives ? rgba(violet7, 0.92) : rgba(violet, 0.26);
+      g.fillRect(X0 + i * pitch, top, Math.max(pitch - 0.6, 0.9), h);
+    }
+
+    g.strokeStyle = rgba(ink, 0.85); g.lineWidth = 2.6;
+    g.setLineDash([10, 6]);
+    g.beginPath();
+    g.moveTo(X0 - 14, CUT + drift); g.lineTo(X1 + 14, CUT + drift); g.stroke();
+    g.setLineDash([]);
+
+    g.strokeStyle = rgba(hair, 1); g.lineWidth = 2;
+    g.beginPath(); g.moveTo(X0 - 14, BASE + 2); g.lineTo(X1 + 14, BASE + 2); g.stroke();
+  }
+
+  /* ==================================================================== */
+  /* certify — separatrix                                                 */
+  /* ==================================================================== */
+  /* Either two candidates are separated by a real gap or their intervals
+     touch, and if they touch the ordering came from the arithmetic and not
+     the data, so nothing is returned. Thirty two comparisons are drawn, the
+     separated ones certified and the touching ones refused, and the whole
+     rule is legible without reading it. */
+  function certify(g, vb, t) {
+    var ROWS = 32, X0 = 40, W = 390, Y0 = 118, PITCH = 8.4;
+    var mint = token('--mint-500', '#0b93ab');
+    var mint7 = token('--mint-700', '#0a6b7c');
+    var coral = token('--coral-500', '#d9376e');
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    var breathe = REDUCED ? 0 : Math.sin(t / 3800) * 0.5 + 0.5;
+
+    for (var i = 0; i < ROWS; i++) {
+      var y = Y0 + i * PITCH;
+      var s = Math.sin(i * 45.233) * 43758.5453;
+      var u = s - Math.floor(s);
+      /* the gap narrows down the stack; near the bottom the intervals touch */
+      var gap = (1 - i / ROWS) * 46 - 10 + (u - 0.5) * 14;
+      var mid = X0 + W / 2;
+      var half = 74 + u * 34;
+      var g1 = mid - gap / 2, g2 = mid + gap / 2;
+      var touching = gap < 4;
+
+      var col = touching ? coral : mint;
+      var a = touching ? 0.55 + 0.35 * breathe : 0.92;
+      g.fillStyle = rgba(col, a);
+      g.fillRect(g1 - half, y, half, 5.2);
+      g.fillRect(g2, y, half, 5.2);
+
+      if (!touching) {
+        g.fillStyle = rgba(mint7, 0.85);
+        g.fillRect(g1 - 2.6, y + 1, 2.6, 3.2);
+        g.fillRect(g2, y + 1, 2.6, 3.2);
+      }
+    }
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
-                 witness: witness, gather: gather };
+                 witness: witness, gather: gather,
+                 refuse: refuse, cut: cut, certify: certify };
 
   /* ------------------------------------------------------------------ */
   var live = [];
@@ -566,18 +696,25 @@
   }
 
   var ticked = false;
+  var lastT = 0;
 
   function paint(t, all) {
     for (var i = 0; i < live.length; i++) {
       var f = live[i];
       if (!all && !onScreen(f.c)) continue;
       fit(f.c, f.vb[0], f.vb[1]);
-      f.fn(f.c.getContext('2d'), f.vb, t, f.st);
+      var ctx = f.c.getContext('2d');
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, f.c.width, f.c.height);
+      ctx.restore();
+      f.fn(ctx, f.vb, t, f.st);
     }
   }
 
   function frame(t) {
     ticked = true;
+    lastT = t;
     paint(t, false);
     requestAnimationFrame(frame);
   }
@@ -597,7 +734,7 @@
     setTimeout(function () {
       if (ticked) return;
       var t0 = 0;
-      setInterval(function () { t0 += 50; paint(t0, false); }, 50);
+      setInterval(function () { t0 += 50; lastT = t0; paint(t0, false); }, 50);
     }, 1200);
   }
 
@@ -605,9 +742,25 @@
      shown and calls redraw, so the one interactive control on the site keeps
      the behaviour it already had. */
   window.FIG = {
+    /* Setting a value repaints that figure at once rather than waiting for the
+       next animation frame. A control that only writes a number and hopes a
+       frame arrives is a control that does nothing whenever the frame loop is
+       throttled, which is exactly what a hidden tab, a background window or a
+       low power mode will do to it. The slider on this site has already
+       shipped broken four separate ways; it does not get a fifth. */
     set: function (name, key, value) {
       for (var i = 0; i < live.length; i++) {
-        if (live[i].c.getAttribute('data-fig') === name) live[i].st[key] = value;
+        var f = live[i];
+        if (f.c.getAttribute('data-fig') !== name) continue;
+        if (f.st[key] === value) continue;
+        f.st[key] = value;
+        fit(f.c, f.vb[0], f.vb[1]);
+        var ctx = f.c.getContext('2d');
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.clearRect(0, 0, f.c.width, f.c.height);
+        ctx.restore();
+        f.fn(ctx, f.vb, lastT, f.st);
       }
     },
     sizeOf: function (name) {

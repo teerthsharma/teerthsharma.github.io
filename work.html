@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=33">
-<link rel="stylesheet" href="motion.css?v=33">
-<link rel="stylesheet" href="art.css?v=33">
+<link rel="stylesheet" href="site.css?v=37">
+<link rel="stylesheet" href="motion.css?v=37">
+<link rel="stylesheet" href="art.css?v=37">
 
 <script type="application/ld+json">
 {
@@ -305,31 +305,18 @@
         <p class="proj__claim">I wanted the shape of data to be an ordinary feature, usable by anyone already building with sklearn or PyTorch.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 340 252" role="img" aria-labelledby="p-topological-ml-toolkit-t p-topological-ml-toolkit-d">
-  <title id="p-topological-ml-toolkit-t">A dense field of bars sheared by one cut, the short ones flush against it and the tall ones through it</title>
-  <desc id="p-topological-ml-toolkit-d">Fourteen bars packed tight, almost touching. A blade of a line crosses them all at one height. Eleven bars are cut short: every one of them ends flush at that line, a single sheared edge, and each keeps shrinking back toward its own start on a loop, dying. Three bars ignore the blade and run on to the far edge of the panel, solid and still. The cut, not their color, is what decides which bars are structure and which are noise.</desc>
-
-  <rect class="pop" x="70" y="34" width="140" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="100" y="46.5" width="110" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="42" y="59" width="268" height="9" rx="4.5" fill="var(--blue-500)"/>
-  <rect class="pop" x="130" y="71.5" width="80" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="60" y="84" width="150" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="150" y="96.5" width="60" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="90" y="109" width="120" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="48" y="121.5" width="262" height="9" rx="4.5" fill="var(--blue-500)"/>
-  <rect class="pop" x="170" y="134" width="40" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="110" y="146.5" width="100" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="75" y="159" width="135" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="55" y="171.5" width="255" height="9" rx="4.5" fill="var(--blue-500)"/>
-  <rect class="pop" x="140" y="184" width="70" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-  <rect class="pop" x="95" y="196.5" width="115" height="9" rx="4.5" fill="var(--coral-500)" opacity="1"/>
-
-  <line pathLength="1" class="draw" x1="210" y1="20" x2="210" y2="212" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"/>
-
-  <text x="210" y="14" text-anchor="middle" font-size="13" fill="var(--ink)">the cut</text>
-  <text x="270" y="54" text-anchor="middle" font-size="11" fill="var(--blue-700)">crosses the cut</text>
-  <text x="34" y="228" font-size="12" fill="var(--coral-700)">short bars stop here</text>
-</svg>
+            <div class="figc" style="--figc-ar:470/520">
+                <canvas data-fig="cut" data-vb="470 520" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="tm-t tm-d">
+                  <title id="tm-t">Two hundred and forty bars and one cut</title>
+                  <desc id="tm-d">Two hundred and forty persistence bars with one cut across them. The bars that reach past the cut are structure and become the feature; the short ones below it are noise and are left behind. The cut is the whole idea, and it is what makes the shape of data an ordinary column that anyone already building a model can use.</desc>
+                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">240 bars, and one cut decides which are real</text>
+                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">long bars are structure, short bars are noise</text>
+                  <text x="235" y="438" text-anchor="middle" font-size="18" font-weight="600" fill="var(--violet-700)">what crosses the cut becomes a feature</text>
+                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">an ordinary column, usable by anyone already building a model</text>
+                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">persistent homology and Betti-curve features, Rust core with a Python API</text>
+                </svg>
+              </div>
             <figcaption class="fig__cap">Long bars are structure, short bars are noise, and the cut is the feature.</figcaption>
           </figure>
         </div>
@@ -480,43 +467,18 @@
         <p class="proj__claim">I certify that a top-k or an argmin was decided by the data, and not by where the kernel happened to round.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sep-title sep-desc">
-  <title id="sep-title">A threshold dividing two candidates</title>
-  <desc id="sep-desc">A vertical line creates a sharp boundary. On the left, two candidates separated by a gap cannot both cross it: the ordering is certified by the data, not by rounding error. On the right, overlapping candidates: the arithmetic is ambiguous and separatrix refuses to answer.</desc>
-
-  <!-- Left side: separated candidates -->
-  <g>
-    <line pathLength="1" class="draw" x1="80" y1="80" x2="160" y2="80" stroke="var(--muted)" stroke-width="4" stroke-linecap="round"/>
-    <circle class="pop" cx="80" cy="80" r="6" fill="var(--ink)"/>
-    <circle class="pop" cx="160" cy="80" r="6" fill="var(--ink)"/>
-    <line pathLength="1" class="draw" x1="50" y1="100" x2="190" y2="100" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
-    <text x="65" y="130" font-size="16" font-weight="600" fill="var(--ink)">gap</text>
-
-    <text x="120" y="180" text-anchor="middle" font-size="16" font-weight="600" fill="var(--ink)">separated</text>
-    <text x="120" y="205" text-anchor="middle" font-size="15" fill="var(--muted)">the answer is certified</text>
-  </g>
-
-  <!-- The separating threshold in the middle -->
-  <line pathLength="1" class="draw" x1="210" y1="20" x2="210" y2="280" stroke="var(--ink)" stroke-width="3"/>
-
-  <!-- Right side: overlapping candidates -->
-  <g>
-    <line pathLength="1" class="draw" x1="250" y1="80" x2="360" y2="80" stroke="var(--muted)" stroke-width="4" stroke-linecap="round"/>
-    <circle class="pop" cx="250" cy="80" r="6" fill="var(--ink)"/>
-    <circle class="pop" cx="360" cy="80" r="6" fill="var(--ink)"/>
-    <line pathLength="1" class="draw" x1="255" y1="100" x2="355" y2="100" stroke="var(--muted)" stroke-width="1" stroke-dasharray="2 3"/>
-    <text x="285" y="130" font-size="16" font-weight="600" fill="var(--ink)">overlap</text>
-
-    <text x="305" y="180" text-anchor="middle" font-size="16" font-weight="600" fill="var(--ink)">overlapping</text>
-    <text x="305" y="205" text-anchor="middle" font-size="15" fill="var(--muted)">nothing is returned</text>
-  </g>
-
-  <!-- Label for threshold -->
-  <text x="210" y="30" text-anchor="middle" font-size="14" font-weight="600" fill="var(--ink)">threshold</text>
-
-  <!-- Top-level annotation -->
-  <text x="210" y="260" text-anchor="middle" font-size="15" fill="var(--muted)">the threshold that separates certified from ambiguous</text>
-</svg>
+            <div class="figc" style="--figc-ar:470/520">
+                <canvas data-fig="certify" data-vb="470 520" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="sp-t sp-d">
+                  <title id="sp-t">Thirty two comparisons, certified or refused</title>
+                  <desc id="sp-d">Thirty two comparisons drawn as pairs of intervals. Where a real gap remains between them the ordering came from the data and the answer is certified. Where the intervals touch, the ordering came from where the kernel happened to round, so nothing is returned. The gap narrows down the stack until it closes, and the point at which certification stops is visible without a number being read.</desc>
+                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">a real gap, or no answer at all</text>
+                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">32 comparisons, and the gap narrows going down</text>
+                  <text x="235" y="438" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">once the intervals touch, nothing is returned</text>
+                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">the ordering would have been the arithmetic and not the data</text>
+                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">top-k, argmin and threshold, certified or refused</text>
+                </svg>
+              </div>
             <figcaption class="fig__cap">If the intervals touch, the ordering was the arithmetic and not the data.</figcaption>
           </figure>
         </div>
@@ -536,20 +498,21 @@
         <p class="proj__claim">shapely.polygonize_full returns 336 wrong answers on the files where planimeter returns none.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="pl-title pl-desc">
-  <title id="pl-title">A closed boundary enclosing a face</title>
-  <desc id="pl-desc">A hand-drawn closed shape fills with a subtle tint, showing the interior it encloses. Planimeter counts: pieces 1, enclosed faces 1, Euler characteristic 0.</desc>
-
-  <!-- The enclosing boundary -->
-  <path pathLength="1" class="draw" d="M200,40 C240,35 270,60 275,95 C280,135 260,170 230,190 C200,205 160,200 135,175 C110,150 105,110 125,75 C145,50 175,42 200,40 Z M200,100 C218,98 232,110 233,128 C235,145 225,158 210,162 C195,166 178,157 172,140 C167,125 172,105 188,95 C194,91 198,99 200,100 Z" fill="var(--green-100)" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-
-  <!-- Annotation -->
-  <text x="200" y="245" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">pieces 1</text>
-  <text x="200" y="268" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">enclosed faces 1</text>
-  <text x="200" y="291" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">χ = 0</text>
-
-  <text x="200" y="315" text-anchor="middle" font-size="14" fill="var(--muted)">the boundary defines what is enclosed</text>
-</svg>
+            <div class="figc" style="--figc-ar:470/520">
+                <canvas data-fig="refuse" data-vb="470 520" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="pl-t pl-d">
+                  <title id="pl-t">The same 528 files, answered two ways</title>
+                  <desc id="pl-d">One mark for every one of the 528 files, drawn twice. On the left 33 are refused and none of the answers given is wrong. On the right nothing is refused and 336 of the answers are wrong, and they are scattered through the field because a wrong answer does not announce itself. Refusing 33 is the price of never being wrong, and it is a price worth naming.</desc>
+                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">528 files, one mark each, answered twice</text>
+                  <text x="120" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="var(--green-700)">mine</text>
+                  <text x="120" y="134" text-anchor="middle" font-size="15" fill="var(--muted)">33 refused, 0 wrong</text>
+                  <text x="350" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="var(--coral-700)">shapely</text>
+                  <text x="350" y="134" text-anchor="middle" font-size="15" fill="var(--muted)">0 refused, 336 wrong</text>
+                  <text x="235" y="446" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">refusing is the price of never being wrong</text>
+                  <text x="235" y="470" text-anchor="middle" font-size="15" fill="var(--muted)">a wrong answer does not announce itself, which is why they are scattered</text>
+                  <text x="235" y="504" text-anchor="middle" font-size="16" fill="var(--muted)">pieces and enclosed faces, or nothing at all</text>
+                </svg>
+              </div>
             <figcaption class="fig__cap">I set my tally against shapely's.</figcaption>
           </figure>
         </div>
@@ -601,7 +564,7 @@
 
 </main>
 
-<script src="fig.js?v=33" defer></script>
-<script src="site.js?v=33" defer></script>
+<script src="fig.js?v=37" defer></script>
+<script src="site.js?v=37" defer></script>
 </body>
 </html>

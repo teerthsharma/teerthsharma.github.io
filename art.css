@@ -129,17 +129,6 @@
     animation: md-carry 3s linear infinite;
   }
 
-  /* --- topological-ml-toolkit -----------------------------------------
-     Long bars survive every scale and short bars die. So the short ones
-     visibly die, on their own cycles, and the long ones never move. */
-  @keyframes tm-die { 0%,100% { opacity:1; transform:scaleX(1); } 55% { opacity:.18; transform:scaleX(.08); } }
-  #p-topological-ml-toolkit svg rect[opacity]{
-    transform-box: fill-box; transform-origin: left center;
-    animation: tm-die 1.5s ease-in-out infinite;
-  }
-  #p-topological-ml-toolkit svg rect[opacity]:nth-of-type(2n){ animation-delay:-0.5s; }
-  #p-topological-ml-toolkit svg rect[opacity]:nth-of-type(3n){ animation-delay:-0.97s; }
-
   /* --- faraday ---------------------------------------------------------
      The coupling appears where the two fields cross, so the crossings
      pulse and the fields themselves stay still. */
@@ -147,15 +136,6 @@
   #p-faraday svg circle[fill*="violet"]{ animation: fd-couple 0.95s ease-in-out infinite; }
   #p-faraday svg circle[fill*="violet"]:nth-of-type(2){ animation-delay:-0.31s; }
   #p-faraday svg circle[fill*="violet"]:nth-of-type(3){ animation-delay:-0.63s; }
-
-  /* --- separatrix ------------------------------------------------------
-     The whole question is whether two intervals touch, so one pair drifts
-     until it almost does and pulls back. The certified pair never moves. */
-  @keyframes sp-drift { 0%,100% { transform:translateX(0); } 50% { transform:translateX(-13px); } }
-  #p-separatrix svg line[stroke*="coral"]:last-of-type{
-    transform-box: fill-box; transform-origin: center;
-    animation: sp-drift 1.6s ease-in-out infinite;
-  }
 
   /* --- nerve -----------------------------------------------------------
      Three of four hypotheses were withdrawn, so the strikes are drawn
@@ -165,12 +145,6 @@
   #p-nerve svg line[stroke*="coral"]{ animation: nv-strike 2s ease-in-out infinite; }
   #p-nerve svg line[stroke*="coral"]:nth-of-type(2){ animation-delay:.45s; }
   #p-nerve svg line[stroke*="coral"]:nth-of-type(3){ animation-delay:.9s; }
-
-  /* --- planimeter ------------------------------------------------------
-     It returns three integers or nothing, so the enclosed region fills and
-     empties, which is the measurement being taken. */
-  @keyframes pl-fill { 0%,100% { opacity:1; } 50% { opacity:.34; } }
-  #p-planimeter svg path[fill]:not([fill="none"]){ animation: pl-fill 1.7s ease-in-out infinite; }
 
   /* --- Pointing at a figure stops it, so it can be read ---------------- */
   .proj:hover .proj__art svg,
