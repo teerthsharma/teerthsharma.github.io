@@ -26,8 +26,12 @@
      They are never both at rest, which is the point. */
   @keyframes rv-mask { 0%,100% { opacity:1; transform:translateX(0); } 50% { opacity:.55; transform:translateX(-3px); } }
   @keyframes rv-graph{ 0%,100% { opacity:.55; transform:translateX(3px); } 50% { opacity:1; transform:translateX(0); } }
-  #p-resolvent svg > g:nth-of-type(1){ animation: rv-mask 1.4s ease-in-out infinite; }
-  #p-resolvent svg > g:nth-of-type(2){ animation: rv-graph 1.4s ease-in-out infinite; }
+  /* Selecting by child position caught a label on the tangle card and made
+     a word fly. The same rule shape was here, so it goes too: motion is
+     applied to marks that are named, never to whatever happens to be the
+     first group in a file someone else may redraw. */
+  #p-resolvent svg rect{ animation: rv-mask 1.4s ease-in-out infinite; }
+  #p-resolvent svg circle{ animation: rv-graph 1.4s ease-in-out infinite; }
   #p-resolvent svg,
   #p-resolvent svg > g { transform-box: fill-box; transform-origin: center; }
 
@@ -54,16 +58,15 @@
   @keyframes al-settle { 0%,72%,100% { opacity:1; } 36% { opacity:.42; } }
   #p-aether-lang svg rect:last-of-type{ animation: al-settle 1.2s ease-in-out infinite; }
 
-  /* --- tangle ----------------------------------------------------------
-     Two loops that are genuinely linked cannot be pulled apart, so the
-     figure tugs and fails. Deliberately small: this was a short piece of
-     work and should not out-perform projects that took a hundred times
-     longer. */
-  @keyframes tg-tug { 0%,100% { transform:translateX(0); } 45% { transform:translateX(5px); } }
-  @keyframes tg-tug2{ 0%,100% { transform:translateX(0); } 45% { transform:translateX(-5px); } }
-  #p-tangle svg > g:nth-of-type(1){ animation: tg-tug 1.7s ease-in-out infinite; }
-  #p-tangle svg > g:nth-of-type(2){ animation: tg-tug2 1.7s ease-in-out infinite; }
-  #p-tangle svg > g { transform-box: fill-box; transform-origin: center; }
+  /* --- tangle: no motion ----------------------------------------------
+     The rule here selected the svg's direct child groups, and one of those
+     groups holds the label rather than a loop, so the caption slid back and
+     forth: a word flying across the figure. Selecting structure by position
+     is fragile when the markup is not yours to guarantee.
+
+     Restored to still. tangle was close to a day's work and does not need to
+     out-perform the projects that took a hundred times longer; a linked pair
+     that simply sits there is the correct amount of drama for it. */
 
   /* --- caustic ---------------------------------------------------------
      The failure it detects is a collapse, so the arrows that collapse
@@ -132,4 +135,52 @@
   .proj:focus-within .proj__art svg *{
     animation-play-state: paused;
   }
+
+  /* --- tensorflow #124410 ---------------------------------------------
+     The bug is a sequence, so the figure is read as one. A highlight walks
+     the four creation events; the two where the set is copied and then not
+     revisited are the ones that matter, and the redundant edge pulses only
+     while they are lit. Nothing here invents motion: the defect genuinely
+     is an ordering, and this is what watching it happen looks like. */
+  @keyframes tf-focus { 0%,22% { opacity:1; } 28%,100% { opacity:.26; } }
+  #pr-tensorflow-124410 .tfstep{ animation: tf-focus 5.2s ease-in-out infinite; }
+  #pr-tensorflow-124410 #tf-s1{ animation-delay: 0s; }
+  #pr-tensorflow-124410 #tf-s2{ animation-delay: 1.3s; }
+  #pr-tensorflow-124410 #tf-s3{ animation-delay: 2.6s; }
+  #pr-tensorflow-124410 #tf-s4{ animation-delay: 3.9s; }
+
+  @keyframes tf-survive { 0%,48% { opacity:.2; } 62%,100% { opacity:1; } }
+  #pr-tensorflow-124410 #tf-redundant{ animation: tf-survive 5.2s ease-in-out infinite; }
+
+  #pr-tensorflow-124410:hover .tfstep,
+  #pr-tensorflow-124410:hover #tf-redundant{ animation-play-state: paused; }
+
+
+  /* --- NVIDIA/NeMo-Relay #481 -----------------------------------------
+     His only upstream Rust work, and the material is unusually good: the
+     pull request body carries the two real keys, which differ in exactly
+     one field. So the differing field is what moves. The scattered
+     profiles sit inert, and the observations gathering in the single
+     bucket arrive one after another, which is the behaviour the change
+     restored. */
+  @keyframes nr-differ { 0%,100% { opacity:1; } 50% { opacity:.34; } }
+  #pr-nemo-relay-481 #nr-keys text:nth-of-type(2),
+  #pr-nemo-relay-481 #nr-keys text:nth-of-type(5){
+    animation: nr-differ 1.3s ease-in-out infinite;
+  }
+  @keyframes nr-gather { 0%,12% { opacity:0; transform:translateY(-7px); } 26%,100% { opacity:1; transform:translateY(0); } }
+  #pr-nemo-relay-481 #nr-stack circle{
+    transform-box: fill-box; transform-origin: center;
+    animation: nr-gather 2.6s ease-out infinite;
+  }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(2){ animation-delay:.1s; }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(3){ animation-delay:.2s; }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(4){ animation-delay:.3s; }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(5){ animation-delay:.4s; }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(6){ animation-delay:.5s; }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(7){ animation-delay:.6s; }
+  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(8){ animation-delay:.7s; }
+  #pr-nemo-relay-481:hover #nr-keys text,
+  #pr-nemo-relay-481:hover #nr-stack circle{ animation-play-state: paused; }
+
 }
