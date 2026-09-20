@@ -928,3 +928,14 @@ img,svg{ max-width:100%; display:block; }
   .figc--glass .glass__seed,
   .figc--glass .glass__fix{ animation: none; }
 }
+
+/* ---------- The figure keeps its own shape --------------------------------
+   .card__art is a grid item spanning every row, so the grid stretched it to
+   whatever height the text column happened to be. That made the figure box a
+   different shape from the viewBox, which left the drawing and its labels
+   depending on both layers letterboxing identically to stay lined up. They do
+   now, but the whole failure mode is avoidable: the item sits at the top at
+   its natural height instead of being stretched, so the box is exactly the
+   viewBox shape, the letterbox is a no-op, and the two layers cannot drift
+   apart however either of them is later changed. */
+.card__art, .proj__art{ align-self: start; }
