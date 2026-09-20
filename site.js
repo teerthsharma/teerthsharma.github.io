@@ -22,64 +22,6 @@
 
   var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  function easeOutCubic(t) {
-    return 1 - Math.pow(1 - t, 3);
-  }
-
-  function initCounters() {
-    var nodes = document.querySelectorAll('[data-count]');
-    if (!nodes.length) return;
-
-    nodes.forEach(function (node) {
-      var valueEl = node.classList.contains('stat__value')
-        ? node
-        : node.querySelector('.stat__value');
-      if (!valueEl) return;
-
-      var target = parseFloat(node.getAttribute('data-count'));
-      if (isNaN(target)) return;
-
-      var decimals = (String(target).split('.')[1] || '').length;
-      var raw = valueEl.textContent;
-      var match = raw.match(/[\d,.]+/);
-      var prefix = match ? raw.slice(0, match.index) : '';
-      var suffix = match ? raw.slice(match.index + match[0].length) : '';
-
-      function render(v) {
-        var fixed = decimals ? v.toFixed(decimals) : String(Math.round(v));
-        var parts = fixed.split('.');
-        parts[0] = Number(parts[0]).toLocaleString('en-US');
-        valueEl.textContent = prefix + parts.join('.') + suffix;
-      }
-
-      if (reduceMotion) {
-        render(target);
-        return;
-      }
-
-      var done = false;
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (entry) {
-          if (!entry.isIntersecting || done) return;
-          done = true;
-          io.unobserve(entry.target);
-
-          var duration = 1200;
-          var start = null;
-
-          function frame(now) {
-            if (start === null) start = now;
-            var t = Math.min(1, (now - start) / duration);
-            render(target * easeOutCubic(t));
-            if (t < 1) requestAnimationFrame(frame);
-          }
-          requestAnimationFrame(frame);
-        });
-      }, { threshold: 0.4 });
-      io.observe(node);
-    });
-  }
-
   function initScaleSlider() {
     var input = document.querySelector('.slider__input');
     if (!input) return;
@@ -673,7 +615,7 @@
    * which is what they already were.
    * ---------------------------------------------------------------- */
   function initInspect(){
-    var figs = document.querySelectorAll('.card__art svg, .proj__art svg, .hero__art svg');
+    var figs = document.querySelectorAll('.card__art svg, .proj__art svg');
     if (!figs.length) return;
 
     function labelFor(el, svg){
@@ -744,7 +686,6 @@
   }
 
   function boot() {
-    initCounters();
     initScaleSlider();
     initFilter();
     initReveal();

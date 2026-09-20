@@ -8,11 +8,11 @@
   --hair:#e5e2da; --hair2:#cfcbc1;
   --ink:#1c1b19; --muted:#5f5b53;
 
-  --blue-700:#163a9a;  --blue-500:#2456dc;  --blue-100:#e4ecff;   /* MEMORY */
+  --blue-700:#163d9a;  --blue-500:#2456dc;  --blue-100:#e4ecff;   /* MEMORY */
   --violet-700:#6b35c4;--violet-500:#a66cf0;--violet-100:#efe6ff; /* PARALLELISM */
   --amber-700:#9a4906; --amber-500:#d96a06; --amber-100:#ffefdf;  /* TIME */
   --mint-700:#0a6b7c;  --mint-500:#0b93ab;  --mint-100:#dcf5f9;   /* SCALE */
-  --coral-700:#a0183f; --coral-500:#d9376e; --coral-100:#ffe6ec;  /* THE OLD PATH */
+  --coral-700:#a01c3f; --coral-500:#d9376e; --coral-100:#ffe6ec;  /* THE OLD PATH */
   --green-700:#0e4a23; --green-500:#146a32; --green-100:#dff5e6;  /* CORRECTNESS */
 
   /* ---------- 4. Type ---------- */
@@ -151,8 +151,6 @@ img,svg{ max-width:100%; display:block; }
   line-height:1.6;
   max-width:66ch;
 }
-.hero__art{ width:100%; margin-top:48px; }
-.hero__art svg{ width:100%; height:auto; }
 
 .cta-row{ display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-top:32px; }
 
@@ -230,46 +228,9 @@ img,svg{ max-width:100%; display:block; }
 .btn--text{ padding:12px 4px; color:var(--blue-700); font-weight:600; }
 .btn--text:hover{ text-decoration:underline; }
 
-/* ---------- Number strip ---------- */
-.numstrip{ background:var(--ground2); }
-.numstrip__grid{
-  display:grid; grid-template-columns:repeat(4,1fr); gap:24px;
-}
-@media (max-width:1080px){ .numstrip__grid{ grid-template-columns:repeat(2,1fr); } }
-@media (max-width:480px){ .numstrip__grid{ grid-template-columns:1fr; } }
-
-.stat{ display:flex; flex-direction:column; }
-.stat__value{
-  font-family:var(--font-mono);
-  font-variant-numeric:tabular-nums;
-  font-weight:800;
-  font-size:var(--fs-giant);
-  line-height:0.9;
-  letter-spacing:-0.03em;
-  color:var(--ink);
-}
-@media (max-width:1080px){ .stat__value{ font-size:var(--fs-6); } }
-@media (max-width:480px){ .stat__value{ font-size:var(--fs-5); } }
-
-/* fixed content order from SPEC §6: 8 PRs (ink), 15,361x (mint), 1,281.6x (blue), 1,851/1,851 (green) */
-.numstrip__grid .stat:nth-child(2) .stat__value{ color:var(--mint-700); }
-.numstrip__grid .stat:nth-child(3) .stat__value{ color:var(--blue-700); }
-.numstrip__grid .stat:nth-child(4) .stat__value{ color:var(--green-700); }
-
-.stat__unit{
-  margin-top:8px;
-  font-size:var(--fs-2);
-  font-weight:600;
-  color:var(--ink);
-}
-.stat__label{
-  margin-top:4px;
-  font-size:var(--fs-0);
-  font-weight:500;
-  text-transform:uppercase;
-  letter-spacing:0.08em;
-  color:var(--muted);
-}
+/* Number strip: superseded by the assembling mosaic (#mosaic, initMosaic
+   in site.js), which shows the same per-PR numbers with attribution
+   instead of four unattributed aggregates. */
 
 /* ---------- Cards ---------- */
 .card{

@@ -1,9 +1,9 @@
 Teerth Sharma
 
-Teerth Sharma is a twenty year old systems engineer whose work is running in production
+Teerth Sharma is a twenty year old programmer whose work is running in production
 at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta.
-He makes the systems machine learning runs on faster and more reliable. Born 12 June
-2006, based in India. No degree and no employer; the evidence below is the credential.
+Born 12 June 2006, based in India. No degree and no employer; the evidence below is
+the credential.
 
 Site: https://teerthsharma.github.io
 GitHub: https://github.com/teerthsharma
