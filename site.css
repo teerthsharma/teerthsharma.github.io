@@ -673,9 +673,9 @@ img,svg{ max-width:100%; display:block; }
 .proofcell img,
 .proofcell__art img{
   width:auto;
-  height:26px;
-  max-height:26px;
-  max-width:84px;
+  height:40px;
+  max-height:40px;
+  max-width:128px;
   object-fit:contain;
   object-position:left center;
   display:block;
@@ -689,7 +689,7 @@ img,svg{ max-width:100%; display:block; }
 @media (max-width:899px){
   .proofcell__org,
   .proofcell img,
-  .proofcell__art img{ height:22px; max-height:22px; max-width:72px; }
+  .proofcell__art img{ height:30px; max-height:30px; max-width:96px; }
 }
 
 /* ---------- Evidence: effort made visible ----------------------------

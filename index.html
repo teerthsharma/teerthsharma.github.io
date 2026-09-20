@@ -16,8 +16,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=17">
-<link rel="stylesheet" href="motion.css?v=17">
+<link rel="stylesheet" href="site.css?v=18">
+<link rel="stylesheet" href="motion.css?v=18">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -1667,22 +1667,527 @@
         <h3 class="card__title">A linear-memory GPU disjoint-set union</h3>
         <p class="card__body">I found that the GPU island-discovery kernel carried the same quadratic memory shape onto the device. I replaced it with a linear-memory disjoint-set union.</p>
         <div class="card__art fig">
-      <svg viewBox="0 0 460 220" role="img" aria-labelledby="pr2-t pr2-d">
-        <title id="pr2-t">Paired timing with a confidence band</title>
-        <desc id="pr2-d">A microsecond axis with a coral dot at 156.738 microseconds for the old code and a blue dot at 101.097 microseconds for the new code. A mint band behind them spans the 99 percent confidence interval of the speedup, with the geometric mean marked as a tick.</desc>
-        <line pathLength="1" class="draw" x1="50" y1="150" x2="420" y2="150" stroke="var(--hair2)" stroke-width="1"/>
-        <rect class="pop" x="284.92" y="105" width="73.98" height="90" fill="var(--mint-100)"/>
-        <line pathLength="1" class="draw" x1="329.39" y1="105" x2="329.39" y2="195" stroke="var(--mint-700)" stroke-width="2"/>
-        <text x="329.39" y="98" text-anchor="middle" class="mono" font-size="11" fill="var(--mint-700)">1.513x geometric mean</text>
-        <circle class="pop" cx="344.92" cy="150" r="7" fill="var(--coral-500)"/>
-        <text x="344.92" y="92.0" text-anchor="middle" class="mono" font-size="12" fill="var(--coral-700)">156.738 us</text>
-        <circle class="pop" cx="116.18" cy="150" r="7" fill="var(--blue-500)"/>
-        <text x="116.18" y="130" text-anchor="middle" class="mono" font-size="12" fill="var(--blue-700)">101.097 us</text>
-        <g class="mono" font-size="10" fill="var(--muted)" text-anchor="middle">
-          <text x="50" y="170">85 us</text>
-          <text x="420" y="170">175 us</text>
-        </g>
-      </svg>
+      <svg viewBox="0 0 560 290" role="img" aria-labelledby="pr2-t pr2-d">
+              <title id="pr2-t">One world's island workspace, before and after</title>
+              <desc id="pr2-d">On the left, a twenty two by twenty two block: the adjacency matrix the old kernel held for every world. On the right, a single row of twenty two: one parent entry per tree. The same partition comes out of both.</desc>
+              <text x="30" y="42" class="mono" font-size="12" fill="var(--coral-700)">before: an entry for every pair of trees</text>
+              <g class="wipe" data-label="484 cells per world, growing with the square of the tree count">
+                <rect class="pop" x="30.0" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="60.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="68.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="77.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="85.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="94.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="103.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="111.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="120.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="128.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="137.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="146.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="154.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="163.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="171.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="180.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="189.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="197.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="206.2" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="214.8" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="223.4" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="232.0" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="30.0" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="38.6" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="47.2" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="55.8" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="64.4" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="73.0" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="81.6" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="90.2" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="98.8" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="107.4" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="116.0" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="124.6" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="133.2" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="141.8" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="150.4" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="159.0" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="167.6" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="176.2" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="184.8" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="193.4" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="202.0" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+                <rect class="pop" x="210.6" y="240.6" width="7.2" height="7.2" rx="1" fill="var(--coral-500)"/>
+              </g>
+              <text x="30" y="272" class="mono" font-size="11" fill="var(--muted)">22 x 22 per world, 2,048 worlds</text>
+              <text x="330" y="132" class="mono" font-size="12" fill="var(--blue-700)">after: one parent per tree</text>
+              <g class="wipe" data-label="22 entries per world, growing with the tree count">
+                <rect class="pop" x="330.0" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="338.6" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="347.2" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="355.8" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="364.4" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="373.0" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="381.6" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="390.2" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="398.8" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="407.4" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="416.0" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="424.6" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="433.2" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="441.8" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="450.4" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="459.0" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="467.6" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="476.2" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="484.8" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="493.4" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="502.0" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+                <rect class="pop" x="510.6" y="150" width="7.2" height="7.2" rx="1" fill="var(--blue-500)"/>
+              </g>
+              <text x="330" y="182" class="mono" font-size="11" fill="var(--muted)">22 per world</text>
+              <text x="330" y="222" class="mono" font-size="22" font-weight="800" fill="var(--blue-700)">1.513x faster</text>
+              <text x="330" y="244" class="mono" font-size="11" fill="var(--muted)">156.738 us to 101.097 us</text>
+              <text x="330" y="262" class="mono" font-size="11" fill="var(--muted)">scratch 7,929,856 B to 180,224 B</text>
+            </svg>
         </div>
         <p class="card__cap mono">156.738 us to 101.097 us. Scratch 7,929,856 bytes to 180,224.</p>
         <ul class="tags"><li class="tag tag--lang">Python</li><li class="tag tag--class">memory O(n^2) to O(n)</li></ul>
@@ -1706,19 +2211,64 @@
         <h3 class="card__title">An inverted point-id table for convex hulls</h3>
         <p class="card__body">Convex hull graph construction was scanning every pair of points to find a match. I built an inverted point-id table that finds it directly instead.</p>
         <div class="card__art fig">
-      <svg viewBox="0 0 460 300" role="img" aria-labelledby="pr3-t pr3-d">
-        <title id="pr3-t">Probe count drawn as area</title>
-        <desc id="pr3-d">A large coral square represents 314,643,317 probes at V equals 10,242. A mint square in its corner, magnified in an inset because it is otherwise invisible, represents 81,924 probes at the same input.</desc>
-        <rect class="pop" x="40" y="60" width="200" height="200" fill="var(--coral-500)"/>
-        <text x="40" y="50" class="mono" font-size="13" fill="var(--coral-700)">314,643,317 probes</text>
-        <rect class="pop" x="236.77" y="256.77" width="3.23" height="3.23" fill="var(--mint-500)"/>
-        <circle class="pop" cx="238.39" cy="258.39" r="10" fill="none" stroke="var(--mint-700)" stroke-width="1" stroke-dasharray="2 2"/>
-        <line pathLength="1" class="draw" x1="246" y1="252" x2="300" y2="200" stroke="var(--mint-700)" stroke-width="1" stroke-dasharray="2 2"/>
-        <rect class="pop" x="300" y="120" width="90" height="90" fill="var(--raised)" stroke="var(--hair2)" stroke-width="1"/>
-        <rect class="pop" x="325" y="145" width="40" height="40" fill="var(--mint-500)"/>
-        <text x="345" y="225" text-anchor="middle" class="mono" font-size="13" fill="var(--mint-700)">81,924 probes</text>
-        <text x="345" y="110" text-anchor="middle" class="mono" font-size="10" fill="var(--muted)">magnified</text>
-      </svg>
+      <svg viewBox="0 0 560 250" role="img" aria-labelledby="pr3-t pr3-d">
+              <title id="pr3-t">Finding one vertex, by scanning and by lookup</title>
+              <desc id="pr3-d">Above, a path that touches every vertex in turn before reaching the one it wants, once for each directed edge. Below, a single arrow straight to it. The scan costs three V squared minus six V probes; the table costs eight V minus twelve.</desc>
+              <text x="40" y="36" class="mono" font-size="12" fill="var(--coral-700)">before: walk the list until the id matches</text>
+              <g data-label="a linear scan, repeated once per directed edge">
+                <circle class="pop" cx="40.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="52.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="65.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="77.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="90.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="103.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="115.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="128.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="140.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="153.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="166.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="178.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="191.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="203.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="216.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="229.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="241.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="254.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="266.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="279.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="292.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="304.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="317.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="329.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="342.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="355.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="367.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="380.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="392.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="405.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="418.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="430.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="443.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="455.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="468.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="481.0" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="493.6" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="506.2" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="518.8" cy="70" r="3.4" fill="var(--hair2)"/>
+                <circle class="pop" cx="531.4" cy="70" r="3.4" fill="var(--hair2)"/>
+                <polyline class="draw" pathLength="1" points="40.0,70 52.6,58 65.2,70 77.8,58 90.4,70 103.0,58 115.6,70 128.2,58 140.8,70 153.4,58 166.0,70 178.6,58 191.2,70 203.8,58 216.4,70 229.0,58 241.6,70 254.2,58 266.8,70 279.4,58 292.0,70 304.6,58 317.2,70 329.8,58 342.4,70 355.0,58 367.6,70 380.2,58 392.8,70 405.4,58 418.0,70 430.6,58 443.2,70 455.8,58 468.4,70 481.0,58 493.6,70 506.2,58 518.8,70 531.4,58" fill="none" stroke="var(--coral-500)" stroke-width="2"/>
+              </g>
+              <circle class="pop pulse" cx="544" cy="70" r="6" fill="var(--coral-500)" data-label="the vertex being looked for"/>
+              <text x="40" y="104" class="mono" font-size="11" fill="var(--muted)">3V^2 - 6V probes. at V = 10,242 that is 314,643,317</text>
+
+              <text x="40" y="160" class="mono" font-size="12" fill="var(--mint-700)">after: one inverted table, one jump</text>
+              <line class="draw" pathLength="1" x1="40" y1="188" x2="536" y2="188" stroke="var(--mint-500)" stroke-width="2.5" marker-end="url(#hullarrow)"/>
+              <defs><marker id="hullarrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--mint-500)"/></marker></defs>
+              <circle class="pop" cx="40" cy="188" r="5" fill="var(--mint-500)" data-label="the edge asking the question"/>
+              <circle class="pop" cx="544" cy="188" r="6" fill="var(--mint-500)" data-label="the vertex, found directly"/>
+              <text x="40" y="216" class="mono" font-size="11" fill="var(--muted)">8V - 12 probes. at V = 10,242 that is 81,924</text>
+              <text x="40" y="242" class="mono" font-size="16" font-weight="800" fill="var(--mint-700)">15,361x fewer probes at V = 40,962, from 16 added lines</text>
+            </svg>
         </div>
         <p class="card__cap mono">16 lines added. 15,361x fewer probes at V=40,962. Cold load 134.400 ms to 71.163 ms.</p>
         <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">probes O(V^2) to O(V)</li></ul>
@@ -2095,6 +2645,6 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="site.js?v=17" defer></script>
+<script src="site.js?v=18" defer></script>
 </body>
 </html>
