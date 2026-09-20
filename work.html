@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=9">
-<link rel="stylesheet" href="motion.css?v=9">
+<link rel="stylesheet" href="site.css?v=13">
+<link rel="stylesheet" href="motion.css?v=13">
 
 <script type="application/ld+json">
 {
@@ -99,7 +99,7 @@
 <header class="hero">
   <div class="wrap">
     <h1 class="hero__h1">The work nobody asked me to do.</h1>
-    <p class="hero__sub">Eleven of my fourteen public repositories are below. In each one I start with a piece of mathematics that predicts a number, and write the code that measures it.</p>
+    <p class="hero__sub">Eleven of my fourteen public repositories are below. Some are topology, some are numerics, some are systems. What they share is that each one ends in a number I can measure.</p>
   </div>
 </header>
 
@@ -262,12 +262,12 @@
               <text x="40" y="228" class="mono" font-size="11" fill="var(--muted)">scale</text>
               <rect class="pop" x="40" y="26" width="318" height="9" rx="4.5" fill="var(--blue-500)" data-label="a loop that survives every scale"/>
               <rect class="pop" x="40" y="48" width="268" height="9" rx="4.5" fill="var(--blue-500)" data-label="a component that survives"/>
-              <rect class="pop" x="62" y="70" width="46" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise, dies immediately"/>
-              <rect class="pop" x="96" y="92" width="30" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
-              <rect class="pop" x="132" y="114" width="58" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
-              <rect class="pop" x="80" y="136" width="22" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
-              <rect class="pop" x="176" y="158" width="38" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
-              <rect class="pop" x="58" y="180" width="26" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
+              <rect class="pop" x="62" y="70" width="46" height="9" rx="4.5" fill="var(--blue-500)" opacity="0.38" data-label="noise, dies immediately"/>
+              <rect class="pop" x="96" y="92" width="30" height="9" rx="4.5" fill="var(--blue-500)" opacity="0.38" data-label="noise"/>
+              <rect class="pop" x="132" y="114" width="58" height="9" rx="4.5" fill="var(--blue-500)" opacity="0.38" data-label="noise"/>
+              <rect class="pop" x="80" y="136" width="22" height="9" rx="4.5" fill="var(--blue-500)" opacity="0.38" data-label="noise"/>
+              <rect class="pop" x="176" y="158" width="38" height="9" rx="4.5" fill="var(--blue-500)" opacity="0.38" data-label="noise"/>
+              <rect class="pop" x="58" y="180" width="26" height="9" rx="4.5" fill="var(--blue-500)" opacity="0.38" data-label="noise"/>
               <text x="380" y="22" text-anchor="end" class="mono" font-size="11" fill="var(--blue-700)">2 features survive</text>
             </svg>
             <figcaption class="fig__cap">Long bars are structure, short bars are noise, and the cut is the feature.</figcaption>
@@ -512,61 +512,61 @@
 
       <article class="proj" id="p-aether-lang" data-lang="Rust" data-doi="true">
         <h3 class="proj__name">Aether-Lang</h3>
-        <p class="proj__claim">Programs are point clouds. Convergence is a Betti number.</p>
+        <p class="proj__claim">I built a language where a loop stops because its shape stopped changing, not because a counter ran out.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 300 300" role="img" aria-labelledby="t7-title t7-desc">
-              <title id="t7-title">A point cloud with a hole, and the detected loop traced around it</title>
-              <desc id="t7-desc">A scattered point cloud arranged so an empty hole is clearly visible in the middle, with the detected loop traced around the hole in a heavier stroke, annotated with the Betti number it represents.</desc>
-              <g>
-                <circle class="pop" cx="218.2" cy="147.5" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="214.1" cy="165.8" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="217.6" cy="180.7" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="217.3" cy="189.9" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="206.2" cy="201.4" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="188.3" cy="204.4" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="178.2" cy="232.5" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="162.8" cy="219.1" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="138.1" cy="239.8" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="125.6" cy="221.0" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="111.9" cy="203.0" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="97.9" cy="199.8" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="98.7" cy="193.5" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="72.1" cy="188.5" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="72.8" cy="171.9" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="75.6" cy="147.8" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="85.8" cy="135.7" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="83.9" cy="127.6" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="90.3" cy="103.1" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="93.9" cy="92.4" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="113.2" cy="87.7" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="129.1" cy="69.1" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="137.4" cy="70.9" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="159.7" cy="62.0" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="175.5" cy="82.6" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="189.3" cy="95.4" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="205.9" cy="85.7" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="209.4" cy="99.9" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="222.0" cy="109.2" r="4" fill="var(--violet-500)"/>
-                <circle class="pop" cx="229.1" cy="137.7" r="4" fill="var(--violet-500)"/>
-              </g>
-              <circle class="pop" cx="150" cy="150" r="80" fill="none" stroke="var(--violet-700)" stroke-width="4"/>
-              <text x="150" y="150" text-anchor="middle" dominant-baseline="central" fill="var(--muted)" font-size="11">hole</text>
-              <text x="150" y="278" text-anchor="middle" fill="var(--violet-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">b&#8321; = 1</text>
+            <svg viewBox="0 0 460 300" role="img" aria-labelledby="t7-title t7-desc">
+              <title id="t7-title">Persistent homology used as a loop termination condition</title>
+              <desc id="t7-desc">A pipeline reading left to right. The running program becomes a point cloud, the point cloud becomes a persistence diagram, and the persistence diagram yields a Betti number. The loop feeds back on itself until that number settles, then exits. The invariant is the exit condition, not a counter and not a tolerance.</desc>
+
+              <rect class="pop" x="18" y="106" width="86" height="52" rx="8" fill="var(--violet-100)" stroke="var(--violet-700)" stroke-width="1.5" data-label="the running program"/>
+              <text x="61" y="128" text-anchor="middle" class="mono" font-size="11" fill="var(--violet-700)">iteration</text>
+              <text x="61" y="144" text-anchor="middle" class="mono" font-size="11" fill="var(--violet-700)">state</text>
+
+              <line class="draw" pathLength="1" x1="108" y1="132" x2="140" y2="132" stroke="var(--violet-700)" stroke-width="2"/>
+
+              <circle class="pop" cx="160" cy="112" r="3.5" fill="var(--violet-500)" data-label="state as a point cloud"/>
+              <circle class="pop" cx="182" cy="104" r="3.5" fill="var(--violet-500)" data-label="state as a point cloud"/>
+              <circle class="pop" cx="200" cy="120" r="3.5" fill="var(--violet-500)" data-label="state as a point cloud"/>
+              <circle class="pop" cx="196" cy="146" r="3.5" fill="var(--violet-500)" data-label="state as a point cloud"/>
+              <circle class="pop" cx="172" cy="158" r="3.5" fill="var(--violet-500)" data-label="state as a point cloud"/>
+              <circle class="pop" cx="152" cy="140" r="3.5" fill="var(--violet-500)" data-label="state as a point cloud"/>
+              <circle class="pop" cx="176" cy="130" r="2.5" fill="var(--violet-100)" stroke="var(--violet-500)" stroke-width="1"/>
+              <text x="176" y="182" text-anchor="middle" class="mono" font-size="11" fill="var(--muted)">point cloud</text>
+
+              <line class="draw" pathLength="1" x1="216" y1="132" x2="248" y2="132" stroke="var(--violet-700)" stroke-width="2"/>
+
+              <line class="draw" pathLength="1" x1="258" y1="160" x2="316" y2="102" stroke="var(--hair2)" stroke-width="1.5"/>
+              <circle class="pop" cx="276" cy="132" r="4" fill="var(--violet-500)" data-label="a feature that dies at once, noise"/>
+              <circle class="pop" cx="286" cy="120" r="4" fill="var(--violet-500)" data-label="a feature that dies at once, noise"/>
+              <circle class="pop" cx="300" cy="74"  r="6" fill="var(--violet-700)" data-label="the loop that persists, b1 = 1"/>
+              <text x="288" y="182" text-anchor="middle" class="mono" font-size="11" fill="var(--muted)">persistence</text>
+
+              <line class="draw" pathLength="1" x1="326" y1="132" x2="356" y2="132" stroke="var(--violet-700)" stroke-width="2"/>
+
+              <rect class="pop" x="356" y="106" width="86" height="52" rx="8" fill="var(--violet-700)" data-label="the invariant the loop reads"/>
+              <text x="399" y="130" text-anchor="middle" class="mono" font-size="15" font-weight="700" fill="#ffffff">b&#8321; = 1</text>
+              <text x="399" y="148" text-anchor="middle" class="mono" font-size="10" fill="#ffffff">settled</text>
+
+              <path class="draw" pathLength="1" d="M399 164 L399 224 Q399 240 383 240 L77 240 Q61 240 61 224 L61 166" fill="none" stroke="var(--violet-500)" stroke-width="2" stroke-dasharray="5 4"/>
+              <text x="230" y="262" text-anchor="middle" class="mono" font-size="11" fill="var(--violet-700)">unchanged, so the loop exits</text>
+
+              <text x="18" y="36" class="mono" font-size="11" fill="var(--muted)">no counter, no tolerance, no epoch budget</text>
             </svg>
-            <figcaption class="fig__cap">The loop the runtime detects around the empty middle.</figcaption>
+            <figcaption class="fig__cap">The exit condition is an invariant of the state, so the loop ends when the shape stops moving.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
           <span>11 stars</span>
-          <span>compiles no_std to bare metal</span>
+          <span>persistent homology as a language primitive</span>
+          <span>runtime compiles no_std to bare metal</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Rust</li>
           <li class="tag tag--class">topology as a primitive</li>
           <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997728">DOI</a></li>
         </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/Aether-Lang">View Aether-Lang on GitHub</a>
+        <a class="card__link" href="https://github.com/teerthsharma/Aether-Lang">Aether-Lang on GitHub</a>
       </article>
 
       <article class="proj" id="p-epsilon-hollow" data-lang="Rust" data-doi="true">
@@ -636,6 +636,6 @@
 
 </main>
 
-<script src="site.js?v=9" defer></script>
+<script src="site.js?v=13" defer></script>
 </body>
 </html>

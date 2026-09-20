@@ -650,6 +650,15 @@
         if (el === svg || !el.tagName) return;
         if (/^(rect|circle|ellipse|path|polyline|line|polygon)$/.test(el.tagName.toLowerCase())) show(el);
       });
+      /* Engaging the figure opens the evidence folded beneath it, so the
+         detail is something the drawing hands over rather than something
+         the page states unprompted. It is a real <details>, so it still
+         opens by click or keyboard with this script absent. */
+      var host = svg.closest ? svg.closest('.card, .proj') : null;
+      var ev = host ? host.querySelector('details.ev') : null;
+      function reveal(){ if (ev && !ev.open) ev.open = true; }
+      svg.addEventListener('pointerenter', reveal);
+      svg.addEventListener('focus', reveal);
       svg.addEventListener('pointerleave', clear);
       svg.addEventListener('blur', clear);
       svg.addEventListener('keydown', function(e){

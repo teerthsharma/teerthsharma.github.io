@@ -603,6 +603,14 @@ img,svg{ max-width:100%; display:block; }
     grid-template-columns: minmax(320px, 0.95fr) 1.05fr;
     column-gap:56px;
     align-items:start;
+    /* Without these the figure, which spans every row, stretches those rows
+       to its own height. The text items then sit one per stretched row and
+       drift to the bottom of the entry while the figure stays at the top,
+       which is the gap that made these cards look broken. Rows sized to
+       their content, and the whole block packed to the top, keeps the
+       title beside the figure where it belongs. */
+    align-content:start;
+    grid-auto-rows:min-content;
     padding:52px 48px;
     margin:0;
     border:0;
@@ -617,7 +625,7 @@ img,svg{ max-width:100%; display:block; }
   .card > *, .proj > *{ grid-column:1; }
   .card__art, .proj__art{
     grid-column:2;
-    grid-row:1 / -1;
+    grid-row:1 / span 99;
     align-self:start;
     margin:0;
   }
@@ -676,4 +684,51 @@ img,svg{ max-width:100%; display:block; }
   .proofcell__org,
   .proofcell img,
   .proofcell__art img{ height:22px; max-height:22px; max-width:72px; }
+}
+
+/* ---------- Evidence: effort made visible ----------------------------
+   The page described what each change did and never what it took to be
+   sure of it, so a five line fix and a change verified across 10,000
+   generated hypergraphs read as equal work. Each entry now carries the
+   checks that stand behind it, and the strips are deliberately uneven:
+   the length of the list is the size of the job.
+
+   Collapsed by default, because eleven expanded lists would bury the
+   figures. The summary states the count, so the weight is legible even
+   closed, and it is a real <details> so it works with no JavaScript.
+   -------------------------------------------------------------------- */
+.ev{ margin:14px 0 0; }
+.ev__sum{
+  font-family:var(--font-mono);
+  font-size:var(--fs-0);
+  letter-spacing:.02em;
+  color:var(--green-700);
+  cursor:pointer;
+  list-style:none;
+  padding:6px 12px;
+  border:1px solid var(--green-100);
+  background:var(--green-100);
+  border-radius:999px;
+  display:inline-block;
+}
+.ev__sum::-webkit-details-marker{ display:none; }
+.ev__sum:hover{ border-color:var(--green-500); }
+.ev[open] .ev__sum{ border-color:var(--green-500); }
+.ev__list{
+  margin:12px 0 0;
+  padding:0 0 0 18px;
+  list-style:none;
+}
+.ev__list li{
+  position:relative;
+  font-family:var(--font-mono);
+  font-size:var(--fs-0);
+  line-height:1.65;
+  color:var(--ink);
+}
+.ev__list li::before{
+  content:"";
+  position:absolute; left:-18px; top:.62em;
+  width:7px; height:7px; border-radius:50%;
+  background:var(--green-500);
 }
