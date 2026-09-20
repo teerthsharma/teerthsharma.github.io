@@ -673,9 +673,9 @@ img,svg{ max-width:100%; display:block; }
 .proofcell img,
 .proofcell__art img{
   width:auto;
-  height:40px;
-  max-height:40px;
-  max-width:128px;
+  height:56px;
+  max-height:56px;
+  max-width:150px;
   object-fit:contain;
   object-position:left center;
   display:block;
@@ -689,7 +689,7 @@ img,svg{ max-width:100%; display:block; }
 @media (max-width:899px){
   .proofcell__org,
   .proofcell img,
-  .proofcell__art img{ height:30px; max-height:30px; max-width:96px; }
+  .proofcell__art img{ height:40px; max-height:40px; max-width:112px; }
 }
 
 /* ---------- Evidence: effort made visible ----------------------------
@@ -771,3 +771,23 @@ img,svg{ max-width:100%; display:block; }
   }
   .mosaic__grid i.is-lit{ opacity:1; }
 }
+
+/* ---------- The proof wall: marks the size they were, cells wide enough
+   for their own labels ------------------------------------------------
+   Four columns left each cell too narrow for its caption, so words broke
+   across lines mid-word. Three columns give each cell roughly a third
+   more width, and breaking is turned off outright so no figure or label
+   can ever be split again.
+   -------------------------------------------------------------------- */
+@media (min-width:900px){
+  .proofgrid{ grid-template-columns:repeat(3, 1fr); gap:14px; }
+  .proofcell{ padding:16px 16px 18px; }
+}
+.proofcell__num,
+.proofcell__org,
+.proofcell{
+  hyphens:none;
+  overflow-wrap:normal;
+  word-break:normal;
+}
+.proofcell__num{ font-size:var(--fs-1); line-height:1.3; }
