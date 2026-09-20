@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=27">
-<link rel="stylesheet" href="motion.css?v=27">
-<link rel="stylesheet" href="art.css?v=27">
+<link rel="stylesheet" href="site.css?v=29">
+<link rel="stylesheet" href="motion.css?v=29">
+<link rel="stylesheet" href="art.css?v=29">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -300,7 +300,154 @@
     <h2>What I fixed, and where.</h2>
     <p>Eleven landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
     <div class="grid grid--3">
-      <article class="card" id="pr-mujoco-3396">
+      <article class="card" id="pr-mujoco-warp-1541">
+        <div class="card__head">
+          <a href="https://github.com/google-deepmind/mujoco_warp/pull/1541"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google-deepmind/mujoco_warp #1541</span>
+        </div>
+        <h3 class="card__title">A linear-memory GPU disjoint-set union</h3>
+        <p class="card__body">I found that the GPU island-discovery kernel carried the same quadratic memory shape onto the device. I replaced it with a linear-memory disjoint-set union.</p>
+        <div class="card__art fig">
+      <div class="figc" style="--figc-ar:470/540"><canvas data-fig="funnel" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="mw-t mw-d">
+                  <title id="mw-t">A square field draining into a single row</title>
+                  <desc id="mw-d">Four hundred and eighty four cells, one for every pair of trees, draining cell by cell into a row of twenty two, one per tree. The old kernel carried the quadratic shape onto the device and the replacement is linear, so the scratch allocation falls from 7,929,856 bytes to 180,224 bytes and the median time from 156.738 microseconds to 101.097, which is 1.513 times faster with a 99 percent confidence interval of 1.406 to 1.584.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">484 cells, one per pair of trees</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 7,929,856 B</text>
+                  <text x="235" y="414" text-anchor="middle" font-size="17" font-weight="600" fill="var(--mint-700)">22 entries, one per tree</text>
+                  <text x="235" y="500" text-anchor="middle" font-size="30" font-weight="800" fill="var(--mint-700)">1.513x faster</text>
+                  <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 180,224 B, median 156.738 us to 101.097 us</text>
+                </svg></div>
+        </div>
+        <p class="card__cap mono">156.738 us to 101.097 us. Scratch 7,929,856 bytes to 180,224.</p>
+        <ul class="tags"><li class="tag tag--lang">Python</li><li class="tag tag--class">memory O(n^2) to O(n)</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 3 ways</summary>
+            <ul class="ev__list">
+            <li>99% interval 1.406x to 1.584x</li>
+            <li>faster in 91 of 93 valid pairs, median dense/DSU ratio 2.40</li>
+            <li>exact match against the dense kernels in every block</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/google-deepmind/mujoco_warp/pull/1541">google-deepmind/mujoco_warp #1541</a>
+      </article>
+
+<article class="card" id="pr-nemo-relay-481">
+        <div class="card__head">
+          <a href="https://github.com/NVIDIA/NeMo-Relay/pull/481"><img src="assets/org/NVIDIA.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into NVIDIA/NeMo-Relay #481</span>
+        </div>
+        <h3 class="card__title">One scaffold, not one profile per task</h3>
+        <p class="card__body">I found the learning key included the first user message, so one unchanging system prompt and tool schema fragmented into a new profile per task and observations never accumulated. I keyed it on the stable scaffold instead, with a fingerprint gate that fails closed.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 500 590" role="img" aria-labelledby="pr-nemo-relay-481-t pr-nemo-relay-481-d">
+  <title id="pr-nemo-relay-481-t">Eight scattered profiles funnel into one that gathers</title>
+  <desc id="pr-nemo-relay-481-d">Two real learning keys from the pull request body, sharing the model, the system hash and the tools hash and differing only in one seed field. Above, eight profiles sit scattered across the panel, each a single observation with nowhere to add to. Fine lines funnel every one of them down into a single bucket, where eight marks now pack together instead of eight buckets holding one each. 23 files changed: 5 source, 18 test.</desc>
+
+  <g id="nr-keys" font-size="14">
+    <text x="16" y="54" class="mono" fill="var(--muted)" xml:space="preserve">agent-a::model=gpt-4o::seed=sha256:</text>
+    <text x="16" y="76" class="mono" fill="var(--muted)" xml:space="preserve">::system=sha256:1a842e58b::tools=sha256:69848c057</text>
+    <text x="16" y="102" class="mono" fill="var(--muted)" xml:space="preserve">agent-a::model=gpt-4o::seed=sha256:</text>
+    <text x="16" y="124" class="mono" fill="var(--muted)" xml:space="preserve">::system=sha256:1a842e58b::tools=sha256:69848c057</text>
+    <text x="470" y="30" class="mono" fill="var(--coral-700)" text-anchor="end" font-size="13" font-weight="600">d006</text>
+    <text x="470" y="50" class="mono" fill="var(--coral-700)" text-anchor="end" font-size="13" font-weight="600">5607</text>
+  </g>
+  <text x="16" y="146" font-size="14" fill="var(--muted)">same system hash, same tools hash, one field apart</text>
+
+  <text x="250" y="175" text-anchor="middle" font-size="15" fill="var(--coral-700)">eight profiles, nothing ever accumulates</text>
+
+  <g stroke="var(--coral-500)" stroke-width="1.5" opacity=".5">
+    <line pathLength="1" class="draw" x1="40" y1="221" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="100" y1="241" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="160" y1="209" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="220" y1="237" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="280" y1="203" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="340" y1="231" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="400" y1="213" x2="250" y2="430"/>
+    <line pathLength="1" class="draw" x1="460" y1="239" x2="250" y2="430"/>
+  </g>
+
+  <g fill="var(--coral-100)" stroke="var(--coral-500)" stroke-width="1.5">
+    <circle class="pop" cx="40" cy="221" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="100" cy="241" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="160" cy="209" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="220" cy="237" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="280" cy="203" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="340" cy="231" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="400" cy="213" r="12" data-label="a profile holding a single observation"/>
+    <circle class="pop" cx="460" cy="239" r="12" data-label="a profile holding a single observation"/>
+  </g>
+
+  <circle id="nr-bucket" class="pop" cx="250" cy="430" r="90" fill="var(--violet-100)" stroke="var(--violet-500)" stroke-width="2" data-label="one profile for the whole stable scaffold"/>
+  <g id="nr-stack" fill="var(--violet-500)">
+    <circle class="pop" cx="202" cy="408" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="234" cy="408" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="266" cy="408" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="298" cy="408" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="202" cy="452" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="234" cy="452" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="266" cy="452" r="10" data-label="an observation that now accumulates"/>
+    <circle class="pop" cx="298" cy="452" r="10" data-label="an observation that now accumulates"/>
+  </g>
+
+  <text x="250" y="547" text-anchor="middle" font-size="15" fill="var(--violet-700)">one scaffold key, and every observation gathers</text>
+  <text x="250" y="571" text-anchor="middle" font-size="14" fill="var(--ink)">23 files changed: 5 source, 18 test</text>
+</svg>
+        </div>
+        <p class="card__cap mono">One unchanging scaffold now keys to one profile instead of one per task. 23 files.</p>
+        <ul class="tags"><li class="tag tag--lang">Rust</li><li class="tag tag--class">cache keying</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 2 ways</summary>
+            <ul class="ev__list">
+            <li>18 test files, 938 lines of tests added</li>
+            <li>the gate fails closed on legacy, missing, shorter and mismatched fingerprints</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/NVIDIA/NeMo-Relay/pull/481">NVIDIA/NeMo-Relay #481</a>
+      </article>
+
+<article class="card" id="pr-triton-kernels-22">
+        <div class="card__head">
+          <a href="https://github.com/triton-lang/kernels/pull/22"><img src="assets/org/openai.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into triton-lang/kernels #22</span>
+        </div>
+        <h3 class="card__title">A topology-derived sparse attention kernel</h3>
+        <p class="card__body">I built a forward-only Triton kernel that schedules causal attention blocks by a topology-derived salience score, instead of scanning every block in the lower triangle.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 500 505" role="img" aria-labelledby="pr-triton-kernels-22-t pr-triton-kernels-22-d">
+  <title id="pr-triton-kernels-22-t">A causal schedule as a triangle that fills from its own diagonal</title>
+  <desc id="pr-triton-kernels-22-d">A 16 by 16 field of causal attention block pairs. The upper triangle is empty because those pairs cannot exist under causal order. Inside the valid lower triangle, the sink column, the local window along the diagonal, and a handful of blocks chosen by a salience score are filled violet and scheduled. The remaining valid pairs stay a pale, unscheduled grey. 17 tests passed, 5 files changed, 804 lines added.</desc>
+
+  <g class="wipe" fill="var(--ground2)" stroke="var(--hair)" stroke-width="1"><rect class="tri-block" x="55.75" y="101.25" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="124" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="124" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="146.75" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="146.75" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="283.25" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="283.25" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="306" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="283.25" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="328.75" y="374.25" width="22.75" height="22.75"/></g>
+  
+  <g fill="var(--violet-500)" stroke="var(--hair)" stroke-width="1"><rect class="pop tri-block" x="33" y="33" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="55.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="78.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="101.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="124" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="146.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="169.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="192.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="215" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="237.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="260.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="283.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="306" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="328.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="351.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="374.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="55.75" y="55.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="55.75" y="78.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="78.5" y="78.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="78.5" y="101.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="101.25" y="101.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="101.25" y="124" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="124" y="124" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="124" y="146.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="146.75" y="146.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="146.75" y="169.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="169.5" y="169.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="169.5" y="192.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="192.25" y="192.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="192.25" y="215" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="215" y="215" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="215" y="237.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="237.75" y="237.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="237.75" y="260.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="260.5" y="260.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="260.5" y="283.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="283.25" y="283.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="283.25" y="306" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="306" y="306" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="306" y="328.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="328.75" y="328.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="328.75" y="351.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="351.5" y="351.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="351.5" y="374.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="374.25" y="374.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="78.5" y="146.75" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="101.25" y="215" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="169.5" y="215" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="78.5" y="283.25" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="192.25" y="283.25" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="146.75" y="328.75" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="237.75" y="351.5" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="306" y="374.25" width="22.75" height="22.75" data-label="chosen by the salience score"/></g>
+
+  
+
+  <circle class="pop" cx="450" cy="45" r="8" fill="var(--violet-500)"/>
+  <text x="450" y="70" text-anchor="middle" font-size="14" fill="var(--ink)">scheduled</text>
+  <circle class="pop" cx="450" cy="102" r="8" fill="var(--ground2)" stroke="var(--hair)"/>
+  <text x="450" y="127" text-anchor="middle" font-size="14" fill="var(--ink)">unscheduled</text>
+
+  <text x="250" y="416" text-anchor="middle" font-size="15" fill="var(--muted)">16 by 16 causal pairs, upper triangle never valid.</text>
+  <text x="250" y="438" text-anchor="middle" font-size="15" fill="var(--muted)">Violet: sink column, local window, salience picks.</text>
+  <text x="250" y="460" text-anchor="middle" font-size="15" fill="var(--muted)">Grey: valid pairs left unscheduled.</text>
+  <text x="250" y="486" text-anchor="middle" font-size="15" fill="var(--ink)">17 tests passed, 5 files changed, 804 lines added.</text>
+</svg>
+        </div>
+        <p class="card__cap mono">A topology derived sparse attention kernel. 804 lines added, 17 tests passing.</p>
+        <ul class="tags"><li class="tag tag--lang">Python, Triton</li><li class="tag tag--class">new kernel</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 3 ways</summary>
+            <ul class="ev__list">
+            <li>17 tests passed</li>
+            <li>correctness checked for 2D and for batched and headed inputs</li>
+            <li>benchmark runner checked in so the table reproduces</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/triton-lang/kernels/pull/22">triton-lang/kernels #22</a>
+      </article>
+
+<article class="card" id="pr-mujoco-3396">
         <div class="card__head">
           <a href="https://github.com/google-deepmind/mujoco/pull/3396"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
           <span class="card__repo mono">merged into google-deepmind/mujoco #3396</span>
@@ -351,37 +498,297 @@
           </details>
           <a class="card__link" href="https://github.com/google-deepmind/mujoco/pull/3396">google-deepmind/mujoco #3396</a>
       </article>
-      <article class="card" id="pr-mujoco-warp-1541">
+
+<article class="card" id="pr-tensorflow-124410">
         <div class="card__head">
-          <a href="https://github.com/google-deepmind/mujoco_warp/pull/1541"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into google-deepmind/mujoco_warp #1541</span>
+          <a href="https://github.com/tensorflow/tensorflow/pull/124410"><img src="assets/org/tensorflow.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into tensorflow/tensorflow #124410</span>
         </div>
-        <h3 class="card__title">A linear-memory GPU disjoint-set union</h3>
-        <p class="card__body">I found that the GPU island-discovery kernel carried the same quadratic memory shape onto the device. I replaced it with a linear-memory disjoint-set union.</p>
+        <h3 class="card__title">A missing back-propagation in transitive reduction</h3>
+        <p class="card__body">I traced a correctness bug: transitive reduction was documented as full reachability but never back-propagated, so a redundant control edge with a longer alternate path survived the prune. I fixed the back-propagation so the prune removes it.</p>
         <div class="card__art fig">
-      <div class="figc" style="--figc-ar:470/540"><canvas data-fig="funnel" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="mw-t mw-d">
-                  <title id="mw-t">A square field draining into a single row</title>
-                  <desc id="mw-d">Four hundred and eighty four cells, one for every pair of trees, draining cell by cell into a row of twenty two, one per tree. The old kernel carried the quadratic shape onto the device and the replacement is linear, so the scratch allocation falls from 7,929,856 bytes to 180,224 bytes and the median time from 156.738 microseconds to 101.097, which is 1.513 times faster with a 99 percent confidence interval of 1.406 to 1.584.</desc>
-                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">484 cells, one per pair of trees</text>
-                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 7,929,856 B</text>
-                  <text x="235" y="414" text-anchor="middle" font-size="17" font-weight="600" fill="var(--mint-700)">22 entries, one per tree</text>
-                  <text x="235" y="500" text-anchor="middle" font-size="30" font-weight="800" fill="var(--mint-700)">1.513x faster</text>
-                  <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 180,224 B, median 156.738 us to 101.097 us</text>
-                </svg></div>
+      <svg viewBox="0 0 460 520" role="img" aria-labelledby="tf-t tf-d">
+                <title id="tf-t">Five facts arrive, the sixth never does</title>
+                <desc id="tf-d">The reachability facts each node holds, grouped by the node that holds them: node four holds three, node three holds two, node two holds one. Five are filled because the code learns them. The sixth, that three reaches one, is the only pale shape, because the set held for node three is copied once when the edge three to two is created and never revisited, so it never learns that two can reach one. Underneath, the chain four three two one is kept and the redundant edge four to one survives the prune, joined by a line to the one fact that would have removed it. Four control edges are emitted where the unique transitive reduction is three. The fix is 362 lines added and 26 removed across 4 files.</desc>
+
+                <text x="230" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">five facts arrive, the sixth never does</text>
+                <text x="230" y="64" text-anchor="middle" font-size="16" fill="var(--muted)">4 edges emitted where the reduction is 3</text>
+
+                <rect id="tf-c43" class="tf-fact" x="72.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
+                <text x="120.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 3</text>
+                <rect id="tf-c42" class="tf-fact" x="182.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
+                <text x="230.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 2</text>
+                <rect id="tf-c41" class="tf-fact" x="292.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
+                <text x="340.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 1</text>
+                <rect id="tf-c32" class="tf-fact" x="127.0" y="192.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
+                <text x="175.0" y="236.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">3 &#8594; 2</text>
+                <rect id="tf-c31" x="237.0" y="192.0" width="96.0" height="74.0" rx="14" fill="var(--ground2)" stroke="var(--coral-500)" stroke-width="2.5" stroke-dasharray="7 5"/>
+                <text x="285.0" y="236.0" text-anchor="middle" font-size="19" font-weight="700" fill="var(--coral-700)">3 &#8594; 1</text>
+                <rect id="tf-c21" class="tf-fact" x="182.0" y="280.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
+                <text x="230.0" y="324.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">2 &#8594; 1</text>
+
+                <path id="tf-link" class="draw" pathLength="1" d="M 339.0 229.0 Q 394.0 296.0 388.0 402.0" fill="none" stroke="var(--coral-500)" stroke-width="2" stroke-dasharray="4 5" opacity=".75"/>
+                <line class="draw" pathLength="1" x1="93.0" y1="428.0" x2="156.3" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
+                <line class="draw" pathLength="1" x1="198.3" y1="428.0" x2="261.7" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
+                <line class="draw" pathLength="1" x1="303.7" y1="428.0" x2="367.0" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
+                <path id="tf-redundant" class="draw" pathLength="1" d="M 72.0 408.0 Q 230.0 344.0 388.0 408.0" fill="none" stroke="var(--coral-500)" stroke-width="3.5" stroke-dasharray="9 6" stroke-linecap="round"/>
+                <circle cx="72.0" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
+                <text x="72.0" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c4</text>
+                <circle cx="177.3" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
+                <text x="177.3" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c3</text>
+                <circle cx="282.7" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
+                <text x="282.7" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c2</text>
+                <circle cx="388.0" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
+                <text x="388.0" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c1</text>
+
+                <text x="230" y="492" text-anchor="middle" font-size="16" fill="var(--muted)">+362/-26 across 4 files</text>
+              </svg>
         </div>
-        <p class="card__cap mono">156.738 us to 101.097 us. Scratch 7,929,856 bytes to 180,224.</p>
-        <ul class="tags"><li class="tag tag--lang">Python</li><li class="tag tag--class">memory O(n^2) to O(n)</li></ul>
+        <p class="card__cap mono">Four control edges emitted where the unique transitive reduction is three.</p>
+        <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">correctness</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 2 ways</summary>
+            <ul class="ev__list">
+            <li>the defect reproduced from the existing VLOG output</li>
+            <li>the unique transitive reduction derived by hand and asserted</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/tensorflow/tensorflow/pull/124410">tensorflow/tensorflow #124410</a>
+      </article>
+
+<article class="card" id="pr-topograph-432">
+        <div class="card__head">
+          <a href="https://github.com/dsx-ai-factory/topograph/pull/432"><img src="assets/org/topograph.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into dsx-ai-factory/topograph #432</span>
+        </div>
+        <h3 class="card__title">Gating cluster wide RBAC to the rules that apply</h3>
+        <p class="card__body">The API server ClusterRole rendered the same Kubernetes RBAC rules regardless of engine and provider, so an install that never reached the Kubernetes API, for example provider test with engine slurm, was still granted pods list, nodes get and list, and daemonsets get, cluster wide. I gated each rule on engine.name and provider.name.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 500 480" role="img" aria-labelledby="pr-topograph-432-t pr-topograph-432-d">
+  <title id="pr-topograph-432-t">A field of permissions contracting to only what is reachable</title>
+  <desc id="pr-topograph-432-d">A dashed outer boundary marks every RBAC rule the ClusterRole used to grant, cluster wide, on every install. A solid inner boundary marks what the gate now lets through. Coral dots fill the ring that got cut, pods list, nodes get, nodes list, daemonsets get, granted even when the install could never reach the Kubernetes API. Mint dots fill the small core that remains, gated by engine.name and provider.name. 145 lines changed across 4 files.</desc>
+
+  <text x="16" y="30" font-size="15" fill="var(--muted)">Before: every rule, granted cluster wide, on every install</text>
+
+  <circle cx="250" cy="215" r="163" fill="none" stroke="var(--hair2)" stroke-width="2" stroke-dasharray="3 2"/>
+  <circle id="tg-gate" cx="250" cy="215" r="63" fill="var(--mint-100)" stroke="var(--mint-500)" stroke-width="2.5"/>
+
+  <g opacity=".55">
+    <circle class="pop" cx="348.2" cy="210.8" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="337.3" cy="246.9" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="340.7" cy="282.1" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="332.1" cy="305.9" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="298.5" cy="322.0" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="259.7" cy="308.7" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="207.9" cy="353.0" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="197.1" cy="303.6" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="124.0" cy="300.8" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="140.0" cy="248.5" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="159.4" cy="204.6" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="150.8" cy="173.0" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="167.8" cy="165.4" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="160.4" cy="102.9" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="201.4" cy="97.1"  r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="253.8" cy="101.7" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="279.5" cy="127.6" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="300.9" cy="126.6" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="347.6" cy="150.3" r="6" fill="var(--coral-500)"/>
+    <circle class="pop" cx="369.7" cy="170.1" r="6" fill="var(--coral-500)"/>
+  </g>
+
+  <g fill="var(--mint-700)">
+    <circle class="pop" cx="279.4" cy="214.4" r="7"/>
+    <circle class="pop" cx="284.4" cy="243.3" r="7"/>
+    <circle class="pop" cx="270.2" cy="249.3" r="7"/>
+    <circle class="pop" cx="242.2" cy="265.7" r="7"/>
+    <circle class="pop" cx="229.1" cy="235.0" r="7"/>
+    <circle class="pop" cx="227.6" cy="217.1" r="7"/>
+    <circle class="pop" cx="204.7" cy="203.3" r="7"/>
+    <circle class="pop" cx="222.4" cy="190.9" r="7"/>
+    <circle class="pop" cx="236.1" cy="173.9" r="7"/>
+    <circle class="pop" cx="270.3" cy="180.8" r="7"/>
+    <circle class="pop" cx="277.3" cy="202.8" r="7"/>
+  </g>
+
+  <text x="16" y="416" font-size="14" fill="var(--muted)">Coral: pods, nodes get and list, daemonsets get, cut off.</text>
+  <text x="16" y="438" font-size="14" fill="var(--muted)">Mint: what <tspan class="mono">engine.name</tspan> and <tspan class="mono">provider.name</tspan> can still reach.</text>
+  <text x="16" y="464" font-size="15" fill="var(--ink)">145 lines changed across 4 files.</text>
+</svg>
+        </div>
+        <p class="card__cap mono">145 lines changed across 4 files. pods, nodes and daemonsets access no longer granted cluster wide.</p>
+        <ul class="tags"><li class="tag tag--lang">YAML, Helm</li><li class="tag tag--class">least privilege</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 2 ways</summary>
+            <ul class="ev__list">
+            <li>chart snapshot tests updated across 4 files</li>
+            <li>each rule gated on engine.name and provider.name</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/dsx-ai-factory/topograph/pull/432">dsx-ai-factory/topograph #432</a>
+      </article>
+
+<article class="card" id="pr-highway-3244">
+        <div class="card__head">
+          <a href="https://github.com/google/highway/pull/3244"><img src="assets/org/google.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google/highway #3244</span>
+        </div>
+        <h3 class="card__title">Pruned collisions by slice structure</h3>
+        <p class="card__body">I noticed the collision and scan tests were comparing key pairs the slice structure had already ruled out. I pruned by structure so those pairs never reach the compare.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 580" role="img" aria-labelledby="pr-highway-3244-t pr-highway-3244-d"><title id="pr-highway-3244-t">A field of pairwise comparisons drained down to the pairs the slice structure keeps</title><desc id="pr-highway-3244-d">A triangular field of small hollow circles, one for every pair the old scan compared, arranged so row by row the field widens the way the count of pairs itself grows. A dashed boundary runs along the field, and only the single edge cell in each row, the pair the slice structure could not rule out, is filled solid instead of hollow. Everything else drains away as an outline. 894,081,141 comparisons at one million keys fall to 13,643,737, 65.5 times fewer. At 200,000 keys 480,728,084 falls to 18,265,157, 26.3 times fewer. Build time at one million keys over 6 paired runs falls by 1.65 times on the worst pair and 2.57 times on the best, median. At 200,000 keys build time falls from 324.5 milliseconds to 204.6 milliseconds.</desc>
+
+<text x="230" y="28" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">65.5x fewer comparisons</text>
+<text x="230" y="48" text-anchor="middle" font-size="13" fill="var(--muted)">1,000,000 keys, pruned by slice structure before the compare</text>
+
+<text x="26" y="76" font-size="13" fill="var(--muted)">slice boundary</text>
+<path class="draw" pathLength="1" d="M26,90 L386,390" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
+
+<g class="wipe" fill="none" stroke="var(--coral-500)" stroke-width="1.5" data-label="pruned pairs, ruled out by slice structure before the compare"><circle cx="40" cy="110" r="3"/><circle cx="40" cy="130" r="3"/><circle cx="64" cy="130" r="3"/><circle cx="40" cy="150" r="3"/><circle cx="64" cy="150" r="3"/><circle cx="88" cy="150" r="3"/><circle cx="40" cy="170" r="3"/><circle cx="64" cy="170" r="3"/><circle cx="88" cy="170" r="3"/><circle cx="112" cy="170" r="3"/><circle cx="40" cy="190" r="3"/><circle cx="64" cy="190" r="3"/><circle cx="88" cy="190" r="3"/><circle cx="112" cy="190" r="3"/><circle cx="136" cy="190" r="3"/><circle cx="40" cy="210" r="3"/><circle cx="64" cy="210" r="3"/><circle cx="88" cy="210" r="3"/><circle cx="112" cy="210" r="3"/><circle cx="136" cy="210" r="3"/><circle cx="160" cy="210" r="3"/><circle cx="40" cy="230" r="3"/><circle cx="64" cy="230" r="3"/><circle cx="88" cy="230" r="3"/><circle cx="112" cy="230" r="3"/><circle cx="136" cy="230" r="3"/><circle cx="160" cy="230" r="3"/><circle cx="184" cy="230" r="3"/><circle cx="40" cy="250" r="3"/><circle cx="64" cy="250" r="3"/><circle cx="88" cy="250" r="3"/><circle cx="112" cy="250" r="3"/><circle cx="136" cy="250" r="3"/><circle cx="160" cy="250" r="3"/><circle cx="184" cy="250" r="3"/><circle cx="208" cy="250" r="3"/><circle cx="40" cy="270" r="3"/><circle cx="64" cy="270" r="3"/><circle cx="88" cy="270" r="3"/><circle cx="112" cy="270" r="3"/><circle cx="136" cy="270" r="3"/><circle cx="160" cy="270" r="3"/><circle cx="184" cy="270" r="3"/><circle cx="208" cy="270" r="3"/><circle cx="232" cy="270" r="3"/><circle cx="40" cy="290" r="3"/><circle cx="64" cy="290" r="3"/><circle cx="88" cy="290" r="3"/><circle cx="112" cy="290" r="3"/><circle cx="136" cy="290" r="3"/><circle cx="160" cy="290" r="3"/><circle cx="184" cy="290" r="3"/><circle cx="208" cy="290" r="3"/><circle cx="232" cy="290" r="3"/><circle cx="256" cy="290" r="3"/><circle cx="40" cy="310" r="3"/><circle cx="64" cy="310" r="3"/><circle cx="88" cy="310" r="3"/><circle cx="112" cy="310" r="3"/><circle cx="136" cy="310" r="3"/><circle cx="160" cy="310" r="3"/><circle cx="184" cy="310" r="3"/><circle cx="208" cy="310" r="3"/><circle cx="232" cy="310" r="3"/><circle cx="256" cy="310" r="3"/><circle cx="280" cy="310" r="3"/><circle cx="40" cy="330" r="3"/><circle cx="64" cy="330" r="3"/><circle cx="88" cy="330" r="3"/><circle cx="112" cy="330" r="3"/><circle cx="136" cy="330" r="3"/><circle cx="160" cy="330" r="3"/><circle cx="184" cy="330" r="3"/><circle cx="208" cy="330" r="3"/><circle cx="232" cy="330" r="3"/><circle cx="256" cy="330" r="3"/><circle cx="280" cy="330" r="3"/><circle cx="304" cy="330" r="3"/><circle cx="40" cy="350" r="3"/><circle cx="64" cy="350" r="3"/><circle cx="88" cy="350" r="3"/><circle cx="112" cy="350" r="3"/><circle cx="136" cy="350" r="3"/><circle cx="160" cy="350" r="3"/><circle cx="184" cy="350" r="3"/><circle cx="208" cy="350" r="3"/><circle cx="232" cy="350" r="3"/><circle cx="256" cy="350" r="3"/><circle cx="280" cy="350" r="3"/><circle cx="304" cy="350" r="3"/><circle cx="328" cy="350" r="3"/><circle cx="40" cy="370" r="3"/><circle cx="64" cy="370" r="3"/><circle cx="88" cy="370" r="3"/><circle cx="112" cy="370" r="3"/><circle cx="136" cy="370" r="3"/><circle cx="160" cy="370" r="3"/><circle cx="184" cy="370" r="3"/><circle cx="208" cy="370" r="3"/><circle cx="232" cy="370" r="3"/><circle cx="256" cy="370" r="3"/><circle cx="280" cy="370" r="3"/><circle cx="304" cy="370" r="3"/><circle cx="328" cy="370" r="3"/><circle cx="352" cy="370" r="3"/><circle cx="40" cy="390" r="3"/><circle cx="64" cy="390" r="3"/><circle cx="88" cy="390" r="3"/><circle cx="112" cy="390" r="3"/><circle cx="136" cy="390" r="3"/><circle cx="160" cy="390" r="3"/><circle cx="184" cy="390" r="3"/><circle cx="208" cy="390" r="3"/><circle cx="232" cy="390" r="3"/><circle cx="256" cy="390" r="3"/><circle cx="280" cy="390" r="3"/><circle cx="304" cy="390" r="3"/><circle cx="328" cy="390" r="3"/><circle cx="352" cy="390" r="3"/><circle cx="376" cy="390" r="3"/></g>
+
+<g fill="var(--mint-500)" data-label="surviving comparisons, one per row, kept for the compare"><circle class="pop" cx="40" cy="90" r="4.5"/><circle class="pop" cx="64" cy="110" r="4.5"/><circle class="pop" cx="88" cy="130" r="4.5"/><circle class="pop" cx="112" cy="150" r="4.5"/><circle class="pop" cx="136" cy="170" r="4.5"/><circle class="pop" cx="160" cy="190" r="4.5"/><circle class="pop" cx="184" cy="210" r="4.5"/><circle class="pop" cx="208" cy="230" r="4.5"/><circle class="pop" cx="232" cy="250" r="4.5"/><circle class="pop" cx="256" cy="270" r="4.5"/><circle class="pop" cx="280" cy="290" r="4.5"/><circle class="pop" cx="304" cy="310" r="4.5"/><circle class="pop" cx="328" cy="330" r="4.5"/><circle class="pop" cx="352" cy="350" r="4.5"/><circle class="pop" cx="376" cy="370" r="4.5"/><circle class="pop" cx="400" cy="390" r="4.5"/></g>
+
+<text x="40" y="412" font-size="14" fill="var(--ink)" font-weight="700">1,000,000 keys</text>
+<text x="40" y="429" font-size="13" fill="var(--muted)">894,081,141 to 13,643,737 comparisons (65.5x)</text>
+<text x="40" y="453" font-size="14" fill="var(--ink)" font-weight="700">200,000 keys</text>
+<text x="40" y="470" font-size="13" fill="var(--muted)">480,728,084 to 18,265,157 comparisons (26.3x)</text>
+<text x="40" y="494" font-size="13" fill="var(--muted)">1M keys, 6 paired runs, build time:</text>
+<text x="40" y="511" font-size="13" fill="var(--muted)">1.65x worst pair, 2.57x median best</text>
+<text x="40" y="535" font-size="13" fill="var(--muted)">200,000 keys build time:</text>
+<text x="40" y="552" font-size="13" fill="var(--muted)">324.5 ms to 204.6 ms</text>
+</svg>
+        </div>
+        <p class="card__cap mono">894,081,141 comparisons to 13,643,737 at one million keys. 65.5x.</p>
+        <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">pairwise scan pruned by structure, exact rejection</li></ul>
                   <details class="ev">
             <summary class="ev__sum">How it was checked, 3 ways</summary>
             <ul class="ev__list">
-            <li>99% interval 1.406x to 1.584x</li>
-            <li>faster in 91 of 93 valid pairs, median dense/DSU ratio 2.40</li>
-            <li>exact match against the dense kernels in every block</li>
+            <li>atomic counters in the pairwise check, whole builds</li>
+            <li>6 paired interleaved runs</li>
+            <li>equal duplicate counts on both builds</li>
             </ul>
           </details>
-          <a class="card__link" href="https://github.com/google-deepmind/mujoco_warp/pull/1541">google-deepmind/mujoco_warp #1541</a>
+          <a class="card__link" href="https://github.com/google/highway/pull/3244">google/highway #3244</a>
       </article>
-      <article class="card" id="pr-mujoco-3450">
+
+<article class="card" id="pr-xnnpack-10801">
+        <div class="card__head">
+          <a href="https://github.com/google/XNNPACK/pull/10801"><img src="assets/org/google.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google/XNNPACK #10801</span>
+        </div>
+        <h3 class="card__title">Reusing the leading gap in the memory planner</h3>
+        <p class="card__body">I found the memory planner never considered the free gap sitting before the first live block. I made it reuse that leading gap, which lowers peak workspace.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 430" role="img" aria-labelledby="pr-xnnpack-10801-t pr-xnnpack-10801-d"><title id="pr-xnnpack-10801-t">The freed leading interval pulled back into the arena instead of appended past its end</title><desc id="pr-xnnpack-10801-d">A packed mint bar of live memory blocks with its leading interval picked out in blue, the interval the old planner left unused. A dashed coral outline floats just past the bar's right edge, the size of a new value that the old planner would have appended there, growing the arena. A curved arrow sweeps that value back over the bar and drops it into the blue leading interval instead. A bracket below marks the arena ending at 112 MiB rather than reaching 144 MiB. FP32 MobileNet V1 peak workspace falls from 23.862980 to 22.331730 MiB, 6.42 percent lower. FP16 MobileNet V1 falls from 21.255882 to 19.916039 MiB, 6.30 percent lower. The public API workspace falls from 144 MiB to 112 MiB with identical output hashes.</desc>
+
+<defs>
+  <marker id="pr-xnnpack-10801-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L8 4 L0 8 z" fill="var(--ink)"/>
+  </marker>
+</defs>
+
+<text x="230" y="28" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">6.42% lower peak</text>
+<text x="230" y="48" text-anchor="middle" font-size="13" fill="var(--muted)">FP32 MobileNet V1, the leading gap reused instead of appended</text>
+
+<path class="draw" pathLength="1" d="M400,124 C330,58 150,58 54,124" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#pr-xnnpack-10801-arrow)"/>
+<text x="230" y="115" text-anchor="middle" font-size="13" fill="var(--ink)">gap reused, not appended</text>
+
+<rect class="pop" x="40" y="130" width="340" height="64" rx="10" fill="var(--mint-500)"/>
+<rect class="pop" x="40" y="130" width="28" height="64" rx="10" fill="var(--blue-500)"/>
+<line class="draw" pathLength="1" x1="94" y1="130" x2="94" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
+<line class="draw" pathLength="1" x1="148" y1="130" x2="148" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
+<line class="draw" pathLength="1" x1="202" y1="130" x2="202" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
+<line class="draw" pathLength="1" x1="256" y1="130" x2="256" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
+<line class="draw" pathLength="1" x1="310" y1="130" x2="310" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
+<line class="draw" pathLength="1" x1="364" y1="130" x2="364" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
+
+<rect class="pop" x="400" y="130" width="28" height="64" rx="10" fill="none" stroke="var(--coral-500)" stroke-width="2" stroke-dasharray="5 4"/>
+
+<path class="draw" pathLength="1" d="M380,204 L380,216 M380,210 L428,210 M428,204 L428,216" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
+<text x="180" y="415" text-anchor="middle" font-size="13" fill="var(--blue-700)">112 MiB after</text>
+<text x="280" y="415" text-anchor="middle" font-size="13" fill="var(--coral-700)">144 MiB before</text>
+
+<text x="40" y="256" font-size="14" font-weight="700" fill="var(--ink)">FP32 MobileNet V1 peak</text>
+<text x="40" y="273" font-size="13" fill="var(--muted)">23.862980 to 22.331730 MiB (6.42% lower)</text>
+<text x="40" y="297" font-size="14" font-weight="700" fill="var(--ink)">FP16 MobileNet V1 peak</text>
+<text x="40" y="314" font-size="13" fill="var(--muted)">21.255882 to 19.916039 MiB (6.30% lower)</text>
+<text x="40" y="338" font-size="13" fill="var(--muted)">Public API workspace 144 MiB to 112 MiB</text>
+<text x="40" y="355" font-size="13" fill="var(--muted)">identical output hashes</text>
+<text x="40" y="379" font-size="13" fill="var(--muted)">memory-planner-test 23/23, 30 paired runs</text>
+<text x="40" y="396" font-size="13" fill="var(--muted)">deltas reproduced exactly</text>
+</svg>
+        </div>
+        <p class="card__cap mono">MobileNet V1 peak 23.862980 to 22.331730 MiB. Workspace 144 MiB to 112 MiB.</p>
+        <ul class="tags"><li class="tag tag--lang">C++ and C</li><li class="tag tag--class">allocation policy, no asymptotic change claimed</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 3 ways</summary>
+            <ul class="ev__list">
+            <li>memory-planner-test 23 of 23 passed</li>
+            <li>30 randomized baseline and candidate MobileNet pairs</li>
+            <li>identical output hashes through the public API</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/google/XNNPACK/pull/10801">google/XNNPACK #10801</a>
+      </article>
+
+<article class="card" id="pr-pyrefly-4180">
+        <div class="card__head">
+          <a href="https://github.com/facebook/pyrefly/pull/4180"><img src="assets/org/facebook.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">landed in facebook/pyrefly #4180</span>
+        </div>
+        <h3 class="card__title">Pinning a 208-module recheck propagation panic</h3>
+        <p class="card__body">An export change can consume the 100 epoch incremental budget, produce another export change during forced invalidation, and reach commit with that change still pending. I generated a chain of 208 two-module strongly connected components inside one Rust test and recorded the resulting Transaction has uncommitted changes failure with should_panic, so the bug is pinned rather than argued about.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 500 230" role="img" aria-labelledby="pr-pyrefly-4180-t pr-pyrefly-4180-d">
+  <title id="pr-pyrefly-4180-t">A chain of links pinned the moment one arrives after the door shuts</title>
+  <desc id="pr-pyrefly-4180-d">A beaded chain stands for a truncated view of 208 chained two-module strongly connected components, alternating blue and mint. A dark bar marks where the 100 epoch incremental budget runs out and the door shuts. The last link still reaches the wire after that bar, and a pin drives through it right there, catching the export change that arrives too late. The test pins the resulting Transaction has uncommitted changes failure with should_panic, so the bug stays caught rather than argued about.</desc>
+
+  <text x="16" y="24" font-size="15" fill="var(--muted)">208 two-module SCCs, the chain that reaches the door</text>
+
+  <line pathLength="1" class="draw" x1="20" y1="90" x2="450" y2="90" stroke="var(--hair2)" stroke-width="2"/>
+  <g>
+    <circle class="pop" cx="20.0" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="48.7" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="77.3" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="106.0" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="134.7" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="163.3" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="192.0" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="220.7" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="249.3" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="278.0" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="306.7" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="335.3" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="364.0" cy="90" r="6" fill="var(--blue-500)"/>
+    <circle class="pop" cx="392.7" cy="90" r="6" fill="var(--mint-500)"/>
+    <circle class="pop" cx="421.3" cy="90" r="6" fill="var(--blue-500)"/>
+  </g>
+
+  <rect class="pop" x="433" y="65" width="6" height="50" fill="var(--ink)" data-label="the 100 epoch budget door, shut"/>
+  <text x="412" y="55" text-anchor="middle" font-size="14" fill="var(--ink)">epoch 100</text>
+
+  <circle class="pop" cx="450" cy="90" r="9" fill="var(--mint-500)" stroke="var(--coral-700)" stroke-width="2.5" data-label="the link that arrives after the door shut"/>
+  <line pathLength="1" class="draw" x1="450" y1="90" x2="474" y2="56" stroke="var(--coral-700)" stroke-width="3" stroke-linecap="round"/>
+  <circle class="pop" cx="474" cy="56" r="9" fill="var(--coral-500)" data-label="pinned"/>
+  <text x="250" y="218" text-anchor="middle" font-size="13" fill="var(--coral-700)" font-weight="600">panic, pinned</text>
+
+  <text x="16" y="150" font-size="15" fill="var(--ink)">one export change reaches commit after the door shuts</text>
+  <text x="16" y="174" font-size="14" fill="var(--muted)">the test pins it with <tspan class="mono">#[should_panic]</tspan></text>
+  <text x="16" y="198" font-size="14" fill="var(--muted)" xml:space="preserve">Transaction has uncommitted changes</text>
+</svg>
+        </div>
+        <p class="card__cap mono">208 two-module SCCs chained in one Rust test. The failure is pinned at the end with should_panic.</p>
+        <ul class="tags"><li class="tag tag--lang">Rust</li><li class="tag tag--class">regression pinned</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 2 ways</summary>
+            <ul class="ev__list">
+            <li>a chain of 208 two-module SCCs generated inside one Rust test</li>
+            <li>the failure pinned with should_panic so it cannot return quietly</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/facebook/pyrefly/pull/4180">facebook/pyrefly #4180</a>
+      </article>
+
+<article class="card" id="pr-mujoco-3450">
         <div class="card__head">
           <a href="https://github.com/google-deepmind/mujoco/pull/3450"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
           <span class="card__repo mono">merged into google-deepmind/mujoco #3450</span>
@@ -501,278 +908,8 @@
           </details>
           <a class="card__link" href="https://github.com/google-deepmind/mujoco/pull/3450">google-deepmind/mujoco #3450</a>
       </article>
-      <article class="card" id="pr-highway-3244">
-        <div class="card__head">
-          <a href="https://github.com/google/highway/pull/3244"><img src="assets/org/google.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into google/highway #3244</span>
-        </div>
-        <h3 class="card__title">Pruned collisions by slice structure</h3>
-        <p class="card__body">I noticed the collision and scan tests were comparing key pairs the slice structure had already ruled out. I pruned by structure so those pairs never reach the compare.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 460 580" role="img" aria-labelledby="pr-highway-3244-t pr-highway-3244-d"><title id="pr-highway-3244-t">A field of pairwise comparisons drained down to the pairs the slice structure keeps</title><desc id="pr-highway-3244-d">A triangular field of small hollow circles, one for every pair the old scan compared, arranged so row by row the field widens the way the count of pairs itself grows. A dashed boundary runs along the field, and only the single edge cell in each row, the pair the slice structure could not rule out, is filled solid instead of hollow. Everything else drains away as an outline. 894,081,141 comparisons at one million keys fall to 13,643,737, 65.5 times fewer. At 200,000 keys 480,728,084 falls to 18,265,157, 26.3 times fewer. Build time at one million keys over 6 paired runs falls by 1.65 times on the worst pair and 2.57 times on the best, median. At 200,000 keys build time falls from 324.5 milliseconds to 204.6 milliseconds.</desc>
 
-<text x="230" y="28" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">65.5x fewer comparisons</text>
-<text x="230" y="48" text-anchor="middle" font-size="13" fill="var(--muted)">1,000,000 keys, pruned by slice structure before the compare</text>
-
-<text x="26" y="76" font-size="13" fill="var(--muted)">slice boundary</text>
-<path class="draw" pathLength="1" d="M26,90 L386,390" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="4 4"/>
-
-<g class="wipe" fill="none" stroke="var(--coral-500)" stroke-width="1.5" data-label="pruned pairs, ruled out by slice structure before the compare"><circle cx="40" cy="110" r="3"/><circle cx="40" cy="130" r="3"/><circle cx="64" cy="130" r="3"/><circle cx="40" cy="150" r="3"/><circle cx="64" cy="150" r="3"/><circle cx="88" cy="150" r="3"/><circle cx="40" cy="170" r="3"/><circle cx="64" cy="170" r="3"/><circle cx="88" cy="170" r="3"/><circle cx="112" cy="170" r="3"/><circle cx="40" cy="190" r="3"/><circle cx="64" cy="190" r="3"/><circle cx="88" cy="190" r="3"/><circle cx="112" cy="190" r="3"/><circle cx="136" cy="190" r="3"/><circle cx="40" cy="210" r="3"/><circle cx="64" cy="210" r="3"/><circle cx="88" cy="210" r="3"/><circle cx="112" cy="210" r="3"/><circle cx="136" cy="210" r="3"/><circle cx="160" cy="210" r="3"/><circle cx="40" cy="230" r="3"/><circle cx="64" cy="230" r="3"/><circle cx="88" cy="230" r="3"/><circle cx="112" cy="230" r="3"/><circle cx="136" cy="230" r="3"/><circle cx="160" cy="230" r="3"/><circle cx="184" cy="230" r="3"/><circle cx="40" cy="250" r="3"/><circle cx="64" cy="250" r="3"/><circle cx="88" cy="250" r="3"/><circle cx="112" cy="250" r="3"/><circle cx="136" cy="250" r="3"/><circle cx="160" cy="250" r="3"/><circle cx="184" cy="250" r="3"/><circle cx="208" cy="250" r="3"/><circle cx="40" cy="270" r="3"/><circle cx="64" cy="270" r="3"/><circle cx="88" cy="270" r="3"/><circle cx="112" cy="270" r="3"/><circle cx="136" cy="270" r="3"/><circle cx="160" cy="270" r="3"/><circle cx="184" cy="270" r="3"/><circle cx="208" cy="270" r="3"/><circle cx="232" cy="270" r="3"/><circle cx="40" cy="290" r="3"/><circle cx="64" cy="290" r="3"/><circle cx="88" cy="290" r="3"/><circle cx="112" cy="290" r="3"/><circle cx="136" cy="290" r="3"/><circle cx="160" cy="290" r="3"/><circle cx="184" cy="290" r="3"/><circle cx="208" cy="290" r="3"/><circle cx="232" cy="290" r="3"/><circle cx="256" cy="290" r="3"/><circle cx="40" cy="310" r="3"/><circle cx="64" cy="310" r="3"/><circle cx="88" cy="310" r="3"/><circle cx="112" cy="310" r="3"/><circle cx="136" cy="310" r="3"/><circle cx="160" cy="310" r="3"/><circle cx="184" cy="310" r="3"/><circle cx="208" cy="310" r="3"/><circle cx="232" cy="310" r="3"/><circle cx="256" cy="310" r="3"/><circle cx="280" cy="310" r="3"/><circle cx="40" cy="330" r="3"/><circle cx="64" cy="330" r="3"/><circle cx="88" cy="330" r="3"/><circle cx="112" cy="330" r="3"/><circle cx="136" cy="330" r="3"/><circle cx="160" cy="330" r="3"/><circle cx="184" cy="330" r="3"/><circle cx="208" cy="330" r="3"/><circle cx="232" cy="330" r="3"/><circle cx="256" cy="330" r="3"/><circle cx="280" cy="330" r="3"/><circle cx="304" cy="330" r="3"/><circle cx="40" cy="350" r="3"/><circle cx="64" cy="350" r="3"/><circle cx="88" cy="350" r="3"/><circle cx="112" cy="350" r="3"/><circle cx="136" cy="350" r="3"/><circle cx="160" cy="350" r="3"/><circle cx="184" cy="350" r="3"/><circle cx="208" cy="350" r="3"/><circle cx="232" cy="350" r="3"/><circle cx="256" cy="350" r="3"/><circle cx="280" cy="350" r="3"/><circle cx="304" cy="350" r="3"/><circle cx="328" cy="350" r="3"/><circle cx="40" cy="370" r="3"/><circle cx="64" cy="370" r="3"/><circle cx="88" cy="370" r="3"/><circle cx="112" cy="370" r="3"/><circle cx="136" cy="370" r="3"/><circle cx="160" cy="370" r="3"/><circle cx="184" cy="370" r="3"/><circle cx="208" cy="370" r="3"/><circle cx="232" cy="370" r="3"/><circle cx="256" cy="370" r="3"/><circle cx="280" cy="370" r="3"/><circle cx="304" cy="370" r="3"/><circle cx="328" cy="370" r="3"/><circle cx="352" cy="370" r="3"/><circle cx="40" cy="390" r="3"/><circle cx="64" cy="390" r="3"/><circle cx="88" cy="390" r="3"/><circle cx="112" cy="390" r="3"/><circle cx="136" cy="390" r="3"/><circle cx="160" cy="390" r="3"/><circle cx="184" cy="390" r="3"/><circle cx="208" cy="390" r="3"/><circle cx="232" cy="390" r="3"/><circle cx="256" cy="390" r="3"/><circle cx="280" cy="390" r="3"/><circle cx="304" cy="390" r="3"/><circle cx="328" cy="390" r="3"/><circle cx="352" cy="390" r="3"/><circle cx="376" cy="390" r="3"/></g>
-
-<g fill="var(--mint-500)" data-label="surviving comparisons, one per row, kept for the compare"><circle class="pop" cx="40" cy="90" r="4.5"/><circle class="pop" cx="64" cy="110" r="4.5"/><circle class="pop" cx="88" cy="130" r="4.5"/><circle class="pop" cx="112" cy="150" r="4.5"/><circle class="pop" cx="136" cy="170" r="4.5"/><circle class="pop" cx="160" cy="190" r="4.5"/><circle class="pop" cx="184" cy="210" r="4.5"/><circle class="pop" cx="208" cy="230" r="4.5"/><circle class="pop" cx="232" cy="250" r="4.5"/><circle class="pop" cx="256" cy="270" r="4.5"/><circle class="pop" cx="280" cy="290" r="4.5"/><circle class="pop" cx="304" cy="310" r="4.5"/><circle class="pop" cx="328" cy="330" r="4.5"/><circle class="pop" cx="352" cy="350" r="4.5"/><circle class="pop" cx="376" cy="370" r="4.5"/><circle class="pop" cx="400" cy="390" r="4.5"/></g>
-
-<text x="40" y="412" font-size="14" fill="var(--ink)" font-weight="700">1,000,000 keys</text>
-<text x="40" y="429" font-size="13" fill="var(--muted)">894,081,141 to 13,643,737 comparisons (65.5x)</text>
-<text x="40" y="453" font-size="14" fill="var(--ink)" font-weight="700">200,000 keys</text>
-<text x="40" y="470" font-size="13" fill="var(--muted)">480,728,084 to 18,265,157 comparisons (26.3x)</text>
-<text x="40" y="494" font-size="13" fill="var(--muted)">1M keys, 6 paired runs, build time:</text>
-<text x="40" y="511" font-size="13" fill="var(--muted)">1.65x worst pair, 2.57x median best</text>
-<text x="40" y="535" font-size="13" fill="var(--muted)">200,000 keys build time:</text>
-<text x="40" y="552" font-size="13" fill="var(--muted)">324.5 ms to 204.6 ms</text>
-</svg>
-        </div>
-        <p class="card__cap mono">894,081,141 comparisons to 13,643,737 at one million keys. 65.5x.</p>
-        <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">pairwise scan pruned by structure, exact rejection</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 3 ways</summary>
-            <ul class="ev__list">
-            <li>atomic counters in the pairwise check, whole builds</li>
-            <li>6 paired interleaved runs</li>
-            <li>equal duplicate counts on both builds</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/google/highway/pull/3244">google/highway #3244</a>
-      </article>
-      <article class="card" id="pr-xnnpack-10801">
-        <div class="card__head">
-          <a href="https://github.com/google/XNNPACK/pull/10801"><img src="assets/org/google.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into google/XNNPACK #10801</span>
-        </div>
-        <h3 class="card__title">Reusing the leading gap in the memory planner</h3>
-        <p class="card__body">I found the memory planner never considered the free gap sitting before the first live block. I made it reuse that leading gap, which lowers peak workspace.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 460 430" role="img" aria-labelledby="pr-xnnpack-10801-t pr-xnnpack-10801-d"><title id="pr-xnnpack-10801-t">The freed leading interval pulled back into the arena instead of appended past its end</title><desc id="pr-xnnpack-10801-d">A packed mint bar of live memory blocks with its leading interval picked out in blue, the interval the old planner left unused. A dashed coral outline floats just past the bar's right edge, the size of a new value that the old planner would have appended there, growing the arena. A curved arrow sweeps that value back over the bar and drops it into the blue leading interval instead. A bracket below marks the arena ending at 112 MiB rather than reaching 144 MiB. FP32 MobileNet V1 peak workspace falls from 23.862980 to 22.331730 MiB, 6.42 percent lower. FP16 MobileNet V1 falls from 21.255882 to 19.916039 MiB, 6.30 percent lower. The public API workspace falls from 144 MiB to 112 MiB with identical output hashes.</desc>
-
-<defs>
-  <marker id="pr-xnnpack-10801-arrow" viewBox="0 0 8 8" refX="6" refY="4" markerWidth="6" markerHeight="6" orient="auto">
-    <path d="M0 0 L8 4 L0 8 z" fill="var(--ink)"/>
-  </marker>
-</defs>
-
-<text x="230" y="28" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">6.42% lower peak</text>
-<text x="230" y="48" text-anchor="middle" font-size="13" fill="var(--muted)">FP32 MobileNet V1, the leading gap reused instead of appended</text>
-
-<path class="draw" pathLength="1" d="M400,124 C330,58 150,58 54,124" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linecap="round" marker-end="url(#pr-xnnpack-10801-arrow)"/>
-<text x="230" y="115" text-anchor="middle" font-size="13" fill="var(--ink)">gap reused, not appended</text>
-
-<rect class="pop" x="40" y="130" width="340" height="64" rx="10" fill="var(--mint-500)"/>
-<rect class="pop" x="40" y="130" width="28" height="64" rx="10" fill="var(--blue-500)"/>
-<line class="draw" pathLength="1" x1="94" y1="130" x2="94" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
-<line class="draw" pathLength="1" x1="148" y1="130" x2="148" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
-<line class="draw" pathLength="1" x1="202" y1="130" x2="202" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
-<line class="draw" pathLength="1" x1="256" y1="130" x2="256" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
-<line class="draw" pathLength="1" x1="310" y1="130" x2="310" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
-<line class="draw" pathLength="1" x1="364" y1="130" x2="364" y2="194" stroke="var(--raised)" stroke-width="1.5"/>
-
-<rect class="pop" x="400" y="130" width="28" height="64" rx="10" fill="none" stroke="var(--coral-500)" stroke-width="2" stroke-dasharray="5 4"/>
-
-<path class="draw" pathLength="1" d="M380,204 L380,216 M380,210 L428,210 M428,204 L428,216" fill="none" stroke="var(--ink)" stroke-width="1.5"/>
-<text x="180" y="415" text-anchor="middle" font-size="13" fill="var(--blue-700)">112 MiB after</text>
-<text x="280" y="415" text-anchor="middle" font-size="13" fill="var(--coral-700)">144 MiB before</text>
-
-<text x="40" y="256" font-size="14" font-weight="700" fill="var(--ink)">FP32 MobileNet V1 peak</text>
-<text x="40" y="273" font-size="13" fill="var(--muted)">23.862980 to 22.331730 MiB (6.42% lower)</text>
-<text x="40" y="297" font-size="14" font-weight="700" fill="var(--ink)">FP16 MobileNet V1 peak</text>
-<text x="40" y="314" font-size="13" fill="var(--muted)">21.255882 to 19.916039 MiB (6.30% lower)</text>
-<text x="40" y="338" font-size="13" fill="var(--muted)">Public API workspace 144 MiB to 112 MiB</text>
-<text x="40" y="355" font-size="13" fill="var(--muted)">identical output hashes</text>
-<text x="40" y="379" font-size="13" fill="var(--muted)">memory-planner-test 23/23, 30 paired runs</text>
-<text x="40" y="396" font-size="13" fill="var(--muted)">deltas reproduced exactly</text>
-</svg>
-        </div>
-        <p class="card__cap mono">MobileNet V1 peak 23.862980 to 22.331730 MiB. Workspace 144 MiB to 112 MiB.</p>
-        <ul class="tags"><li class="tag tag--lang">C++ and C</li><li class="tag tag--class">allocation policy, no asymptotic change claimed</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 3 ways</summary>
-            <ul class="ev__list">
-            <li>memory-planner-test 23 of 23 passed</li>
-            <li>30 randomized baseline and candidate MobileNet pairs</li>
-            <li>identical output hashes through the public API</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/google/XNNPACK/pull/10801">google/XNNPACK #10801</a>
-      </article>
-      <article class="card" id="pr-tensorflow-124410">
-        <div class="card__head">
-          <a href="https://github.com/tensorflow/tensorflow/pull/124410"><img src="assets/org/tensorflow.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into tensorflow/tensorflow #124410</span>
-        </div>
-        <h3 class="card__title">A missing back-propagation in transitive reduction</h3>
-        <p class="card__body">I traced a correctness bug: transitive reduction was documented as full reachability but never back-propagated, so a redundant control edge with a longer alternate path survived the prune. I fixed the back-propagation so the prune removes it.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 460 520" role="img" aria-labelledby="tf-t tf-d">
-                <title id="tf-t">Five facts arrive, the sixth never does</title>
-                <desc id="tf-d">The reachability facts each node holds, grouped by the node that holds them: node four holds three, node three holds two, node two holds one. Five are filled because the code learns them. The sixth, that three reaches one, is the only pale shape, because the set held for node three is copied once when the edge three to two is created and never revisited, so it never learns that two can reach one. Underneath, the chain four three two one is kept and the redundant edge four to one survives the prune, joined by a line to the one fact that would have removed it. Four control edges are emitted where the unique transitive reduction is three. The fix is 362 lines added and 26 removed across 4 files.</desc>
-
-                <text x="230" y="38" text-anchor="middle" font-size="22" font-weight="700" fill="var(--ink)">five facts arrive, the sixth never does</text>
-                <text x="230" y="64" text-anchor="middle" font-size="16" fill="var(--muted)">4 edges emitted where the reduction is 3</text>
-
-                <rect id="tf-c43" class="tf-fact" x="72.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="120.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 3</text>
-                <rect id="tf-c42" class="tf-fact" x="182.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="230.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 2</text>
-                <rect id="tf-c41" class="tf-fact" x="292.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="340.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 1</text>
-                <rect id="tf-c32" class="tf-fact" x="127.0" y="192.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="175.0" y="236.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">3 &#8594; 2</text>
-                <rect id="tf-c31" x="237.0" y="192.0" width="96.0" height="74.0" rx="14" fill="var(--ground2)" stroke="var(--coral-500)" stroke-width="2.5" stroke-dasharray="7 5"/>
-                <text x="285.0" y="236.0" text-anchor="middle" font-size="19" font-weight="700" fill="var(--coral-700)">3 &#8594; 1</text>
-                <rect id="tf-c21" class="tf-fact" x="182.0" y="280.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="230.0" y="324.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">2 &#8594; 1</text>
-
-                <path id="tf-link" class="draw" pathLength="1" d="M 339.0 229.0 Q 394.0 296.0 388.0 402.0" fill="none" stroke="var(--coral-500)" stroke-width="2" stroke-dasharray="4 5" opacity=".75"/>
-                <line class="draw" pathLength="1" x1="93.0" y1="428.0" x2="156.3" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
-                <line class="draw" pathLength="1" x1="198.3" y1="428.0" x2="261.7" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
-                <line class="draw" pathLength="1" x1="303.7" y1="428.0" x2="367.0" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
-                <path id="tf-redundant" class="draw" pathLength="1" d="M 72.0 408.0 Q 230.0 344.0 388.0 408.0" fill="none" stroke="var(--coral-500)" stroke-width="3.5" stroke-dasharray="9 6" stroke-linecap="round"/>
-                <circle cx="72.0" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="72.0" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c4</text>
-                <circle cx="177.3" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="177.3" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c3</text>
-                <circle cx="282.7" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="282.7" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c2</text>
-                <circle cx="388.0" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="388.0" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c1</text>
-
-                <text x="230" y="492" text-anchor="middle" font-size="16" fill="var(--muted)">+362/-26 across 4 files</text>
-              </svg>
-        </div>
-        <p class="card__cap mono">Four control edges emitted where the unique transitive reduction is three.</p>
-        <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">correctness</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 2 ways</summary>
-            <ul class="ev__list">
-            <li>the defect reproduced from the existing VLOG output</li>
-            <li>the unique transitive reduction derived by hand and asserted</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/tensorflow/tensorflow/pull/124410">tensorflow/tensorflow #124410</a>
-      </article>
-      <article class="card" id="pr-nemo-relay-481">
-        <div class="card__head">
-          <a href="https://github.com/NVIDIA/NeMo-Relay/pull/481"><img src="assets/org/NVIDIA.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into NVIDIA/NeMo-Relay #481</span>
-        </div>
-        <h3 class="card__title">One scaffold, not one profile per task</h3>
-        <p class="card__body">I found the learning key included the first user message, so one unchanging system prompt and tool schema fragmented into a new profile per task and observations never accumulated. I keyed it on the stable scaffold instead, with a fingerprint gate that fails closed.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 500 590" role="img" aria-labelledby="pr-nemo-relay-481-t pr-nemo-relay-481-d">
-  <title id="pr-nemo-relay-481-t">Eight scattered profiles funnel into one that gathers</title>
-  <desc id="pr-nemo-relay-481-d">Two real learning keys from the pull request body, sharing the model, the system hash and the tools hash and differing only in one seed field. Above, eight profiles sit scattered across the panel, each a single observation with nowhere to add to. Fine lines funnel every one of them down into a single bucket, where eight marks now pack together instead of eight buckets holding one each. 23 files changed: 5 source, 18 test.</desc>
-
-  <g id="nr-keys" font-size="14">
-    <text x="16" y="54" class="mono" fill="var(--muted)" xml:space="preserve">agent-a::model=gpt-4o::seed=sha256:</text>
-    <text x="16" y="76" class="mono" fill="var(--muted)" xml:space="preserve">::system=sha256:1a842e58b::tools=sha256:69848c057</text>
-    <text x="16" y="102" class="mono" fill="var(--muted)" xml:space="preserve">agent-a::model=gpt-4o::seed=sha256:</text>
-    <text x="16" y="124" class="mono" fill="var(--muted)" xml:space="preserve">::system=sha256:1a842e58b::tools=sha256:69848c057</text>
-    <text x="470" y="30" class="mono" fill="var(--coral-700)" text-anchor="end" font-size="13" font-weight="600">d006</text>
-    <text x="470" y="50" class="mono" fill="var(--coral-700)" text-anchor="end" font-size="13" font-weight="600">5607</text>
-  </g>
-  <text x="16" y="146" font-size="14" fill="var(--muted)">same system hash, same tools hash, one field apart</text>
-
-  <text x="250" y="175" text-anchor="middle" font-size="15" fill="var(--coral-700)">eight profiles, nothing ever accumulates</text>
-
-  <g stroke="var(--coral-500)" stroke-width="1.5" opacity=".5">
-    <line pathLength="1" class="draw" x1="40" y1="221" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="100" y1="241" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="160" y1="209" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="220" y1="237" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="280" y1="203" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="340" y1="231" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="400" y1="213" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="460" y1="239" x2="250" y2="430"/>
-  </g>
-
-  <g fill="var(--coral-100)" stroke="var(--coral-500)" stroke-width="1.5">
-    <circle class="pop" cx="40" cy="221" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="100" cy="241" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="160" cy="209" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="220" cy="237" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="280" cy="203" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="340" cy="231" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="400" cy="213" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="460" cy="239" r="12" data-label="a profile holding a single observation"/>
-  </g>
-
-  <circle id="nr-bucket" class="pop" cx="250" cy="430" r="90" fill="var(--violet-100)" stroke="var(--violet-500)" stroke-width="2" data-label="one profile for the whole stable scaffold"/>
-  <g id="nr-stack" fill="var(--violet-500)">
-    <circle class="pop" cx="202" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="234" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="266" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="298" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="202" cy="452" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="234" cy="452" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="266" cy="452" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="298" cy="452" r="10" data-label="an observation that now accumulates"/>
-  </g>
-
-  <text x="250" y="547" text-anchor="middle" font-size="15" fill="var(--violet-700)">one scaffold key, and every observation gathers</text>
-  <text x="250" y="571" text-anchor="middle" font-size="14" fill="var(--ink)">23 files changed: 5 source, 18 test</text>
-</svg>
-        </div>
-        <p class="card__cap mono">One unchanging scaffold now keys to one profile instead of one per task. 23 files.</p>
-        <ul class="tags"><li class="tag tag--lang">Rust</li><li class="tag tag--class">cache keying</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 2 ways</summary>
-            <ul class="ev__list">
-            <li>18 test files, 938 lines of tests added</li>
-            <li>the gate fails closed on legacy, missing, shorter and mismatched fingerprints</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/NVIDIA/NeMo-Relay/pull/481">NVIDIA/NeMo-Relay #481</a>
-      </article>
-      <article class="card" id="pr-triton-kernels-22">
-        <div class="card__head">
-          <a href="https://github.com/triton-lang/kernels/pull/22"><img src="assets/org/openai.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into triton-lang/kernels #22</span>
-        </div>
-        <h3 class="card__title">A topology-derived sparse attention kernel</h3>
-        <p class="card__body">I built a forward-only Triton kernel that schedules causal attention blocks by a topology-derived salience score, instead of scanning every block in the lower triangle.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 500 505" role="img" aria-labelledby="pr-triton-kernels-22-t pr-triton-kernels-22-d">
-  <title id="pr-triton-kernels-22-t">A causal schedule as a triangle that fills from its own diagonal</title>
-  <desc id="pr-triton-kernels-22-d">A 16 by 16 field of causal attention block pairs. The upper triangle is empty because those pairs cannot exist under causal order. Inside the valid lower triangle, the sink column, the local window along the diagonal, and a handful of blocks chosen by a salience score are filled violet and scheduled. The remaining valid pairs stay a pale, unscheduled grey. 17 tests passed, 5 files changed, 804 lines added.</desc>
-
-  <g class="wipe" fill="var(--ground2)" stroke="var(--hair)" stroke-width="1"><rect class="tri-block" x="55.75" y="101.25" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="124" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="124" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="146.75" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="146.75" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="169.5" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="192.25" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="215" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="237.75" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="260.5" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="283.25" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="306" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="283.25" y="328.75" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="283.25" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="306" y="351.5" width="22.75" height="22.75"/><rect class="tri-block" x="55.75" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="78.5" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="101.25" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="124" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="146.75" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="169.5" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="192.25" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="215" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="237.75" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="260.5" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="283.25" y="374.25" width="22.75" height="22.75"/><rect class="tri-block" x="328.75" y="374.25" width="22.75" height="22.75"/></g>
-  
-  <g fill="var(--violet-500)" stroke="var(--hair)" stroke-width="1"><rect class="pop tri-block" x="33" y="33" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="55.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="78.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="101.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="124" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="146.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="169.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="192.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="215" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="237.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="260.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="283.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="306" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="328.75" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="351.5" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="33" y="374.25" width="22.75" height="22.75" data-label="sink column, always scheduled"/><rect class="pop tri-block" x="55.75" y="55.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="55.75" y="78.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="78.5" y="78.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="78.5" y="101.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="101.25" y="101.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="101.25" y="124" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="124" y="124" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="124" y="146.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="146.75" y="146.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="146.75" y="169.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="169.5" y="169.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="169.5" y="192.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="192.25" y="192.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="192.25" y="215" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="215" y="215" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="215" y="237.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="237.75" y="237.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="237.75" y="260.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="260.5" y="260.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="260.5" y="283.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="283.25" y="283.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="283.25" y="306" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="306" y="306" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="306" y="328.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="328.75" y="328.75" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="328.75" y="351.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="351.5" y="351.5" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="351.5" y="374.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="374.25" y="374.25" width="22.75" height="22.75" data-label="local window on the diagonal"/><rect class="pop tri-block" x="78.5" y="146.75" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="101.25" y="215" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="169.5" y="215" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="78.5" y="283.25" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="192.25" y="283.25" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="146.75" y="328.75" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="237.75" y="351.5" width="22.75" height="22.75" data-label="chosen by the salience score"/><rect class="pop tri-block" x="306" y="374.25" width="22.75" height="22.75" data-label="chosen by the salience score"/></g>
-
-  
-
-  <circle class="pop" cx="450" cy="45" r="8" fill="var(--violet-500)"/>
-  <text x="450" y="70" text-anchor="middle" font-size="14" fill="var(--ink)">scheduled</text>
-  <circle class="pop" cx="450" cy="102" r="8" fill="var(--ground2)" stroke="var(--hair)"/>
-  <text x="450" y="127" text-anchor="middle" font-size="14" fill="var(--ink)">unscheduled</text>
-
-  <text x="250" y="416" text-anchor="middle" font-size="15" fill="var(--muted)">16 by 16 causal pairs, upper triangle never valid.</text>
-  <text x="250" y="438" text-anchor="middle" font-size="15" fill="var(--muted)">Violet: sink column, local window, salience picks.</text>
-  <text x="250" y="460" text-anchor="middle" font-size="15" fill="var(--muted)">Grey: valid pairs left unscheduled.</text>
-  <text x="250" y="486" text-anchor="middle" font-size="15" fill="var(--ink)">17 tests passed, 5 files changed, 804 lines added.</text>
-</svg>
-        </div>
-        <p class="card__cap mono">A topology derived sparse attention kernel. 804 lines added, 17 tests passing.</p>
-        <ul class="tags"><li class="tag tag--lang">Python, Triton</li><li class="tag tag--class">new kernel</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 3 ways</summary>
-            <ul class="ev__list">
-            <li>17 tests passed</li>
-            <li>correctness checked for 2D and for batched and headed inputs</li>
-            <li>benchmark runner checked in so the table reproduces</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/triton-lang/kernels/pull/22">triton-lang/kernels #22</a>
-      </article>
-      <article class="card" id="pr-openxla-46539">
+<article class="card" id="pr-openxla-46539">
         <div class="card__head">
           <a href="https://github.com/openxla/xla/pull/46539"><img src="assets/org/openxla.png" class="card__mark" alt=""></a>
           <span class="card__repo mono">landed in openxla/xla #46539</span>
@@ -846,133 +983,6 @@
           </details>
           <a class="card__link" href="https://github.com/openxla/xla/pull/46539">openxla/xla #46539</a>
       </article>
-      <article class="card" id="pr-topograph-432">
-        <div class="card__head">
-          <a href="https://github.com/dsx-ai-factory/topograph/pull/432"><img src="assets/org/topograph.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">merged into dsx-ai-factory/topograph #432</span>
-        </div>
-        <h3 class="card__title">Gating cluster wide RBAC to the rules that apply</h3>
-        <p class="card__body">The API server ClusterRole rendered the same Kubernetes RBAC rules regardless of engine and provider, so an install that never reached the Kubernetes API, for example provider test with engine slurm, was still granted pods list, nodes get and list, and daemonsets get, cluster wide. I gated each rule on engine.name and provider.name.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 500 480" role="img" aria-labelledby="pr-topograph-432-t pr-topograph-432-d">
-  <title id="pr-topograph-432-t">A field of permissions contracting to only what is reachable</title>
-  <desc id="pr-topograph-432-d">A dashed outer boundary marks every RBAC rule the ClusterRole used to grant, cluster wide, on every install. A solid inner boundary marks what the gate now lets through. Coral dots fill the ring that got cut, pods list, nodes get, nodes list, daemonsets get, granted even when the install could never reach the Kubernetes API. Mint dots fill the small core that remains, gated by engine.name and provider.name. 145 lines changed across 4 files.</desc>
-
-  <text x="16" y="30" font-size="15" fill="var(--muted)">Before: every rule, granted cluster wide, on every install</text>
-
-  <circle cx="250" cy="215" r="163" fill="none" stroke="var(--hair2)" stroke-width="2" stroke-dasharray="3 2"/>
-  <circle id="tg-gate" cx="250" cy="215" r="63" fill="var(--mint-100)" stroke="var(--mint-500)" stroke-width="2.5"/>
-
-  <g opacity=".55">
-    <circle class="pop" cx="348.2" cy="210.8" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="337.3" cy="246.9" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="340.7" cy="282.1" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="332.1" cy="305.9" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="298.5" cy="322.0" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="259.7" cy="308.7" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="207.9" cy="353.0" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="197.1" cy="303.6" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="124.0" cy="300.8" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="140.0" cy="248.5" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="159.4" cy="204.6" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="150.8" cy="173.0" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="167.8" cy="165.4" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="160.4" cy="102.9" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="201.4" cy="97.1"  r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="253.8" cy="101.7" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="279.5" cy="127.6" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="300.9" cy="126.6" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="347.6" cy="150.3" r="6" fill="var(--coral-500)"/>
-    <circle class="pop" cx="369.7" cy="170.1" r="6" fill="var(--coral-500)"/>
-  </g>
-
-  <g fill="var(--mint-700)">
-    <circle class="pop" cx="279.4" cy="214.4" r="7"/>
-    <circle class="pop" cx="284.4" cy="243.3" r="7"/>
-    <circle class="pop" cx="270.2" cy="249.3" r="7"/>
-    <circle class="pop" cx="242.2" cy="265.7" r="7"/>
-    <circle class="pop" cx="229.1" cy="235.0" r="7"/>
-    <circle class="pop" cx="227.6" cy="217.1" r="7"/>
-    <circle class="pop" cx="204.7" cy="203.3" r="7"/>
-    <circle class="pop" cx="222.4" cy="190.9" r="7"/>
-    <circle class="pop" cx="236.1" cy="173.9" r="7"/>
-    <circle class="pop" cx="270.3" cy="180.8" r="7"/>
-    <circle class="pop" cx="277.3" cy="202.8" r="7"/>
-  </g>
-
-  <text x="16" y="416" font-size="14" fill="var(--muted)">Coral: pods, nodes get and list, daemonsets get, cut off.</text>
-  <text x="16" y="438" font-size="14" fill="var(--muted)">Mint: what <tspan class="mono">engine.name</tspan> and <tspan class="mono">provider.name</tspan> can still reach.</text>
-  <text x="16" y="464" font-size="15" fill="var(--ink)">145 lines changed across 4 files.</text>
-</svg>
-        </div>
-        <p class="card__cap mono">145 lines changed across 4 files. pods, nodes and daemonsets access no longer granted cluster wide.</p>
-        <ul class="tags"><li class="tag tag--lang">YAML, Helm</li><li class="tag tag--class">least privilege</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 2 ways</summary>
-            <ul class="ev__list">
-            <li>chart snapshot tests updated across 4 files</li>
-            <li>each rule gated on engine.name and provider.name</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/dsx-ai-factory/topograph/pull/432">dsx-ai-factory/topograph #432</a>
-      </article>
-      <article class="card" id="pr-pyrefly-4180">
-        <div class="card__head">
-          <a href="https://github.com/facebook/pyrefly/pull/4180"><img src="assets/org/facebook.png" class="card__mark" alt=""></a>
-          <span class="card__repo mono">landed in facebook/pyrefly #4180</span>
-        </div>
-        <h3 class="card__title">Pinning a 208-module recheck propagation panic</h3>
-        <p class="card__body">An export change can consume the 100 epoch incremental budget, produce another export change during forced invalidation, and reach commit with that change still pending. I generated a chain of 208 two-module strongly connected components inside one Rust test and recorded the resulting Transaction has uncommitted changes failure with should_panic, so the bug is pinned rather than argued about.</p>
-        <div class="card__art fig">
-      <svg viewBox="0 0 500 230" role="img" aria-labelledby="pr-pyrefly-4180-t pr-pyrefly-4180-d">
-  <title id="pr-pyrefly-4180-t">A chain of links pinned the moment one arrives after the door shuts</title>
-  <desc id="pr-pyrefly-4180-d">A beaded chain stands for a truncated view of 208 chained two-module strongly connected components, alternating blue and mint. A dark bar marks where the 100 epoch incremental budget runs out and the door shuts. The last link still reaches the wire after that bar, and a pin drives through it right there, catching the export change that arrives too late. The test pins the resulting Transaction has uncommitted changes failure with should_panic, so the bug stays caught rather than argued about.</desc>
-
-  <text x="16" y="24" font-size="15" fill="var(--muted)">208 two-module SCCs, the chain that reaches the door</text>
-
-  <line pathLength="1" class="draw" x1="20" y1="90" x2="450" y2="90" stroke="var(--hair2)" stroke-width="2"/>
-  <g>
-    <circle class="pop" cx="20.0" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="48.7" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="77.3" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="106.0" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="134.7" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="163.3" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="192.0" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="220.7" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="249.3" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="278.0" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="306.7" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="335.3" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="364.0" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="392.7" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="421.3" cy="90" r="6" fill="var(--blue-500)"/>
-  </g>
-
-  <rect class="pop" x="433" y="65" width="6" height="50" fill="var(--ink)" data-label="the 100 epoch budget door, shut"/>
-  <text x="412" y="55" text-anchor="middle" font-size="14" fill="var(--ink)">epoch 100</text>
-
-  <circle class="pop" cx="450" cy="90" r="9" fill="var(--mint-500)" stroke="var(--coral-700)" stroke-width="2.5" data-label="the link that arrives after the door shut"/>
-  <line pathLength="1" class="draw" x1="450" y1="90" x2="474" y2="56" stroke="var(--coral-700)" stroke-width="3" stroke-linecap="round"/>
-  <circle class="pop" cx="474" cy="56" r="9" fill="var(--coral-500)" data-label="pinned"/>
-  <text x="250" y="218" text-anchor="middle" font-size="13" fill="var(--coral-700)" font-weight="600">panic, pinned</text>
-
-  <text x="16" y="150" font-size="15" fill="var(--ink)">one export change reaches commit after the door shuts</text>
-  <text x="16" y="174" font-size="14" fill="var(--muted)">the test pins it with <tspan class="mono">#[should_panic]</tspan></text>
-  <text x="16" y="198" font-size="14" fill="var(--muted)" xml:space="preserve">Transaction has uncommitted changes</text>
-</svg>
-        </div>
-        <p class="card__cap mono">208 two-module SCCs chained in one Rust test. The failure is pinned at the end with should_panic.</p>
-        <ul class="tags"><li class="tag tag--lang">Rust</li><li class="tag tag--class">regression pinned</li></ul>
-                  <details class="ev">
-            <summary class="ev__sum">How it was checked, 2 ways</summary>
-            <ul class="ev__list">
-            <li>a chain of 208 two-module SCCs generated inside one Rust test</li>
-            <li>the failure pinned with should_panic so it cannot return quietly</li>
-            </ul>
-          </details>
-          <a class="card__link" href="https://github.com/facebook/pyrefly/pull/4180">facebook/pyrefly #4180</a>
-      </article>
     </div>
     <p class="muted mono">Every number on this page is in a merged diff under my GitHub username.</p>
     <div class="cta-row">
@@ -1005,7 +1015,7 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="fig.js?v=27" defer></script>
-<script src="site.js?v=27" defer></script>
+<script src="fig.js?v=29" defer></script>
+<script src="site.js?v=29" defer></script>
 </body>
 </html>

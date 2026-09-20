@@ -96,7 +96,8 @@
        incoming angle, so tilting it makes the bright curve breathe and
        re-form, which is the figure performing its own mechanism rather
        than a decoration laid over it. */
-    var a = REDUCED ? 0 : Math.sin(t / 5200) * 0.085;
+    var a = REDUCED ? 0 : Math.sin(t / 6400) * 0.26;
+    var band = REDUCED ? -9 : ((t % 6400) / 6400) * 2.4 - 1.2;
     var dx = Math.cos(a), dy = Math.sin(a);
     var pxv = -dy, pyv = dx;
 
@@ -146,7 +147,6 @@
        measurement is clipped away, which is exactly what the pixels showed.
        At 0.018 ten rays sit at 0.17 and 172 reach 0.96, so the sparse field
        stays pale and only the crowding goes solid. */
-    g.strokeStyle = rgba(coral, 0.018);
     g.lineWidth = 1.0;
     for (var j = 0; j < N; j++) {
       var bb = (-0.965 + 1.93 * j / (N - 1)) * R;
@@ -156,6 +156,10 @@
       var dn = dx * nx + dy * ny;
       var rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny;
       var tt = -2 * ((px - CX) * rx + (py - CY) * ry);
+      /* a band of brighter rays travels across the bundle, so light is seen
+         moving through it instead of the whole figure fading together */
+      var f = bb / R - band;
+      g.strokeStyle = rgba(coral, 0.018 + 0.055 * Math.exp(-f * f * 11));
       g.beginPath();
       g.moveTo(px, py);
       g.lineTo(px + tt * rx, py + tt * ry);
@@ -318,7 +322,61 @@
     }
   }
 
-  var RENDER = { caustic: caustic, units: units, funnel: funnel, transport: transport };
+
+  /* ==================================================================== */
+  /* collapse — Epsilon-Hollow                                            */
+  /* ==================================================================== */
+  function collapse(g, vb, t) {
+    var CX = 235, CY = 250, R = 165, N = 300;
+    var blue = token('--blue-500', '#2456dc');
+    var blue7 = token('--blue-700', '#163a9a');
+    var coral = token('--coral-500', '#d9376e');
+    var hair = token('--hair2', '#cfcbc1');
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+
+    /* the surface. It is the thing that must not change, so it is drawn
+       first and identically on every frame. */
+    g.strokeStyle = rgba(hair, 1); g.lineWidth = 2;
+    g.beginPath(); g.arc(CX, CY, R, 0, Math.PI * 2); g.stroke();
+    for (var e = 1; e <= 3; e++) {
+      g.beginPath();
+      g.ellipse(CX, CY, R * (e / 4), R, 0, 0, Math.PI * 2);
+      g.strokeStyle = rgba(hair, 0.55); g.stroke();
+    }
+
+    var cyc = REDUCED ? 0 : t / 5400;
+    for (var i = 0; i < N; i++) {
+      /* a stable pseudo-random placement, so points do not jump between
+         frames and the field reads as one population being thinned */
+      var s = Math.sin(i * 12.9898) * 43758.5453;
+      var u = s - Math.floor(s);
+      var s2 = Math.sin(i * 78.233) * 43758.5453;
+      var v = s2 - Math.floor(s2);
+      var rr = R * 0.94 * Math.sqrt(u), th = v * Math.PI * 2;
+      var x = CX + rr * Math.cos(th), y = CY + rr * Math.sin(th) * 0.82;
+
+      /* each point has its own moment, and when it comes it folds onto its
+         neighbour and is gone. Nothing about the surface changes. */
+      var own = ((i * 37) % 101) / 101;
+      var k = REDUCED ? 0 : Math.max(0, Math.min(1, ((cyc + own) % 1 - 0.72) / 0.17));
+      var nx = CX + rr * 0.76 * Math.cos(th + 0.42);
+      var ny = CY + rr * 0.76 * Math.sin(th + 0.42) * 0.82;
+      var ex = k * k * (3 - 2 * k);
+      var px = x + (nx - x) * ex, py = y + (ny - y) * ex;
+
+      g.beginPath();
+      g.arc(px, py, 3.4 * (1 - 0.55 * ex), 0, Math.PI * 2);
+      g.fillStyle = ex > 0.04 ? rgba(coral, 0.9 * (1 - ex)) : rgba(blue, 0.78);
+      g.fill();
+    }
+
+    g.strokeStyle = rgba(blue7, 0.9); g.lineWidth = 2.6;
+    g.beginPath(); g.arc(CX, CY, R, 0, Math.PI * 2); g.stroke();
+  }
+
+  var RENDER = { caustic: caustic, units: units, funnel: funnel,
+                 transport: transport, collapse: collapse };
 
   /* ------------------------------------------------------------------ */
   var live = [];
