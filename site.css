@@ -174,7 +174,7 @@ img,svg{ max-width:100%; display:block; }
   border-radius:8px;
   box-shadow:var(--e1);
   min-width:0;
-  transition:box-shadow 140ms var(--hover-ease), transform 140ms var(--hover-ease), border-color 140ms var(--hover-ease);
+  transition:box-shadow 30ms var(--hover-ease), transform 30ms var(--hover-ease), border-color 30ms var(--hover-ease);
 }
 .proofcell:hover{
   box-shadow:var(--e2);
@@ -217,7 +217,7 @@ img,svg{ max-width:100%; display:block; }
   font-weight:600;
   font-size:var(--fs-1);
   border:1px solid transparent;
-  transition:box-shadow 140ms var(--hover-ease), transform 140ms var(--hover-ease), border-color 140ms var(--hover-ease), background-color 140ms var(--hover-ease);
+  transition:box-shadow 30ms var(--hover-ease), transform 30ms var(--hover-ease), border-color 30ms var(--hover-ease), background-color 30ms var(--hover-ease);
 }
 .btn--primary{
   background:var(--blue-700); color:#fff; box-shadow:var(--e1);
@@ -279,7 +279,7 @@ img,svg{ max-width:100%; display:block; }
   border-radius:var(--r);
   box-shadow:var(--e1);
   padding:24px;
-  transition:box-shadow 140ms var(--hover-ease), transform 140ms var(--hover-ease), border-color 140ms var(--hover-ease);
+  transition:box-shadow 30ms var(--hover-ease), transform 30ms var(--hover-ease), border-color 30ms var(--hover-ease);
 }
 .card:hover{
   box-shadow:var(--e2);
@@ -333,7 +333,7 @@ img,svg{ max-width:100%; display:block; }
   font-weight:600;
   color:var(--ink);
   cursor:pointer;
-  transition:background-color 140ms var(--hover-ease), border-color 140ms var(--hover-ease), color 140ms var(--hover-ease);
+  transition:background-color 30ms var(--hover-ease), border-color 30ms var(--hover-ease), color 30ms var(--hover-ease);
 }
 .filter:hover{ border-color:var(--hair2); box-shadow:var(--e1); }
 .filter[aria-pressed="true"]{
@@ -347,7 +347,7 @@ img,svg{ max-width:100%; display:block; }
   border-radius:var(--r);
   box-shadow:var(--e1);
   padding:24px;
-  transition:box-shadow 140ms var(--hover-ease), transform 140ms var(--hover-ease), border-color 140ms var(--hover-ease);
+  transition:box-shadow 30ms var(--hover-ease), transform 30ms var(--hover-ease), border-color 30ms var(--hover-ease);
 }
 .proj:hover{ box-shadow:var(--e2); transform:translateY(-2px); border-color:var(--hair2); }
 .proj__name{ font-size:var(--fs-2); line-height:1.3; font-weight:600; color:var(--ink); }
@@ -425,7 +425,7 @@ img,svg{ max-width:100%; display:block; }
   background:var(--raised);
   font-size:var(--fs-0); font-weight:600; color:var(--ink);
   cursor:pointer;
-  transition:border-color 140ms var(--hover-ease), box-shadow 140ms var(--hover-ease);
+  transition:border-color 30ms var(--hover-ease), box-shadow 30ms var(--hover-ease);
 }
 .mosaic__pause:hover{ box-shadow:var(--e1); }
 
@@ -476,7 +476,7 @@ img,svg{ max-width:100%; display:block; }
   .tri-block{
     transform-box: fill-box;
     transform-origin: center;
-    animation: tri-scan 3.4s ease-in-out infinite;
+    animation: tri-scan 1.1s ease-in-out infinite;
   }
   @keyframes tri-scan{
     /* Same fault as cell-wave: seventy percent of the cycle was a still frame
@@ -753,8 +753,8 @@ img,svg{ max-width:100%; display:block; }
 .mosaic__grid i{
   transform: translate(var(--dx,0), var(--dy,0)) rotate(var(--rot,0)) scale(.42);
   opacity:0;
-  transition: transform 720ms cubic-bezier(.22,.9,.24,1),
-              opacity 520ms ease-out;
+  transition: transform 240ms cubic-bezier(.22,.9,.24,1),
+              opacity 160ms linear;
   will-change: transform, opacity;
 }
 .mosaic__grid i.is-lit{

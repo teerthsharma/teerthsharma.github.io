@@ -131,20 +131,47 @@
     var outBefore = svg ? svg.querySelector('[data-out="before"]') : null;
     var outAfter = svg ? svg.querySelector('[data-out="after"]') : null;
 
+    var units = svg ? svg.querySelectorAll('.unit') : [];
+    var unitRef = svg ? svg.querySelector('#unit-ref') : null;
+    var outRatio = svg ? svg.querySelector('[data-out="ratio"]') : null;
+    var outBefore = svg ? svg.querySelector('[data-out="before"]') : null;
+    var outAfter = svg ? svg.querySelector('[data-out="after"]') : null;
+
+    /* The block is laid out square rather than across a fixed column count.
+       Row-major across 47 columns drew 22 units as one partial row, which
+       reads as a dashed line and not as a quantity. */
+    var BOX_X = 300, BOX_Y = 40, BOX_W = 300, BOX_H = 270;
+
     function update() {
       var n = Number(input.value);
       var before = 5 * n * n + 36 * n + 32;
       var after = 16 * n + 32;
       var fmt = function (v) { return v.toLocaleString('en-US'); };
-
-      /* One square is the whole allocation of the new path, so the count of
-         squares IS the ratio. Dragging grows it from 22 at ntree 64 to 1,282
-         at 4,096, which is the claim made physical rather than plotted on a
-         log axis that flattened it. */
       var shown = Math.ceil(before / after);
-      for (var i = 0; i < units.length; i++) {
-        units[i].style.display = i < shown ? '' : 'none';
+
+      var cols = Math.ceil(Math.sqrt(shown));
+      var rows = Math.ceil(shown / cols);
+      /* One size for the units and the reference both. They must match
+         exactly: one square is one allocation of the new path, and drawing
+         the reference larger merely to make it visible would make the
+         picture untrue. */
+      var pitch = Math.min(BOX_W / cols, BOX_H / rows);
+      var size = Math.max(2, pitch * 0.82);
+
+      for (var k = 0; k < units.length; k++) {
+        if (k >= shown) { units[k].style.display = 'none'; continue; }
+        units[k].style.display = '';
+        var r = Math.floor(k / cols), c = k % cols;
+        units[k].setAttribute('x', (BOX_X + c * pitch).toFixed(2));
+        units[k].setAttribute('y', (BOX_Y + r * pitch).toFixed(2));
+        units[k].setAttribute('width', size.toFixed(2));
+        units[k].setAttribute('height', size.toFixed(2));
       }
+      if (unitRef) {
+        unitRef.setAttribute('width', size.toFixed(2));
+        unitRef.setAttribute('height', size.toFixed(2));
+      }
+
       if (outRatio) outRatio.textContent = fmt(shown);
       if (outBefore) outBefore.textContent = fmt(before) + ' B';
       if (outAfter) outAfter.textContent = fmt(after) + ' B';

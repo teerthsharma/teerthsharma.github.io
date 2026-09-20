@@ -42,7 +42,7 @@
   .proj__art .pop {
     transform-box: fill-box;
     transform-origin: center;
-    animation: cell-wave 3.1s ease-in-out infinite;
+    animation: cell-wave 1.0s ease-in-out infinite;
   }
   .card__art .pop:nth-of-type(6n+1) { animation-delay: -0.0s; }
   .card__art .pop:nth-of-type(6n+2) { animation-delay: -0.7s; }
@@ -69,7 +69,7 @@
     0%, 100% { opacity: 1; }
     50%      { opacity: .45; }
   }
-  .pulse { animation: end-pulse 2.6s ease-in-out infinite; }
+  .pulse { animation: end-pulse 0.9s ease-in-out infinite; }
 
   /* --- 5. Hairline drift on axes --------------------------------------
      Axis rules and guide lines breathe very slightly, which stops a chart
@@ -80,7 +80,7 @@
   }
   .card__art line[stroke*="hair"],
   .proj__art line[stroke*="hair"] {
-    animation: rule-breathe 5.5s ease-in-out infinite;
+    animation: rule-breathe 1.8s ease-in-out infinite;
   }
 
   /* --- 6. Pause on hover ----------------------------------------------
@@ -102,9 +102,9 @@
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .hero__h1   { animation: line-rise 620ms cubic-bezier(.2,.7,.3,1) both; }
-  .hero__sub  { animation: line-rise 620ms cubic-bezier(.2,.7,.3,1) 130ms both; }
-  .hero__note { animation: line-rise 620ms cubic-bezier(.2,.7,.3,1) 240ms both; }
+  .hero__h1   { animation: line-rise 200ms cubic-bezier(.2,.7,.3,1) both; }
+  .hero__sub  { animation: line-rise 200ms cubic-bezier(.2,.7,.3,1) 130ms both; }
+  .hero__note { animation: line-rise 200ms cubic-bezier(.2,.7,.3,1) 240ms both; }
 
   /* --- 8. The wall of marks breathes ----------------------------------
      A pulse travels across the eleven proof cells, one after another, so
@@ -125,34 +125,41 @@
     0%, 72%, 100% { filter: saturate(.72) opacity(.82); }
     18%           { filter: saturate(1)   opacity(1); }
   }
-  .proofcell { animation: cell-glow 6.5s ease-in-out infinite; }
+  .proofcell { animation: cell-glow 2.2s ease-in-out infinite; }
   .proofcell__org,
-  .proofcell img { animation: mark-wake 6.5s ease-in-out infinite; }
+  .proofcell img { animation: mark-wake 2.2s ease-in-out infinite; }
 
   .proofcell:nth-of-type(1)  { animation-delay: 0ms; }
-  .proofcell:nth-of-type(2)  { animation-delay: 300ms; }
-  .proofcell:nth-of-type(3)  { animation-delay: 600ms; }
-  .proofcell:nth-of-type(4)  { animation-delay: 900ms; }
-  .proofcell:nth-of-type(5)  { animation-delay: 1200ms; }
-  .proofcell:nth-of-type(6)  { animation-delay: 1500ms; }
-  .proofcell:nth-of-type(7)  { animation-delay: 1800ms; }
-  .proofcell:nth-of-type(8)  { animation-delay: 2100ms; }
-  .proofcell:nth-of-type(9)  { animation-delay: 2400ms; }
-  .proofcell:nth-of-type(10) { animation-delay: 2700ms; }
-  .proofcell:nth-of-type(11) { animation-delay: 3000ms; }
+  .proofcell:nth-of-type(2)  { animation-delay: 100ms; }
+  .proofcell:nth-of-type(3)  { animation-delay: 200ms; }
+  .proofcell:nth-of-type(4)  { animation-delay: 300ms; }
+  .proofcell:nth-of-type(5)  { animation-delay: 400ms; }
+  .proofcell:nth-of-type(6)  { animation-delay: 500ms; }
+  .proofcell:nth-of-type(7)  { animation-delay: 600ms; }
+  .proofcell:nth-of-type(8)  { animation-delay: 700ms; }
+  .proofcell:nth-of-type(9)  { animation-delay: 800ms; }
+  .proofcell:nth-of-type(10) { animation-delay: 900ms; }
+  .proofcell:nth-of-type(11) { animation-delay: 1000ms; }
   .proofcell:nth-of-type(1)  .proofcell__org { animation-delay: 0ms; }
-  .proofcell:nth-of-type(2)  .proofcell__org { animation-delay: 300ms; }
-  .proofcell:nth-of-type(3)  .proofcell__org { animation-delay: 600ms; }
-  .proofcell:nth-of-type(4)  .proofcell__org { animation-delay: 900ms; }
-  .proofcell:nth-of-type(5)  .proofcell__org { animation-delay: 1200ms; }
-  .proofcell:nth-of-type(6)  .proofcell__org { animation-delay: 1500ms; }
-  .proofcell:nth-of-type(7)  .proofcell__org { animation-delay: 1800ms; }
-  .proofcell:nth-of-type(8)  .proofcell__org { animation-delay: 2100ms; }
-  .proofcell:nth-of-type(9)  .proofcell__org { animation-delay: 2400ms; }
-  .proofcell:nth-of-type(10) .proofcell__org { animation-delay: 2700ms; }
-  .proofcell:nth-of-type(11) .proofcell__org { animation-delay: 3000ms; }
+  .proofcell:nth-of-type(2)  .proofcell__org { animation-delay: 100ms; }
+  .proofcell:nth-of-type(3)  .proofcell__org { animation-delay: 200ms; }
+  .proofcell:nth-of-type(4)  .proofcell__org { animation-delay: 300ms; }
+  .proofcell:nth-of-type(5)  .proofcell__org { animation-delay: 400ms; }
+  .proofcell:nth-of-type(6)  .proofcell__org { animation-delay: 500ms; }
+  .proofcell:nth-of-type(7)  .proofcell__org { animation-delay: 600ms; }
+  .proofcell:nth-of-type(8)  .proofcell__org { animation-delay: 700ms; }
+  .proofcell:nth-of-type(9)  .proofcell__org { animation-delay: 800ms; }
+  .proofcell:nth-of-type(10) .proofcell__org { animation-delay: 900ms; }
+  .proofcell:nth-of-type(11) .proofcell__org { animation-delay: 1000ms; }
 
   .proofcell:hover,
   .proofcell:focus-visible { animation-play-state: paused; }
 
 }
+
+/* Loop durations are held at 900ms or slower on purpose. A repeating
+   animation at 30ms is 33 cycles per second, which is inside the 3 to 60Hz
+   band associated with photosensitive seizures, and this page animates over a
+   thousand elements at once. Responses to a pointer or a key are a different
+   thing and are set to 30ms, because those fire once and should feel instant.
+   Do not lower the loop floor. */
