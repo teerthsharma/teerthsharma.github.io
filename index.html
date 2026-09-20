@@ -16,8 +16,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=13">
-<link rel="stylesheet" href="motion.css?v=13">
+<link rel="stylesheet" href="site.css?v=15">
+<link rel="stylesheet" href="motion.css?v=15">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -307,7 +307,10 @@
         <h3 class="card__title">Quadratic scratch in island discovery</h3>
         <p class="card__body">Island discovery was allocating scratch that grew with the square of the tree count. I rebuilt it to compute the same partition from a disjoint-set forest, so the allocation grows linearly instead.</p>
         <div class="card__art fig">
-      <svg viewBox="-36 0 730 300" role="img" aria-labelledby="pr1-t pr1-d">
+      <svg viewBox="-36 0 730 300" role="img" aria-labelledby="pr1-t pr1-d"
+                 data-xmin="64" data-xmax="4096" data-xlog="1"
+                 data-ymin="1056" data-ymax="84033568"
+                 data-px0="60" data-px1="430" data-py0="30" data-py1="270">
         <title id="pr1-t">Scratch memory versus tree count, log scale</title>
         <desc id="pr1-d">Two curves over ntree from 64 to 4,096 on a logarithmic byte axis. The coral curve, 5 ntree squared plus 36 ntree plus 32, climbs steeply from 22,816 to 84,033,568 bytes. The blue curve, 16 ntree plus 32, stays nearly flat, ending at 65,568 bytes.</desc>
         <line pathLength="1" class="draw" x1="55" y1="20" x2="55" y2="278" stroke="var(--hair2)" stroke-width="1"/>
@@ -1347,6 +1350,9 @@
                 <circle class="pop" cx="460.7" cy="121.7" r="1.7" fill="var(--green-500)"/>
               </g>
               <text x="250" y="28" class="mono" font-size="11" fill="var(--green-700)">every generated hypergraph agreed, one mark per ten</text>
+            
+              <circle data-marker="before" cx="430" cy="30.00" r="7" fill="var(--coral-500)" stroke="#ffffff" stroke-width="2" data-label="scratch the old path allocates"/>
+              <circle data-marker="after" cx="430" cy="182.19" r="7" fill="var(--blue-500)" stroke="#ffffff" stroke-width="2" data-label="scratch the disjoint-set path allocates"/>
             </svg>
         </div>
         <p class="card__cap mono">84,033,568 bytes to 65,568 at ntree 4,096. 1,281.6x less.</p>
@@ -1804,6 +1810,6 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="site.js?v=13" defer></script>
+<script src="site.js?v=15" defer></script>
 </body>
 </html>

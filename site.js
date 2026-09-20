@@ -112,6 +112,13 @@
     }
 
     function xPos(n) {
+      /* The axis is logarithmic: 64, 256, 1,024 and 4,096 are drawn evenly
+         spaced. Interpolating linearly in n put ntree = 256 at x = 77.6
+         when the drawn tick is at 183.33. */
+      if (svg && svg.getAttribute('data-xlog') === '1') {
+        var l0 = Math.log(xMin), l1 = Math.log(xMax);
+        return px0 + ((Math.log(n) - l0) / (l1 - l0)) * (px1 - px0);
+      }
       return px0 + ((n - xMin) / (xMax - xMin)) * (px1 - px0);
     }
     function yPos(v) {
@@ -124,10 +131,19 @@
       var before = 5 * n * n + 36 * n + 32;
       var after = 16 * n + 32;
 
+      var fmt = function (v) { return v.toLocaleString('en-US'); };
       outs.forEach(function (out) {
         var metric = out.getAttribute('data-metric');
-        if (metric === 'before') out.textContent = before.toLocaleString('en-US');
-        else if (metric === 'after') out.textContent = after.toLocaleString('en-US');
+        if (metric === 'before') out.textContent = fmt(before);
+        else if (metric === 'after') out.textContent = fmt(after);
+        else {
+          /* The markup carries one readout with no data-metric on it, so the
+             metric-only branch matched nothing and the sentence sat frozen at
+             its authored value however far the slider moved. A readout that
+             never changes is worse than no readout, because it reads as a
+             measurement rather than as a control that is doing nothing. */
+          out.textContent = 'ntree = ' + fmt(n) + ', scratch ' + fmt(before) + ' B to ' + fmt(after) + ' B';
+        }
       });
 
       if (canPlot) {
