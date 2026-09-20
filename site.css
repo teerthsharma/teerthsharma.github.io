@@ -458,45 +458,64 @@ img,svg{ max-width:100%; display:block; }
   font-size:var(--fs-1); font-weight:600; color:var(--ink);
 }
 
-/* ---------- Triton block scatter (pr-triton-kernels-22 card) ----------
-   .tri-block goes on every rect of the lower-triangular matrix. Rest state
-   is untouched (no transform), so the triangle is correct with this block
-   absent, with JS disabled, or under reduced motion. The animation only
-   ever departs from and returns to that resting position: translate(0,0)
-   at 0%/8% and again at 58%/100%, so blocks always re-form the exact
-   drawn triangle. nth-of-type buckets give each block a different
-   direction (7 offsets) and a different start delay (4 steps), and both
-   are modulo-based so they hold for any number of rects, not just today's
-   count. 7s per loop, roughly half of it spent at rest, so it reads as a
-   deliberate breath rather than restless jitter. */
+/* ---------- Triton schedule scan (pr-triton-kernels-22 card) ----------
+   This replaces a random per-block scatter. 136 rects each drifting in its
+   own direction did not read as a design; it read as a rendering fault,
+   and the unscheduled grey blocks ghosting around made it worse.
+
+   The diagram is a causal block SCHEDULE, so the honest animation is the
+   schedule being walked. A brightness scan sweeps through the blocks in
+   document order, which for a row-major lower triangle is a diagonal wave
+   from the first row to the last. No transform is involved at all, so no
+   block can ever appear out of place: the triangle is always exactly as
+   drawn, and only lightness moves across it.
+
+   Delay buckets are modulo-based, so the wave holds for any block count.
+   ------------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference){
   .tri-block{
-    transform-box: fill-box;
-    transform-origin: center;
-    animation: tri-scatter 7s var(--hover-ease) infinite;
+    animation: tri-scan 4.8s ease-in-out infinite;
   }
-  @keyframes tri-scatter{
-    0%, 8%    { transform: translate(0,0); }
-    32%       { transform: translate(var(--tx,0px), var(--ty,0px)); }
-    58%, 100% { transform: translate(0,0); }
+  @keyframes tri-scan{
+    0%, 70%, 100% { opacity: 1; }
+    12%           { opacity: .34; }
   }
-  .tri-block:nth-of-type(7n+1){ --tx:-16px; --ty:-14px; }
-  .tri-block:nth-of-type(7n+2){ --tx:18px;  --ty:-10px; }
-  .tri-block:nth-of-type(7n+3){ --tx:-12px; --ty:16px; }
-  .tri-block:nth-of-type(7n+4){ --tx:20px;  --ty:12px; }
-  .tri-block:nth-of-type(7n+5){ --tx:-20px; --ty:6px; }
-  .tri-block:nth-of-type(7n+6){ --tx:10px;  --ty:-18px; }
-  .tri-block:nth-of-type(7n)  { --tx:-8px;  --ty:20px; }
-  .tri-block:nth-of-type(4n+1){ animation-delay:0ms; }
-  .tri-block:nth-of-type(4n+2){ animation-delay:70ms; }
-  .tri-block:nth-of-type(4n+3){ animation-delay:140ms; }
-  .tri-block:nth-of-type(4n)  { animation-delay:210ms; }
+  .tri-block:nth-of-type(12n+1){ animation-delay:0ms; }
+  .tri-block:nth-of-type(12n+2){ animation-delay:70ms; }
+  .tri-block:nth-of-type(12n+3){ animation-delay:140ms; }
+  .tri-block:nth-of-type(12n+4){ animation-delay:210ms; }
+  .tri-block:nth-of-type(12n+5){ animation-delay:280ms; }
+  .tri-block:nth-of-type(12n+6){ animation-delay:350ms; }
+  .tri-block:nth-of-type(12n+7){ animation-delay:420ms; }
+  .tri-block:nth-of-type(12n+8){ animation-delay:490ms; }
+  .tri-block:nth-of-type(12n+9){ animation-delay:560ms; }
+  .tri-block:nth-of-type(12n+10){ animation-delay:630ms; }
+  .tri-block:nth-of-type(12n+11){ animation-delay:700ms; }
+  .tri-block:nth-of-type(12n){ animation-delay:770ms; }
 }
 
-/* ---------- 11. Responsive ---------- */
-@media (max-width:1080px){
-  .hero__h1{ font-size:var(--fs-5); }
+/* ---------- Cards stop being hollow ----------------------------------
+   The grid stretches every card to the height of the tallest in its row.
+   With content top-aligned, a card with shorter prose got a dead white
+   void beneath its diagram. Making the card a column and letting the art
+   grow into the leftover space means the diagram takes the slack instead
+   of the whitespace, and the figure is centred in whatever room it has.
+   A min-height stops a wide, short viewBox from rendering as a sliver on
+   a page whose whole argument is that the evidence is worth looking at.
+   ------------------------------------------------------------------- */
+.card{ display:flex; flex-direction:column; }
+.card__art{
+  flex:1 1 auto;
+  display:flex; align-items:center; justify-content:center;
 }
+.card__art svg{ min-height:210px; }
+.proj{ display:flex; flex-direction:column; }
+.proj__art{
+  flex:1 1 auto;
+  display:flex; align-items:center; justify-content:center;
+}
+.proj__art svg{ min-height:200px; }
+
 @media (max-width:760px){
   .band{ padding:64px 0; }
   .hero{ padding:64px 0 48px; }
@@ -578,4 +597,110 @@ img,svg{ max-width:100%; display:block; }
       animation-range: entry 15% cover 45%;
     }
   }
+}
+
+/* ===================================================================
+   EDITORIAL LAYOUT, replacing the card grid.
+
+   The page was nineteen white boxes of identical weight on a near-white
+   ground, three to a row. Nothing led, nothing rested, and the diagram
+   finished as the smallest element inside its own card on a page whose
+   entire argument is that the evidence is worth looking at.
+
+   Each contribution is now a full-width entry: prose in a narrow column,
+   the figure given the larger half, and the sides alternating down the
+   page so the eye is handed across rather than marched in rows. The
+   figure gets roughly three times the area it had. Alternate entries sit
+   on the tinted ground so the run has a pulse instead of being one
+   continuous sheet of white.
+
+   No HTML changed for this. The markup was already a list of articles.
+   =================================================================== */
+@media (min-width:900px){
+  .grid--3, .grid--2{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0;
+  }
+
+  .card, .proj{
+    display:grid;
+    grid-template-columns: minmax(280px, 34%) 1fr;
+    column-gap:56px;
+    align-items:center;
+    padding:56px 48px;
+    border:0;
+    border-radius:0;
+    box-shadow:none;
+    border-top:1px solid var(--hair);
+  }
+  .card:first-child, .proj:first-child{ border-top:0; }
+
+  /* Hand the reader across the page rather than down a column. */
+  .card:nth-child(even) > *, .proj:nth-child(even) > *{ grid-column:1; }
+  .card:nth-child(even) .card__art,
+  .proj:nth-child(even) .proj__art{ grid-column:2; grid-row:1 / span 99; }
+  .card:nth-child(odd) .card__art,
+  .proj:nth-child(odd) .proj__art{ grid-column:2; grid-row:1 / span 99; }
+  .card:nth-child(even){ direction:rtl; }
+  .card:nth-child(even) > *{ direction:ltr; }
+  .proj:nth-child(even){ direction:rtl; }
+  .proj:nth-child(even) > *{ direction:ltr; }
+
+  /* A pulse down the run, so it is not one unbroken sheet. */
+  .card:nth-child(4n+2), .proj:nth-child(4n+2){ background:var(--ground2); }
+  .card:nth-child(4n+4), .proj:nth-child(4n+4){ background:var(--ground2); }
+
+  .card:hover, .proj:hover{ transform:none; box-shadow:none; }
+
+  /* The figure takes the larger half and is allowed to be large. */
+  .card__art, .proj__art{ margin-top:0; }
+  .card__art svg, .proj__art svg{ min-height:300px; max-height:420px; }
+
+  .card__title, .proj__name{ font-size:var(--fs-4); line-height:1.12; }
+  .card__body, .proj__claim{ max-width:44ch; }
+}
+
+/* Below 900px the entry stacks: prose, then figure, full width. The
+   alternation is meaningless in one column, so it is dropped rather than
+   left to produce a random-looking order. */
+@media (max-width:899px){
+  .card, .proj{ direction:ltr; }
+  .card__art svg, .proj__art svg{ min-height:240px; }
+}
+
+/* ---------- Inspect: every diagram answers when you point at it -------
+   The isolation is done by dimming siblings rather than by brightening
+   the held part, so nothing ever gets louder than the palette allows and
+   no colour is introduced that is not already in the system. The readout
+   sits under the figure in the caption position and is empty until it has
+   something to say, so it never reserves space it is not using.
+   The focus ring is on the figure, and the parts are walked with the
+   arrow keys, so this is reachable without a pointer.
+   -------------------------------------------------------------------- */
+.is-inspectable{ cursor:crosshair; outline-offset:4px; }
+.is-inspectable:focus-visible{ outline:2px solid var(--blue-500); }
+
+.is-inspecting rect,
+.is-inspecting circle,
+.is-inspecting ellipse,
+.is-inspecting path,
+.is-inspecting polyline,
+.is-inspecting line,
+.is-inspecting polygon{
+  opacity:.22;
+  transition:opacity 140ms cubic-bezier(.2,.7,.3,1);
+}
+.is-inspecting .is-held{
+  opacity:1;
+  animation:none;          /* hold it still while it is being read */
+}
+.is-inspecting text{ opacity:.45; transition:opacity 140ms ease; }
+
+.inspect__out{
+  min-height:1.2em;
+  margin:8px 0 0;
+  font-size:var(--fs-0);
+  letter-spacing:.02em;
+  color:var(--blue-700);
 }

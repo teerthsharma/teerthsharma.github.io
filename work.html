@@ -18,8 +18,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=4">
-<link rel="stylesheet" href="motion.css?v=4">
+<link rel="stylesheet" href="site.css?v=6">
+<link rel="stylesheet" href="motion.css?v=6">
 
 <script type="application/ld+json">
 {
@@ -99,7 +99,7 @@
 <header class="hero">
   <div class="wrap">
     <h1 class="hero__h1">The work nobody asked me to do.</h1>
-    <p class="hero__sub">Fourteen public repositories. In each one I start with a piece of mathematics that predicts a number, and write the code that measures it.</p>
+    <p class="hero__sub">Eleven of my fourteen public repositories are below. In each one I start with a piece of mathematics that predicts a number, and write the code that measures it.</p>
   </div>
 </header>
 
@@ -250,6 +250,113 @@
         <a class="card__link" href="https://github.com/teerthsharma/resolvent">View resolvent on GitHub</a>
       </article>
 
+      <article class="proj" id="p-topological-ml-toolkit" data-lang="Python" data-doi="false">
+        <h3 class="proj__name">topological-ml-toolkit</h3>
+        <p class="proj__claim">I wanted the shape of data to be an ordinary feature, usable by anyone already building with sklearn or PyTorch.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 240" role="img" aria-labelledby="tm-t tm-d">
+              <title id="tm-t">A persistence barcode</title>
+              <desc id="tm-d">Horizontal bars of different lengths stacked in rows. Short bars are noise that dies quickly. The two long bars survive across the whole scale and are the features worth keeping.</desc>
+              <line class="draw" pathLength="1" x1="40" y1="206" x2="380" y2="206" stroke="var(--hair2)" stroke-width="1.5"/>
+              <text x="40" y="228" class="mono" font-size="11" fill="var(--muted)">scale</text>
+              <rect class="pop" x="40" y="26" width="318" height="9" rx="4.5" fill="var(--blue-500)" data-label="a loop that survives every scale"/>
+              <rect class="pop" x="40" y="48" width="268" height="9" rx="4.5" fill="var(--blue-500)" data-label="a component that survives"/>
+              <rect class="pop" x="62" y="70" width="46" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise, dies immediately"/>
+              <rect class="pop" x="96" y="92" width="30" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
+              <rect class="pop" x="132" y="114" width="58" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
+              <rect class="pop" x="80" y="136" width="22" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
+              <rect class="pop" x="176" y="158" width="38" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
+              <rect class="pop" x="58" y="180" width="26" height="9" rx="4.5" fill="var(--blue-100)" data-label="noise"/>
+              <text x="380" y="22" text-anchor="end" class="mono" font-size="11" fill="var(--blue-700)">2 features survive</text>
+            </svg>
+            <figcaption class="fig__cap">Long bars are structure, short bars are noise, and the cut is the feature.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>9 stars</span>
+          <span>Rust core, Python API</span>
+          <span>persistent homology and Betti-curve features</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python and Rust</li>
+          <li class="tag tag--class">shape as a feature</li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/topological-ml-toolkit">topological-ml-toolkit on GitHub</a>
+      </article>
+      <article class="proj" id="p-faraday" data-lang="Python" data-doi="false">
+        <h3 class="proj__name">faraday</h3>
+        <p class="proj__claim">I compute the Faraday tensor directly, so the coupling between the electric and magnetic fields is found rather than assumed.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 240" role="img" aria-labelledby="fa-t fa-d">
+              <title id="fa-t">Two orthogonal fields and the coupling between them</title>
+              <desc id="fa-d">A lattice of horizontal arrows for the electric field crosses a lattice of vertical arrows for the magnetic field. Where they cross, a third mark marks the coupling the tensor measures.</desc>
+              <defs>
+                <marker id="fa-h" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--amber-500)"/></marker>
+                <marker id="fa-v" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 z" fill="var(--mint-500)"/></marker>
+              </defs>
+              <line class="draw" pathLength="1" x1="40" y1="60" x2="150" y2="60" stroke="var(--amber-500)" stroke-width="2.5" marker-end="url(#fa-h)" data-label="electric field"/>
+              <line class="draw" pathLength="1" x1="40" y1="120" x2="150" y2="120" stroke="var(--amber-500)" stroke-width="2.5" marker-end="url(#fa-h)" data-label="electric field"/>
+              <line class="draw" pathLength="1" x1="40" y1="180" x2="150" y2="180" stroke="var(--amber-500)" stroke-width="2.5" marker-end="url(#fa-h)" data-label="electric field"/>
+              <line class="draw" pathLength="1" x1="70" y1="30" x2="70" y2="200" stroke="var(--mint-500)" stroke-width="2.5" marker-end="url(#fa-v)" data-label="magnetic field"/>
+              <line class="draw" pathLength="1" x1="110" y1="30" x2="110" y2="200" stroke="var(--mint-500)" stroke-width="2.5" marker-end="url(#fa-v)" data-label="magnetic field"/>
+              <circle class="pop" cx="70" cy="60" r="6" fill="var(--violet-500)" data-label="E cross H, out of the plane"/>
+              <circle class="pop" cx="110" cy="120" r="6" fill="var(--violet-500)" data-label="E cross H, out of the plane"/>
+              <circle class="pop" cx="70" cy="180" r="6" fill="var(--violet-500)" data-label="E cross H, out of the plane"/>
+              <text x="200" y="64" class="mono" font-size="12" fill="var(--amber-700)">E</text>
+              <text x="200" y="92" class="mono" font-size="12" fill="var(--mint-700)">H</text>
+              <text x="200" y="120" class="mono" font-size="12" fill="var(--violet-700)">E x H</text>
+              <text x="380" y="216" text-anchor="end" class="mono" font-size="11" fill="var(--muted)">coupling by fixed-point projection</text>
+            </svg>
+            <figcaption class="fig__cap">Two fields at right angles, and the third quantity that falls out where they meet.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>5 stars</span>
+          <span>computational Faraday tensor</span>
+          <span>topology-fixed-point projection</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">coupling, not assumption</li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/faraday">faraday on GitHub</a>
+      </article>
+      <article class="proj" id="p-separatrix" data-lang="Python" data-doi="false">
+        <h3 class="proj__name">separatrix</h3>
+        <p class="proj__claim">I certify that a top-k or an argmin was decided by the data, and not by where the kernel happened to round.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 240" role="img" aria-labelledby="sp-t sp-d">
+              <title id="sp-t">Two candidates, with and without separation</title>
+              <desc id="sp-d">In the upper pair the two intervals do not touch, so the winner is certified. In the lower pair they overlap, so no answer is returned.</desc>
+              <text x="40" y="34" class="mono" font-size="11" fill="var(--green-700)">separated, so the answer is certified</text>
+              <line class="draw" pathLength="1" x1="60" y1="70" x2="150" y2="70" stroke="var(--green-500)" stroke-width="3" data-label="candidate A and its interval"/>
+              <line class="draw" pathLength="1" x1="210" y1="70" x2="300" y2="70" stroke="var(--green-500)" stroke-width="3" data-label="candidate B and its interval"/>
+              <circle class="pop" cx="105" cy="70" r="5" fill="var(--green-700)" data-label="A"/>
+              <circle class="pop" cx="255" cy="70" r="5" fill="var(--green-700)" data-label="B"/>
+              <text x="340" y="75" class="mono" font-size="12" fill="var(--green-700)">certify</text>
+              <text x="40" y="150" class="mono" font-size="11" fill="var(--coral-700)">overlapping, so nothing is returned</text>
+              <line class="draw" pathLength="1" x1="90" y1="186" x2="210" y2="186" stroke="var(--coral-500)" stroke-width="3" data-label="candidate A, interval overlaps B"/>
+              <line class="draw" pathLength="1" x1="170" y1="186" x2="290" y2="186" stroke="var(--coral-500)" stroke-width="3" data-label="candidate B, interval overlaps A"/>
+              <circle class="pop" cx="150" cy="186" r="5" fill="var(--coral-700)" data-label="A"/>
+              <circle class="pop" cx="230" cy="186" r="5" fill="var(--coral-700)" data-label="B"/>
+              <text x="340" y="191" class="mono" font-size="12" fill="var(--coral-700)">refuse</text>
+            </svg>
+            <figcaption class="fig__cap">If the intervals touch, the ordering was the arithmetic and not the data.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>top-k, argmin and threshold</span>
+          <span>certified or refused</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">decided by data, not rounding</li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/separatrix">separatrix on GitHub</a>
+      </article>
       <article class="proj" id="p-caustic" data-lang="Python" data-doi="true">
         <h3 class="proj__name">caustic</h3>
         <p class="proj__claim">Detects and repairs hallucination from the orbit partition of a relation.</p>
@@ -529,6 +636,6 @@
 
 </main>
 
-<script src="site.js?v=4" defer></script>
+<script src="site.js?v=6" defer></script>
 </body>
 </html>

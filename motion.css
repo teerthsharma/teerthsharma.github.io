@@ -16,26 +16,15 @@
 
 @media (prefers-reduced-motion: no-preference) {
 
-  /* --- 1. Figure float ------------------------------------------------
-     Each figure drifts on its own slow cycle. Staggered by card so the
-     grid never pulses in unison, which would read as a page-wide glitch
-     rather than as separate living objects. */
-  @keyframes fig-float {
-    0%, 100% { transform: translateY(0); }
-    50%      { transform: translateY(-3px); }
-  }
-  .card__art svg,
-  .proj__art svg,
-  .hero__art svg {
-    animation: fig-float 7s ease-in-out infinite;
-    will-change: transform;
-  }
-  .card:nth-of-type(3n+2) .card__art svg,
-  .proj:nth-of-type(3n+2) .proj__art svg { animation-delay: -2.3s; }
-  .card:nth-of-type(3n+3) .card__art svg,
-  .proj:nth-of-type(3n+3) .proj__art svg { animation-delay: -4.6s; }
+    /* --- 1. Figure float: removed ---------------------------------------
+     Nineteen figures each drifting 3px on their own cycle read as wobble
+     rather than as life, and it fought the flex centring that now lets a
+     diagram grow into its card. The motion that earns its place is the
+     kind that means something: the wave through a point field, the gap
+     travelling a curve, the scan across a schedule. Drift means nothing,
+     so it is gone. */
 
-  /* --- 2. Shimmer across dense point fields ---------------------------
+/* --- 2. Shimmer across dense point fields ---------------------------
      A slow wave of brightness travels through a dot matrix or block grid,
      so a field of 1,015 dots reads as a living population rather than a
      texture. Opacity only: position and colour never change. */
@@ -120,4 +109,67 @@
   .proj:hover .proj__art svg * {
     animation-play-state: paused;
   }
+
+  /* --- 7. The opening line arrives ------------------------------------
+     "Hi, I'm Teerth." is the first thing anyone reads, and it was simply
+     present. It now rises into place with the subhead a beat behind it,
+     once, on load. Both animate from a visible end state, so if the
+     animation never runs the words are already where they belong. */
+  @keyframes line-rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .hero__h1   { animation: line-rise 620ms cubic-bezier(.2,.7,.3,1) both; }
+  .hero__sub  { animation: line-rise 620ms cubic-bezier(.2,.7,.3,1) 130ms both; }
+  .hero__note { animation: line-rise 620ms cubic-bezier(.2,.7,.3,1) 240ms both; }
+
+  /* --- 8. The wall of marks breathes ----------------------------------
+     A pulse travels across the eleven proof cells, one after another, so
+     the wall reads as something live rather than a sheet of stickers. The
+     glow is a soft blue-tinted shadow rather than a dark one, because the
+     page has no dark surfaces and a grey drop shadow would dirty the
+     ground. Each cell also lifts under the pointer.
+     The mark itself desaturates slightly at rest and comes to full colour
+     as the pulse passes, which is what makes the wall look like it is
+     being read rather than displayed. */
+  @keyframes cell-glow {
+    0%, 72%, 100% { box-shadow: var(--e1); }
+    18%           { box-shadow: 0 1px 0 #fff inset,
+                                0 2px 6px rgba(36,86,220,.16),
+                                0 10px 26px rgba(36,86,220,.14); }
+  }
+  @keyframes mark-wake {
+    0%, 72%, 100% { filter: saturate(.72) opacity(.82); }
+    18%           { filter: saturate(1)   opacity(1); }
+  }
+  .proofcell { animation: cell-glow 6.5s ease-in-out infinite; }
+  .proofcell__org,
+  .proofcell img { animation: mark-wake 6.5s ease-in-out infinite; }
+
+  .proofcell:nth-of-type(1)  { animation-delay: 0ms; }
+  .proofcell:nth-of-type(2)  { animation-delay: 300ms; }
+  .proofcell:nth-of-type(3)  { animation-delay: 600ms; }
+  .proofcell:nth-of-type(4)  { animation-delay: 900ms; }
+  .proofcell:nth-of-type(5)  { animation-delay: 1200ms; }
+  .proofcell:nth-of-type(6)  { animation-delay: 1500ms; }
+  .proofcell:nth-of-type(7)  { animation-delay: 1800ms; }
+  .proofcell:nth-of-type(8)  { animation-delay: 2100ms; }
+  .proofcell:nth-of-type(9)  { animation-delay: 2400ms; }
+  .proofcell:nth-of-type(10) { animation-delay: 2700ms; }
+  .proofcell:nth-of-type(11) { animation-delay: 3000ms; }
+  .proofcell:nth-of-type(1)  .proofcell__org { animation-delay: 0ms; }
+  .proofcell:nth-of-type(2)  .proofcell__org { animation-delay: 300ms; }
+  .proofcell:nth-of-type(3)  .proofcell__org { animation-delay: 600ms; }
+  .proofcell:nth-of-type(4)  .proofcell__org { animation-delay: 900ms; }
+  .proofcell:nth-of-type(5)  .proofcell__org { animation-delay: 1200ms; }
+  .proofcell:nth-of-type(6)  .proofcell__org { animation-delay: 1500ms; }
+  .proofcell:nth-of-type(7)  .proofcell__org { animation-delay: 1800ms; }
+  .proofcell:nth-of-type(8)  .proofcell__org { animation-delay: 2100ms; }
+  .proofcell:nth-of-type(9)  .proofcell__org { animation-delay: 2400ms; }
+  .proofcell:nth-of-type(10) .proofcell__org { animation-delay: 2700ms; }
+  .proofcell:nth-of-type(11) .proofcell__org { animation-delay: 3000ms; }
+
+  .proofcell:hover,
+  .proofcell:focus-visible { animation-play-state: paused; }
+
 }

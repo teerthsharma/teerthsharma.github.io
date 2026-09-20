@@ -581,6 +581,85 @@
     }
   }
 
+
+  /* ------------------------------------------------------------------
+   * initInspect - makes every diagram on the site interrogable.
+   *
+   * Nineteen bespoke controls would be nineteen things to maintain and
+   * nineteen ways to be inconsistent. Every figure already carries the
+   * information a reader wants: each SVG has a <title> and a <desc>, and
+   * the meaningful marks carry their own text. So one mechanism serves
+   * all of them: point at any part of a figure and that part is isolated
+   * while everything else recedes, with a readout naming what it is.
+   *
+   * Works with a mouse, with touch, and from the keyboard: each figure is
+   * focusable and arrow keys walk its parts.
+   *
+   * With this script absent the figures are simply static and complete,
+   * which is what they already were.
+   * ---------------------------------------------------------------- */
+  function initInspect(){
+    var figs = document.querySelectorAll('.card__art svg, .proj__art svg, .hero__art svg');
+    if (!figs.length) return;
+
+    function labelFor(el, svg){
+      var own = el.getAttribute('data-label')
+             || (el.querySelector && el.querySelector('title') && el.querySelector('title').textContent);
+      if (own) return own.trim();
+      // A shape rarely names itself, so fall back to the nearest text in
+      // its own group, which is how these diagrams are actually authored.
+      var g = el.parentNode, txt = g && g.querySelector && g.querySelector('text');
+      if (txt && txt.textContent.trim()) return txt.textContent.trim();
+      var st = svg.querySelector('title');
+      return st ? st.textContent.trim() : '';
+    }
+
+    Array.prototype.forEach.call(figs, function(svg){
+      var parts = svg.querySelectorAll('rect, circle, ellipse, path, polyline, line, polygon');
+      if (!parts.length) return;
+
+      var fig = svg.closest ? svg.closest('figure, .card__art, .proj__art') : svg.parentNode;
+      if (!fig) return;
+
+      var out = document.createElement('p');
+      out.className = 'inspect__out mono';
+      out.setAttribute('aria-live', 'polite');
+      out.textContent = '';
+      fig.appendChild(out);
+
+      svg.setAttribute('tabindex', '0');
+      svg.classList.add('is-inspectable');
+
+      var idx = -1;
+      function show(el){
+        svg.classList.add('is-inspecting');
+        Array.prototype.forEach.call(parts, function(p){ p.classList.remove('is-held'); });
+        if (!el) { svg.classList.remove('is-inspecting'); out.textContent = ''; return; }
+        el.classList.add('is-held');
+        out.textContent = labelFor(el, svg);
+      }
+      function clear(){
+        svg.classList.remove('is-inspecting');
+        Array.prototype.forEach.call(parts, function(p){ p.classList.remove('is-held'); });
+        out.textContent = '';
+        idx = -1;
+      }
+
+      svg.addEventListener('pointermove', function(e){
+        var el = e.target;
+        if (el === svg || !el.tagName) return;
+        if (/^(rect|circle|ellipse|path|polyline|line|polygon)$/.test(el.tagName.toLowerCase())) show(el);
+      });
+      svg.addEventListener('pointerleave', clear);
+      svg.addEventListener('blur', clear);
+      svg.addEventListener('keydown', function(e){
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { idx = (idx + 1) % parts.length; show(parts[idx]); e.preventDefault(); }
+        else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') { idx = (idx - 1 + parts.length) % parts.length; show(parts[idx]); e.preventDefault(); }
+        else if (e.key === 'Escape') { clear(); }
+      });
+    });
+  }
+
   function boot() {
     initCounters();
     initScaleSlider();
@@ -590,6 +669,7 @@
        block in site.css. initArt stays defined but unused so nothing
        writes inline styles over the stylesheet. */
     initMosaic();
+    initInspect();
   }
 
   if (document.readyState === 'loading') {
