@@ -732,3 +732,36 @@ img,svg{ max-width:100%; display:block; }
   width:7px; height:7px; border-radius:50%;
   background:var(--green-500);
 }
+
+/* ---------- The mosaic assembles rather than fades --------------------
+   A cell that is not part of the current shape waits out at its own
+   offset, rotated and small. Lit, it returns to translate(0,0) rotate(0)
+   scale(1), which is its true place in the grid. So a shape is built out
+   of parts that arrived from elsewhere, and the resting state is always
+   the exact figure.
+
+   transform and opacity only, so four hundred cells stay on the
+   compositor. The delay per cell is set in script, which is what makes
+   the arrival look like a swarm settling rather than a row sweeping.
+   -------------------------------------------------------------------- */
+.mosaic__grid i{
+  transform: translate(var(--dx,0), var(--dy,0)) rotate(var(--rot,0)) scale(.42);
+  opacity:0;
+  transition: transform 720ms cubic-bezier(.22,.9,.24,1),
+              opacity 520ms ease-out;
+  will-change: transform, opacity;
+}
+.mosaic__grid i.is-lit{
+  transform: translate(0,0) rotate(0) scale(1);
+  opacity:1;
+}
+
+@media (prefers-reduced-motion: reduce){
+  /* No travel, no spin: the shape is simply present and correct. */
+  .mosaic__grid i{
+    transform:none;
+    transition:none;
+    opacity:0;
+  }
+  .mosaic__grid i.is-lit{ opacity:1; }
+}

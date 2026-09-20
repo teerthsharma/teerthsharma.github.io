@@ -495,6 +495,7 @@
       }
     }
     grid.appendChild(frag);
+    cells.forEach(scatter);   // every cell starts out in the swarm
 
     function litMap(shapeName) {
       var fn = SHAPES[shapeName];
@@ -515,14 +516,34 @@
       if (subEl) subEl.textContent = a.sub;
     }
 
+    /* Where a cell waits when it is not part of the current shape. Far
+       enough out to read as travel, not so far that four hundred of them
+       become noise across the band. */
+    function scatter(cell) {
+      var dx = (Math.random() * 2 - 1) * 46;
+      var dy = (Math.random() * 2 - 1) * 34;
+      var rot = (Math.random() * 2 - 1) * 110;
+      cell.style.setProperty('--dx', dx.toFixed(1) + 'px');
+      cell.style.setProperty('--dy', dy.toFixed(1) + 'px');
+      cell.style.setProperty('--rot', rot.toFixed(1) + 'deg');
+    }
+
     function applyShape(idx, animate) {
       var a = ACHIEVEMENTS[idx];
       var map = litMap(a.shape);
 
       cells.forEach(function (cell, i) {
         var shouldLight = Object.prototype.hasOwnProperty.call(map, i);
+        var wasLit = cell.classList.contains('is-lit');
         var delay = animate ? Math.round(Math.random() * (shouldLight ? 700 : 400)) : 0;
         cell.style.transitionDelay = delay + 'ms';
+
+        /* A cell going dark is thrown to a fresh position, so the next shape
+           that needs it flies in from somewhere it has never been. Re-rolling
+           only on the way out means a cell already travelling is never yanked
+           to a new vector mid-flight. */
+        if (animate && wasLit && !shouldLight) scatter(cell);
+
         cell.classList.toggle('is-lit', shouldLight);
         cell.classList.toggle('is-accent', shouldLight && !!map[i]);
       });
