@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://teerthsharma.github.io/sitemap.xml

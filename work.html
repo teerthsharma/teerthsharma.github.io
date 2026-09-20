@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Personal Work: Teerth Sharma</title>
+<meta name="description" content="Open source projects by Teerth Sharma: computational topology for machine learning, persistent homology, Triton GPU kernels, Rust systems, Lean 4 verified attention.">
+<link rel="canonical" href="https://teerthsharma.github.io/work.html">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="Personal Work: Teerth Sharma">
+<meta property="og:description" content="Open source projects by Teerth Sharma: computational topology for machine learning, persistent homology, Triton GPU kernels, Rust systems, Lean 4 verified attention.">
+<meta property="og:url" content="https://teerthsharma.github.io/work.html">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Personal Work: Teerth Sharma">
+<meta name="twitter:description" content="Open source projects by Teerth Sharma: computational topology for machine learning, persistent homology, Triton GPU kernels, Rust systems, Lean 4 verified attention.">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "tangle",
+      "codeRepository": "https://github.com/teerthsharma/tangle",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "planimeter",
+      "codeRepository": "https://github.com/teerthsharma/planimeter",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "resolvent",
+      "codeRepository": "https://github.com/teerthsharma/resolvent",
+      "programmingLanguage": "Python"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "caustic",
+      "codeRepository": "https://github.com/teerthsharma/caustic",
+      "programmingLanguage": "Python",
+      "identifier": "https://doi.org/10.5281/zenodo.21997746"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "nerve",
+      "codeRepository": "https://github.com/teerthsharma/nerve",
+      "programmingLanguage": "Rust"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "monodromy",
+      "codeRepository": "https://github.com/teerthsharma/monodromy",
+      "programmingLanguage": "Python",
+      "identifier": "https://doi.org/10.5281/zenodo.22064739"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "Aether-Lang",
+      "codeRepository": "https://github.com/teerthsharma/Aether-Lang",
+      "programmingLanguage": "Rust",
+      "identifier": "https://doi.org/10.5281/zenodo.21997728"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "Epsilon-Hollow",
+      "codeRepository": "https://github.com/teerthsharma/Epsilon-Hollow",
+      "programmingLanguage": "Rust",
+      "identifier": "https://doi.org/10.5281/zenodo.20264206"
+    }
+  ]
+}
+</script>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav__inner">
+    <a class="nav__brand" href="index.html">Teerth Sharma</a>
+    <div class="nav__links">
+      <a class="nav__link" href="index.html#upstream">Upstream</a>
+      <a class="nav__link" href="work.html" aria-current="page">Personal work</a>
+      <a class="nav__link" href="mailto:teerths57@gmail.com">Email</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+
+<header class="hero">
+  <div class="wrap">
+    <h1 class="hero__h1">The work nobody asked me to do.</h1>
+    <p class="hero__sub">Fourteen public repositories. Each one starts with a piece of mathematics that predicts a number, and ends with code that measures it.</p>
+  </div>
+</header>
+
+<section class="band band--tint">
+  <div class="wrap">
+
+    <div class="filters" role="group" aria-label="Filter projects">
+      <button class="filter" type="button" data-filter="all" aria-pressed="true">All</button>
+      <button class="filter" type="button" data-filter="python" aria-pressed="false">Python</button>
+      <button class="filter" type="button" data-filter="rust" aria-pressed="false">Rust</button>
+      <button class="filter" type="button" data-filter="doi" aria-pressed="false">Has a DOI</button>
+    </div>
+
+    <div class="grid grid--3" style="margin-top:40px">
+
+      <article class="proj" id="p-tangle" data-lang="Python" data-doi="false">
+        <h3 class="proj__name">tangle</h3>
+        <p class="proj__claim">It never returns a wrong answer, because it would rather return none.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 260" role="img" aria-labelledby="t1-title t1-desc">
+              <title id="t1-title">Three evaluation sets for tangle, all at zero wrong certificates</title>
+              <desc id="t1-desc">Bar chart of 2,000 rendered diagrams, 80 rendered scenes and 247 real photographs, resting on a hard zero line for wrong certificates.</desc>
+              <line x1="40" y1="220" x2="360" y2="220" stroke="var(--ink)" stroke-width="2"/>
+              <rect x="60" y="60" width="60" height="160" fill="var(--green-500)"/>
+              <rect x="170" y="188" width="60" height="32" fill="var(--green-500)"/>
+              <rect x="280" y="163.8" width="60" height="56.2" fill="var(--green-500)"/>
+              <text x="90" y="50" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">2,000</text>
+              <text x="200" y="178" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">80</text>
+              <text x="310" y="153.8" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">247</text>
+              <text x="90" y="238" text-anchor="middle" fill="var(--muted)" font-size="11">diagrams</text>
+              <text x="200" y="238" text-anchor="middle" fill="var(--muted)" font-size="11">scenes</text>
+              <text x="310" y="238" text-anchor="middle" fill="var(--muted)" font-size="11">photographs</text>
+              <text x="200" y="254" text-anchor="middle" fill="var(--green-700)" font-size="11" font-weight="600">0 wrong certificates</text>
+            </svg>
+            <figcaption class="fig__cap">Evaluation counts against a hard zero line.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>2,000 diagrams</span>
+          <span>80 scenes</span>
+          <span>247 photographs</span>
+          <span>0 wrong certificates</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Python</span>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/tangle">View tangle on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-planimeter" data-lang="Python" data-doi="false">
+        <h3 class="proj__name">planimeter</h3>
+        <p class="proj__claim">It never returns a wrong answer, because it would rather return none.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 200" role="img" aria-labelledby="t2-title t2-desc">
+              <title id="t2-title">planimeter's exact and refused counts opposed against shapely's wrong count</title>
+              <desc id="t2-desc">Two bars opposed around a shared zero axis: planimeter scores 495 exact and 33 refused with 0 wrong, shapely.polygonize_full scores 336 wrong with 0 refused.</desc>
+              <line x1="200" y1="60" x2="200" y2="170" stroke="var(--ink)" stroke-width="1.5"/>
+              <rect x="200" y="72" width="168.75" height="32" fill="var(--green-500)"/>
+              <rect x="368.75" y="72" width="11.25" height="32" fill="var(--hair2)"/>
+              <rect x="85.455" y="126" width="114.545" height="32" fill="var(--coral-500)"/>
+              <rect x="20" y="126" width="65.455" height="32" fill="var(--hair2)"/>
+              <text x="290" y="66" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="600">planimeter</text>
+              <text x="110" y="120" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="600">shapely</text>
+              <text x="284" y="44" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">495 exact</text>
+              <text x="398" y="44" text-anchor="end" fill="var(--muted)" font-family="var(--font-mono)" font-size="11">33 refused</text>
+              <text x="143" y="176" text-anchor="middle" fill="var(--coral-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">336 wrong</text>
+            </svg>
+            <figcaption class="fig__cap">His result opposed against shapely's.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>495 exact</span>
+          <span>33 refused</span>
+          <span>0 wrong</span>
+          <span>shapely.polygonize_full: 336 wrong, 0 refused</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Python</span>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/planimeter">View planimeter on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-resolvent" data-lang="Python" data-doi="false">
+        <h3 class="proj__name">resolvent</h3>
+        <p class="proj__claim">Softmax attention and Markov path composition are the same operator.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 150" role="img" aria-labelledby="t3-title t3-desc">
+              <title id="t3-title">175 cells, one per theorem and lemma, no gaps</title>
+              <desc id="t3-desc">A filled grid of 175 cells with no gaps: 134 cells for theorems and 41 cells for lemmas, all proved with 0 sorry.</desc>
+              <g transform="translate(1,4)">
+          <rect x="0" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="16" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="32" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="48" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="64" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="80" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="96" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="112" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="128" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="144" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="160" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="176" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="192" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="208" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="224" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="240" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="256" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="272" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="288" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="304" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="320" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="336" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="352" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="368" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="384" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="0" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="16" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="32" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="48" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="64" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="80" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="96" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="112" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="128" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="144" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="160" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="176" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="192" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="208" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="224" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="240" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="256" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="272" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="288" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="304" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="320" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="336" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="352" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="368" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="384" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="0" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="16" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="32" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="48" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="64" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="80" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="96" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="112" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="128" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="144" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="160" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="176" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="192" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="208" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="224" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="240" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="256" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="272" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="288" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="304" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="320" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="336" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="352" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="368" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="384" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="0" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="16" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="32" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="48" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="64" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="80" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="96" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="112" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="128" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="144" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="160" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="176" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="192" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="208" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="224" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="240" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="256" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="272" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="288" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="304" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="320" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="336" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="352" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="368" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="384" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="0" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="16" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="32" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="48" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="64" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="80" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="96" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="112" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="128" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="144" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="160" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="176" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="192" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="208" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="224" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="240" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="256" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="272" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="288" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="304" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="320" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="336" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="352" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="368" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="384" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="0" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="16" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="32" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="48" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="64" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="80" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="96" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="112" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="128" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
+          <rect x="144" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="160" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="176" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="192" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="208" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="224" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="240" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="256" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="272" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="288" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="304" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="320" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="336" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="352" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="368" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="384" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="0" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="16" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="32" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="48" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="64" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="80" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="96" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="112" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="128" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="144" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="160" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="176" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="192" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="208" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="224" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="240" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="256" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="272" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="288" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="304" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="320" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="336" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="352" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="368" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+          <rect x="384" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+              </g>
+              <rect x="1" y="128" width="10" height="10" fill="var(--blue-500)"/>
+              <text x="15" y="137" fill="var(--blue-700)" font-size="11">134 theorems</text>
+              <rect x="141" y="128" width="10" height="10" fill="var(--blue-700)"/>
+              <text x="155" y="137" fill="var(--blue-700)" font-size="11">41 lemmas</text>
+            </svg>
+            <figcaption class="fig__cap">Every theorem and lemma, one cell each.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>134 theorems</span>
+          <span>41 lemmas</span>
+          <span>0 sorry</span>
+          <span>69 corner tests</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Python</span>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/resolvent">View resolvent on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-caustic" data-lang="Python" data-doi="true">
+        <h3 class="proj__name">caustic</h3>
+        <p class="proj__claim">Detects and repairs hallucination from the orbit partition of a relation.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 260" role="img" aria-labelledby="t4-title t4-desc">
+              <title id="t4-title">ROC curve for caustic at 0.995 AUROC</title>
+              <desc id="t4-desc">Receiver operating characteristic curve rising almost immediately toward the top-left corner, with five proved bounds marked along it, well above the diagonal chance line.</desc>
+              <line x1="60" y1="210" x2="360" y2="210" stroke="var(--ink)" stroke-width="1"/>
+              <line x1="60" y1="210" x2="60" y2="20" stroke="var(--ink)" stroke-width="1"/>
+              <line x1="60" y1="210" x2="360" y2="20" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <path d="M60,210 L66,48.5 L78,27.6 L105,21.9 L180,20.95 L360,20" fill="none" stroke="var(--violet-500)" stroke-width="2.5" stroke-linejoin="round"/>
+              <circle cx="66" cy="48.5" r="4" fill="var(--violet-700)"/>
+              <circle cx="78" cy="27.6" r="4" fill="var(--violet-700)"/>
+              <circle cx="105" cy="21.9" r="4" fill="var(--violet-700)"/>
+              <circle cx="180" cy="20.95" r="4" fill="var(--violet-700)"/>
+              <circle cx="360" cy="20" r="4" fill="var(--violet-700)"/>
+              <text x="52" y="214" text-anchor="end" fill="var(--muted)" font-size="10">0</text>
+              <text x="360" y="224" text-anchor="middle" fill="var(--muted)" font-size="10">1</text>
+              <text x="52" y="24" text-anchor="end" fill="var(--muted)" font-size="10">1</text>
+              <text x="210" y="244" text-anchor="middle" fill="var(--muted)" font-size="11">false positive rate</text>
+              <text x="24" y="115" text-anchor="middle" fill="var(--muted)" font-size="11" transform="rotate(-90 24 115)">true positive rate</text>
+              <text x="220" y="45" text-anchor="middle" fill="var(--violet-700)" font-family="var(--font-mono)" font-size="14" font-weight="700">0.995 AUROC</text>
+            </svg>
+            <figcaption class="fig__cap">Detection rate against false alarms.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>0.995 AUROC</span>
+          <span>five proved bounds</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Python</span>
+          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/caustic">View caustic on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-nerve" data-lang="Rust" data-doi="false">
+        <h3 class="proj__name">nerve</h3>
+        <p class="proj__claim">He built the control that could kill his own result, then published what it said.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 220" role="img" aria-labelledby="t5-title t5-desc">
+              <title id="t5-title">Four hypotheses, three struck through by nerve's own controls</title>
+              <desc id="t5-desc">Four panels for nerve's four hypotheses. The first three carry a strike mark where the control failed; the fourth stands unmarked.</desc>
+              <rect x="20" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
+              <line x1="20" y1="60" x2="100" y2="140" stroke="var(--coral-500)" stroke-width="3"/>
+              <rect x="120" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
+              <line x1="120" y1="60" x2="200" y2="140" stroke="var(--coral-500)" stroke-width="3"/>
+              <rect x="220" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
+              <line x1="220" y1="60" x2="300" y2="140" stroke="var(--coral-500)" stroke-width="3"/>
+              <rect x="320" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--ink)" stroke-width="2"/>
+              <text x="60" y="158" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">1</text>
+              <text x="160" y="158" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">2</text>
+              <text x="260" y="158" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">3</text>
+              <text x="360" y="158" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="12" font-weight="700">4</text>
+              <text x="200" y="195" text-anchor="middle" fill="var(--coral-700)" font-size="13" font-weight="600">3 of 4 withdrawn</text>
+            </svg>
+            <figcaption class="fig__cap">Four hypotheses, three struck through.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>224 tests passing</span>
+          <span>3 of its own 4 hypotheses withdrawn</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Rust</span>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/nerve">View nerve on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-monodromy" data-lang="Python" data-doi="true">
+        <h3 class="proj__name">monodromy</h3>
+        <p class="proj__claim">Data analysis and machine learning without the Jacobian.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 300 300" role="img" aria-labelledby="t6-title t6-desc">
+              <title id="t6-title">Five dependencies orbiting monodromy's core</title>
+              <desc id="t6-desc">A single core dot with five dependency dots spaced evenly around it, no sixth dot for torch.</desc>
+              <circle cx="150" cy="150" r="100" fill="none" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="3 3"/>
+              <line x1="150" y1="150" x2="150.0" y2="50.0" stroke="var(--mint-100)" stroke-width="2"/>
+              <line x1="150" y1="150" x2="245.1" y2="119.1" stroke="var(--mint-100)" stroke-width="2"/>
+              <line x1="150" y1="150" x2="208.8" y2="230.9" stroke="var(--mint-100)" stroke-width="2"/>
+              <line x1="150" y1="150" x2="91.2" y2="230.9" stroke="var(--mint-100)" stroke-width="2"/>
+              <line x1="150" y1="150" x2="54.9" y2="119.1" stroke="var(--mint-100)" stroke-width="2"/>
+              <circle cx="150.0" cy="50.0" r="7" fill="var(--mint-500)"/>
+              <circle cx="245.1" cy="119.1" r="7" fill="var(--mint-500)"/>
+              <circle cx="208.8" cy="230.9" r="7" fill="var(--mint-500)"/>
+              <circle cx="91.2" cy="230.9" r="7" fill="var(--mint-500)"/>
+              <circle cx="54.9" cy="119.1" r="7" fill="var(--mint-500)"/>
+              <circle cx="150" cy="150" r="12" fill="var(--mint-700)"/>
+              <text x="150" y="178" text-anchor="middle" fill="var(--mint-700)" font-size="11" font-weight="600">monodromy</text>
+            </svg>
+            <figcaption class="fig__cap">Five dependencies in orbit around the core.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>5 dependencies</span>
+          <span>torch not required</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Python</span>
+          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/monodromy">View monodromy on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-aether-lang" data-lang="Rust" data-doi="true">
+        <h3 class="proj__name">Aether-Lang</h3>
+        <p class="proj__claim">Programs are point clouds. Convergence is a Betti number.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 400 220" role="img" aria-labelledby="t7-title t7-desc">
+              <title id="t7-title">Step function converging on a Betti number</title>
+              <desc id="t7-desc">A staircase of decreasing steps flattening toward a dashed asymptote, the runtime's persistent homology convergence check.</desc>
+              <line x1="20" y1="210" x2="380" y2="210" stroke="var(--hair2)" stroke-width="1"/>
+              <line x1="20" y1="50" x2="380" y2="50" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="4 4"/>
+              <path d="M40,200 H80 V140 H120 V105 H160 V85 H200 V73 H240 V66 H280 V61 H320 V58 H360 V56" fill="none" stroke="var(--violet-500)" stroke-width="2.5"/>
+              <circle cx="40" cy="200" r="3" fill="var(--violet-700)"/>
+              <circle cx="80" cy="140" r="3" fill="var(--violet-700)"/>
+              <circle cx="120" cy="105" r="3" fill="var(--violet-700)"/>
+              <circle cx="160" cy="85" r="3" fill="var(--violet-700)"/>
+              <circle cx="200" cy="73" r="3" fill="var(--violet-700)"/>
+              <circle cx="240" cy="66" r="3" fill="var(--violet-700)"/>
+              <circle cx="280" cy="61" r="3" fill="var(--violet-700)"/>
+              <circle cx="320" cy="58" r="3" fill="var(--violet-700)"/>
+              <circle cx="360" cy="56" r="3" fill="var(--violet-700)"/>
+              <text x="378" y="44" text-anchor="end" fill="var(--violet-700)" font-size="11" font-weight="600">Betti number</text>
+              <text x="200" y="214" text-anchor="middle" fill="var(--muted)" font-size="11">iterations</text>
+            </svg>
+            <figcaption class="fig__cap">Convergence toward a topological invariant.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>11 stars</span>
+          <span>compiles no_std to bare metal</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Rust</span>
+          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997728">DOI</a>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/Aether-Lang">View Aether-Lang on GitHub</a>
+      </article>
+
+      <article class="proj" id="p-epsilon-hollow" data-lang="Rust" data-doi="true">
+        <h3 class="proj__name">Epsilon-Hollow</h3>
+        <p class="proj__claim">OS state is topology on S.</p>
+        <div class="proj__art">
+          <figure class="fig">
+            <svg viewBox="0 0 300 300" role="img" aria-labelledby="t8-title t8-desc">
+              <title id="t8-title">A point cloud sampled near a circle</title>
+              <desc id="t8-desc">Scattered points clustering around a circle, the manifold Epsilon-Hollow's kernel eviction model collapses along.</desc>
+              <circle cx="150" cy="150" r="100" fill="none" stroke="var(--hair2)" stroke-width="1.5"/>
+              <circle cx="250.0" cy="150.0" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="252.4" cy="173.4" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="247.1" cy="196.8" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="233.8" cy="216.8" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="214.5" cy="230.9" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="192.6" cy="238.5" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="170.9" cy="241.4" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="150.0" cy="242.0" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="129.1" cy="241.4" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="107.4" cy="238.5" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="85.5" cy="230.9" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="66.2" cy="216.8" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="52.9" cy="196.8" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="47.6" cy="173.4" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="50.0" cy="150.0" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="57.4" cy="128.9" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="66.9" cy="110.0" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="77.5" cy="92.1" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="89.8" cy="74.5" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="105.8" cy="58.3" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="126.4" cy="46.4" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="150.0" cy="42.0" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="173.6" cy="46.4" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="194.2" cy="58.3" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="210.2" cy="74.5" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="222.5" cy="92.1" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="233.1" cy="110.0" r="3.4" fill="var(--blue-500)"/>
+              <circle cx="242.6" cy="128.9" r="3.4" fill="var(--blue-500)"/>
+              <text x="150" y="24" text-anchor="middle" fill="var(--blue-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">S&#185;</text>
+            </svg>
+            <figcaption class="fig__cap">Samples scattered on the underlying circle.</figcaption>
+          </figure>
+        </div>
+        <div class="proj__nums">
+          <span>bare metal x86_64</span>
+          <span>no POSIX</span>
+          <span>no libc</span>
+        </div>
+        <div class="proj__tags">
+          <span class="tag">Rust</span>
+          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.20264206">DOI</a>
+        </div>
+        <a class="card__link" href="https://github.com/teerthsharma/Epsilon-Hollow">View Epsilon-Hollow on GitHub</a>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+</main>
+
+<script src="site.js" defer></script>
+</body>
+</html>

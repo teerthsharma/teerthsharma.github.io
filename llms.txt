@@ -1,0 +1,32 @@
+Teerth Sharma
+
+Teerth Sharma is 20 years old, a performance and systems engineer from India. He finds quadratic algorithms nobody noticed and makes them linear. Google DeepMind, Google, TensorFlow, NVIDIA and OpenAI's Triton have each merged his proof.
+
+Merged Pull Requests
+
+1. google-deepmind/mujoco #3396: 1,281.6x less scratch memory (ntree=4,096, 84,033,568 B to 65,568 B).
+2. google-deepmind/mujoco_warp #1541: 1.513x faster (geometric mean, 99% CI [1.406x, 1.584x]). Median 156.738 us to 101.097 us.
+3. google-deepmind/mujoco #3450: 15,361x fewer probes at V=40,962.
+4. google/highway #3244: 65.5x fewer comparisons at one million keys (894,081,141 to 13,643,737).
+5. google/XNNPACK #10801: 6.42% lower peak memory (MobileNet V1, 23.862980 to 22.331730 MiB).
+6. tensorflow/tensorflow #124410: Correctness fix. Four control edges reduced to three (transitive reduction of collective control edges).
+7. NVIDIA/NeMo-Relay #481: One unchanging scaffold now keys to one profile instead of one per task (23 files).
+8. triton-lang/kernels #22: Topology-derived sparse attention kernel. 804 lines added, 17 tests passing.
+
+Flagship Projects
+
+tangle (Python, PyPI): 0 wrong certificates over 2,000 rendered diagrams, 80 rendered scenes, 247 real photographs.
+planimeter (Python, PyPI): 495 exact, 33 refused, 0 wrong (shapely: 336 wrong, 0 refused).
+resolvent (Python, Lean 4): 134 theorems, 41 lemmas, 0 sorry, 69 corner tests passing.
+caustic (Python, DOI 10.5281/zenodo.21997746): 0.995 AUROC, five proved bounds.
+nerve (Rust): 224 tests passing. Withdrew 3 of its own 4 hypotheses when controls failed.
+monodromy (Python, DOI 10.5281/zenodo.22064739): 5 dependencies, torch not required.
+Aether-Lang (Rust, 11 stars, DOI 10.5281/zenodo.21997728): Compiles no_std to bare metal.
+Epsilon-Hollow (Rust, 2 stars, DOI 10.5281/zenodo.20264206): Bare-metal x86_64 microkernel, no POSIX, no libc.
+
+Contact
+
+Email: teerths57@gmail.com
+GitHub: https://github.com/teerthsharma
+Resume: https://github.com/teerthsharma/teerthsharma/raw/main/Teerth_Sharma_Resume.pdf
+Interactive portfolio: https://teerthsharma.vercel.app

@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure</title>
+<meta name="description" content="Teerth Sharma, performance and systems engineer. Eight pull requests merged into Google DeepMind, Google, TensorFlow, NVIDIA and OpenAI Triton: GPU kernels, CUDA, sparse attention, compiler and memory planner optimisation, ML infrastructure.">
+<link rel="canonical" href="https://teerthsharma.github.io/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
+<meta property="og:description" content="Teerth Sharma, performance and systems engineer. Eight pull requests merged into Google DeepMind, Google, TensorFlow, NVIDIA and OpenAI Triton: GPU kernels, CUDA, sparse attention, compiler and memory planner optimisation, ML infrastructure.">
+<meta property="og:url" content="https://teerthsharma.github.io/">
+<meta property="og:image" content="https://teerthsharma.github.io/assets/og-cover.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
+<meta name="twitter:description" content="Teerth Sharma, performance and systems engineer. Eight pull requests merged into Google DeepMind, Google, TensorFlow, NVIDIA and OpenAI Triton: GPU kernels, CUDA, sparse attention, compiler and memory planner optimisation, ML infrastructure.">
+<meta name="twitter:image" content="https://teerthsharma.github.io/assets/og-cover.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Teerth Sharma",
+  "url": "https://teerthsharma.github.io",
+  "sameAs": ["https://github.com/teerthsharma", "https://teerthsharma.vercel.app"],
+  "email": "teerths57@gmail.com",
+  "jobTitle": "Performance and Systems Engineer",
+  "knowsAbout": ["GPU kernels", "CUDA", "Triton", "sparse attention", "compiler optimization", "performance engineering", "ML infrastructure", "computational topology", "persistent homology", "MuJoCo", "TensorFlow", "XNNPACK", "Highway", "NVIDIA NeMo", "Rust", "open source contribution"]
+}
+</script>
+</head>
+<body>
+<nav class="nav">
+  <div class="nav__inner wrap">
+    <a class="nav__brand" href="index.html">Teerth Sharma</a>
+    <div class="nav__links">
+      <a class="nav__link" href="index.html#upstream">Upstream</a>
+      <a class="nav__link" href="work.html">Personal work</a>
+      <a class="nav__link" href="mailto:teerths57@gmail.com">Email</a>
+    </div>
+  </div>
+</nav>
+<main>
+<section class="hero">
+  <div class="wrap">
+    <h1 class="hero__h1">I make machine learning faster.</h1>
+    <p class="hero__sub muted">Twenty years old. Eight pull requests merged into Google DeepMind, Google, TensorFlow, NVIDIA and OpenAI's Triton. Every one of them replaced something quadratic with something that scales.</p>
+    <div class="hero__art fig">
+    <svg viewBox="0 0 720 320" role="img" aria-labelledby="hero-t hero-d">
+      <title id="hero-t">Two curves from a shared origin</title>
+      <desc id="hero-d">A coral curve climbs off the top edge of the chart, growing faster and faster. A green line from the same starting point stays low and rises at a steady, gentle rate.</desc>
+      <polyline points="60.00,280.00 110.00,277.92 160.00,271.67 210.00,261.25 260.00,246.67 310.00,227.92 360.00,205.00 410.00,177.92 460.00,146.67 510.00,111.25 560.00,71.67 610.00,27.92 660.00,-20.00" fill="none" stroke="var(--coral-500)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+      <line x1="60.00" y1="280.00" x2="660.00" y2="140.00" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="60" cy="280" r="5" fill="var(--ink)"/>
+      <text x="672" y="150" text-anchor="end" class="mono" font-size="15" fill="var(--coral-700)">what was there</text>
+      <text x="672" y="230" text-anchor="end" class="mono" font-size="15" fill="var(--green-700)">what I replaced it with</text>
+    </svg>
+    </div>
+    <div class="cta-row">
+      <a class="btn btn--primary" href="mailto:teerths57@gmail.com">Email me</a>
+      <a class="btn btn--ghost" href="https://github.com/teerthsharma/teerthsharma/raw/main/Teerth_Sharma_Resume.pdf">Resume (PDF)</a>
+      <a class="btn btn--text" href="https://github.com/teerthsharma">GitHub</a>
+    </div>
+  </div>
+</section>
+<section class="band band--tint">
+  <div class="wrap numstrip">
+    <div class="numstrip__grid">
+      <div class="stat">
+        <div class="stat__value mono" data-count="8">8</div>
+        <div class="stat__unit">merged pull requests</div>
+        <div class="stat__label">into 5 organisations</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value mono" data-count="15361" style="color:var(--mint-700)">15,361x</div>
+        <div class="stat__unit">fewer probes</div>
+        <div class="stat__label">mujoco convex hull, V=40,962</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value mono" data-count="1281.6" style="color:var(--blue-700)">1,281.6x</div>
+        <div class="stat__unit">less scratch memory</div>
+        <div class="stat__label">mujoco islands, ntree=4,096</div>
+      </div>
+      <div class="stat">
+        <div class="stat__value mono" data-count="1851" style="color:var(--green-700)">1,851/1,851</div>
+        <div class="stat__unit">tests passing</div>
+        <div class="stat__label">MuJoCo CTest, full suite</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="band" id="upstream">
+  <div class="wrap">
+    <h2>What I fixed, and where.</h2>
+    <p>Eight pull requests. Every number below was measured on a named machine against a control, and every one of them is in the merged diff.</p>
+    <div class="grid grid--3">
+      <article class="card" id="pr-mujoco-3396">
+        <div class="card__head">
+          <a href="https://github.com/google-deepmind/mujoco/pull/3396"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google-deepmind/mujoco #3396</span>
+        </div>
+        <h3 class="card__title">Quadratic scratch in island discovery</h3>
+        <p class="card__body">Native island discovery allocated scratch memory that grew with the square of the tree count. The fix rebuilds the same result with an allocation that grows linearly instead.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 300" role="img" aria-labelledby="pr1-t pr1-d">
+        <title id="pr1-t">Scratch memory versus tree count, log scale</title>
+        <desc id="pr1-d">Two curves over ntree from 64 to 4,096 on a logarithmic byte axis. The coral curve, 5 ntree squared plus 36 ntree plus 32, climbs steeply from 22,816 to 84,033,568 bytes. The blue curve, 16 ntree plus 32, stays nearly flat, ending at 65,568 bytes.</desc>
+        <line x1="55" y1="20" x2="55" y2="278" stroke="var(--hair2)" stroke-width="1"/>
+        <line x1="55" y1="278" x2="438" y2="278" stroke="var(--hair2)" stroke-width="1"/>
+        <g stroke="var(--hair)" stroke-width="1">
+          <line x1="50" y1="204.64" x2="438" y2="204.64"/>
+          <line x1="50" y1="147.38" x2="438" y2="147.38"/>
+          <line x1="50" y1="88.86" x2="438" y2="88.86"/>
+          <line x1="50" y1="30.00" x2="438" y2="30.00"/>
+        </g>
+        <g class="mono" font-size="11" fill="var(--muted)" text-anchor="end">
+          <text x="48" y="207.5">22,816</text>
+          <text x="48" y="150.2">336,928</text>
+          <text x="48" y="91.7">5,279,776</text>
+          <text x="48" y="33.0">84,033,568</text>
+        </g>
+        <polyline points="60.00,204.64 121.67,176.29 183.33,147.38 245.00,118.19 306.67,88.86 368.33,59.45 430.00,30.00" fill="none" stroke="var(--coral-500)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <polyline points="60.00,270.00 121.67,255.58 183.33,241.01 245.00,226.35 306.67,211.65 368.33,196.92 430.00,182.19" fill="none" stroke="var(--blue-500)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <g fill="var(--coral-700)">
+          <circle cx="60.00" cy="204.64" r="4"/>
+          <circle cx="183.33" cy="147.38" r="4"/>
+          <circle cx="306.67" cy="88.86" r="4"/>
+          <circle cx="430.00" cy="30.00" r="4"/>
+        </g>
+        <g fill="var(--blue-700)">
+          <circle cx="60.00" cy="270.00" r="4"/>
+          <circle cx="183.33" cy="241.01" r="4"/>
+          <circle cx="306.67" cy="211.65" r="4"/>
+          <circle cx="430.00" cy="182.19" r="4"/>
+        </g>
+        <g class="mono" font-size="11" fill="var(--muted)" text-anchor="middle">
+          <text x="60.00" y="292">64</text>
+          <text x="183.33" y="292">256</text>
+          <text x="306.67" y="292">1,024</text>
+          <text x="430.00" y="292">4,096</text>
+        </g>
+      </svg>
+        </div>
+        <p class="card__cap mono">84,033,568 bytes to 65,568 at ntree 4,096. 1,281.6x less.</p>
+        <div class="slider">
+          <label for="ntree-range">ntree</label>
+          <input class="slider__input" type="range" id="ntree-range" min="64" max="4096" value="4096" step="4" aria-describedby="ntree-readout">
+          <span class="slider__out" id="ntree-readout">ntree = 4,096, scratch 84,033,568 B to 65,568 B</span>
+        </div>
+        <a class="card__link" href="https://github.com/google-deepmind/mujoco/pull/3396">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-mujoco-warp-1541">
+        <div class="card__head">
+          <a href="https://github.com/google-deepmind/mujoco_warp/pull/1541"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google-deepmind/mujoco_warp #1541</span>
+        </div>
+        <h3 class="card__title">A linear-memory GPU disjoint-set union</h3>
+        <p class="card__body">The GPU island-discovery kernel carried the same quadratic memory shape onto the device. A linear-memory disjoint-set union replaces it.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 220" role="img" aria-labelledby="pr2-t pr2-d">
+        <title id="pr2-t">Paired timing with a confidence band</title>
+        <desc id="pr2-d">A microsecond axis with a coral dot at 156.738 microseconds for the old code and a blue dot at 101.097 microseconds for the new code. A mint band behind them spans the 99 percent confidence interval of the speedup, with the geometric mean marked as a tick.</desc>
+        <line x1="50" y1="150" x2="420" y2="150" stroke="var(--hair2)" stroke-width="1"/>
+        <rect x="284.92" y="105" width="73.98" height="90" fill="var(--mint-100)"/>
+        <line x1="329.39" y1="105" x2="329.39" y2="195" stroke="var(--mint-700)" stroke-width="2"/>
+        <text x="329.39" y="98" text-anchor="middle" class="mono" font-size="11" fill="var(--mint-700)">1.513x geometric mean</text>
+        <circle cx="344.92" cy="150" r="7" fill="var(--coral-500)"/>
+        <text x="344.92" y="130" text-anchor="middle" class="mono" font-size="12" fill="var(--coral-700)">156.738 us</text>
+        <circle cx="116.18" cy="150" r="7" fill="var(--blue-500)"/>
+        <text x="116.18" y="130" text-anchor="middle" class="mono" font-size="12" fill="var(--blue-700)">101.097 us</text>
+        <g class="mono" font-size="10" fill="var(--muted)" text-anchor="middle">
+          <text x="50" y="170">85 us</text>
+          <text x="420" y="170">175 us</text>
+        </g>
+      </svg>
+        </div>
+        <p class="card__cap mono">156.738 us to 101.097 us. Scratch 7,929,856 bytes to 180,224.</p>
+        <a class="card__link" href="https://github.com/google-deepmind/mujoco_warp/pull/1541">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-mujoco-3450">
+        <div class="card__head">
+          <a href="https://github.com/google-deepmind/mujoco/pull/3450"><img src="assets/org/google-deepmind.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google-deepmind/mujoco #3450</span>
+        </div>
+        <h3 class="card__title">An inverted point-id table for convex hulls</h3>
+        <p class="card__body">Convex hull graph construction scanned every pair of points to find a match. An inverted point-id table finds it directly.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 300" role="img" aria-labelledby="pr3-t pr3-d">
+        <title id="pr3-t">Probe count drawn as area</title>
+        <desc id="pr3-d">A large coral square represents 314,643,317 probes at V equals 10,242. A mint square in its corner, magnified in an inset because it is otherwise invisible, represents 81,924 probes at the same input.</desc>
+        <rect x="40" y="60" width="200" height="200" fill="var(--coral-500)"/>
+        <text x="40" y="50" class="mono" font-size="13" fill="var(--coral-700)">314,643,317 probes</text>
+        <rect x="236.77" y="256.77" width="3.23" height="3.23" fill="var(--mint-500)"/>
+        <circle cx="238.39" cy="258.39" r="10" fill="none" stroke="var(--mint-700)" stroke-width="1" stroke-dasharray="2 2"/>
+        <line x1="246" y1="252" x2="300" y2="200" stroke="var(--mint-700)" stroke-width="1" stroke-dasharray="2 2"/>
+        <rect x="300" y="120" width="90" height="90" fill="var(--raised)" stroke="var(--hair2)" stroke-width="1"/>
+        <rect x="325" y="145" width="40" height="40" fill="var(--mint-500)"/>
+        <text x="345" y="225" text-anchor="middle" class="mono" font-size="13" fill="var(--mint-700)">81,924 probes</text>
+        <text x="345" y="110" text-anchor="middle" class="mono" font-size="10" fill="var(--muted)">magnified</text>
+      </svg>
+        </div>
+        <p class="card__cap mono">16 lines added. 15,361x fewer probes at V=40,962. Cold load 134.400 ms to 71.163 ms.</p>
+        <a class="card__link" href="https://github.com/google-deepmind/mujoco/pull/3450">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-highway-3244">
+        <div class="card__head">
+          <a href="https://github.com/google/highway/pull/3244"><img src="assets/org/google.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google/highway #3244</span>
+        </div>
+        <h3 class="card__title">Pruned collisions by slice structure</h3>
+        <p class="card__body">The collision and scan tests compared key pairs the slice structure had already ruled out. Pruning by structure removes them before the compare ever runs.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 300" role="img" aria-labelledby="pr4-t pr4-d">
+        <title id="pr4-t">Comparisons drawn as a unit dot matrix</title>
+        <desc id="pr4-d">A block of 1,000 coral dots, each standing for 894,081 comparisons, before the fix. A block of 15 mint dots on the same unit after the fix.</desc>
+        <g fill="var(--coral-500)"><circle cx="30.00" cy="40.00" r="1.5"/><circle cx="34.60" cy="40.00" r="1.5"/><circle cx="39.20" cy="40.00" r="1.5"/><circle cx="43.80" cy="40.00" r="1.5"/><circle cx="48.40" cy="40.00" r="1.5"/><circle cx="53.00" cy="40.00" r="1.5"/><circle cx="57.60" cy="40.00" r="1.5"/><circle cx="62.20" cy="40.00" r="1.5"/><circle cx="66.80" cy="40.00" r="1.5"/><circle cx="71.40" cy="40.00" r="1.5"/><circle cx="76.00" cy="40.00" r="1.5"/><circle cx="80.60" cy="40.00" r="1.5"/><circle cx="85.20" cy="40.00" r="1.5"/><circle cx="89.80" cy="40.00" r="1.5"/><circle cx="94.40" cy="40.00" r="1.5"/><circle cx="99.00" cy="40.00" r="1.5"/><circle cx="103.60" cy="40.00" r="1.5"/><circle cx="108.20" cy="40.00" r="1.5"/><circle cx="112.80" cy="40.00" r="1.5"/><circle cx="117.40" cy="40.00" r="1.5"/><circle cx="122.00" cy="40.00" r="1.5"/><circle cx="126.60" cy="40.00" r="1.5"/><circle cx="131.20" cy="40.00" r="1.5"/><circle cx="135.80" cy="40.00" r="1.5"/><circle cx="140.40" cy="40.00" r="1.5"/><circle cx="145.00" cy="40.00" r="1.5"/><circle cx="149.60" cy="40.00" r="1.5"/><circle cx="154.20" cy="40.00" r="1.5"/><circle cx="158.80" cy="40.00" r="1.5"/><circle cx="163.40" cy="40.00" r="1.5"/><circle cx="168.00" cy="40.00" r="1.5"/><circle cx="172.60" cy="40.00" r="1.5"/><circle cx="177.20" cy="40.00" r="1.5"/><circle cx="181.80" cy="40.00" r="1.5"/><circle cx="186.40" cy="40.00" r="1.5"/><circle cx="191.00" cy="40.00" r="1.5"/><circle cx="195.60" cy="40.00" r="1.5"/><circle cx="200.20" cy="40.00" r="1.5"/><circle cx="204.80" cy="40.00" r="1.5"/><circle cx="209.40" cy="40.00" r="1.5"/><circle cx="30.00" cy="48.20" r="1.5"/><circle cx="34.60" cy="48.20" r="1.5"/><circle cx="39.20" cy="48.20" r="1.5"/><circle cx="43.80" cy="48.20" r="1.5"/><circle cx="48.40" cy="48.20" r="1.5"/><circle cx="53.00" cy="48.20" r="1.5"/><circle cx="57.60" cy="48.20" r="1.5"/><circle cx="62.20" cy="48.20" r="1.5"/><circle cx="66.80" cy="48.20" r="1.5"/><circle cx="71.40" cy="48.20" r="1.5"/><circle cx="76.00" cy="48.20" r="1.5"/><circle cx="80.60" cy="48.20" r="1.5"/><circle cx="85.20" cy="48.20" r="1.5"/><circle cx="89.80" cy="48.20" r="1.5"/><circle cx="94.40" cy="48.20" r="1.5"/><circle cx="99.00" cy="48.20" r="1.5"/><circle cx="103.60" cy="48.20" r="1.5"/><circle cx="108.20" cy="48.20" r="1.5"/><circle cx="112.80" cy="48.20" r="1.5"/><circle cx="117.40" cy="48.20" r="1.5"/><circle cx="122.00" cy="48.20" r="1.5"/><circle cx="126.60" cy="48.20" r="1.5"/><circle cx="131.20" cy="48.20" r="1.5"/><circle cx="135.80" cy="48.20" r="1.5"/><circle cx="140.40" cy="48.20" r="1.5"/><circle cx="145.00" cy="48.20" r="1.5"/><circle cx="149.60" cy="48.20" r="1.5"/><circle cx="154.20" cy="48.20" r="1.5"/><circle cx="158.80" cy="48.20" r="1.5"/><circle cx="163.40" cy="48.20" r="1.5"/><circle cx="168.00" cy="48.20" r="1.5"/><circle cx="172.60" cy="48.20" r="1.5"/><circle cx="177.20" cy="48.20" r="1.5"/><circle cx="181.80" cy="48.20" r="1.5"/><circle cx="186.40" cy="48.20" r="1.5"/><circle cx="191.00" cy="48.20" r="1.5"/><circle cx="195.60" cy="48.20" r="1.5"/><circle cx="200.20" cy="48.20" r="1.5"/><circle cx="204.80" cy="48.20" r="1.5"/><circle cx="209.40" cy="48.20" r="1.5"/><circle cx="30.00" cy="56.40" r="1.5"/><circle cx="34.60" cy="56.40" r="1.5"/><circle cx="39.20" cy="56.40" r="1.5"/><circle cx="43.80" cy="56.40" r="1.5"/><circle cx="48.40" cy="56.40" r="1.5"/><circle cx="53.00" cy="56.40" r="1.5"/><circle cx="57.60" cy="56.40" r="1.5"/><circle cx="62.20" cy="56.40" r="1.5"/><circle cx="66.80" cy="56.40" r="1.5"/><circle cx="71.40" cy="56.40" r="1.5"/><circle cx="76.00" cy="56.40" r="1.5"/><circle cx="80.60" cy="56.40" r="1.5"/><circle cx="85.20" cy="56.40" r="1.5"/><circle cx="89.80" cy="56.40" r="1.5"/><circle cx="94.40" cy="56.40" r="1.5"/><circle cx="99.00" cy="56.40" r="1.5"/><circle cx="103.60" cy="56.40" r="1.5"/><circle cx="108.20" cy="56.40" r="1.5"/><circle cx="112.80" cy="56.40" r="1.5"/><circle cx="117.40" cy="56.40" r="1.5"/><circle cx="122.00" cy="56.40" r="1.5"/><circle cx="126.60" cy="56.40" r="1.5"/><circle cx="131.20" cy="56.40" r="1.5"/><circle cx="135.80" cy="56.40" r="1.5"/><circle cx="140.40" cy="56.40" r="1.5"/><circle cx="145.00" cy="56.40" r="1.5"/><circle cx="149.60" cy="56.40" r="1.5"/><circle cx="154.20" cy="56.40" r="1.5"/><circle cx="158.80" cy="56.40" r="1.5"/><circle cx="163.40" cy="56.40" r="1.5"/><circle cx="168.00" cy="56.40" r="1.5"/><circle cx="172.60" cy="56.40" r="1.5"/><circle cx="177.20" cy="56.40" r="1.5"/><circle cx="181.80" cy="56.40" r="1.5"/><circle cx="186.40" cy="56.40" r="1.5"/><circle cx="191.00" cy="56.40" r="1.5"/><circle cx="195.60" cy="56.40" r="1.5"/><circle cx="200.20" cy="56.40" r="1.5"/><circle cx="204.80" cy="56.40" r="1.5"/><circle cx="209.40" cy="56.40" r="1.5"/><circle cx="30.00" cy="64.60" r="1.5"/><circle cx="34.60" cy="64.60" r="1.5"/><circle cx="39.20" cy="64.60" r="1.5"/><circle cx="43.80" cy="64.60" r="1.5"/><circle cx="48.40" cy="64.60" r="1.5"/><circle cx="53.00" cy="64.60" r="1.5"/><circle cx="57.60" cy="64.60" r="1.5"/><circle cx="62.20" cy="64.60" r="1.5"/><circle cx="66.80" cy="64.60" r="1.5"/><circle cx="71.40" cy="64.60" r="1.5"/><circle cx="76.00" cy="64.60" r="1.5"/><circle cx="80.60" cy="64.60" r="1.5"/><circle cx="85.20" cy="64.60" r="1.5"/><circle cx="89.80" cy="64.60" r="1.5"/><circle cx="94.40" cy="64.60" r="1.5"/><circle cx="99.00" cy="64.60" r="1.5"/><circle cx="103.60" cy="64.60" r="1.5"/><circle cx="108.20" cy="64.60" r="1.5"/><circle cx="112.80" cy="64.60" r="1.5"/><circle cx="117.40" cy="64.60" r="1.5"/><circle cx="122.00" cy="64.60" r="1.5"/><circle cx="126.60" cy="64.60" r="1.5"/><circle cx="131.20" cy="64.60" r="1.5"/><circle cx="135.80" cy="64.60" r="1.5"/><circle cx="140.40" cy="64.60" r="1.5"/><circle cx="145.00" cy="64.60" r="1.5"/><circle cx="149.60" cy="64.60" r="1.5"/><circle cx="154.20" cy="64.60" r="1.5"/><circle cx="158.80" cy="64.60" r="1.5"/><circle cx="163.40" cy="64.60" r="1.5"/><circle cx="168.00" cy="64.60" r="1.5"/><circle cx="172.60" cy="64.60" r="1.5"/><circle cx="177.20" cy="64.60" r="1.5"/><circle cx="181.80" cy="64.60" r="1.5"/><circle cx="186.40" cy="64.60" r="1.5"/><circle cx="191.00" cy="64.60" r="1.5"/><circle cx="195.60" cy="64.60" r="1.5"/><circle cx="200.20" cy="64.60" r="1.5"/><circle cx="204.80" cy="64.60" r="1.5"/><circle cx="209.40" cy="64.60" r="1.5"/><circle cx="30.00" cy="72.80" r="1.5"/><circle cx="34.60" cy="72.80" r="1.5"/><circle cx="39.20" cy="72.80" r="1.5"/><circle cx="43.80" cy="72.80" r="1.5"/><circle cx="48.40" cy="72.80" r="1.5"/><circle cx="53.00" cy="72.80" r="1.5"/><circle cx="57.60" cy="72.80" r="1.5"/><circle cx="62.20" cy="72.80" r="1.5"/><circle cx="66.80" cy="72.80" r="1.5"/><circle cx="71.40" cy="72.80" r="1.5"/><circle cx="76.00" cy="72.80" r="1.5"/><circle cx="80.60" cy="72.80" r="1.5"/><circle cx="85.20" cy="72.80" r="1.5"/><circle cx="89.80" cy="72.80" r="1.5"/><circle cx="94.40" cy="72.80" r="1.5"/><circle cx="99.00" cy="72.80" r="1.5"/><circle cx="103.60" cy="72.80" r="1.5"/><circle cx="108.20" cy="72.80" r="1.5"/><circle cx="112.80" cy="72.80" r="1.5"/><circle cx="117.40" cy="72.80" r="1.5"/><circle cx="122.00" cy="72.80" r="1.5"/><circle cx="126.60" cy="72.80" r="1.5"/><circle cx="131.20" cy="72.80" r="1.5"/><circle cx="135.80" cy="72.80" r="1.5"/><circle cx="140.40" cy="72.80" r="1.5"/><circle cx="145.00" cy="72.80" r="1.5"/><circle cx="149.60" cy="72.80" r="1.5"/><circle cx="154.20" cy="72.80" r="1.5"/><circle cx="158.80" cy="72.80" r="1.5"/><circle cx="163.40" cy="72.80" r="1.5"/><circle cx="168.00" cy="72.80" r="1.5"/><circle cx="172.60" cy="72.80" r="1.5"/><circle cx="177.20" cy="72.80" r="1.5"/><circle cx="181.80" cy="72.80" r="1.5"/><circle cx="186.40" cy="72.80" r="1.5"/><circle cx="191.00" cy="72.80" r="1.5"/><circle cx="195.60" cy="72.80" r="1.5"/><circle cx="200.20" cy="72.80" r="1.5"/><circle cx="204.80" cy="72.80" r="1.5"/><circle cx="209.40" cy="72.80" r="1.5"/><circle cx="30.00" cy="81.00" r="1.5"/><circle cx="34.60" cy="81.00" r="1.5"/><circle cx="39.20" cy="81.00" r="1.5"/><circle cx="43.80" cy="81.00" r="1.5"/><circle cx="48.40" cy="81.00" r="1.5"/><circle cx="53.00" cy="81.00" r="1.5"/><circle cx="57.60" cy="81.00" r="1.5"/><circle cx="62.20" cy="81.00" r="1.5"/><circle cx="66.80" cy="81.00" r="1.5"/><circle cx="71.40" cy="81.00" r="1.5"/><circle cx="76.00" cy="81.00" r="1.5"/><circle cx="80.60" cy="81.00" r="1.5"/><circle cx="85.20" cy="81.00" r="1.5"/><circle cx="89.80" cy="81.00" r="1.5"/><circle cx="94.40" cy="81.00" r="1.5"/><circle cx="99.00" cy="81.00" r="1.5"/><circle cx="103.60" cy="81.00" r="1.5"/><circle cx="108.20" cy="81.00" r="1.5"/><circle cx="112.80" cy="81.00" r="1.5"/><circle cx="117.40" cy="81.00" r="1.5"/><circle cx="122.00" cy="81.00" r="1.5"/><circle cx="126.60" cy="81.00" r="1.5"/><circle cx="131.20" cy="81.00" r="1.5"/><circle cx="135.80" cy="81.00" r="1.5"/><circle cx="140.40" cy="81.00" r="1.5"/><circle cx="145.00" cy="81.00" r="1.5"/><circle cx="149.60" cy="81.00" r="1.5"/><circle cx="154.20" cy="81.00" r="1.5"/><circle cx="158.80" cy="81.00" r="1.5"/><circle cx="163.40" cy="81.00" r="1.5"/><circle cx="168.00" cy="81.00" r="1.5"/><circle cx="172.60" cy="81.00" r="1.5"/><circle cx="177.20" cy="81.00" r="1.5"/><circle cx="181.80" cy="81.00" r="1.5"/><circle cx="186.40" cy="81.00" r="1.5"/><circle cx="191.00" cy="81.00" r="1.5"/><circle cx="195.60" cy="81.00" r="1.5"/><circle cx="200.20" cy="81.00" r="1.5"/><circle cx="204.80" cy="81.00" r="1.5"/><circle cx="209.40" cy="81.00" r="1.5"/><circle cx="30.00" cy="89.20" r="1.5"/><circle cx="34.60" cy="89.20" r="1.5"/><circle cx="39.20" cy="89.20" r="1.5"/><circle cx="43.80" cy="89.20" r="1.5"/><circle cx="48.40" cy="89.20" r="1.5"/><circle cx="53.00" cy="89.20" r="1.5"/><circle cx="57.60" cy="89.20" r="1.5"/><circle cx="62.20" cy="89.20" r="1.5"/><circle cx="66.80" cy="89.20" r="1.5"/><circle cx="71.40" cy="89.20" r="1.5"/><circle cx="76.00" cy="89.20" r="1.5"/><circle cx="80.60" cy="89.20" r="1.5"/><circle cx="85.20" cy="89.20" r="1.5"/><circle cx="89.80" cy="89.20" r="1.5"/><circle cx="94.40" cy="89.20" r="1.5"/><circle cx="99.00" cy="89.20" r="1.5"/><circle cx="103.60" cy="89.20" r="1.5"/><circle cx="108.20" cy="89.20" r="1.5"/><circle cx="112.80" cy="89.20" r="1.5"/><circle cx="117.40" cy="89.20" r="1.5"/><circle cx="122.00" cy="89.20" r="1.5"/><circle cx="126.60" cy="89.20" r="1.5"/><circle cx="131.20" cy="89.20" r="1.5"/><circle cx="135.80" cy="89.20" r="1.5"/><circle cx="140.40" cy="89.20" r="1.5"/><circle cx="145.00" cy="89.20" r="1.5"/><circle cx="149.60" cy="89.20" r="1.5"/><circle cx="154.20" cy="89.20" r="1.5"/><circle cx="158.80" cy="89.20" r="1.5"/><circle cx="163.40" cy="89.20" r="1.5"/><circle cx="168.00" cy="89.20" r="1.5"/><circle cx="172.60" cy="89.20" r="1.5"/><circle cx="177.20" cy="89.20" r="1.5"/><circle cx="181.80" cy="89.20" r="1.5"/><circle cx="186.40" cy="89.20" r="1.5"/><circle cx="191.00" cy="89.20" r="1.5"/><circle cx="195.60" cy="89.20" r="1.5"/><circle cx="200.20" cy="89.20" r="1.5"/><circle cx="204.80" cy="89.20" r="1.5"/><circle cx="209.40" cy="89.20" r="1.5"/><circle cx="30.00" cy="97.40" r="1.5"/><circle cx="34.60" cy="97.40" r="1.5"/><circle cx="39.20" cy="97.40" r="1.5"/><circle cx="43.80" cy="97.40" r="1.5"/><circle cx="48.40" cy="97.40" r="1.5"/><circle cx="53.00" cy="97.40" r="1.5"/><circle cx="57.60" cy="97.40" r="1.5"/><circle cx="62.20" cy="97.40" r="1.5"/><circle cx="66.80" cy="97.40" r="1.5"/><circle cx="71.40" cy="97.40" r="1.5"/><circle cx="76.00" cy="97.40" r="1.5"/><circle cx="80.60" cy="97.40" r="1.5"/><circle cx="85.20" cy="97.40" r="1.5"/><circle cx="89.80" cy="97.40" r="1.5"/><circle cx="94.40" cy="97.40" r="1.5"/><circle cx="99.00" cy="97.40" r="1.5"/><circle cx="103.60" cy="97.40" r="1.5"/><circle cx="108.20" cy="97.40" r="1.5"/><circle cx="112.80" cy="97.40" r="1.5"/><circle cx="117.40" cy="97.40" r="1.5"/><circle cx="122.00" cy="97.40" r="1.5"/><circle cx="126.60" cy="97.40" r="1.5"/><circle cx="131.20" cy="97.40" r="1.5"/><circle cx="135.80" cy="97.40" r="1.5"/><circle cx="140.40" cy="97.40" r="1.5"/><circle cx="145.00" cy="97.40" r="1.5"/><circle cx="149.60" cy="97.40" r="1.5"/><circle cx="154.20" cy="97.40" r="1.5"/><circle cx="158.80" cy="97.40" r="1.5"/><circle cx="163.40" cy="97.40" r="1.5"/><circle cx="168.00" cy="97.40" r="1.5"/><circle cx="172.60" cy="97.40" r="1.5"/><circle cx="177.20" cy="97.40" r="1.5"/><circle cx="181.80" cy="97.40" r="1.5"/><circle cx="186.40" cy="97.40" r="1.5"/><circle cx="191.00" cy="97.40" r="1.5"/><circle cx="195.60" cy="97.40" r="1.5"/><circle cx="200.20" cy="97.40" r="1.5"/><circle cx="204.80" cy="97.40" r="1.5"/><circle cx="209.40" cy="97.40" r="1.5"/><circle cx="30.00" cy="105.60" r="1.5"/><circle cx="34.60" cy="105.60" r="1.5"/><circle cx="39.20" cy="105.60" r="1.5"/><circle cx="43.80" cy="105.60" r="1.5"/><circle cx="48.40" cy="105.60" r="1.5"/><circle cx="53.00" cy="105.60" r="1.5"/><circle cx="57.60" cy="105.60" r="1.5"/><circle cx="62.20" cy="105.60" r="1.5"/><circle cx="66.80" cy="105.60" r="1.5"/><circle cx="71.40" cy="105.60" r="1.5"/><circle cx="76.00" cy="105.60" r="1.5"/><circle cx="80.60" cy="105.60" r="1.5"/><circle cx="85.20" cy="105.60" r="1.5"/><circle cx="89.80" cy="105.60" r="1.5"/><circle cx="94.40" cy="105.60" r="1.5"/><circle cx="99.00" cy="105.60" r="1.5"/><circle cx="103.60" cy="105.60" r="1.5"/><circle cx="108.20" cy="105.60" r="1.5"/><circle cx="112.80" cy="105.60" r="1.5"/><circle cx="117.40" cy="105.60" r="1.5"/><circle cx="122.00" cy="105.60" r="1.5"/><circle cx="126.60" cy="105.60" r="1.5"/><circle cx="131.20" cy="105.60" r="1.5"/><circle cx="135.80" cy="105.60" r="1.5"/><circle cx="140.40" cy="105.60" r="1.5"/><circle cx="145.00" cy="105.60" r="1.5"/><circle cx="149.60" cy="105.60" r="1.5"/><circle cx="154.20" cy="105.60" r="1.5"/><circle cx="158.80" cy="105.60" r="1.5"/><circle cx="163.40" cy="105.60" r="1.5"/><circle cx="168.00" cy="105.60" r="1.5"/><circle cx="172.60" cy="105.60" r="1.5"/><circle cx="177.20" cy="105.60" r="1.5"/><circle cx="181.80" cy="105.60" r="1.5"/><circle cx="186.40" cy="105.60" r="1.5"/><circle cx="191.00" cy="105.60" r="1.5"/><circle cx="195.60" cy="105.60" r="1.5"/><circle cx="200.20" cy="105.60" r="1.5"/><circle cx="204.80" cy="105.60" r="1.5"/><circle cx="209.40" cy="105.60" r="1.5"/><circle cx="30.00" cy="113.80" r="1.5"/><circle cx="34.60" cy="113.80" r="1.5"/><circle cx="39.20" cy="113.80" r="1.5"/><circle cx="43.80" cy="113.80" r="1.5"/><circle cx="48.40" cy="113.80" r="1.5"/><circle cx="53.00" cy="113.80" r="1.5"/><circle cx="57.60" cy="113.80" r="1.5"/><circle cx="62.20" cy="113.80" r="1.5"/><circle cx="66.80" cy="113.80" r="1.5"/><circle cx="71.40" cy="113.80" r="1.5"/><circle cx="76.00" cy="113.80" r="1.5"/><circle cx="80.60" cy="113.80" r="1.5"/><circle cx="85.20" cy="113.80" r="1.5"/><circle cx="89.80" cy="113.80" r="1.5"/><circle cx="94.40" cy="113.80" r="1.5"/><circle cx="99.00" cy="113.80" r="1.5"/><circle cx="103.60" cy="113.80" r="1.5"/><circle cx="108.20" cy="113.80" r="1.5"/><circle cx="112.80" cy="113.80" r="1.5"/><circle cx="117.40" cy="113.80" r="1.5"/><circle cx="122.00" cy="113.80" r="1.5"/><circle cx="126.60" cy="113.80" r="1.5"/><circle cx="131.20" cy="113.80" r="1.5"/><circle cx="135.80" cy="113.80" r="1.5"/><circle cx="140.40" cy="113.80" r="1.5"/><circle cx="145.00" cy="113.80" r="1.5"/><circle cx="149.60" cy="113.80" r="1.5"/><circle cx="154.20" cy="113.80" r="1.5"/><circle cx="158.80" cy="113.80" r="1.5"/><circle cx="163.40" cy="113.80" r="1.5"/><circle cx="168.00" cy="113.80" r="1.5"/><circle cx="172.60" cy="113.80" r="1.5"/><circle cx="177.20" cy="113.80" r="1.5"/><circle cx="181.80" cy="113.80" r="1.5"/><circle cx="186.40" cy="113.80" r="1.5"/><circle cx="191.00" cy="113.80" r="1.5"/><circle cx="195.60" cy="113.80" r="1.5"/><circle cx="200.20" cy="113.80" r="1.5"/><circle cx="204.80" cy="113.80" r="1.5"/><circle cx="209.40" cy="113.80" r="1.5"/><circle cx="30.00" cy="122.00" r="1.5"/><circle cx="34.60" cy="122.00" r="1.5"/><circle cx="39.20" cy="122.00" r="1.5"/><circle cx="43.80" cy="122.00" r="1.5"/><circle cx="48.40" cy="122.00" r="1.5"/><circle cx="53.00" cy="122.00" r="1.5"/><circle cx="57.60" cy="122.00" r="1.5"/><circle cx="62.20" cy="122.00" r="1.5"/><circle cx="66.80" cy="122.00" r="1.5"/><circle cx="71.40" cy="122.00" r="1.5"/><circle cx="76.00" cy="122.00" r="1.5"/><circle cx="80.60" cy="122.00" r="1.5"/><circle cx="85.20" cy="122.00" r="1.5"/><circle cx="89.80" cy="122.00" r="1.5"/><circle cx="94.40" cy="122.00" r="1.5"/><circle cx="99.00" cy="122.00" r="1.5"/><circle cx="103.60" cy="122.00" r="1.5"/><circle cx="108.20" cy="122.00" r="1.5"/><circle cx="112.80" cy="122.00" r="1.5"/><circle cx="117.40" cy="122.00" r="1.5"/><circle cx="122.00" cy="122.00" r="1.5"/><circle cx="126.60" cy="122.00" r="1.5"/><circle cx="131.20" cy="122.00" r="1.5"/><circle cx="135.80" cy="122.00" r="1.5"/><circle cx="140.40" cy="122.00" r="1.5"/><circle cx="145.00" cy="122.00" r="1.5"/><circle cx="149.60" cy="122.00" r="1.5"/><circle cx="154.20" cy="122.00" r="1.5"/><circle cx="158.80" cy="122.00" r="1.5"/><circle cx="163.40" cy="122.00" r="1.5"/><circle cx="168.00" cy="122.00" r="1.5"/><circle cx="172.60" cy="122.00" r="1.5"/><circle cx="177.20" cy="122.00" r="1.5"/><circle cx="181.80" cy="122.00" r="1.5"/><circle cx="186.40" cy="122.00" r="1.5"/><circle cx="191.00" cy="122.00" r="1.5"/><circle cx="195.60" cy="122.00" r="1.5"/><circle cx="200.20" cy="122.00" r="1.5"/><circle cx="204.80" cy="122.00" r="1.5"/><circle cx="209.40" cy="122.00" r="1.5"/><circle cx="30.00" cy="130.20" r="1.5"/><circle cx="34.60" cy="130.20" r="1.5"/><circle cx="39.20" cy="130.20" r="1.5"/><circle cx="43.80" cy="130.20" r="1.5"/><circle cx="48.40" cy="130.20" r="1.5"/><circle cx="53.00" cy="130.20" r="1.5"/><circle cx="57.60" cy="130.20" r="1.5"/><circle cx="62.20" cy="130.20" r="1.5"/><circle cx="66.80" cy="130.20" r="1.5"/><circle cx="71.40" cy="130.20" r="1.5"/><circle cx="76.00" cy="130.20" r="1.5"/><circle cx="80.60" cy="130.20" r="1.5"/><circle cx="85.20" cy="130.20" r="1.5"/><circle cx="89.80" cy="130.20" r="1.5"/><circle cx="94.40" cy="130.20" r="1.5"/><circle cx="99.00" cy="130.20" r="1.5"/><circle cx="103.60" cy="130.20" r="1.5"/><circle cx="108.20" cy="130.20" r="1.5"/><circle cx="112.80" cy="130.20" r="1.5"/><circle cx="117.40" cy="130.20" r="1.5"/><circle cx="122.00" cy="130.20" r="1.5"/><circle cx="126.60" cy="130.20" r="1.5"/><circle cx="131.20" cy="130.20" r="1.5"/><circle cx="135.80" cy="130.20" r="1.5"/><circle cx="140.40" cy="130.20" r="1.5"/><circle cx="145.00" cy="130.20" r="1.5"/><circle cx="149.60" cy="130.20" r="1.5"/><circle cx="154.20" cy="130.20" r="1.5"/><circle cx="158.80" cy="130.20" r="1.5"/><circle cx="163.40" cy="130.20" r="1.5"/><circle cx="168.00" cy="130.20" r="1.5"/><circle cx="172.60" cy="130.20" r="1.5"/><circle cx="177.20" cy="130.20" r="1.5"/><circle cx="181.80" cy="130.20" r="1.5"/><circle cx="186.40" cy="130.20" r="1.5"/><circle cx="191.00" cy="130.20" r="1.5"/><circle cx="195.60" cy="130.20" r="1.5"/><circle cx="200.20" cy="130.20" r="1.5"/><circle cx="204.80" cy="130.20" r="1.5"/><circle cx="209.40" cy="130.20" r="1.5"/><circle cx="30.00" cy="138.40" r="1.5"/><circle cx="34.60" cy="138.40" r="1.5"/><circle cx="39.20" cy="138.40" r="1.5"/><circle cx="43.80" cy="138.40" r="1.5"/><circle cx="48.40" cy="138.40" r="1.5"/><circle cx="53.00" cy="138.40" r="1.5"/><circle cx="57.60" cy="138.40" r="1.5"/><circle cx="62.20" cy="138.40" r="1.5"/><circle cx="66.80" cy="138.40" r="1.5"/><circle cx="71.40" cy="138.40" r="1.5"/><circle cx="76.00" cy="138.40" r="1.5"/><circle cx="80.60" cy="138.40" r="1.5"/><circle cx="85.20" cy="138.40" r="1.5"/><circle cx="89.80" cy="138.40" r="1.5"/><circle cx="94.40" cy="138.40" r="1.5"/><circle cx="99.00" cy="138.40" r="1.5"/><circle cx="103.60" cy="138.40" r="1.5"/><circle cx="108.20" cy="138.40" r="1.5"/><circle cx="112.80" cy="138.40" r="1.5"/><circle cx="117.40" cy="138.40" r="1.5"/><circle cx="122.00" cy="138.40" r="1.5"/><circle cx="126.60" cy="138.40" r="1.5"/><circle cx="131.20" cy="138.40" r="1.5"/><circle cx="135.80" cy="138.40" r="1.5"/><circle cx="140.40" cy="138.40" r="1.5"/><circle cx="145.00" cy="138.40" r="1.5"/><circle cx="149.60" cy="138.40" r="1.5"/><circle cx="154.20" cy="138.40" r="1.5"/><circle cx="158.80" cy="138.40" r="1.5"/><circle cx="163.40" cy="138.40" r="1.5"/><circle cx="168.00" cy="138.40" r="1.5"/><circle cx="172.60" cy="138.40" r="1.5"/><circle cx="177.20" cy="138.40" r="1.5"/><circle cx="181.80" cy="138.40" r="1.5"/><circle cx="186.40" cy="138.40" r="1.5"/><circle cx="191.00" cy="138.40" r="1.5"/><circle cx="195.60" cy="138.40" r="1.5"/><circle cx="200.20" cy="138.40" r="1.5"/><circle cx="204.80" cy="138.40" r="1.5"/><circle cx="209.40" cy="138.40" r="1.5"/><circle cx="30.00" cy="146.60" r="1.5"/><circle cx="34.60" cy="146.60" r="1.5"/><circle cx="39.20" cy="146.60" r="1.5"/><circle cx="43.80" cy="146.60" r="1.5"/><circle cx="48.40" cy="146.60" r="1.5"/><circle cx="53.00" cy="146.60" r="1.5"/><circle cx="57.60" cy="146.60" r="1.5"/><circle cx="62.20" cy="146.60" r="1.5"/><circle cx="66.80" cy="146.60" r="1.5"/><circle cx="71.40" cy="146.60" r="1.5"/><circle cx="76.00" cy="146.60" r="1.5"/><circle cx="80.60" cy="146.60" r="1.5"/><circle cx="85.20" cy="146.60" r="1.5"/><circle cx="89.80" cy="146.60" r="1.5"/><circle cx="94.40" cy="146.60" r="1.5"/><circle cx="99.00" cy="146.60" r="1.5"/><circle cx="103.60" cy="146.60" r="1.5"/><circle cx="108.20" cy="146.60" r="1.5"/><circle cx="112.80" cy="146.60" r="1.5"/><circle cx="117.40" cy="146.60" r="1.5"/><circle cx="122.00" cy="146.60" r="1.5"/><circle cx="126.60" cy="146.60" r="1.5"/><circle cx="131.20" cy="146.60" r="1.5"/><circle cx="135.80" cy="146.60" r="1.5"/><circle cx="140.40" cy="146.60" r="1.5"/><circle cx="145.00" cy="146.60" r="1.5"/><circle cx="149.60" cy="146.60" r="1.5"/><circle cx="154.20" cy="146.60" r="1.5"/><circle cx="158.80" cy="146.60" r="1.5"/><circle cx="163.40" cy="146.60" r="1.5"/><circle cx="168.00" cy="146.60" r="1.5"/><circle cx="172.60" cy="146.60" r="1.5"/><circle cx="177.20" cy="146.60" r="1.5"/><circle cx="181.80" cy="146.60" r="1.5"/><circle cx="186.40" cy="146.60" r="1.5"/><circle cx="191.00" cy="146.60" r="1.5"/><circle cx="195.60" cy="146.60" r="1.5"/><circle cx="200.20" cy="146.60" r="1.5"/><circle cx="204.80" cy="146.60" r="1.5"/><circle cx="209.40" cy="146.60" r="1.5"/><circle cx="30.00" cy="154.80" r="1.5"/><circle cx="34.60" cy="154.80" r="1.5"/><circle cx="39.20" cy="154.80" r="1.5"/><circle cx="43.80" cy="154.80" r="1.5"/><circle cx="48.40" cy="154.80" r="1.5"/><circle cx="53.00" cy="154.80" r="1.5"/><circle cx="57.60" cy="154.80" r="1.5"/><circle cx="62.20" cy="154.80" r="1.5"/><circle cx="66.80" cy="154.80" r="1.5"/><circle cx="71.40" cy="154.80" r="1.5"/><circle cx="76.00" cy="154.80" r="1.5"/><circle cx="80.60" cy="154.80" r="1.5"/><circle cx="85.20" cy="154.80" r="1.5"/><circle cx="89.80" cy="154.80" r="1.5"/><circle cx="94.40" cy="154.80" r="1.5"/><circle cx="99.00" cy="154.80" r="1.5"/><circle cx="103.60" cy="154.80" r="1.5"/><circle cx="108.20" cy="154.80" r="1.5"/><circle cx="112.80" cy="154.80" r="1.5"/><circle cx="117.40" cy="154.80" r="1.5"/><circle cx="122.00" cy="154.80" r="1.5"/><circle cx="126.60" cy="154.80" r="1.5"/><circle cx="131.20" cy="154.80" r="1.5"/><circle cx="135.80" cy="154.80" r="1.5"/><circle cx="140.40" cy="154.80" r="1.5"/><circle cx="145.00" cy="154.80" r="1.5"/><circle cx="149.60" cy="154.80" r="1.5"/><circle cx="154.20" cy="154.80" r="1.5"/><circle cx="158.80" cy="154.80" r="1.5"/><circle cx="163.40" cy="154.80" r="1.5"/><circle cx="168.00" cy="154.80" r="1.5"/><circle cx="172.60" cy="154.80" r="1.5"/><circle cx="177.20" cy="154.80" r="1.5"/><circle cx="181.80" cy="154.80" r="1.5"/><circle cx="186.40" cy="154.80" r="1.5"/><circle cx="191.00" cy="154.80" r="1.5"/><circle cx="195.60" cy="154.80" r="1.5"/><circle cx="200.20" cy="154.80" r="1.5"/><circle cx="204.80" cy="154.80" r="1.5"/><circle cx="209.40" cy="154.80" r="1.5"/><circle cx="30.00" cy="163.00" r="1.5"/><circle cx="34.60" cy="163.00" r="1.5"/><circle cx="39.20" cy="163.00" r="1.5"/><circle cx="43.80" cy="163.00" r="1.5"/><circle cx="48.40" cy="163.00" r="1.5"/><circle cx="53.00" cy="163.00" r="1.5"/><circle cx="57.60" cy="163.00" r="1.5"/><circle cx="62.20" cy="163.00" r="1.5"/><circle cx="66.80" cy="163.00" r="1.5"/><circle cx="71.40" cy="163.00" r="1.5"/><circle cx="76.00" cy="163.00" r="1.5"/><circle cx="80.60" cy="163.00" r="1.5"/><circle cx="85.20" cy="163.00" r="1.5"/><circle cx="89.80" cy="163.00" r="1.5"/><circle cx="94.40" cy="163.00" r="1.5"/><circle cx="99.00" cy="163.00" r="1.5"/><circle cx="103.60" cy="163.00" r="1.5"/><circle cx="108.20" cy="163.00" r="1.5"/><circle cx="112.80" cy="163.00" r="1.5"/><circle cx="117.40" cy="163.00" r="1.5"/><circle cx="122.00" cy="163.00" r="1.5"/><circle cx="126.60" cy="163.00" r="1.5"/><circle cx="131.20" cy="163.00" r="1.5"/><circle cx="135.80" cy="163.00" r="1.5"/><circle cx="140.40" cy="163.00" r="1.5"/><circle cx="145.00" cy="163.00" r="1.5"/><circle cx="149.60" cy="163.00" r="1.5"/><circle cx="154.20" cy="163.00" r="1.5"/><circle cx="158.80" cy="163.00" r="1.5"/><circle cx="163.40" cy="163.00" r="1.5"/><circle cx="168.00" cy="163.00" r="1.5"/><circle cx="172.60" cy="163.00" r="1.5"/><circle cx="177.20" cy="163.00" r="1.5"/><circle cx="181.80" cy="163.00" r="1.5"/><circle cx="186.40" cy="163.00" r="1.5"/><circle cx="191.00" cy="163.00" r="1.5"/><circle cx="195.60" cy="163.00" r="1.5"/><circle cx="200.20" cy="163.00" r="1.5"/><circle cx="204.80" cy="163.00" r="1.5"/><circle cx="209.40" cy="163.00" r="1.5"/><circle cx="30.00" cy="171.20" r="1.5"/><circle cx="34.60" cy="171.20" r="1.5"/><circle cx="39.20" cy="171.20" r="1.5"/><circle cx="43.80" cy="171.20" r="1.5"/><circle cx="48.40" cy="171.20" r="1.5"/><circle cx="53.00" cy="171.20" r="1.5"/><circle cx="57.60" cy="171.20" r="1.5"/><circle cx="62.20" cy="171.20" r="1.5"/><circle cx="66.80" cy="171.20" r="1.5"/><circle cx="71.40" cy="171.20" r="1.5"/><circle cx="76.00" cy="171.20" r="1.5"/><circle cx="80.60" cy="171.20" r="1.5"/><circle cx="85.20" cy="171.20" r="1.5"/><circle cx="89.80" cy="171.20" r="1.5"/><circle cx="94.40" cy="171.20" r="1.5"/><circle cx="99.00" cy="171.20" r="1.5"/><circle cx="103.60" cy="171.20" r="1.5"/><circle cx="108.20" cy="171.20" r="1.5"/><circle cx="112.80" cy="171.20" r="1.5"/><circle cx="117.40" cy="171.20" r="1.5"/><circle cx="122.00" cy="171.20" r="1.5"/><circle cx="126.60" cy="171.20" r="1.5"/><circle cx="131.20" cy="171.20" r="1.5"/><circle cx="135.80" cy="171.20" r="1.5"/><circle cx="140.40" cy="171.20" r="1.5"/><circle cx="145.00" cy="171.20" r="1.5"/><circle cx="149.60" cy="171.20" r="1.5"/><circle cx="154.20" cy="171.20" r="1.5"/><circle cx="158.80" cy="171.20" r="1.5"/><circle cx="163.40" cy="171.20" r="1.5"/><circle cx="168.00" cy="171.20" r="1.5"/><circle cx="172.60" cy="171.20" r="1.5"/><circle cx="177.20" cy="171.20" r="1.5"/><circle cx="181.80" cy="171.20" r="1.5"/><circle cx="186.40" cy="171.20" r="1.5"/><circle cx="191.00" cy="171.20" r="1.5"/><circle cx="195.60" cy="171.20" r="1.5"/><circle cx="200.20" cy="171.20" r="1.5"/><circle cx="204.80" cy="171.20" r="1.5"/><circle cx="209.40" cy="171.20" r="1.5"/><circle cx="30.00" cy="179.40" r="1.5"/><circle cx="34.60" cy="179.40" r="1.5"/><circle cx="39.20" cy="179.40" r="1.5"/><circle cx="43.80" cy="179.40" r="1.5"/><circle cx="48.40" cy="179.40" r="1.5"/><circle cx="53.00" cy="179.40" r="1.5"/><circle cx="57.60" cy="179.40" r="1.5"/><circle cx="62.20" cy="179.40" r="1.5"/><circle cx="66.80" cy="179.40" r="1.5"/><circle cx="71.40" cy="179.40" r="1.5"/><circle cx="76.00" cy="179.40" r="1.5"/><circle cx="80.60" cy="179.40" r="1.5"/><circle cx="85.20" cy="179.40" r="1.5"/><circle cx="89.80" cy="179.40" r="1.5"/><circle cx="94.40" cy="179.40" r="1.5"/><circle cx="99.00" cy="179.40" r="1.5"/><circle cx="103.60" cy="179.40" r="1.5"/><circle cx="108.20" cy="179.40" r="1.5"/><circle cx="112.80" cy="179.40" r="1.5"/><circle cx="117.40" cy="179.40" r="1.5"/><circle cx="122.00" cy="179.40" r="1.5"/><circle cx="126.60" cy="179.40" r="1.5"/><circle cx="131.20" cy="179.40" r="1.5"/><circle cx="135.80" cy="179.40" r="1.5"/><circle cx="140.40" cy="179.40" r="1.5"/><circle cx="145.00" cy="179.40" r="1.5"/><circle cx="149.60" cy="179.40" r="1.5"/><circle cx="154.20" cy="179.40" r="1.5"/><circle cx="158.80" cy="179.40" r="1.5"/><circle cx="163.40" cy="179.40" r="1.5"/><circle cx="168.00" cy="179.40" r="1.5"/><circle cx="172.60" cy="179.40" r="1.5"/><circle cx="177.20" cy="179.40" r="1.5"/><circle cx="181.80" cy="179.40" r="1.5"/><circle cx="186.40" cy="179.40" r="1.5"/><circle cx="191.00" cy="179.40" r="1.5"/><circle cx="195.60" cy="179.40" r="1.5"/><circle cx="200.20" cy="179.40" r="1.5"/><circle cx="204.80" cy="179.40" r="1.5"/><circle cx="209.40" cy="179.40" r="1.5"/><circle cx="30.00" cy="187.60" r="1.5"/><circle cx="34.60" cy="187.60" r="1.5"/><circle cx="39.20" cy="187.60" r="1.5"/><circle cx="43.80" cy="187.60" r="1.5"/><circle cx="48.40" cy="187.60" r="1.5"/><circle cx="53.00" cy="187.60" r="1.5"/><circle cx="57.60" cy="187.60" r="1.5"/><circle cx="62.20" cy="187.60" r="1.5"/><circle cx="66.80" cy="187.60" r="1.5"/><circle cx="71.40" cy="187.60" r="1.5"/><circle cx="76.00" cy="187.60" r="1.5"/><circle cx="80.60" cy="187.60" r="1.5"/><circle cx="85.20" cy="187.60" r="1.5"/><circle cx="89.80" cy="187.60" r="1.5"/><circle cx="94.40" cy="187.60" r="1.5"/><circle cx="99.00" cy="187.60" r="1.5"/><circle cx="103.60" cy="187.60" r="1.5"/><circle cx="108.20" cy="187.60" r="1.5"/><circle cx="112.80" cy="187.60" r="1.5"/><circle cx="117.40" cy="187.60" r="1.5"/><circle cx="122.00" cy="187.60" r="1.5"/><circle cx="126.60" cy="187.60" r="1.5"/><circle cx="131.20" cy="187.60" r="1.5"/><circle cx="135.80" cy="187.60" r="1.5"/><circle cx="140.40" cy="187.60" r="1.5"/><circle cx="145.00" cy="187.60" r="1.5"/><circle cx="149.60" cy="187.60" r="1.5"/><circle cx="154.20" cy="187.60" r="1.5"/><circle cx="158.80" cy="187.60" r="1.5"/><circle cx="163.40" cy="187.60" r="1.5"/><circle cx="168.00" cy="187.60" r="1.5"/><circle cx="172.60" cy="187.60" r="1.5"/><circle cx="177.20" cy="187.60" r="1.5"/><circle cx="181.80" cy="187.60" r="1.5"/><circle cx="186.40" cy="187.60" r="1.5"/><circle cx="191.00" cy="187.60" r="1.5"/><circle cx="195.60" cy="187.60" r="1.5"/><circle cx="200.20" cy="187.60" r="1.5"/><circle cx="204.80" cy="187.60" r="1.5"/><circle cx="209.40" cy="187.60" r="1.5"/><circle cx="30.00" cy="195.80" r="1.5"/><circle cx="34.60" cy="195.80" r="1.5"/><circle cx="39.20" cy="195.80" r="1.5"/><circle cx="43.80" cy="195.80" r="1.5"/><circle cx="48.40" cy="195.80" r="1.5"/><circle cx="53.00" cy="195.80" r="1.5"/><circle cx="57.60" cy="195.80" r="1.5"/><circle cx="62.20" cy="195.80" r="1.5"/><circle cx="66.80" cy="195.80" r="1.5"/><circle cx="71.40" cy="195.80" r="1.5"/><circle cx="76.00" cy="195.80" r="1.5"/><circle cx="80.60" cy="195.80" r="1.5"/><circle cx="85.20" cy="195.80" r="1.5"/><circle cx="89.80" cy="195.80" r="1.5"/><circle cx="94.40" cy="195.80" r="1.5"/><circle cx="99.00" cy="195.80" r="1.5"/><circle cx="103.60" cy="195.80" r="1.5"/><circle cx="108.20" cy="195.80" r="1.5"/><circle cx="112.80" cy="195.80" r="1.5"/><circle cx="117.40" cy="195.80" r="1.5"/><circle cx="122.00" cy="195.80" r="1.5"/><circle cx="126.60" cy="195.80" r="1.5"/><circle cx="131.20" cy="195.80" r="1.5"/><circle cx="135.80" cy="195.80" r="1.5"/><circle cx="140.40" cy="195.80" r="1.5"/><circle cx="145.00" cy="195.80" r="1.5"/><circle cx="149.60" cy="195.80" r="1.5"/><circle cx="154.20" cy="195.80" r="1.5"/><circle cx="158.80" cy="195.80" r="1.5"/><circle cx="163.40" cy="195.80" r="1.5"/><circle cx="168.00" cy="195.80" r="1.5"/><circle cx="172.60" cy="195.80" r="1.5"/><circle cx="177.20" cy="195.80" r="1.5"/><circle cx="181.80" cy="195.80" r="1.5"/><circle cx="186.40" cy="195.80" r="1.5"/><circle cx="191.00" cy="195.80" r="1.5"/><circle cx="195.60" cy="195.80" r="1.5"/><circle cx="200.20" cy="195.80" r="1.5"/><circle cx="204.80" cy="195.80" r="1.5"/><circle cx="209.40" cy="195.80" r="1.5"/><circle cx="30.00" cy="204.00" r="1.5"/><circle cx="34.60" cy="204.00" r="1.5"/><circle cx="39.20" cy="204.00" r="1.5"/><circle cx="43.80" cy="204.00" r="1.5"/><circle cx="48.40" cy="204.00" r="1.5"/><circle cx="53.00" cy="204.00" r="1.5"/><circle cx="57.60" cy="204.00" r="1.5"/><circle cx="62.20" cy="204.00" r="1.5"/><circle cx="66.80" cy="204.00" r="1.5"/><circle cx="71.40" cy="204.00" r="1.5"/><circle cx="76.00" cy="204.00" r="1.5"/><circle cx="80.60" cy="204.00" r="1.5"/><circle cx="85.20" cy="204.00" r="1.5"/><circle cx="89.80" cy="204.00" r="1.5"/><circle cx="94.40" cy="204.00" r="1.5"/><circle cx="99.00" cy="204.00" r="1.5"/><circle cx="103.60" cy="204.00" r="1.5"/><circle cx="108.20" cy="204.00" r="1.5"/><circle cx="112.80" cy="204.00" r="1.5"/><circle cx="117.40" cy="204.00" r="1.5"/><circle cx="122.00" cy="204.00" r="1.5"/><circle cx="126.60" cy="204.00" r="1.5"/><circle cx="131.20" cy="204.00" r="1.5"/><circle cx="135.80" cy="204.00" r="1.5"/><circle cx="140.40" cy="204.00" r="1.5"/><circle cx="145.00" cy="204.00" r="1.5"/><circle cx="149.60" cy="204.00" r="1.5"/><circle cx="154.20" cy="204.00" r="1.5"/><circle cx="158.80" cy="204.00" r="1.5"/><circle cx="163.40" cy="204.00" r="1.5"/><circle cx="168.00" cy="204.00" r="1.5"/><circle cx="172.60" cy="204.00" r="1.5"/><circle cx="177.20" cy="204.00" r="1.5"/><circle cx="181.80" cy="204.00" r="1.5"/><circle cx="186.40" cy="204.00" r="1.5"/><circle cx="191.00" cy="204.00" r="1.5"/><circle cx="195.60" cy="204.00" r="1.5"/><circle cx="200.20" cy="204.00" r="1.5"/><circle cx="204.80" cy="204.00" r="1.5"/><circle cx="209.40" cy="204.00" r="1.5"/><circle cx="30.00" cy="212.20" r="1.5"/><circle cx="34.60" cy="212.20" r="1.5"/><circle cx="39.20" cy="212.20" r="1.5"/><circle cx="43.80" cy="212.20" r="1.5"/><circle cx="48.40" cy="212.20" r="1.5"/><circle cx="53.00" cy="212.20" r="1.5"/><circle cx="57.60" cy="212.20" r="1.5"/><circle cx="62.20" cy="212.20" r="1.5"/><circle cx="66.80" cy="212.20" r="1.5"/><circle cx="71.40" cy="212.20" r="1.5"/><circle cx="76.00" cy="212.20" r="1.5"/><circle cx="80.60" cy="212.20" r="1.5"/><circle cx="85.20" cy="212.20" r="1.5"/><circle cx="89.80" cy="212.20" r="1.5"/><circle cx="94.40" cy="212.20" r="1.5"/><circle cx="99.00" cy="212.20" r="1.5"/><circle cx="103.60" cy="212.20" r="1.5"/><circle cx="108.20" cy="212.20" r="1.5"/><circle cx="112.80" cy="212.20" r="1.5"/><circle cx="117.40" cy="212.20" r="1.5"/><circle cx="122.00" cy="212.20" r="1.5"/><circle cx="126.60" cy="212.20" r="1.5"/><circle cx="131.20" cy="212.20" r="1.5"/><circle cx="135.80" cy="212.20" r="1.5"/><circle cx="140.40" cy="212.20" r="1.5"/><circle cx="145.00" cy="212.20" r="1.5"/><circle cx="149.60" cy="212.20" r="1.5"/><circle cx="154.20" cy="212.20" r="1.5"/><circle cx="158.80" cy="212.20" r="1.5"/><circle cx="163.40" cy="212.20" r="1.5"/><circle cx="168.00" cy="212.20" r="1.5"/><circle cx="172.60" cy="212.20" r="1.5"/><circle cx="177.20" cy="212.20" r="1.5"/><circle cx="181.80" cy="212.20" r="1.5"/><circle cx="186.40" cy="212.20" r="1.5"/><circle cx="191.00" cy="212.20" r="1.5"/><circle cx="195.60" cy="212.20" r="1.5"/><circle cx="200.20" cy="212.20" r="1.5"/><circle cx="204.80" cy="212.20" r="1.5"/><circle cx="209.40" cy="212.20" r="1.5"/><circle cx="30.00" cy="220.40" r="1.5"/><circle cx="34.60" cy="220.40" r="1.5"/><circle cx="39.20" cy="220.40" r="1.5"/><circle cx="43.80" cy="220.40" r="1.5"/><circle cx="48.40" cy="220.40" r="1.5"/><circle cx="53.00" cy="220.40" r="1.5"/><circle cx="57.60" cy="220.40" r="1.5"/><circle cx="62.20" cy="220.40" r="1.5"/><circle cx="66.80" cy="220.40" r="1.5"/><circle cx="71.40" cy="220.40" r="1.5"/><circle cx="76.00" cy="220.40" r="1.5"/><circle cx="80.60" cy="220.40" r="1.5"/><circle cx="85.20" cy="220.40" r="1.5"/><circle cx="89.80" cy="220.40" r="1.5"/><circle cx="94.40" cy="220.40" r="1.5"/><circle cx="99.00" cy="220.40" r="1.5"/><circle cx="103.60" cy="220.40" r="1.5"/><circle cx="108.20" cy="220.40" r="1.5"/><circle cx="112.80" cy="220.40" r="1.5"/><circle cx="117.40" cy="220.40" r="1.5"/><circle cx="122.00" cy="220.40" r="1.5"/><circle cx="126.60" cy="220.40" r="1.5"/><circle cx="131.20" cy="220.40" r="1.5"/><circle cx="135.80" cy="220.40" r="1.5"/><circle cx="140.40" cy="220.40" r="1.5"/><circle cx="145.00" cy="220.40" r="1.5"/><circle cx="149.60" cy="220.40" r="1.5"/><circle cx="154.20" cy="220.40" r="1.5"/><circle cx="158.80" cy="220.40" r="1.5"/><circle cx="163.40" cy="220.40" r="1.5"/><circle cx="168.00" cy="220.40" r="1.5"/><circle cx="172.60" cy="220.40" r="1.5"/><circle cx="177.20" cy="220.40" r="1.5"/><circle cx="181.80" cy="220.40" r="1.5"/><circle cx="186.40" cy="220.40" r="1.5"/><circle cx="191.00" cy="220.40" r="1.5"/><circle cx="195.60" cy="220.40" r="1.5"/><circle cx="200.20" cy="220.40" r="1.5"/><circle cx="204.80" cy="220.40" r="1.5"/><circle cx="209.40" cy="220.40" r="1.5"/><circle cx="30.00" cy="228.60" r="1.5"/><circle cx="34.60" cy="228.60" r="1.5"/><circle cx="39.20" cy="228.60" r="1.5"/><circle cx="43.80" cy="228.60" r="1.5"/><circle cx="48.40" cy="228.60" r="1.5"/><circle cx="53.00" cy="228.60" r="1.5"/><circle cx="57.60" cy="228.60" r="1.5"/><circle cx="62.20" cy="228.60" r="1.5"/><circle cx="66.80" cy="228.60" r="1.5"/><circle cx="71.40" cy="228.60" r="1.5"/><circle cx="76.00" cy="228.60" r="1.5"/><circle cx="80.60" cy="228.60" r="1.5"/><circle cx="85.20" cy="228.60" r="1.5"/><circle cx="89.80" cy="228.60" r="1.5"/><circle cx="94.40" cy="228.60" r="1.5"/><circle cx="99.00" cy="228.60" r="1.5"/><circle cx="103.60" cy="228.60" r="1.5"/><circle cx="108.20" cy="228.60" r="1.5"/><circle cx="112.80" cy="228.60" r="1.5"/><circle cx="117.40" cy="228.60" r="1.5"/><circle cx="122.00" cy="228.60" r="1.5"/><circle cx="126.60" cy="228.60" r="1.5"/><circle cx="131.20" cy="228.60" r="1.5"/><circle cx="135.80" cy="228.60" r="1.5"/><circle cx="140.40" cy="228.60" r="1.5"/><circle cx="145.00" cy="228.60" r="1.5"/><circle cx="149.60" cy="228.60" r="1.5"/><circle cx="154.20" cy="228.60" r="1.5"/><circle cx="158.80" cy="228.60" r="1.5"/><circle cx="163.40" cy="228.60" r="1.5"/><circle cx="168.00" cy="228.60" r="1.5"/><circle cx="172.60" cy="228.60" r="1.5"/><circle cx="177.20" cy="228.60" r="1.5"/><circle cx="181.80" cy="228.60" r="1.5"/><circle cx="186.40" cy="228.60" r="1.5"/><circle cx="191.00" cy="228.60" r="1.5"/><circle cx="195.60" cy="228.60" r="1.5"/><circle cx="200.20" cy="228.60" r="1.5"/><circle cx="204.80" cy="228.60" r="1.5"/><circle cx="209.40" cy="228.60" r="1.5"/><circle cx="30.00" cy="236.80" r="1.5"/><circle cx="34.60" cy="236.80" r="1.5"/><circle cx="39.20" cy="236.80" r="1.5"/><circle cx="43.80" cy="236.80" r="1.5"/><circle cx="48.40" cy="236.80" r="1.5"/><circle cx="53.00" cy="236.80" r="1.5"/><circle cx="57.60" cy="236.80" r="1.5"/><circle cx="62.20" cy="236.80" r="1.5"/><circle cx="66.80" cy="236.80" r="1.5"/><circle cx="71.40" cy="236.80" r="1.5"/><circle cx="76.00" cy="236.80" r="1.5"/><circle cx="80.60" cy="236.80" r="1.5"/><circle cx="85.20" cy="236.80" r="1.5"/><circle cx="89.80" cy="236.80" r="1.5"/><circle cx="94.40" cy="236.80" r="1.5"/><circle cx="99.00" cy="236.80" r="1.5"/><circle cx="103.60" cy="236.80" r="1.5"/><circle cx="108.20" cy="236.80" r="1.5"/><circle cx="112.80" cy="236.80" r="1.5"/><circle cx="117.40" cy="236.80" r="1.5"/><circle cx="122.00" cy="236.80" r="1.5"/><circle cx="126.60" cy="236.80" r="1.5"/><circle cx="131.20" cy="236.80" r="1.5"/><circle cx="135.80" cy="236.80" r="1.5"/><circle cx="140.40" cy="236.80" r="1.5"/><circle cx="145.00" cy="236.80" r="1.5"/><circle cx="149.60" cy="236.80" r="1.5"/><circle cx="154.20" cy="236.80" r="1.5"/><circle cx="158.80" cy="236.80" r="1.5"/><circle cx="163.40" cy="236.80" r="1.5"/><circle cx="168.00" cy="236.80" r="1.5"/><circle cx="172.60" cy="236.80" r="1.5"/><circle cx="177.20" cy="236.80" r="1.5"/><circle cx="181.80" cy="236.80" r="1.5"/><circle cx="186.40" cy="236.80" r="1.5"/><circle cx="191.00" cy="236.80" r="1.5"/><circle cx="195.60" cy="236.80" r="1.5"/><circle cx="200.20" cy="236.80" r="1.5"/><circle cx="204.80" cy="236.80" r="1.5"/><circle cx="209.40" cy="236.80" r="1.5"/></g>
+        <g fill="var(--mint-500)"><circle cx="330.00" cy="90.00" r="5"/><circle cx="356.00" cy="90.00" r="5"/><circle cx="382.00" cy="90.00" r="5"/><circle cx="408.00" cy="90.00" r="5"/><circle cx="434.00" cy="90.00" r="5"/><circle cx="330.00" cy="116.00" r="5"/><circle cx="356.00" cy="116.00" r="5"/><circle cx="382.00" cy="116.00" r="5"/><circle cx="408.00" cy="116.00" r="5"/><circle cx="434.00" cy="116.00" r="5"/><circle cx="330.00" cy="142.00" r="5"/><circle cx="356.00" cy="142.00" r="5"/><circle cx="382.00" cy="142.00" r="5"/><circle cx="408.00" cy="142.00" r="5"/><circle cx="434.00" cy="142.00" r="5"/></g>
+        <text x="120" y="260" text-anchor="middle" class="mono" font-size="12" fill="var(--coral-700)">before, 1 dot = 894,081 comparisons</text>
+        <text x="382" y="260" text-anchor="middle" class="mono" font-size="12" fill="var(--mint-700)">after, same unit</text>
+      </svg>
+        </div>
+        <p class="card__cap mono">894,081,141 comparisons to 13,643,737 at one million keys. 65.5x.</p>
+        <a class="card__link" href="https://github.com/google/highway/pull/3244">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-xnnpack-10801">
+        <div class="card__head">
+          <a href="https://github.com/google/XNNPACK/pull/10801"><img src="assets/org/google.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into google/XNNPACK #10801</span>
+        </div>
+        <h3 class="card__title">Reusing the leading gap in the memory planner</h3>
+        <p class="card__body">The memory planner never considered the free gap sitting before the first live block. Reusing that leading gap lowers peak workspace.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 240" role="img" aria-labelledby="pr5-t pr5-d">
+        <title id="pr5-t">Memory arena before and after reuse</title>
+        <desc id="pr5-d">Two horizontal strips of the same memory arena. On the before row a hatched coral gap sits unused ahead of the live block. On the after row that same gap is filled in blue and reused, and the end of the arena is pulled left because the whole arena is now shorter.</desc>
+        <defs>
+          <pattern id="hatch5" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="var(--coral-500)" stroke-width="2"/>
+          </pattern>
+        </defs>
+        <text x="30" y="45" class="mono" font-size="12" fill="var(--muted)">before, workspace 144 MiB</text>
+        <rect x="30" y="55" width="333.71" height="30" fill="var(--coral-100)"/>
+        <rect x="30" y="55" width="333.71" height="30" fill="url(#hatch5)"/>
+        <rect x="363.71" y="55" width="66.29" height="30" fill="var(--ground2)" stroke="var(--hair2)" stroke-width="1"/>
+        <text x="430" y="48" text-anchor="end" class="mono" font-size="11" fill="var(--muted)">peak 23.862980 MiB</text>
+        <text x="30" y="145" class="mono" font-size="12" fill="var(--muted)">after, workspace 112 MiB</text>
+        <rect x="30" y="155" width="249.08" height="30" fill="var(--blue-500)"/>
+        <rect x="279.08" y="155" width="62.03" height="30" fill="var(--ground2)" stroke="var(--hair2)" stroke-width="1"/>
+        <text x="341.11" y="148" text-anchor="end" class="mono" font-size="11" fill="var(--muted)">peak 22.331730 MiB</text>
+        <line x1="341.11" y1="55" x2="341.11" y2="195" stroke="var(--hair2)" stroke-width="1" stroke-dasharray="3 3"/>
+        <text x="341.11" y="210" text-anchor="middle" class="mono" font-size="11" fill="var(--muted)">arena end pulled left</text>
+      </svg>
+        </div>
+        <p class="card__cap mono">MobileNet V1 peak 23.862980 to 22.331730 MiB. Workspace 144 MiB to 112 MiB.</p>
+        <a class="card__link" href="https://github.com/google/XNNPACK/pull/10801">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-tensorflow-124410">
+        <div class="card__head">
+          <a href="https://github.com/tensorflow/tensorflow/pull/124410"><img src="assets/org/tensorflow.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into tensorflow/tensorflow #124410</span>
+        </div>
+        <h3 class="card__title">A missing back-propagation in transitive reduction</h3>
+        <p class="card__body">Transitive reduction was documented as full reachability but never back-propagated, so a redundant control edge with a longer alternate path survived the prune.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 260" role="img" aria-labelledby="pr6-t pr6-d">
+        <title id="pr6-t">Control edges before and after the fix</title>
+        <desc id="pr6-d">Four nodes, c4, c3, c2 and c1, joined by a green chain of three necessary edges. A dashed coral arc from c4 direct to c1 is the redundant fourth edge, struck through, because c4 already reaches c1 through the chain.</desc>
+        <path d="M70,150 Q250,40 430,150" fill="none" stroke="var(--coral-500)" stroke-width="3" stroke-dasharray="7 5"/>
+        <g stroke="var(--coral-700)" stroke-width="4" stroke-linecap="round">
+          <line x1="238" y1="83" x2="262" y2="107"/>
+          <line x1="262" y1="83" x2="238" y2="107"/>
+        </g>
+        <g stroke="var(--green-500)" stroke-width="4" stroke-linecap="round">
+          <line x1="92" y1="150" x2="168" y2="150"/>
+          <line x1="212" y1="150" x2="288" y2="150"/>
+          <line x1="332" y1="150" x2="408" y2="150"/>
+        </g>
+        <g>
+          <circle cx="70" cy="150" r="22" fill="var(--raised)" stroke="var(--ink)" stroke-width="1.5"/>
+          <circle cx="190" cy="150" r="22" fill="var(--raised)" stroke="var(--ink)" stroke-width="1.5"/>
+          <circle cx="310" cy="150" r="22" fill="var(--raised)" stroke="var(--ink)" stroke-width="1.5"/>
+          <circle cx="430" cy="150" r="22" fill="var(--raised)" stroke="var(--ink)" stroke-width="1.5"/>
+        </g>
+        <g class="mono" font-size="14" fill="var(--ink)" text-anchor="middle" dominant-baseline="central">
+          <text x="70" y="151">c4</text>
+          <text x="190" y="151">c3</text>
+          <text x="310" y="151">c2</text>
+          <text x="430" y="151">c1</text>
+        </g>
+        <text x="250" y="30" text-anchor="middle" class="mono" font-size="11" fill="var(--coral-700)">redundant edge, alternate path length 3</text>
+      </svg>
+        </div>
+        <p class="card__cap mono">Four control edges emitted where the unique transitive reduction is three.</p>
+        <a class="card__link" href="https://github.com/tensorflow/tensorflow/pull/124410">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-nemo-relay-481">
+        <div class="card__head">
+          <a href="https://github.com/NVIDIA/NeMo-Relay/pull/481"><img src="assets/org/NVIDIA.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into NVIDIA/NeMo-Relay #481</span>
+        </div>
+        <h3 class="card__title">One scaffold, not one profile per task</h3>
+        <p class="card__body">The learning key included the first user message, so one unchanging system prompt and tool schema fragmented into a new profile per task. Observations never accumulated.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 460 280" role="img" aria-labelledby="pr7-t pr7-d">
+        <title id="pr7-t">Eight buckets collapsing into one</title>
+        <desc id="pr7-d">Before, eight separate coral buckets each hold one observation. After, one violet bucket holds all eight, stacked, because the learning key no longer fragments on the first user message.</desc>
+        <text x="42" y="22" class="mono" font-size="12" fill="var(--muted)">before, one profile per task</text>
+        <g fill="var(--coral-500)">
+          <rect x="42" y="30" width="40" height="40"/>
+          <rect x="90" y="30" width="40" height="40"/>
+          <rect x="138" y="30" width="40" height="40"/>
+          <rect x="186" y="30" width="40" height="40"/>
+          <rect x="234" y="30" width="40" height="40"/>
+          <rect x="282" y="30" width="40" height="40"/>
+          <rect x="330" y="30" width="40" height="40"/>
+          <rect x="378" y="30" width="40" height="40"/>
+        </g>
+        <g fill="var(--raised)">
+          <circle cx="62" cy="50" r="5"/><circle cx="110" cy="50" r="5"/><circle cx="158" cy="50" r="5"/><circle cx="206" cy="50" r="5"/>
+          <circle cx="254" cy="50" r="5"/><circle cx="302" cy="50" r="5"/><circle cx="350" cy="50" r="5"/><circle cx="398" cy="50" r="5"/>
+        </g>
+        <text x="140" y="150" class="mono" font-size="12" fill="var(--muted)">after, one stable scaffold</text>
+        <rect x="140" y="160" width="180" height="100" fill="var(--violet-500)"/>
+        <g fill="var(--raised)">
+          <circle cx="160" cy="185" r="6"/><circle cx="200" cy="185" r="6"/><circle cx="240" cy="185" r="6"/><circle cx="280" cy="185" r="6"/>
+          <circle cx="160" cy="225" r="6"/><circle cx="200" cy="225" r="6"/><circle cx="240" cy="225" r="6"/><circle cx="280" cy="225" r="6"/>
+        </g>
+      </svg>
+        </div>
+        <p class="card__cap mono">One unchanging scaffold now keys to one profile instead of one per task. 23 files.</p>
+        <a class="card__link" href="https://github.com/NVIDIA/NeMo-Relay/pull/481">View the pull request on GitHub</a>
+      </article>
+      <article class="card" id="pr-triton-kernels-22">
+        <div class="card__head">
+          <a href="https://github.com/triton-lang/kernels/pull/22"><img src="assets/org/openai.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into triton-lang/kernels #22</span>
+        </div>
+        <h3 class="card__title">A topology-derived sparse attention kernel</h3>
+        <p class="card__body">A forward-only Triton kernel schedules causal attention blocks by a topology-derived salience score instead of scanning every block in the lower triangle.</p>
+        <div class="card__art fig">
+      <svg viewBox="0 0 300 300" role="img" aria-labelledby="pr8-t pr8-d">
+        <title id="pr8-t">A causal block schedule as a lower-triangular matrix</title>
+        <desc id="pr8-d">A 16 by 16 grid of causal attention blocks. Only blocks at or below the diagonal are valid. The sink column, the local window along the diagonal, and a handful of blocks chosen by a salience score are filled violet and scheduled. The remaining valid blocks are left unscheduled in a light tint.</desc>
+        <g fill="var(--ground2)" stroke="var(--hair)" stroke-width="1"><rect x="27.5" y="62.5" width="17.5" height="17.5"/><rect x="27.5" y="80.0" width="17.5" height="17.5"/><rect x="45.0" y="80.0" width="17.5" height="17.5"/><rect x="27.5" y="97.5" width="17.5" height="17.5"/><rect x="62.5" y="97.5" width="17.5" height="17.5"/><rect x="27.5" y="115.0" width="17.5" height="17.5"/><rect x="45.0" y="115.0" width="17.5" height="17.5"/><rect x="62.5" y="115.0" width="17.5" height="17.5"/><rect x="80.0" y="115.0" width="17.5" height="17.5"/><rect x="27.5" y="132.5" width="17.5" height="17.5"/><rect x="45.0" y="132.5" width="17.5" height="17.5"/><rect x="62.5" y="132.5" width="17.5" height="17.5"/><rect x="80.0" y="132.5" width="17.5" height="17.5"/><rect x="97.5" y="132.5" width="17.5" height="17.5"/><rect x="27.5" y="150.0" width="17.5" height="17.5"/><rect x="45.0" y="150.0" width="17.5" height="17.5"/><rect x="80.0" y="150.0" width="17.5" height="17.5"/><rect x="97.5" y="150.0" width="17.5" height="17.5"/><rect x="27.5" y="167.5" width="17.5" height="17.5"/><rect x="45.0" y="167.5" width="17.5" height="17.5"/><rect x="62.5" y="167.5" width="17.5" height="17.5"/><rect x="80.0" y="167.5" width="17.5" height="17.5"/><rect x="97.5" y="167.5" width="17.5" height="17.5"/><rect x="115.0" y="167.5" width="17.5" height="17.5"/><rect x="132.5" y="167.5" width="17.5" height="17.5"/><rect x="27.5" y="185.0" width="17.5" height="17.5"/><rect x="45.0" y="185.0" width="17.5" height="17.5"/><rect x="62.5" y="185.0" width="17.5" height="17.5"/><rect x="80.0" y="185.0" width="17.5" height="17.5"/><rect x="97.5" y="185.0" width="17.5" height="17.5"/><rect x="115.0" y="185.0" width="17.5" height="17.5"/><rect x="132.5" y="185.0" width="17.5" height="17.5"/><rect x="150.0" y="185.0" width="17.5" height="17.5"/><rect x="27.5" y="202.5" width="17.5" height="17.5"/><rect x="62.5" y="202.5" width="17.5" height="17.5"/><rect x="80.0" y="202.5" width="17.5" height="17.5"/><rect x="97.5" y="202.5" width="17.5" height="17.5"/><rect x="115.0" y="202.5" width="17.5" height="17.5"/><rect x="150.0" y="202.5" width="17.5" height="17.5"/><rect x="167.5" y="202.5" width="17.5" height="17.5"/><rect x="27.5" y="220.0" width="17.5" height="17.5"/><rect x="45.0" y="220.0" width="17.5" height="17.5"/><rect x="62.5" y="220.0" width="17.5" height="17.5"/><rect x="80.0" y="220.0" width="17.5" height="17.5"/><rect x="97.5" y="220.0" width="17.5" height="17.5"/><rect x="115.0" y="220.0" width="17.5" height="17.5"/><rect x="132.5" y="220.0" width="17.5" height="17.5"/><rect x="150.0" y="220.0" width="17.5" height="17.5"/><rect x="167.5" y="220.0" width="17.5" height="17.5"/><rect x="185.0" y="220.0" width="17.5" height="17.5"/><rect x="27.5" y="237.5" width="17.5" height="17.5"/><rect x="45.0" y="237.5" width="17.5" height="17.5"/><rect x="62.5" y="237.5" width="17.5" height="17.5"/><rect x="80.0" y="237.5" width="17.5" height="17.5"/><rect x="115.0" y="237.5" width="17.5" height="17.5"/><rect x="132.5" y="237.5" width="17.5" height="17.5"/><rect x="150.0" y="237.5" width="17.5" height="17.5"/><rect x="167.5" y="237.5" width="17.5" height="17.5"/><rect x="185.0" y="237.5" width="17.5" height="17.5"/><rect x="202.5" y="237.5" width="17.5" height="17.5"/><rect x="27.5" y="255.0" width="17.5" height="17.5"/><rect x="45.0" y="255.0" width="17.5" height="17.5"/><rect x="62.5" y="255.0" width="17.5" height="17.5"/><rect x="80.0" y="255.0" width="17.5" height="17.5"/><rect x="97.5" y="255.0" width="17.5" height="17.5"/><rect x="115.0" y="255.0" width="17.5" height="17.5"/><rect x="132.5" y="255.0" width="17.5" height="17.5"/><rect x="150.0" y="255.0" width="17.5" height="17.5"/><rect x="185.0" y="255.0" width="17.5" height="17.5"/><rect x="202.5" y="255.0" width="17.5" height="17.5"/><rect x="220.0" y="255.0" width="17.5" height="17.5"/><rect x="27.5" y="272.5" width="17.5" height="17.5"/><rect x="45.0" y="272.5" width="17.5" height="17.5"/><rect x="62.5" y="272.5" width="17.5" height="17.5"/><rect x="80.0" y="272.5" width="17.5" height="17.5"/><rect x="97.5" y="272.5" width="17.5" height="17.5"/><rect x="115.0" y="272.5" width="17.5" height="17.5"/><rect x="132.5" y="272.5" width="17.5" height="17.5"/><rect x="150.0" y="272.5" width="17.5" height="17.5"/><rect x="167.5" y="272.5" width="17.5" height="17.5"/><rect x="185.0" y="272.5" width="17.5" height="17.5"/><rect x="202.5" y="272.5" width="17.5" height="17.5"/><rect x="237.5" y="272.5" width="17.5" height="17.5"/></g>
+        <g fill="var(--violet-500)" stroke="var(--hair)" stroke-width="1"><rect x="10.0" y="10.0" width="17.5" height="17.5"/><rect x="10.0" y="27.5" width="17.5" height="17.5"/><rect x="10.0" y="45.0" width="17.5" height="17.5"/><rect x="10.0" y="62.5" width="17.5" height="17.5"/><rect x="10.0" y="80.0" width="17.5" height="17.5"/><rect x="10.0" y="97.5" width="17.5" height="17.5"/><rect x="10.0" y="115.0" width="17.5" height="17.5"/><rect x="10.0" y="132.5" width="17.5" height="17.5"/><rect x="10.0" y="150.0" width="17.5" height="17.5"/><rect x="10.0" y="167.5" width="17.5" height="17.5"/><rect x="10.0" y="185.0" width="17.5" height="17.5"/><rect x="10.0" y="202.5" width="17.5" height="17.5"/><rect x="10.0" y="220.0" width="17.5" height="17.5"/><rect x="10.0" y="237.5" width="17.5" height="17.5"/><rect x="10.0" y="255.0" width="17.5" height="17.5"/><rect x="10.0" y="272.5" width="17.5" height="17.5"/><rect x="27.5" y="27.5" width="17.5" height="17.5"/><rect x="27.5" y="45.0" width="17.5" height="17.5"/><rect x="45.0" y="45.0" width="17.5" height="17.5"/><rect x="45.0" y="62.5" width="17.5" height="17.5"/><rect x="62.5" y="62.5" width="17.5" height="17.5"/><rect x="62.5" y="80.0" width="17.5" height="17.5"/><rect x="80.0" y="80.0" width="17.5" height="17.5"/><rect x="80.0" y="97.5" width="17.5" height="17.5"/><rect x="97.5" y="97.5" width="17.5" height="17.5"/><rect x="97.5" y="115.0" width="17.5" height="17.5"/><rect x="115.0" y="115.0" width="17.5" height="17.5"/><rect x="115.0" y="132.5" width="17.5" height="17.5"/><rect x="132.5" y="132.5" width="17.5" height="17.5"/><rect x="132.5" y="150.0" width="17.5" height="17.5"/><rect x="150.0" y="150.0" width="17.5" height="17.5"/><rect x="150.0" y="167.5" width="17.5" height="17.5"/><rect x="167.5" y="167.5" width="17.5" height="17.5"/><rect x="167.5" y="185.0" width="17.5" height="17.5"/><rect x="185.0" y="185.0" width="17.5" height="17.5"/><rect x="185.0" y="202.5" width="17.5" height="17.5"/><rect x="202.5" y="202.5" width="17.5" height="17.5"/><rect x="202.5" y="220.0" width="17.5" height="17.5"/><rect x="220.0" y="220.0" width="17.5" height="17.5"/><rect x="220.0" y="237.5" width="17.5" height="17.5"/><rect x="237.5" y="237.5" width="17.5" height="17.5"/><rect x="237.5" y="255.0" width="17.5" height="17.5"/><rect x="255.0" y="255.0" width="17.5" height="17.5"/><rect x="255.0" y="272.5" width="17.5" height="17.5"/><rect x="272.5" y="272.5" width="17.5" height="17.5"/><rect x="45.0" y="97.5" width="17.5" height="17.5"/><rect x="62.5" y="150.0" width="17.5" height="17.5"/><rect x="115.0" y="150.0" width="17.5" height="17.5"/><rect x="45.0" y="202.5" width="17.5" height="17.5"/><rect x="132.5" y="202.5" width="17.5" height="17.5"/><rect x="97.5" y="237.5" width="17.5" height="17.5"/><rect x="167.5" y="255.0" width="17.5" height="17.5"/><rect x="220.0" y="272.5" width="17.5" height="17.5"/></g>
+      </svg>
+        </div>
+        <p class="card__cap mono">A topology derived sparse attention kernel. 804 lines added, 17 tests passing.</p>
+        <a class="card__link" href="https://github.com/triton-lang/kernels/pull/22">View the pull request on GitHub</a>
+      </article>
+    </div>
+  </div>
+</section>
+<section class="band band--tint">
+  <div class="wrap">
+    <div class="card card--panel">
+      <h2>I also build my own.</h2>
+      <p>Fourteen public repositories. Topology that predicts a number, and code that then measures it.</p>
+      <a class="card__link" href="work.html">See the personal work</a>
+    </div>
+  </div>
+</section>
+<section class="band">
+  <div class="wrap">
+    <p class="muted">There is an interactive 3D version of this at <a href="https://teerthsharma.vercel.app">teerthsharma.vercel.app</a>.</p>
+  </div>
+</section>
+</main>
+<footer class="band band--tint">
+  <div class="wrap">
+    <a class="btn--text" href="mailto:teerths57@gmail.com">Email</a>
+    <a class="btn--text" href="https://github.com/teerthsharma/teerthsharma/raw/main/Teerth_Sharma_Resume.pdf">Resume</a>
+    <a class="btn--text" href="https://github.com/teerthsharma">GitHub</a>
+    <p class="muted">Built as plain HTML. No framework, no build step.</p>
+  </div>
+</footer>
+<script src="site.js" defer></script>
+</body>
+</html>
