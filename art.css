@@ -109,18 +109,6 @@
     animation: tg-turn-rev 14s linear infinite;
   }
 
-  /* --- caustic ---------------------------------------------------------
-     The rays are the drawing and the cusp is the claim, so the rays are what
-     moves: a slow bloom passes along the bundle and the crowded region stays
-     lit longest, because that is where they overlap. Selected by class, never
-     by position, so a later redraw cannot animate a label by accident. */
-  @keyframes cs-bloom { 0%, 100% { opacity: .38; } 50% { opacity: .95; } }
-  @keyframes cs-burn  { 0%, 100% { opacity: .62; r: 8; } 50% { opacity: 1; r: 11; } }
-  #p-caustic #cs-out .cs-ray{ animation: cs-bloom 4.6s ease-in-out infinite; }
-  #p-caustic #cs-cusp{ animation: cs-burn 4.6s ease-in-out infinite; }
-  #p-caustic:hover #cs-out .cs-ray,
-  #p-caustic:hover #cs-cusp{ animation-play-state: paused; }
-
   /* --- monodromy -------------------------------------------------------
      The result is that a frame comes back rotated, so the frames rotate. */
   @keyframes md-carry { from { transform: rotate(0); } to { transform: rotate(360deg); } }

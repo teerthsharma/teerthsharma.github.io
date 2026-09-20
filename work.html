@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=40">
-<link rel="stylesheet" href="motion.css?v=40">
-<link rel="stylesheet" href="art.css?v=40">
+<link rel="stylesheet" href="site.css?v=42">
+<link rel="stylesheet" href="motion.css?v=42">
+<link rel="stylesheet" href="art.css?v=42">
 
 <script type="application/ld+json">
 {
@@ -117,9 +117,24 @@
     <div class="grid grid--3" style="margin-top:40px">
 
       <article class="proj" id="p-resolvent" data-lang="Python" data-doi="false">
+<div class="proj__text">
         <h3 class="proj__name">resolvent</h3>
         <p class="proj__claim">I proved softmax attention and Markov path composition are the same operator, then checked the whole argument in Lean until nothing was left standing on my word.</p>
-        <div class="proj__art">
+        
+        <div class="proj__nums">
+          <span>134 theorems</span>
+          <span>41 lemmas</span>
+          <span>0 sorry</span>
+          <span>69 corner tests</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">Lean 4 verified, 0 sorry</li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/resolvent">View resolvent on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <svg viewBox="0 0 400 375" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="p-resolvent-title p-resolvent-desc">
   <title id="p-resolvent-title">A causal attention matrix and a Markov path are the same staircase, seen twice</title>
@@ -161,23 +176,28 @@
             <figcaption class="fig__cap">The mask and the graph, one operator drawn twice.</figcaption>
           </figure>
         </div>
-        <div class="proj__nums">
-          <span>134 theorems</span>
-          <span>41 lemmas</span>
-          <span>0 sorry</span>
-          <span>69 corner tests</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">Lean 4 verified, 0 sorry</li>
-        </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/resolvent">View resolvent on GitHub</a>
-      </article>
+</div>
+</article>
 
 <article class="proj" id="p-epsilon-hollow" data-lang="Rust" data-doi="true">
+<div class="proj__text">
         <h3 class="proj__name">Epsilon-Hollow</h3>
         <p class="proj__claim">I wrote an operating system from bare metal where memory, files and the scheduler live as points on a sphere, and the kernel's day job is machine learning.</p>
-        <div class="proj__art">
+        
+        <div class="proj__nums">
+          <span>bare metal x86_64</span>
+          <span>no POSIX</span>
+          <span>no libc</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Rust</li>
+          <li class="tag tag--class">bare metal, no libc</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.20264206">DOI</a></li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/Epsilon-Hollow">View Epsilon-Hollow on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/540">
                 <canvas data-fig="collapse" data-vb="470 540" aria-hidden="true"></canvas>
@@ -194,23 +214,27 @@
             <figcaption class="fig__cap">One sphere, and the three subsystems I put on its surface.</figcaption>
           </figure>
         </div>
+</div>
+</article>
+
+<article class="proj" id="p-aether-lang" data-lang="Rust" data-doi="true">
+<div class="proj__text">
+        <h3 class="proj__name">Aether-Lang</h3>
+        <p class="proj__claim">I built a language where a loop stops because its shape stopped changing, not because a counter ran out.</p>
+        
         <div class="proj__nums">
-          <span>bare metal x86_64</span>
-          <span>no POSIX</span>
-          <span>no libc</span>
+          <span>persistent homology as a language primitive</span>
+          <span>runtime compiles no_std to bare metal</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Rust</li>
-          <li class="tag tag--class">bare metal, no libc</li>
-          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.20264206">DOI</a></li>
+          <li class="tag tag--class">topology as a primitive</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997728">DOI</a></li>
         </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/Epsilon-Hollow">View Epsilon-Hollow on GitHub</a>
-      </article>
-
-<article class="proj" id="p-aether-lang" data-lang="Rust" data-doi="true">
-        <h3 class="proj__name">Aether-Lang</h3>
-        <p class="proj__claim">I built a language where a loop stops because its shape stopped changing, not because a counter ran out.</p>
-        <div class="proj__art">
+        <a class="card__link" href="https://github.com/teerthsharma/Aether-Lang">Aether-Lang on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <svg viewBox="0 0 470 500" role="img" aria-labelledby="al-t al-d">
                 <title id="al-t">Fourteen passes, and the last eight are the same shape</title>
@@ -288,22 +312,26 @@
             <figcaption class="fig__cap">The exit condition is an invariant of the state, so the loop ends when the shape stops moving.</figcaption>
           </figure>
         </div>
-        <div class="proj__nums">
-          <span>persistent homology as a language primitive</span>
-          <span>runtime compiles no_std to bare metal</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Rust</li>
-          <li class="tag tag--class">topology as a primitive</li>
-          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997728">DOI</a></li>
-        </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/Aether-Lang">Aether-Lang on GitHub</a>
-      </article>
+</div>
+</article>
 
 <article class="proj" id="p-topological-ml-toolkit" data-lang="Python" data-doi="false">
+<div class="proj__text">
         <h3 class="proj__name">topological-ml-toolkit</h3>
         <p class="proj__claim">I wanted the shape of data to be an ordinary feature, usable by anyone already building with sklearn or PyTorch.</p>
-        <div class="proj__art">
+        
+        <div class="proj__nums">
+          <span>Rust core, Python API</span>
+          <span>persistent homology and Betti-curve features</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python and Rust</li>
+          <li class="tag tag--class">shape as a feature</li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/topological-ml-toolkit">topological-ml-toolkit on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520">
                 <canvas data-fig="cut" data-vb="470 520" aria-hidden="true"></canvas>
@@ -320,21 +348,27 @@
             <figcaption class="fig__cap">Long bars are structure, short bars are noise, and the cut is the feature.</figcaption>
           </figure>
         </div>
-        <div class="proj__nums">
-          <span>Rust core, Python API</span>
-          <span>persistent homology and Betti-curve features</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python and Rust</li>
-          <li class="tag tag--class">shape as a feature</li>
-        </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/topological-ml-toolkit">topological-ml-toolkit on GitHub</a>
-      </article>
+</div>
+</article>
 
 <article class="proj" id="p-caustic" data-lang="Python" data-doi="true">
+<div class="proj__text">
         <h3 class="proj__name">caustic</h3>
         <p class="proj__claim">I found that when a model cannot reach a fact it collapses distinct entities onto one answer, and that collapse is measurable with no ground truth at all.</p>
-        <div class="proj__art">
+        
+        <div class="proj__nums">
+          <span>0.995 AUROC</span>
+          <span>five proved bounds</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">0.995 AUROC</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a></li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/caustic">View caustic on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/540"><canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="cs-t cs-d">
                   <title id="cs-t">Six hundred and twenty separate rays, and one bright place they all land on</title>
@@ -349,22 +383,26 @@
             <figcaption class="fig__cap">Three entities collapse onto one answer. That collapse is the hallucination.</figcaption>
           </figure>
         </div>
-        <div class="proj__nums">
-          <span>0.995 AUROC</span>
-          <span>five proved bounds</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">0.995 AUROC</li>
-          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a></li>
-        </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/caustic">View caustic on GitHub</a>
-      </article>
+</div>
+</article>
 
 <article class="proj" id="p-nerve" data-lang="Rust" data-doi="false">
+<div class="proj__text">
         <h3 class="proj__name">nerve</h3>
         <p class="proj__claim">I built the control that could kill my own result, then published what it said.</p>
-        <div class="proj__art">
+        
+        <div class="proj__nums">
+          <span>224 tests passing</span>
+          <span>3 of its own 4 hypotheses withdrawn</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Rust</li>
+          <li class="tag tag--class">3 of 4 hypotheses withdrawn</li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/nerve">View nerve on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520">
                 <canvas data-fig="witness" data-vb="470 520" aria-hidden="true"></canvas>
@@ -381,21 +419,27 @@
             <figcaption class="fig__cap">One chain, one crossing. I tested four hypotheses against their own controls.</figcaption>
           </figure>
         </div>
-        <div class="proj__nums">
-          <span>224 tests passing</span>
-          <span>3 of its own 4 hypotheses withdrawn</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Rust</li>
-          <li class="tag tag--class">3 of 4 hypotheses withdrawn</li>
-        </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/nerve">View nerve on GitHub</a>
-      </article>
+</div>
+</article>
 
 <article class="proj" id="p-monodromy" data-lang="Python" data-doi="true">
+<div class="proj__text">
         <h3 class="proj__name">monodromy</h3>
         <p class="proj__claim">I wanted to know whether a transformation could be undone without ever computing a derivative, so I built the tools that answer it from topology instead.</p>
-        <div class="proj__art">
+        
+        <div class="proj__nums">
+          <span>5 dependencies</span>
+          <span>torch not required</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">no Jacobian required</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a></li>
+        </ul>
+        <a class="card__link" href="https://github.com/teerthsharma/monodromy">View monodromy on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520"><canvas data-fig="transport" data-vb="470 520" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="mo-t mo-d">
                   <title id="mo-t">It comes back pointing somewhere else</title>
@@ -409,22 +453,26 @@
             <figcaption class="fig__cap">Four stations around the loop, no derivative needed.</figcaption>
           </figure>
         </div>
+</div>
+</article>
+
+<article class="proj" id="p-faraday" data-lang="Python" data-doi="false">
+<div class="proj__text">
+        <h3 class="proj__name">faraday</h3>
+        <p class="proj__claim">I compute the Faraday tensor directly, so the coupling between the electric and magnetic fields is found rather than assumed.</p>
+        
         <div class="proj__nums">
-          <span>5 dependencies</span>
-          <span>torch not required</span>
+          <span>computational Faraday tensor</span>
+          <span>topology-fixed-point projection</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">no Jacobian required</li>
-          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a></li>
+          <li class="tag tag--class">coupling, not assumption</li>
         </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/monodromy">View monodromy on GitHub</a>
-      </article>
-
-<article class="proj" id="p-faraday" data-lang="Python" data-doi="false">
-        <h3 class="proj__name">faraday</h3>
-        <p class="proj__claim">I compute the Faraday tensor directly, so the coupling between the electric and magnetic fields is found rather than assumed.</p>
-        <div class="proj__art">
+        <a class="card__link" href="https://github.com/teerthsharma/faraday">faraday on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc figc--glass" style="--figc-ar:470/520">
                 <div class="glass" aria-hidden="true">
@@ -451,21 +499,26 @@
             <figcaption class="fig__cap">Two fields at right angles, and the third quantity that falls out where they meet.</figcaption>
           </figure>
         </div>
+</div>
+</article>
+
+<article class="proj" id="p-separatrix" data-lang="Python" data-doi="false">
+<div class="proj__text">
+        <h3 class="proj__name">separatrix</h3>
+        <p class="proj__claim">I certify that a top-k or an argmin was decided by the data, and not by where the kernel happened to round.</p>
+        
         <div class="proj__nums">
-          <span>computational Faraday tensor</span>
-          <span>topology-fixed-point projection</span>
+          <span>top-k, argmin and threshold</span>
+          <span>certified or refused</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">coupling, not assumption</li>
+          <li class="tag tag--class">decided by data, not rounding</li>
         </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/faraday">faraday on GitHub</a>
-      </article>
-
-<article class="proj" id="p-separatrix" data-lang="Python" data-doi="false">
-        <h3 class="proj__name">separatrix</h3>
-        <p class="proj__claim">I certify that a top-k or an argmin was decided by the data, and not by where the kernel happened to round.</p>
-        <div class="proj__art">
+        <a class="card__link" href="https://github.com/teerthsharma/separatrix">separatrix on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520">
                 <canvas data-fig="certify" data-vb="470 520" aria-hidden="true"></canvas>
@@ -482,21 +535,28 @@
             <figcaption class="fig__cap">If the intervals touch, the ordering was the arithmetic and not the data.</figcaption>
           </figure>
         </div>
+</div>
+</article>
+
+<article class="proj" id="p-planimeter" data-lang="Python" data-doi="false">
+<div class="proj__text">
+        <h3 class="proj__name">planimeter</h3>
+        <p class="proj__claim">shapely.polygonize_full returns 336 wrong answers on the files where planimeter returns none.</p>
+        
         <div class="proj__nums">
-          <span>top-k, argmin and threshold</span>
-          <span>certified or refused</span>
+          <span>495 exact</span>
+          <span>33 refused</span>
+          <span>0 wrong</span>
+          <span>shapely.polygonize_full: 336 wrong, 0 refused</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">decided by data, not rounding</li>
+          <li class="tag tag--class">exact or refused</li>
         </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/separatrix">separatrix on GitHub</a>
-      </article>
-
-<article class="proj" id="p-planimeter" data-lang="Python" data-doi="false">
-        <h3 class="proj__name">planimeter</h3>
-        <p class="proj__claim">shapely.polygonize_full returns 336 wrong answers on the files where planimeter returns none.</p>
-        <div class="proj__art">
+        <a class="card__link" href="https://github.com/teerthsharma/planimeter">View planimeter on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520">
                 <canvas data-fig="refuse" data-vb="470 520" aria-hidden="true"></canvas>
@@ -516,23 +576,28 @@
             <figcaption class="fig__cap">I set my tally against shapely's.</figcaption>
           </figure>
         </div>
+</div>
+</article>
+
+<article class="proj" id="p-tangle" data-lang="Python" data-doi="false">
+<div class="proj__text">
+        <h3 class="proj__name">tangle</h3>
+        <p class="proj__claim">I built tangle to never return a wrong answer. It refuses rather than guesses.</p>
+        
         <div class="proj__nums">
-          <span>495 exact</span>
-          <span>33 refused</span>
-          <span>0 wrong</span>
-          <span>shapely.polygonize_full: 336 wrong, 0 refused</span>
+          <span>2,000 diagrams</span>
+          <span>80 scenes</span>
+          <span>247 photographs</span>
+          <span>0 wrong certificates</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">exact or refused</li>
+          <li class="tag tag--class">certificate or nothing</li>
         </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/planimeter">View planimeter on GitHub</a>
-      </article>
-
-<article class="proj" id="p-tangle" data-lang="Python" data-doi="false">
-        <h3 class="proj__name">tangle</h3>
-        <p class="proj__claim">I built tangle to never return a wrong answer. It refuses rather than guesses.</p>
-        <div class="proj__art">
+        <a class="card__link" href="https://github.com/teerthsharma/tangle">View tangle on GitHub</a>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
           <figure class="fig">
             <svg viewBox="0 0 360 340" role="img" aria-labelledby="tg-t tg-d">
                 <title id="tg-t">Two loops that cannot be pulled apart</title>
@@ -545,18 +610,8 @@
             <figcaption class="fig__cap">Two crossings, one linking number, and a certificate I can hand you.</figcaption>
           </figure>
         </div>
-        <div class="proj__nums">
-          <span>2,000 diagrams</span>
-          <span>80 scenes</span>
-          <span>247 photographs</span>
-          <span>0 wrong certificates</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">certificate or nothing</li>
-        </ul>
-        <a class="card__link" href="https://github.com/teerthsharma/tangle">View tangle on GitHub</a>
-      </article>
+</div>
+</article>
 
     </div>
   </div>
@@ -564,7 +619,7 @@
 
 </main>
 
-<script src="fig.js?v=40" defer></script>
-<script src="site.js?v=40" defer></script>
+<script src="fig.js?v=42" defer></script>
+<script src="site.js?v=42" defer></script>
 </body>
 </html>

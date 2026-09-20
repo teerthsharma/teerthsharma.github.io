@@ -54,6 +54,14 @@
     return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
   }
 
+  /* Smootherstep. Travel that begins and ends at zero velocity is what makes
+     motion read as smooth; constant speed with a hard stop is what reads as a
+     jump, however long the cycle is. */
+  function ease(k) {
+    k = k < 0 ? 0 : k > 1 ? 1 : k;
+    return k * k * k * (k * (k * 6 - 15) + 10);
+  }
+
   function fit(c, vbw, vbh) {
     /* vbh is used for the letterbox; see the note below. */
     var r = c.getBoundingClientRect();
@@ -284,7 +292,10 @@
 
     /* the one that is travelling now, so the turning is watched and not
        merely inferred from a row of stamps */
-    var cyc = REDUCED ? 0.999 : (t % 7600) / 7600;
+    /* eased so the frame slows through the start, where the angle it
+       failed to close by is being compared */
+    var raw = REDUCED ? 0.999 : (t % 7600) / 7600;
+    var cyc = REDUCED ? 0.999 : raw * 0.35 + ease(raw) * 0.65;
     var tp = at(cyc * Math.PI * 2);
     frame(tp[0], tp[1], cyc * Math.PI * 2 + TWIST * cyc, rgba(mint7, 1), 4.2, 28);
     g.fillStyle = rgba(mint7, 1);
@@ -507,12 +518,18 @@
       g.strokeStyle = rgba(hair, 1); g.lineWidth = 1.4;
       g.strokeRect(bx, by, BW, BH);
 
-      /* an arrival sweeps the grid; the box it reaches lights up and still
-         holds exactly one when it has passed */
-      var reach = ((cyc * (COLS * ROWS) * 1.0) | 0) === i;
+      /* An arrival sweeps the grid. It used to jump from box to box; now the
+         highlight falls off with distance from the sweep, so a box brightens
+         and fades rather than switching. The count it holds never changes,
+         which is the point. */
+      var head = cyc * (COLS * ROWS);
+      var near = REDUCED ? 0 : Math.max(0, 1 - Math.abs(head - i) / 2.2);
+      var lift = ease(near);
       g.beginPath();
-      g.arc(bx + BW / 2, by + BH / 2, reach && !REDUCED ? 8.4 : 6.2, 0, Math.PI * 2);
-      g.fillStyle = reach && !REDUCED ? rgba(coral7, 1) : rgba(coral, 0.85);
+      g.arc(bx + BW / 2, by + BH / 2, 6.2 + 2.4 * lift, 0, Math.PI * 2);
+      g.fillStyle = lift > 0.02
+        ? rgba(coral7, 0.85 + 0.15 * lift)
+        : rgba(coral, 0.85);
       g.fill();
     }
 
@@ -523,13 +540,18 @@
     g.fillRect(RX, RY, RW, RH);
     g.strokeRect(RX, RY, RW, RH);
 
-    var filled = REDUCED ? 24 : Math.min(24, Math.floor((Math.min(cyc, 0.42) / 0.42) * 24 + 0.001));
-    for (var j = 0; j < filled; j++) {
+    /* The pile used to gain a whole dot at a time, which is 24 visible steps.
+       Each dot now grows in over its own slice of the fill, so the pile rises
+       continuously and the last one is mid-arrival rather than snapping. */
+    var fill = REDUCED ? 1 : ease(Math.min(cyc, 0.46) / 0.46);
+    for (var j = 0; j < 24; j++) {
+      var grow = REDUCED ? 1 : ease((fill * 24 - j) / 1.6);
+      if (grow <= 0.002) continue;
       var cc = j % 4, rr = (j / 4) | 0;
       var dx = RX + 26 + cc * 30, dy = RY + RH - 24 - rr * 27;
       g.beginPath();
-      g.arc(dx, dy, 8.6, 0, Math.PI * 2);
-      g.fillStyle = rgba(violet7, 0.94);
+      g.arc(dx, dy - (1 - grow) * 16, 8.6 * grow, 0, Math.PI * 2);
+      g.fillStyle = rgba(violet7, 0.94 * grow);
       g.fill();
     }
 

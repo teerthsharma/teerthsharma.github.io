@@ -562,19 +562,18 @@ img,svg{ max-width:100%; display:block; }
 @media (min-width:900px){
   .grid, .grid--3, .grid--2{ display:block; }
 
+  /* Two columns, so two columns in the markup and a flex row here. The
+     previous version was a grid in which the figure spanned
+     grid-row 1 / span 99 and every text child sat one per row beside it,
+     which is where the layout faults came from: the rows stretched to the
+     figure's height, the figure stretched out of its own aspect ratio, and
+     the whole thing was held together by align-content, min-content rows and
+     an align-self patch. Nothing spans anything now. */
   .card, .proj{
-    display:grid;
-    grid-template-columns: minmax(320px, 0.95fr) 1.05fr;
-    column-gap:56px;
-    align-items:start;
-    /* Without these the figure, which spans every row, stretches those rows
-       to its own height. The text items then sit one per stretched row and
-       drift to the bottom of the entry while the figure stays at the top,
-       which is the gap that made these cards look broken. Rows sized to
-       their content, and the whole block packed to the top, keeps the
-       title beside the figure where it belongs. */
-    align-content:start;
-    grid-auto-rows:min-content;
+    display:flex;
+    flex-direction:row;
+    align-items:flex-start;
+    gap:56px;
     padding:52px 48px;
     margin:0;
     border:0;
@@ -586,26 +585,21 @@ img,svg{ max-width:100%; display:block; }
   .card:first-of-type, .proj:first-of-type{ border-top:0; }
   .card:hover, .proj:hover{ transform:none; box-shadow:none; border-color:var(--hair); }
 
-  .card > *, .proj > *{ grid-column:1; }
-  .card__art, .proj__art{
-    grid-column:2;
-    grid-row:1 / span 99;
-    align-self:start;
-    margin:0;
+  .card__text, .proj__text{
+    flex:1 1 0;
+    min-width:320px;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
   }
-
-  .card:nth-of-type(even), .proj:nth-of-type(even){ background:var(--ground2); }
-
-  /* Capped, so a short entry cannot open a void beneath its own text. */
-  .card__art svg, .proj__art svg{
-    width:100%; height:auto;
-    max-height:300px;
-    min-height:0;
+  .card__figure, .proj__figure{
+    flex:1 1 0;
+    min-width:0;
+    align-self:flex-start;
   }
-
-  .card__title, .proj__name{ font-size:var(--fs-3); line-height:1.15; margin-bottom:10px; }
-  .card__body, .proj__claim{ max-width:48ch; }
+  .card__art, .proj__art{ margin-top:0; }
 }
+
 
 @media (max-width:899px){
   .card, .proj{
@@ -938,4 +932,35 @@ img,svg{ max-width:100%; display:block; }
    its natural height instead of being stretched, so the box is exactly the
    viewBox shape, the letterbox is a no-op, and the two layers cannot drift
    apart however either of them is later changed. */
-.card__art, .proj__art{ align-self: start; }
+
+/* ---------- Narrow layout, stated once and last ---------------------------
+   Measured at a 390px viewport: the card grid was still resolving to two
+   unequal columns of 225px and 196px even though the max-width:760px rule
+   asking for one column was matching, and .card was computing to display
+   block while its own flex-direction was column. Two rules from earlier in
+   the cascade were winning, which is how a figure ended up 154px wide beside
+   another at 183px on a phone.
+
+   Below the point where the two column card layout takes over, the entries
+   are a single stack and each entry is a flex column: text, then figure,
+   both full width. Stated last so nothing earlier can win. */
+@media (max-width:899px){
+  .grid, .grid--3, .grid--2{ display:block; }
+  .grid > * + *{ margin-top:20px; }
+
+  .card, .proj{
+    display:flex;
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .card__text, .proj__text,
+  .card__figure, .proj__figure{
+    width:100%;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .card__figure, .proj__figure{ margin-top:20px; }
+  .card__art, .proj__art{ width:100%; margin-top:0; }
+}
