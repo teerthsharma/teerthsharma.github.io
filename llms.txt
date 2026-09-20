@@ -98,4 +98,4 @@ Contact
 Email: teerths57@gmail.com
 GitHub: https://github.com/teerthsharma
 Resume: https://github.com/teerthsharma/teerthsharma/raw/main/Teerth_Sharma_Resume.pdf
-Interactive portfolio: https://teerthsharma.vercel.app
+Interactive portfolio: https://teerthfolio.vercel.app
