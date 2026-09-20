@@ -29,12 +29,20 @@
      so a field of 1,015 dots reads as a living population rather than a
      texture. Opacity only: position and colour never change. */
   @keyframes cell-wave {
-    0%, 62%, 100% { opacity: 1; }
-    31%           { opacity: .42; }
+    /* Was 0/62/100 at full opacity with a single dip, which meant seventy
+       percent of every cycle was a still frame and the only thing moving was
+       opacity on a four pixel dot. It now travels and shrinks as it dims, and
+       spends most of the cycle in motion. */
+    0%   { opacity: 1;   transform: translateY(0) scale(1); }
+    28%  { opacity: .30; transform: translateY(-3px) scale(.68); }
+    56%  { opacity: 1;   transform: translateY(0) scale(1.06); }
+    100% { opacity: 1;   transform: translateY(0) scale(1); }
   }
   .card__art .pop,
   .proj__art .pop {
-    animation: cell-wave 4.2s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: cell-wave 3.1s ease-in-out infinite;
   }
   .card__art .pop:nth-of-type(6n+1) { animation-delay: -0.0s; }
   .card__art .pop:nth-of-type(6n+2) { animation-delay: -0.7s; }

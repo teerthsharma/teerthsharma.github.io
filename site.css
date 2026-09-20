@@ -474,11 +474,17 @@ img,svg{ max-width:100%; display:block; }
    ------------------------------------------------------------------- */
 @media (prefers-reduced-motion: no-preference){
   .tri-block{
-    animation: tri-scan 4.8s ease-in-out infinite;
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: tri-scan 3.4s ease-in-out infinite;
   }
   @keyframes tri-scan{
-    0%, 70%, 100% { opacity: 1; }
-    12%           { opacity: .34; }
+    /* Same fault as cell-wave: seventy percent of the cycle was a still frame
+       at full opacity. The scan now visibly passes through each block. */
+    0%   { opacity: 1;   transform: scale(1); }
+    16%  { opacity: .26; transform: scale(.74); }
+    38%  { opacity: 1;   transform: scale(1.08); }
+    100% { opacity: 1;   transform: scale(1); }
   }
   .tri-block:nth-of-type(12n+1){ animation-delay:0ms; }
   .tri-block:nth-of-type(12n+2){ animation-delay:70ms; }

@@ -126,36 +126,35 @@
       return py1 - ((Math.log10(v) - lo) / (hi - lo)) * (py1 - py0);
     }
 
+    var units = svg ? svg.querySelectorAll('.unit') : [];
+    var outRatio = svg ? svg.querySelector('[data-out="ratio"]') : null;
+    var outBefore = svg ? svg.querySelector('[data-out="before"]') : null;
+    var outAfter = svg ? svg.querySelector('[data-out="after"]') : null;
+
     function update() {
       var n = Number(input.value);
       var before = 5 * n * n + 36 * n + 32;
       var after = 16 * n + 32;
-
       var fmt = function (v) { return v.toLocaleString('en-US'); };
+
+      /* One square is the whole allocation of the new path, so the count of
+         squares IS the ratio. Dragging grows it from 22 at ntree 64 to 1,282
+         at 4,096, which is the claim made physical rather than plotted on a
+         log axis that flattened it. */
+      var shown = Math.ceil(before / after);
+      for (var i = 0; i < units.length; i++) {
+        units[i].style.display = i < shown ? '' : 'none';
+      }
+      if (outRatio) outRatio.textContent = fmt(shown);
+      if (outBefore) outBefore.textContent = fmt(before) + ' B';
+      if (outAfter) outAfter.textContent = fmt(after) + ' B';
+
       outs.forEach(function (out) {
         var metric = out.getAttribute('data-metric');
         if (metric === 'before') out.textContent = fmt(before);
         else if (metric === 'after') out.textContent = fmt(after);
-        else {
-          /* The markup carries one readout with no data-metric on it, so the
-             metric-only branch matched nothing and the sentence sat frozen at
-             its authored value however far the slider moved. A readout that
-             never changes is worse than no readout, because it reads as a
-             measurement rather than as a control that is doing nothing. */
-          out.textContent = 'ntree = ' + fmt(n) + ', scratch ' + fmt(before) + ' B to ' + fmt(after) + ' B';
-        }
+        else out.textContent = 'ntree = ' + fmt(n) + ', scratch ' + fmt(before) + ' B to ' + fmt(after) + ' B';
       });
-
-      if (canPlot) {
-        if (markerBefore) {
-          markerBefore.setAttribute('cx', xPos(n));
-          markerBefore.setAttribute('cy', yPos(before));
-        }
-        if (markerAfter) {
-          markerAfter.setAttribute('cx', xPos(n));
-          markerAfter.setAttribute('cy', yPos(after));
-        }
-      }
     }
 
     input.addEventListener('input', update);
@@ -578,8 +577,13 @@
       applyShape(currentIdx, true);
     }
 
+    function onScreen() {
+      var r = grid.getBoundingClientRect();
+      return r.bottom > 0 && r.top < (window.innerHeight || 0) + 80;
+    }
+
     function sync() {
-      var shouldRun = inView && !document.hidden && !userPaused;
+      var shouldRun = (inView || onScreen()) && !document.hidden && !userPaused;
       if (shouldRun && !timer) {
         timer = setInterval(tick, CYCLE_MS);
       } else if (!shouldRun && timer) {
@@ -603,6 +607,12 @@
     }
 
     document.addEventListener('visibilitychange', sync);
+
+    window.addEventListener('scroll', sync, {passive:true});
+
+    window.addEventListener('resize', sync, {passive:true});
+
+    sync();   // start now rather than waiting for an observer that may never fire
 
     if (readEl) {
       var pauseBtn = document.createElement('button');
