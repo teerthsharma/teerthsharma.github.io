@@ -749,3 +749,41 @@ img,svg{ max-width:100%; display:block; }
   word-break:normal;
 }
 .proofcell__num{ font-size:var(--fs-1); line-height:1.3; }
+
+/* ---------- Figures stop looking like terminal output ------------------
+   Every label in every figure was monospace, because the site's captions
+   are and the figures followed. Mono is a signal, and the signal it sends
+   is console. Twenty two figures set entirely in it read as log output
+   with a picture in them, whatever they depict, and that is the single
+   largest reason they kept being called ugly while getting steadily more
+   correct.
+
+   Figure text now uses the text face. Mono is kept only where it carries
+   meaning and would be wrong in anything else: identifiers, hashes, code,
+   and the numerals in a measured figure, which want tabular alignment.
+   Those opt in with class="id".
+   -------------------------------------------------------------------- */
+.card__art svg text,
+.proj__art svg text,
+.hero__art svg text{
+  font-family: var(--font-sans, "Instrument Sans", system-ui, sans-serif);
+  letter-spacing: -0.005em;
+}
+.card__art svg text.id,
+.proj__art svg text.id,
+.card__art svg text.mono,
+.proj__art svg text.mono{
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+/* The caption under a figure is prose, not a readout. */
+.fig__cap{
+  font-family: var(--font-sans, "Instrument Sans", system-ui, sans-serif);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-1);
+  color: var(--muted);
+  max-width: 46ch;
+}
