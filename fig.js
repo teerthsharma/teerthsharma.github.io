@@ -270,7 +270,7 @@
 
     g.clearRect(0, 0, vb[0], vb[1]);
 
-    g.strokeStyle = rgba(hair, 1); g.lineWidth = 2; g.beginPath();
+    g.strokeStyle = rgba(token('--muted', '#5f5b53'), 0.5); g.lineWidth = 2.4; g.beginPath();
     for (var s = 0; s <= 240; s++) {
       var p = at(s / 240 * Math.PI * 2);
       if (s === 0) g.moveTo(p[0], p[1]); else g.lineTo(p[0], p[1]);
@@ -279,22 +279,22 @@
 
     for (var i = 0; i < STATIONS; i++) {
       var f = i / STATIONS, th = f * Math.PI * 2, q = at(th);
-      frame(q[0], q[1], th + TWIST * f, rgba(mint, 0.30 + 0.35 * f), 2, 17);
+      frame(q[0], q[1], th + TWIST * f, rgba(mint, 0.42 + 0.48 * f), 2.8, 19);
     }
 
     /* the one that is travelling now, so the turning is watched and not
        merely inferred from a row of stamps */
     var cyc = REDUCED ? 0.999 : (t % 7600) / 7600;
     var tp = at(cyc * Math.PI * 2);
-    frame(tp[0], tp[1], cyc * Math.PI * 2 + TWIST * cyc, rgba(mint7, 1), 3.4, 24);
+    frame(tp[0], tp[1], cyc * Math.PI * 2 + TWIST * cyc, rgba(mint7, 1), 4.2, 28);
     g.fillStyle = rgba(mint7, 1);
     g.beginPath(); g.arc(tp[0], tp[1], 5, 0, Math.PI * 2); g.fill();
 
     /* set out with, and came back with */
     var st = at(0);
-    frame(st[0], st[1], 0, rgba(ink, 0.85), 3.4, 30);
-    frame(st[0], st[1], TWIST, rgba(mint7, 0.95), 3.4, 30);
-    g.strokeStyle = rgba(mint7, 0.5); g.lineWidth = 2;
+    frame(st[0], st[1], 0, rgba(ink, 0.9), 4.2, 34);
+    frame(st[0], st[1], TWIST, rgba(mint7, 1), 4.2, 34);
+    g.strokeStyle = rgba(mint7, 0.75); g.lineWidth = 2.4;
     g.setLineDash([4, 4]);
     g.beginPath(); g.arc(st[0], st[1], 44, 0, TWIST); g.stroke();
     g.setLineDash([]);
