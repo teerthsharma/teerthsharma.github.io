@@ -210,31 +210,4 @@
   #pr-tensorflow-124410:hover #tf-redundant,
   #pr-tensorflow-124410:hover #tf-link{ animation-play-state: paused; }
 
-  /* --- NVIDIA/NeMo-Relay #481 -----------------------------------------
-     His only upstream Rust work, and the material is unusually good: the
-     pull request body carries the two real keys, which differ in exactly
-     one field. So the differing field is what moves. The scattered
-     profiles sit inert, and the observations gathering in the single
-     bucket arrive one after another, which is the behaviour the change
-     restored. */
-  @keyframes nr-differ { 0%,100% { opacity:1; } 50% { opacity:.34; } }
-  #pr-nemo-relay-481 #nr-keys text:nth-of-type(2),
-  #pr-nemo-relay-481 #nr-keys text:nth-of-type(5){
-    animation: nr-differ 1.3s ease-in-out infinite;
-  }
-  @keyframes nr-gather { 0%,3.1% { opacity:0; transform:translateY(-7px); } 26%,100% { opacity:1; transform:translateY(0); } }
-  #pr-nemo-relay-481 #nr-stack circle{
-    transform-box: fill-box; transform-origin: center;
-    animation: nr-gather 2.6s ease-out infinite;
-  }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(2){ animation-delay:.1s; }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(3){ animation-delay:.2s; }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(4){ animation-delay:.3s; }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(5){ animation-delay:.4s; }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(6){ animation-delay:.5s; }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(7){ animation-delay:.6s; }
-  #pr-nemo-relay-481 #nr-stack circle:nth-of-type(8){ animation-delay:.7s; }
-  #pr-nemo-relay-481:hover #nr-keys text,
-  #pr-nemo-relay-481:hover #nr-stack circle{ animation-play-state: paused; }
-
 }

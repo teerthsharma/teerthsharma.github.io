@@ -200,20 +200,34 @@
     g.clearRect(0, 0, vb[0], vb[1]);
     st.size = size;
 
-    /* A wave crosses the field rather than every cell blinking together.
-       A thousand marks flickering in unison reads as a fault; a slow tide
-       reads as a quantity that is alive. */
-    var phase = REDUCED ? 0 : t / 2600;
+    /* A tide crosses the field rather than every cell blinking together, but
+       it has to be gentle. Phasing on (column + row) striped the block with
+       hard diagonals that read as a rendering artefact rather than as
+       movement, so it runs on distance from the centre and the swing is
+       small: the quantity should look alive, not corrupted. */
+    var phase = REDUCED ? 0 : t / 3400;
+    var midC = cols / 2, midR = rows / 2;
     for (var k = 0; k < shown; k++) {
       var r = (k / cols) | 0, c = k % cols;
       var x = BOX_X + c * pitch, y = BOX_Y + r * pitch;
-      var w = REDUCED ? 1 : 0.62 + 0.38 * Math.sin(phase * Math.PI * 2 - (c + r) * 0.22);
-      g.fillStyle = rgba(coral, 0.30 + 0.55 * w);
+      var dcx = (c - midC) / cols, dcy = (r - midR) / rows;
+      var dist = Math.sqrt(dcx * dcx + dcy * dcy);
+      var w = REDUCED ? 1 : 0.82 + 0.18 * Math.sin(phase * Math.PI * 2 - dist * 5.2);
+      g.fillStyle = rgba(coral, 0.42 + 0.46 * w);
       g.fillRect(x, y, size, size);
     }
 
+    /* The reference is one allocation of the new path and is drawn at exactly
+       the size of a field cell, because enlarging it to make it visible would
+       make the picture untrue. At ntree = 4,096 that is six pixels, which
+       disappears. The ring around it is annotation and carries no quantity,
+       so it can be seen without the square lying about its size. */
+    var RX = 22, RY = 62;
+    g.strokeStyle = rgba(blue, 0.34); g.lineWidth = 1.6;
+    g.beginPath(); g.arc(RX + size / 2, RY + size / 2, 19, 0, Math.PI * 2); g.stroke();
     g.fillStyle = rgba(blue, 1);
-    g.fillRect(20, 44, size, size);
+    g.fillRect(RX, RY, Math.max(size, 3), Math.max(size, 3));
+    st.refAt = [RX + size / 2, RY + size / 2];
   }
 
   /* ==================================================================== */
@@ -375,8 +389,157 @@
     g.beginPath(); g.arc(CX, CY, R, 0, Math.PI * 2); g.stroke();
   }
 
+
+  /* ==================================================================== */
+  /* witness — nerve                                                      */
+  /* ==================================================================== */
+  /* The story is that he built the control capable of killing his own result
+     and then published what it said: of his own four hypotheses, three did
+     not survive it.
+
+     The first build had the three columns crumble and vanish, and rendering
+     it showed the same fault the NeMo figure had: for most of the cycle the
+     panel was empty, so there was nothing left to compare the survivor
+     against. The outcome is permanent here instead. Three columns stand as
+     withdrawn stubs, one stands full height against the control line, and the
+     motion is only the moment of withdrawal passing over them again. */
+  function witness(g, vb, t) {
+    var BASE = 366, TOP = 148, W = 56, GAP = 32;
+    var N = 4, BLOCKS = 11;
+    var x0 = (vb[0] - (N * W + (N - 1) * GAP)) / 2;
+    var green = token('--green-500', '#146a32');
+    var coral = token('--coral-500', '#d9376e');
+    var hair = token('--hair2', '#cfcbc1');
+    var ink = token('--ink', '#1c1b19');
+    var SURVIVOR = 2;
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+
+    var cyc = REDUCED ? 1 : (t % 6800) / 6800;
+    var bh = (BASE - TOP) / BLOCKS - 3;
+
+    for (var i = 0; i < N; i++) {
+      var x = x0 + i * (W + GAP);
+      var dies = i !== SURVIVOR;
+      /* a withdrawn hypothesis keeps two blocks, so it is still a column and
+         still countable, and the gap to the survivor is the finding */
+      var kept = dies ? 2 : BLOCKS;
+
+      for (var b = 0; b < BLOCKS; b++) {
+        var y = BASE - (b + 1) * (bh + 3);
+        var gone = b >= kept;
+
+        if (!gone) {
+          g.fillStyle = rgba(dies ? coral : green, dies ? 0.80 : 0.94);
+          g.fillRect(x, y, W, bh);
+          continue;
+        }
+
+        /* the part that was withdrawn is drawn as a faint outline, so what
+           was given up stays visible instead of simply being absent */
+        g.strokeStyle = rgba(coral, 0.22);
+        g.lineWidth = 1;
+        g.strokeRect(x + 0.5, y + 0.5, W - 1, bh - 1);
+
+        /* the withdrawal passes over the three again, one block at a time */
+        if (!REDUCED) {
+          var own = 0.10 + i * 0.07 + (BLOCKS - b) * 0.030;
+          var k = Math.max(0, Math.min(1, (cyc - own) / 0.10));
+          var pulse = k > 0 && k < 1 ? Math.sin(k * Math.PI) : 0;
+          if (pulse > 0.02) {
+            g.fillStyle = rgba(coral, 0.55 * pulse);
+            g.fillRect(x, y, W, bh);
+          }
+        }
+      }
+    }
+
+    g.strokeStyle = rgba(ink, 0.82); g.lineWidth = 2.4;
+    g.setLineDash([9, 6]);
+    g.beginPath();
+    g.moveTo(x0 - 30, TOP + 12); g.lineTo(x0 + N * (W + GAP) - GAP + 30, TOP + 12);
+    g.stroke();
+    g.setLineDash([]);
+
+    g.strokeStyle = rgba(hair, 1); g.lineWidth = 2;
+    g.beginPath();
+    g.moveTo(x0 - 30, BASE + 2); g.lineTo(x0 + N * (W + GAP) - GAP + 30, BASE + 2);
+    g.stroke();
+  }
+
+  /* ==================================================================== */
+  /* gather — NeMo-Relay                                                  */
+  /* ==================================================================== */
+  /* Two requests sharing a model, a system prompt hash and a tool schema hash
+     were given different learning keys because one field differed, so every
+     profile held a single observation and nothing ever accumulated.
+
+     The first build of this flew the dots from one side to the other, and
+     rendering it showed why that fails: mid flight the dots are a straggling
+     diagonal, the destination is empty, and the source has been emptied out,
+     so at no moment can the two states be compared, which is the only thing
+     the figure exists to let you do.
+
+     Both sides are permanently legible instead. On the left a new observation
+     keeps arriving and keeps replacing the one already there, so the count
+     stays at one forever and the stillness is the bug. On the right the same
+     observations land on top of each other and the pile grows. */
+  function gather(g, vb, t, st) {
+    var coral = token('--coral-500', '#d9376e');
+    var coral7 = token('--coral-700', '#a0183f');
+    var violet = token('--violet-500', '#a66cf0');
+    var violet7 = token('--violet-700', '#6b35c4');
+    var hair = token('--hair2', '#cfcbc1');
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+
+    var cyc = REDUCED ? 1 : (t % 7200) / 7200;
+
+    /* left: twenty four profiles, one observation each, forever */
+    var COLS = 4, ROWS = 6, BW = 42, BH = 33, GAP = 8;
+    var LX = 36, LY = 130;
+    for (var i = 0; i < COLS * ROWS; i++) {
+      var c = i % COLS, r = (i / COLS) | 0;
+      var bx = LX + c * (BW + GAP), by = LY + r * (BH + GAP);
+      g.strokeStyle = rgba(hair, 1); g.lineWidth = 1.4;
+      g.strokeRect(bx, by, BW, BH);
+
+      /* an arrival sweeps the grid; the box it reaches lights up and still
+         holds exactly one when it has passed */
+      var reach = ((cyc * (COLS * ROWS) * 1.0) | 0) === i;
+      g.beginPath();
+      g.arc(bx + BW / 2, by + BH / 2, reach && !REDUCED ? 8.4 : 6.2, 0, Math.PI * 2);
+      g.fillStyle = reach && !REDUCED ? rgba(coral7, 1) : rgba(coral, 0.85);
+      g.fill();
+    }
+
+    /* right: one profile, and the same observations land on each other */
+    var RX = 292, RY = 130, RW = 140, RH = ROWS * (BH + GAP) - GAP;
+    g.strokeStyle = rgba(violet, 0.95); g.lineWidth = 2.2;
+    g.fillStyle = rgba(violet, 0.06);
+    g.fillRect(RX, RY, RW, RH);
+    g.strokeRect(RX, RY, RW, RH);
+
+    var filled = REDUCED ? 24 : Math.min(24, Math.floor((Math.min(cyc, 0.42) / 0.42) * 24 + 0.001));
+    for (var j = 0; j < filled; j++) {
+      var cc = j % 4, rr = (j / 4) | 0;
+      var dx = RX + 26 + cc * 30, dy = RY + RH - 24 - rr * 27;
+      g.beginPath();
+      g.arc(dx, dy, 8.6, 0, Math.PI * 2);
+      g.fillStyle = rgba(violet7, 0.94);
+      g.fill();
+    }
+
+    /* the line the observations never cross on the left */
+    g.strokeStyle = rgba(hair, 0.9); g.lineWidth = 1.5;
+    g.setLineDash([5, 6]);
+    g.beginPath(); g.moveTo(258, 120); g.lineTo(258, RY + RH + 10); g.stroke();
+    g.setLineDash([]);
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
-                 transport: transport, collapse: collapse };
+                 transport: transport, collapse: collapse,
+                 witness: witness, gather: gather };
 
   /* ------------------------------------------------------------------ */
   var live = [];

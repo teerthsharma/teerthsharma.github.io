@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=29">
-<link rel="stylesheet" href="motion.css?v=29">
-<link rel="stylesheet" href="art.css?v=29">
+<link rel="stylesheet" href="site.css?v=33">
+<link rel="stylesheet" href="motion.css?v=33">
+<link rel="stylesheet" href="art.css?v=33">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -339,59 +339,20 @@
         <h3 class="card__title">One scaffold, not one profile per task</h3>
         <p class="card__body">I found the learning key included the first user message, so one unchanging system prompt and tool schema fragmented into a new profile per task and observations never accumulated. I keyed it on the stable scaffold instead, with a fingerprint gate that fails closed.</p>
         <div class="card__art fig">
-      <svg viewBox="0 0 500 590" role="img" aria-labelledby="pr-nemo-relay-481-t pr-nemo-relay-481-d">
-  <title id="pr-nemo-relay-481-t">Eight scattered profiles funnel into one that gathers</title>
-  <desc id="pr-nemo-relay-481-d">Two real learning keys from the pull request body, sharing the model, the system hash and the tools hash and differing only in one seed field. Above, eight profiles sit scattered across the panel, each a single observation with nowhere to add to. Fine lines funnel every one of them down into a single bucket, where eight marks now pack together instead of eight buckets holding one each. 23 files changed: 5 source, 18 test.</desc>
-
-  <g id="nr-keys" font-size="14">
-    <text x="16" y="54" class="mono" fill="var(--muted)" xml:space="preserve">agent-a::model=gpt-4o::seed=sha256:</text>
-    <text x="16" y="76" class="mono" fill="var(--muted)" xml:space="preserve">::system=sha256:1a842e58b::tools=sha256:69848c057</text>
-    <text x="16" y="102" class="mono" fill="var(--muted)" xml:space="preserve">agent-a::model=gpt-4o::seed=sha256:</text>
-    <text x="16" y="124" class="mono" fill="var(--muted)" xml:space="preserve">::system=sha256:1a842e58b::tools=sha256:69848c057</text>
-    <text x="470" y="30" class="mono" fill="var(--coral-700)" text-anchor="end" font-size="13" font-weight="600">d006</text>
-    <text x="470" y="50" class="mono" fill="var(--coral-700)" text-anchor="end" font-size="13" font-weight="600">5607</text>
-  </g>
-  <text x="16" y="146" font-size="14" fill="var(--muted)">same system hash, same tools hash, one field apart</text>
-
-  <text x="250" y="175" text-anchor="middle" font-size="15" fill="var(--coral-700)">eight profiles, nothing ever accumulates</text>
-
-  <g stroke="var(--coral-500)" stroke-width="1.5" opacity=".5">
-    <line pathLength="1" class="draw" x1="40" y1="221" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="100" y1="241" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="160" y1="209" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="220" y1="237" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="280" y1="203" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="340" y1="231" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="400" y1="213" x2="250" y2="430"/>
-    <line pathLength="1" class="draw" x1="460" y1="239" x2="250" y2="430"/>
-  </g>
-
-  <g fill="var(--coral-100)" stroke="var(--coral-500)" stroke-width="1.5">
-    <circle class="pop" cx="40" cy="221" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="100" cy="241" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="160" cy="209" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="220" cy="237" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="280" cy="203" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="340" cy="231" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="400" cy="213" r="12" data-label="a profile holding a single observation"/>
-    <circle class="pop" cx="460" cy="239" r="12" data-label="a profile holding a single observation"/>
-  </g>
-
-  <circle id="nr-bucket" class="pop" cx="250" cy="430" r="90" fill="var(--violet-100)" stroke="var(--violet-500)" stroke-width="2" data-label="one profile for the whole stable scaffold"/>
-  <g id="nr-stack" fill="var(--violet-500)">
-    <circle class="pop" cx="202" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="234" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="266" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="298" cy="408" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="202" cy="452" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="234" cy="452" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="266" cy="452" r="10" data-label="an observation that now accumulates"/>
-    <circle class="pop" cx="298" cy="452" r="10" data-label="an observation that now accumulates"/>
-  </g>
-
-  <text x="250" y="547" text-anchor="middle" font-size="15" fill="var(--violet-700)">one scaffold key, and every observation gathers</text>
-  <text x="250" y="571" text-anchor="middle" font-size="14" fill="var(--ink)">23 files changed: 5 source, 18 test</text>
-</svg>
+      <div class="figc" style="--figc-ar:470/520">
+                <canvas data-fig="gather" data-vb="470 520" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="nr-t nr-d">
+                  <title id="nr-t">The same observations, one to a box and then gathered</title>
+                  <desc id="nr-d">Two requests sharing a model, a system prompt hash and a tool schema hash were given different learning keys because one field differed, so every profile held a single observation and nothing ever accumulated. The same twenty four observations are drawn twice: one to a box on the left, which is the same quantity and worth nothing, and gathered into one profile on the right, where the pile is the whole value of the change. 1,370 lines added and 86 removed across 23 files.</desc>
+                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">one differing field split the key</text>
+                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">same model, same system prompt, same tools</text>
+                  <text x="112" y="104" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">one each, forever</text>
+                  <text x="366" y="104" text-anchor="middle" font-size="16" font-weight="600" fill="var(--violet-700)">or all in one</text>
+                  <text x="235" y="418" text-anchor="middle" font-size="18" font-weight="600" fill="var(--violet-700)">the same 24 observations, twice</text>
+                  <text x="235" y="442" text-anchor="middle" font-size="15" fill="var(--muted)">the pile on the right is the entire difference</text>
+                  <text x="235" y="486" text-anchor="middle" font-size="16" fill="var(--muted)">+1,370/-86 across 23 files</text>
+                </svg>
+              </div>
         </div>
         <p class="card__cap mono">One unchanging scaffold now keys to one profile instead of one per task. 23 files.</p>
         <ul class="tags"><li class="tag tag--lang">Rust</li><li class="tag tag--class">cache keying</li></ul>
@@ -464,9 +425,9 @@
   <rect x="300" y="40" width="300" height="270" rx="12" fill="none" stroke="var(--hair2)" stroke-width="1.5" class="draw" pathLength="1"/>
   <line class="draw" pathLength="1" x1="290" y1="20" x2="290" y2="316" stroke="var(--hair2)" stroke-width="1.5"/>
 
-  <text x="20" y="28" font-size="18" fill="var(--blue-700)">mine, once</text>
+  <text x="20" y="34" font-size="18" fill="var(--blue-700)">mine, once</text>
   
-  <line class="draw" pathLength="1" x1="90" y1="61" x2="280" y2="61" stroke="var(--coral-500)" stroke-width="2" marker-end="url(#pr-mujoco-3396-arrow)" data-label="the same allocation, asked for again and again"/>
+  <line class="draw" pathLength="1" x1="96" y1="66" x2="280" y2="66" stroke="var(--coral-500)" stroke-width="2" marker-end="url(#pr-mujoco-3396-arrow)" data-label="the same allocation, asked for again and again"/>
   <defs><marker id="pr-mujoco-3396-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--coral-500)"/></marker></defs>
   <text x="20" y="112" font-size="18" fill="var(--muted)" data-out="after">65,568 B</text>
 
@@ -1015,7 +976,7 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="fig.js?v=29" defer></script>
-<script src="site.js?v=29" defer></script>
+<script src="fig.js?v=33" defer></script>
+<script src="site.js?v=33" defer></script>
 </body>
 </html>
