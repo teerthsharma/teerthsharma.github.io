@@ -148,24 +148,29 @@
   }
 
   /* --- tensorflow #124410 ---------------------------------------------
-     The bug is a sequence, so the figure is read as one. A highlight walks
-     the four creation events; the two where the set is copied and then not
-     revisited are the ones that matter, and the redundant edge pulses only
-     while they are lit. Nothing here invents motion: the defect genuinely
-     is an ordering, and this is what watching it happen looks like. */
-  @keyframes tf-focus { 0%,1.5% { opacity:1; } 28%,100% { opacity:.26; } }
-  #pr-tensorflow-124410 .tfstep{ animation: tf-focus 5.2s ease-in-out infinite; }
-  #pr-tensorflow-124410 #tf-s1{ animation-delay: 0s; }
-  #pr-tensorflow-124410 #tf-s2{ animation-delay: 1.3s; }
-  #pr-tensorflow-124410 #tf-s3{ animation-delay: 2.6s; }
-  #pr-tensorflow-124410 #tf-s4{ animation-delay: 3.9s; }
+     Six reachability facts, and the bug is that one of them never arrives.
+     So five cells brighten in the order the code actually learns them and
+     the sixth stays down, refusing, for the whole cycle. The redundant edge
+     surfaces underneath only once the refusal has been seen, because that
+     is the causation: the missing fact is why the edge survived the prune.
 
-  @keyframes tf-survive { 0%,1.5% { opacity:.2; } 62%,100% { opacity:1; } }
-  #pr-tensorflow-124410 #tf-redundant{ animation: tf-survive 5.2s ease-in-out infinite; }
+     Smooth rather than fast. Each cell holds most of the cycle and the
+     travel is eased, so a field of marks breathes instead of flickering. */
+  @keyframes tf-learn  { 0%, 8% { opacity: .30; } 22%, 100% { opacity: 1; } }
+  @keyframes tf-refuse { 0%, 100% { opacity: .34; } 50% { opacity: .62; } }
+  @keyframes tf-survive{ 0%, 44% { opacity: .22; } 66%, 100% { opacity: 1; } }
 
-  #pr-tensorflow-124410:hover .tfstep,
+  #pr-tensorflow-124410 .tf-fact{ animation: tf-learn 5.6s ease-in-out infinite; }
+  #pr-tensorflow-124410 #tf-c43{ animation-delay: 0s; }
+  #pr-tensorflow-124410 #tf-c42{ animation-delay: .5s; }
+  #pr-tensorflow-124410 #tf-c41{ animation-delay: 1s; }
+  #pr-tensorflow-124410 #tf-c32{ animation-delay: 1.5s; }
+  #pr-tensorflow-124410 #tf-c21{ animation-delay: 2s; }
+  #pr-tensorflow-124410 #tf-c31{ animation: tf-refuse 3.2s ease-in-out infinite; }
+  #pr-tensorflow-124410 #tf-redundant{ animation: tf-survive 5.6s ease-in-out infinite; }
+
+  #pr-tensorflow-124410:hover .tf-fact,
   #pr-tensorflow-124410:hover #tf-redundant{ animation-play-state: paused; }
-
 
   /* --- NVIDIA/NeMo-Relay #481 -----------------------------------------
      His only upstream Rust work, and the material is unusually good: the
