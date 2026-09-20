@@ -90,6 +90,8 @@
       var after = 16 * n + 32;
       var fmt = function (v) { return v.toLocaleString('en-US'); };
       var shown = Math.ceil(before / after);
+      /* The field is canvas now; the count is still computed here. */
+      if (window.FIG) window.FIG.set('units', 'shown', shown);
 
       var cols = Math.ceil(Math.sqrt(shown));
       var rows = Math.ceil(shown / cols);

@@ -802,3 +802,28 @@ img,svg{ max-width:100%; display:block; }
   rotate: none !important;
   scale: none !important;
 }
+
+/* ---------- Canvas figures ----------------------------------------------
+   Three figures were too dense for the DOM: 1,316 elements in the island
+   discovery field, 484 in the GPU field, and a caustic that wanted hundreds
+   of rays and was given forty four. They are now a canvas with an SVG laid
+   over it in the SAME coordinate space, so a label at x=235 in the overlay
+   lands exactly where the canvas puts x=235 and the two cannot drift apart
+   when the card resizes.
+
+   The canvas draws no words. Words stay in the overlay, where they are crisp
+   at any pixel ratio, readable by a screen reader, and incapable of moving. */
+.figc{
+  position: relative;
+  width: 100%;
+  aspect-ratio: var(--figc-ar, 470/540);
+}
+.figc > canvas,
+.figc > .figc__lab{
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+.figc > .figc__lab{ pointer-events: none; }

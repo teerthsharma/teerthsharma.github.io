@@ -48,23 +48,45 @@
   #p-epsilon-hollow svg ellipse:nth-of-type(3){ animation-delay:-1.16s; }
 
   /* --- Aether-Lang -----------------------------------------------------
-     The claim is that the loop ends because the shape stopped changing, so
-     the figure ends the same way: the early passes are still moving and the
-     settled ones are perfectly still. The stillness is not an absence of
-     animation, it is the result being shown. Nothing here selects by
-     position, so the curves cannot be swapped for a label by a later redraw. */
+     Asked for, in his words: show the line continuously, make the purple
+     circle, and break it, as waves of lines rather than one line.
+
+     Seven arcs chase each other round the settled loop. Together they close
+     it, and the gaps between them are the break, so the circle is continually
+     made and broken by the same motion rather than by two separate tricks.
+     It is also what the project does: each pass is another wave through the
+     same state, and the waves flatten as the shape settles.
+
+     The pale settled passes stay underneath the whole cycle, so the figure is
+     never blank and the resting state is always the correct drawing. */
+  @keyframes al-wave {
+    0%   { stroke-dashoffset: 0;  opacity: .30; }
+    50%  { opacity: 1; }
+    100% { stroke-dashoffset: -1; opacity: .30; }
+  }
+  #p-aether-lang .al-trace{
+    stroke-dasharray: .13 .87;
+    animation: al-wave 5.2s linear infinite;
+  }
+  #p-aether-lang .al-w1{ animation-delay: -0.74s; }
+  #p-aether-lang .al-w2{ animation-delay: -1.49s; }
+  #p-aether-lang .al-w3{ animation-delay: -2.23s; }
+  #p-aether-lang .al-w4{ animation-delay: -2.97s; }
+  #p-aether-lang .al-w5{ animation-delay: -3.71s; }
+  #p-aether-lang .al-w6{ animation-delay: -4.46s; }
+
   @keyframes al-wobble { 0%, 100% { transform: rotate(-1.6deg) scale(.985); } 50% { transform: rotate(1.6deg) scale(1.015); } }
   @keyframes al-flicker{ 0%, 100% { opacity: .26; } 50% { opacity: .62; } }
   #p-aether-lang .al-wild{
     transform-box: fill-box; transform-origin: center;
     animation: al-wobble 4.4s ease-in-out infinite;
   }
-  #p-aether-lang .al-wild:nth-child(2n){ animation-duration: 5.2s; }
   #p-aether-lang .al-bar-wild{ animation: al-flicker 3.6s ease-in-out infinite; }
   #p-aether-lang .al-set,
   #p-aether-lang .al-bar-set{ animation: none; }
   #p-aether-lang:hover .al-wild,
-  #p-aether-lang:hover .al-bar-wild{ animation-play-state: paused; }
+  #p-aether-lang:hover .al-bar-wild,
+  #p-aether-lang:hover .al-trace{ animation-play-state: paused; }
 
   /* --- tangle ----------------------------------------------------------
      What was asked for: two circles that keep rotating, one grey and one
