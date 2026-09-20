@@ -55,18 +55,29 @@
   #p-aether-lang svg path[stroke-dasharray]{
     animation: al-flow 0.9s linear infinite;
   }
-  @keyframes al-settle { 0%,72%,100% { opacity:1; } 36% { opacity:.42; } }
+  @keyframes al-settle { 0%,93.3%,100% { opacity:1; } 36% { opacity:.42; } }
   #p-aether-lang svg rect:last-of-type{ animation: al-settle 1.2s ease-in-out infinite; }
 
-  /* --- tangle: no motion ----------------------------------------------
-     The rule here selected the svg's direct child groups, and one of those
-     groups holds the label rather than a loop, so the caption slid back and
-     forth: a word flying across the figure. Selecting structure by position
-     is fragile when the markup is not yours to guarantee.
+  /* --- tangle ----------------------------------------------------------
+     What was asked for: two circles that keep rotating, one grey and one
+     black. The earlier rule selected child groups by position and caught a
+     label, which is why a word flew across the card. These select the two
+     stroked loops by their own colour, so no label can be picked up however
+     the figure is later redrawn.
 
-     Restored to still. tangle was close to a day's work and does not need to
-     out-perform the projects that took a hundred times longer; a linked pair
-     that simply sits there is the correct amount of drama for it. */
+     They turn in opposite directions and never stop, because two loops that
+     are genuinely linked cannot be pulled apart however they are turned,
+     which is the whole certificate. */
+  @keyframes tg-turn     { from { transform: rotate(0deg); }   to { transform: rotate(360deg); } }
+  @keyframes tg-turn-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+  #p-tangle svg path[stroke="var(--ink)"]{
+    transform-box: fill-box; transform-origin: center;
+    animation: tg-turn 14s linear infinite;
+  }
+  #p-tangle svg path[stroke="var(--muted)"]{
+    transform-box: fill-box; transform-origin: center;
+    animation: tg-turn-rev 14s linear infinite;
+  }
 
   /* --- caustic ---------------------------------------------------------
      The failure it detects is a collapse, so the arrows that collapse
@@ -74,7 +85,7 @@
   @keyframes cs-collapse { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
   #p-caustic svg path[stroke], #p-caustic svg line[stroke]{
     stroke-dasharray: 11 11;
-    animation: cs-collapse 0.9s linear infinite;
+    animation: cs-collapse 0.9s ease-in-out infinite;
   }
 
   /* --- monodromy -------------------------------------------------------
@@ -118,7 +129,7 @@
      rather than simply present, one after another, and the survivor is
      left alone. */
   @keyframes nv-strike { 0% { opacity:0; } 18%,100% { opacity:1; } }
-  #p-nerve svg line[stroke*="coral"]{ animation: nv-strike 2s ease-out infinite; }
+  #p-nerve svg line[stroke*="coral"]{ animation: nv-strike 2s ease-in-out infinite; }
   #p-nerve svg line[stroke*="coral"]:nth-of-type(2){ animation-delay:.45s; }
   #p-nerve svg line[stroke*="coral"]:nth-of-type(3){ animation-delay:.9s; }
 
@@ -142,14 +153,14 @@
      revisited are the ones that matter, and the redundant edge pulses only
      while they are lit. Nothing here invents motion: the defect genuinely
      is an ordering, and this is what watching it happen looks like. */
-  @keyframes tf-focus { 0%,22% { opacity:1; } 28%,100% { opacity:.26; } }
+  @keyframes tf-focus { 0%,1.5% { opacity:1; } 28%,100% { opacity:.26; } }
   #pr-tensorflow-124410 .tfstep{ animation: tf-focus 5.2s ease-in-out infinite; }
   #pr-tensorflow-124410 #tf-s1{ animation-delay: 0s; }
   #pr-tensorflow-124410 #tf-s2{ animation-delay: 1.3s; }
   #pr-tensorflow-124410 #tf-s3{ animation-delay: 2.6s; }
   #pr-tensorflow-124410 #tf-s4{ animation-delay: 3.9s; }
 
-  @keyframes tf-survive { 0%,48% { opacity:.2; } 62%,100% { opacity:1; } }
+  @keyframes tf-survive { 0%,1.5% { opacity:.2; } 62%,100% { opacity:1; } }
   #pr-tensorflow-124410 #tf-redundant{ animation: tf-survive 5.2s ease-in-out infinite; }
 
   #pr-tensorflow-124410:hover .tfstep,
@@ -168,7 +179,7 @@
   #pr-nemo-relay-481 #nr-keys text:nth-of-type(5){
     animation: nr-differ 1.3s ease-in-out infinite;
   }
-  @keyframes nr-gather { 0%,12% { opacity:0; transform:translateY(-7px); } 26%,100% { opacity:1; transform:translateY(0); } }
+  @keyframes nr-gather { 0%,3.1% { opacity:0; transform:translateY(-7px); } 26%,100% { opacity:1; transform:translateY(0); } }
   #pr-nemo-relay-481 #nr-stack circle{
     transform-box: fill-box; transform-origin: center;
     animation: nr-gather 2.6s ease-out infinite;

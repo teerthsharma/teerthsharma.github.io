@@ -29,20 +29,18 @@
      so a field of 1,015 dots reads as a living population rather than a
      texture. Opacity only: position and colour never change. */
   @keyframes cell-wave {
-    /* Was 0/62/100 at full opacity with a single dip, which meant seventy
-       percent of every cycle was a still frame and the only thing moving was
-       opacity on a four pixel dot. It now travels and shrinks as it dims, and
-       spends most of the cycle in motion. */
+    /* Smooth, not snappy. The travel fills the cycle instead of happening in
+       80ms and holding, and the range is small so a field of a thousand marks
+       breathes rather than flickers. */
     0%   { opacity: 1;   transform: translateY(0) scale(1); }
-    28%  { opacity: .30; transform: translateY(-3px) scale(.68); }
-    56%  { opacity: 1;   transform: translateY(0) scale(1.06); }
+    50%  { opacity: .62; transform: translateY(-2px) scale(.88); }
     100% { opacity: 1;   transform: translateY(0) scale(1); }
   }
   .card__art .pop,
   .proj__art .pop {
     transform-box: fill-box;
     transform-origin: center;
-    animation: cell-wave 1.0s ease-in-out infinite;
+    animation: cell-wave 3.4s ease-in-out infinite;
   }
   .card__art .pop:nth-of-type(6n+1) { animation-delay: -0.0s; }
   .card__art .pop:nth-of-type(6n+2) { animation-delay: -0.7s; }
@@ -66,21 +64,22 @@
      The marker a diagram wants you to end on breathes gently. Radius is
      animated rather than scale so it cannot drift off its own coordinate. */
   @keyframes end-pulse {
-    0%, 100% { opacity: 1; }
-    50%      { opacity: .45; }
+    0%   { opacity: 1; }
+    50%  { opacity: .58; }
+    100% { opacity: 1; }
   }
-  .pulse { animation: end-pulse 0.9s ease-in-out infinite; }
+  .pulse { animation: end-pulse 2.8s ease-in-out infinite; }
 
   /* --- 5. Hairline drift on axes --------------------------------------
      Axis rules and guide lines breathe very slightly, which stops a chart
      from looking printed. */
   @keyframes rule-breathe {
     0%, 100% { opacity: .9; }
-    50%      { opacity: .55; }
+    50%      { opacity: .62; }
   }
   .card__art line[stroke*="hair"],
   .proj__art line[stroke*="hair"] {
-    animation: rule-breathe 1.8s ease-in-out infinite;
+    animation: rule-breathe 5.2s ease-in-out infinite;
   }
 
   /* --- 6. Pause on hover ----------------------------------------------
@@ -102,9 +101,9 @@
     from { opacity: 0; transform: translateY(14px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  .hero__h1   { animation: line-rise 200ms cubic-bezier(.2,.7,.3,1) both; }
-  .hero__sub  { animation: line-rise 200ms cubic-bezier(.2,.7,.3,1) 130ms both; }
-  .hero__note { animation: line-rise 200ms cubic-bezier(.2,.7,.3,1) 240ms both; }
+  .hero__h1   { animation: line-rise 460ms cubic-bezier(.2,.7,.3,1) both; }
+  .hero__sub  { animation: line-rise 460ms cubic-bezier(.2,.7,.3,1) 130ms both; }
+  .hero__note { animation: line-rise 460ms cubic-bezier(.2,.7,.3,1) 240ms both; }
 
   /* --- 8. The wall of marks breathes ----------------------------------
      A pulse travels across the eleven proof cells, one after another, so
@@ -116,18 +115,18 @@
      as the pulse passes, which is what makes the wall look like it is
      being read rather than displayed. */
   @keyframes cell-glow {
-    0%, 72%, 100% { box-shadow: var(--e1); }
-    18%           { box-shadow: 0 1px 0 #fff inset,
-                                0 2px 6px rgba(36,86,220,.16),
-                                0 10px 26px rgba(36,86,220,.14); }
+    0%, 100% { box-shadow: var(--e1); }
+    50%      { box-shadow: 0 1px 0 #fff inset,
+                           0 2px 6px rgba(36,86,220,.16),
+                           0 10px 26px rgba(36,86,220,.14); }
   }
   @keyframes mark-wake {
-    0%, 72%, 100% { filter: saturate(.72) opacity(.82); }
-    18%           { filter: saturate(1)   opacity(1); }
+    0%, 100% { filter: saturate(.80) opacity(.88); }
+    50%      { filter: saturate(1) opacity(1); }
   }
-  .proofcell { animation: cell-glow 2.2s ease-in-out infinite; }
+  .proofcell { animation: cell-glow 5.6s ease-in-out infinite; }
   .proofcell__org,
-  .proofcell img { animation: mark-wake 2.2s ease-in-out infinite; }
+  .proofcell img { animation: mark-wake 5.6s ease-in-out infinite; }
 
   .proofcell:nth-of-type(1)  { animation-delay: 0ms; }
   .proofcell:nth-of-type(2)  { animation-delay: 100ms; }
