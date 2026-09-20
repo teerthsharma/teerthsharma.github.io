@@ -48,15 +48,23 @@
   #p-epsilon-hollow svg ellipse:nth-of-type(3){ animation-delay:-1.16s; }
 
   /* --- Aether-Lang -----------------------------------------------------
-     A loop that ends when its shape stops changing. The pipeline pulses
-     along its length and the feedback path travels, so the reader sees a
-     cycle running rather than a diagram of one. */
-  @keyframes al-flow { from { stroke-dashoffset: 18; } to { stroke-dashoffset: 0; } }
-  #p-aether-lang svg path[stroke-dasharray]{
-    animation: al-flow 0.9s linear infinite;
+     The claim is that the loop ends because the shape stopped changing, so
+     the figure ends the same way: the early passes are still moving and the
+     settled ones are perfectly still. The stillness is not an absence of
+     animation, it is the result being shown. Nothing here selects by
+     position, so the curves cannot be swapped for a label by a later redraw. */
+  @keyframes al-wobble { 0%, 100% { transform: rotate(-1.6deg) scale(.985); } 50% { transform: rotate(1.6deg) scale(1.015); } }
+  @keyframes al-flicker{ 0%, 100% { opacity: .26; } 50% { opacity: .62; } }
+  #p-aether-lang .al-wild{
+    transform-box: fill-box; transform-origin: center;
+    animation: al-wobble 4.4s ease-in-out infinite;
   }
-  @keyframes al-settle { 0%,93.3%,100% { opacity:1; } 36% { opacity:.42; } }
-  #p-aether-lang svg rect:last-of-type{ animation: al-settle 1.2s ease-in-out infinite; }
+  #p-aether-lang .al-wild:nth-child(2n){ animation-duration: 5.2s; }
+  #p-aether-lang .al-bar-wild{ animation: al-flicker 3.6s ease-in-out infinite; }
+  #p-aether-lang .al-set,
+  #p-aether-lang .al-bar-set{ animation: none; }
+  #p-aether-lang:hover .al-wild,
+  #p-aether-lang:hover .al-bar-wild{ animation-play-state: paused; }
 
   /* --- tangle ----------------------------------------------------------
      What was asked for: two circles that keep rotating, one grey and one
@@ -80,13 +88,16 @@
   }
 
   /* --- caustic ---------------------------------------------------------
-     The failure it detects is a collapse, so the arrows that collapse
-     travel and the ones that stay separate do not. */
-  @keyframes cs-collapse { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
-  #p-caustic svg path[stroke], #p-caustic svg line[stroke]{
-    stroke-dasharray: 11 11;
-    animation: cs-collapse 0.9s ease-in-out infinite;
-  }
+     The rays are the drawing and the cusp is the claim, so the rays are what
+     moves: a slow bloom passes along the bundle and the crowded region stays
+     lit longest, because that is where they overlap. Selected by class, never
+     by position, so a later redraw cannot animate a label by accident. */
+  @keyframes cs-bloom { 0%, 100% { opacity: .38; } 50% { opacity: .95; } }
+  @keyframes cs-burn  { 0%, 100% { opacity: .62; r: 8; } 50% { opacity: 1; r: 11; } }
+  #p-caustic #cs-out .cs-ray{ animation: cs-bloom 4.6s ease-in-out infinite; }
+  #p-caustic #cs-cusp{ animation: cs-burn 4.6s ease-in-out infinite; }
+  #p-caustic:hover #cs-out .cs-ray,
+  #p-caustic:hover #cs-cusp{ animation-play-state: paused; }
 
   /* --- monodromy -------------------------------------------------------
      The result is that a frame comes back rotated, so the frames rotate. */
@@ -148,29 +159,34 @@
   }
 
   /* --- tensorflow #124410 ---------------------------------------------
-     Six reachability facts, and the bug is that one of them never arrives.
-     So five cells brighten in the order the code actually learns them and
-     the sixth stays down, refusing, for the whole cycle. The redundant edge
-     surfaces underneath only once the refusal has been seen, because that
-     is the causation: the missing fact is why the edge survived the prune.
+     Composition borrowed from how a result is presented on the DeepMind
+     pages: centred, given air, and almost nothing written on top of the
+     drawing, with the words above it and in the caption below. That is the
+     fix for the labels as much as it is the look, because a label that is
+     not sitting on the drawing cannot collide with it.
 
-     Smooth rather than fast. Each cell holds most of the cycle and the
-     travel is eased, so a field of marks breathes instead of flickering. */
-  @keyframes tf-learn  { 0%, 8% { opacity: .30; } 22%, 100% { opacity: 1; } }
-  @keyframes tf-refuse { 0%, 100% { opacity: .34; } 50% { opacity: .62; } }
-  @keyframes tf-survive{ 0%, 44% { opacity: .22; } 66%, 100% { opacity: 1; } }
+     Five facts brighten in the order the code learns them. The sixth is the
+     only pale shape and it stays pale, breathing slightly, refusing for the
+     whole cycle. The edge it should have removed surfaces after it, because
+     that is the causation and not merely the sequence. */
+  @keyframes tf-learn  { 0%, 6% { opacity: .28; } 20%, 100% { opacity: 1; } }
+  @keyframes tf-refuse { 0%, 100% { opacity: .55; } 50% { opacity: .92; } }
+  @keyframes tf-survive{ 0%, 46% { opacity: .18; } 68%, 100% { opacity: 1; } }
 
   #pr-tensorflow-124410 .tf-fact{ animation: tf-learn 5.6s ease-in-out infinite; }
   #pr-tensorflow-124410 #tf-c43{ animation-delay: 0s; }
-  #pr-tensorflow-124410 #tf-c42{ animation-delay: .5s; }
-  #pr-tensorflow-124410 #tf-c41{ animation-delay: 1s; }
-  #pr-tensorflow-124410 #tf-c32{ animation-delay: 1.5s; }
-  #pr-tensorflow-124410 #tf-c21{ animation-delay: 2s; }
-  #pr-tensorflow-124410 #tf-c31{ animation: tf-refuse 3.2s ease-in-out infinite; }
-  #pr-tensorflow-124410 #tf-redundant{ animation: tf-survive 5.6s ease-in-out infinite; }
+  #pr-tensorflow-124410 #tf-c42{ animation-delay: .45s; }
+  #pr-tensorflow-124410 #tf-c41{ animation-delay: .9s; }
+  #pr-tensorflow-124410 #tf-c32{ animation-delay: 1.35s; }
+  #pr-tensorflow-124410 #tf-c21{ animation-delay: 1.8s; }
+  #pr-tensorflow-124410 #tf-c31{ animation: tf-refuse 3.4s ease-in-out infinite; }
+  #pr-tensorflow-124410 #tf-redundant,
+  #pr-tensorflow-124410 #tf-link{ animation: tf-survive 5.6s ease-in-out infinite; }
 
   #pr-tensorflow-124410:hover .tf-fact,
-  #pr-tensorflow-124410:hover #tf-redundant{ animation-play-state: paused; }
+  #pr-tensorflow-124410:hover #tf-c31,
+  #pr-tensorflow-124410:hover #tf-redundant,
+  #pr-tensorflow-124410:hover #tf-link{ animation-play-state: paused; }
 
   /* --- NVIDIA/NeMo-Relay #481 -----------------------------------------
      His only upstream Rust work, and the material is unusually good: the

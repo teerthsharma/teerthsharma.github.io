@@ -787,3 +787,18 @@ img,svg{ max-width:100%; display:block; }
   color: var(--muted);
   max-width: 46ch;
 }
+
+/* ---------- Words do not move ------------------------------------------
+   .pop carries a translateY, and text elements had been given that class, so
+   every label in every figure was sliding under the reader. The class is off
+   them now and this makes it permanent: inside a figure, anything that is a
+   word is fixed in place, whatever class a later redraw hands it. Shapes are
+   what move. A label that drifts is unreadable and reads as a fault, which is
+   exactly how it read. */
+.card__art svg text, .proj__art svg text, .hero__art svg text,
+.card__art svg tspan, .proj__art svg tspan, .hero__art svg tspan{
+  transform: none !important;
+  translate: none !important;
+  rotate: none !important;
+  scale: none !important;
+}
