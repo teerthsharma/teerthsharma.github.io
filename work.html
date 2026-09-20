@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=38">
-<link rel="stylesheet" href="motion.css?v=38">
-<link rel="stylesheet" href="art.css?v=38">
+<link rel="stylesheet" href="site.css?v=39">
+<link rel="stylesheet" href="motion.css?v=39">
+<link rel="stylesheet" href="art.css?v=39">
 
 <script type="application/ld+json">
 {
@@ -142,8 +142,8 @@
   <rect class="pop" data-label="a43, the weight from token 4 to token 3" x="204" y="216" width="70" height="50" rx="3" fill="var(--blue-700)"/>
   <rect class="pop" data-label="token 4 attends itself" x="276" y="216" width="70" height="50" rx="3" fill="var(--blue-500)"/>
 
-  <text x="120" y="365" text-anchor="middle" font-size="12" font-weight="700" fill="var(--blue-700)">a32</text>
-  <text x="280" y="365" text-anchor="middle" font-size="12" font-weight="700" fill="var(--blue-700)">a43</text>
+  
+  
 
   <!-- the same two cells, read as a path graph riding inside the mask -->
   <line class="draw" pathLength="1" data-label="a32 feeds the composition" x1="167" y1="189" x2="167" y2="241" stroke="#ffffff" stroke-width="2.5"/>
@@ -184,7 +184,7 @@
                 <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="eh-t eh-d">
                   <title id="eh-t">The population thins, the surface does not change</title>
                   <desc id="eh-d">Three hundred pieces of kernel state living as points on a surface: memory, files and the scheduler. When one has to go it is not deleted, it folds onto its neighbour and disappears, which is an elementary collapse. The population thins continuously and the shape of the surface never changes, and that shape is exactly what the kernel is protecting. Written from bare metal on x86_64 with no POSIX and no libc.</desc>
-                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">memory, files and the scheduler, as points on a surface</text>
+                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">memory, files and the scheduler, on one surface</text>
                   <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">an operating system with nowhere else to put them</text>
                   <text x="235" y="452" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">eviction folds a point onto its neighbour</text>
                   <text x="235" y="476" text-anchor="middle" font-size="15" fill="var(--muted)">the population thins and the shape never changes</text>
@@ -217,7 +217,7 @@
                 <desc id="al-d">Fourteen passes of the same loop drawn over one another. The early passes disagree and wander, and each one is still moving. From the seventh they land on each other and become a single crisp curve that does not move at all. Beside them the shape of each pass is recorded as bars, and those stop changing at the same pass. The loop ends there. Nothing counted the passes and no tolerance was set: the exit condition is a property of the shape, and the runtime compiles no_std to bare metal.</desc>
                 <text x="235" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">persistent homology as a language primitive</text>
                 <text x="235" y="50" text-anchor="middle" font-size="15" fill="var(--muted)">no counter, no tolerance, no epoch budget</text>
-                <text x="318" y="104" font-size="15" fill="var(--muted)">the shape of each pass</text>
+                <text x="286" y="104" font-size="14" fill="var(--muted)">the shape of each pass</text>
                 <polyline class="al-wild" points="268.0 238.0 280.1 245.3 290.2 254.1 297.0 263.7 299.7 273.3 298.2 282.2 292.9 289.7 284.6 295.5 274.7 299.6 264.2 302.3 254.3 304.2 245.4 305.9 237.9 307.9 231.6 310.6 226.2 313.9 221.1 317.5 215.9 321.0 210.4 323.9 204.3 325.7 198.0 326.4 191.6 326.0 185.3 324.8 179.3 323.5 173.5 322.4 168.0 322.0 162.5 322.4 156.7 323.5 150.7 324.8 144.4 326.0 138.0 326.4 131.7 325.7 125.6 323.9 120.1 321.0 114.9 317.5 109.8 313.9 104.4 310.6 98.1 307.9 90.6 305.9 81.7 304.2 71.8 302.3 61.3 299.6 51.4 295.5 43.1 289.7 37.8 282.2 36.3 273.3 39.0 263.7 45.8 254.1 55.9 245.3 68.0 238.0 80.5 232.3 91.9 228.0 100.8 224.6 106.5 221.5 108.8 217.9 108.1 213.2 105.3 207.1 101.5 199.6 97.9 191.2 95.6 182.4 95.0 174.0 96.5 166.5 99.8 160.2 104.5 155.2 110.0 151.2 115.9 147.8 121.9 144.5 127.8 141.0 133.7 137.0 139.8 132.8 146.3 128.7 153.1 125.2 160.5 122.8 168.0 122.0 175.5 122.8 182.9 125.2 189.7 128.7 196.2 132.8 202.3 137.0 208.2 141.0 214.1 144.5 220.1 147.8 226.0 151.2 231.5 155.2 236.2 160.2 239.5 166.5 241.0 174.0 240.4 182.4 238.1 191.2 234.5 199.6 230.7 207.1 227.9 213.2 227.2 217.9 229.5 221.5 235.2 224.6 244.1 228.0 255.5 232.3 268.0 238.0" fill="none" stroke="var(--violet-500)" stroke-width="1.4" opacity="0.30" stroke-linejoin="round"/>
                 <polyline class="al-wild" points="285.2 238.0 287.3 245.8 287.0 253.7 284.3 261.1 279.6 267.9 273.3 273.7 266.2 278.7 259.0 282.9 252.4 286.7 246.7 290.6 242.2 295.0 238.7 300.0 235.6 305.6 232.6 311.7 229.2 317.7 224.9 323.1 219.6 327.4 213.4 330.1 206.6 331.1 199.4 330.5 192.3 328.6 185.5 326.2 179.3 323.8 173.5 322.1 168.0 321.5 162.5 322.1 156.7 323.9 150.4 326.3 143.6 329.0 136.3 331.4 128.6 333.0 120.9 333.5 113.3 332.7 106.1 330.6 99.3 327.5 93.0 323.5 87.1 318.9 81.7 313.6 76.9 307.9 72.7 301.7 69.5 294.9 67.4 287.6 66.7 280.0 67.5 272.1 69.8 264.3 73.2 256.8 77.4 249.9 81.6 243.7 85.2 238.0 87.7 232.7 88.7 227.6 88.2 222.1 86.4 216.1 83.9 209.5 81.4 202.1 79.6 194.4 79.2 186.7 80.4 179.5 83.6 173.2 88.3 168.1 94.2 164.2 100.8 161.3 107.4 159.1 113.8 156.8 119.6 154.2 125.0 150.7 130.0 146.3 135.1 141.1 140.5 135.4 146.5 130.0 153.2 125.6 160.4 122.6 168.0 121.5 175.6 122.6 182.8 125.6 189.4 130.2 195.4 135.8 200.6 142.0 205.2 148.2 209.4 154.1 213.3 159.5 217.2 164.4 221.0 168.9 224.8 173.2 228.5 177.5 232.1 181.8 235.6 186.2 239.0 190.5 242.7 194.9 246.7 199.2 251.4 203.4 256.9 207.8 263.0 212.6 269.4 217.8 275.7 223.8 281.2 230.6 285.2 238.0" fill="none" stroke="var(--violet-500)" stroke-width="1.4" opacity="0.35" stroke-linejoin="round"/>
                 <polyline class="al-wild" points="274.2 238.0 273.8 244.9 272.4 251.7 270.3 258.3 267.4 264.6 264.2 270.6 260.7 276.4 257.1 282.0 253.7 287.5 250.3 293.0 246.8 298.5 243.2 303.9 239.1 309.1 234.4 313.8 229.1 317.7 223.2 320.6 216.8 322.6 210.2 323.6 203.6 324.0 197.2 324.0 191.1 324.1 185.2 324.7 179.6 326.0 173.9 328.2 168.0 331.1 161.7 334.5 154.8 337.9 147.5 340.8 139.9 342.7 132.3 343.2 124.9 342.0 118.0 339.3 111.9 335.1 106.6 329.9 102.1 323.9 98.3 317.5 94.9 311.1 91.9 304.8 88.9 298.7 86.1 292.7 83.3 286.9 80.8 281.0 78.6 275.0 76.8 269.0 75.5 262.8 74.7 256.5 74.4 250.3 74.2 244.1 74.2 238.0 74.2 231.9 74.1 225.6 74.1 219.3 74.2 212.9 74.8 206.4 75.9 199.8 77.8 193.5 80.5 187.5 84.0 181.9 88.2 176.7 92.8 172.1 97.7 167.7 102.6 163.4 107.4 159.0 112.1 154.3 116.8 149.4 121.8 144.3 127.1 139.2 132.9 134.6 139.3 130.9 146.2 128.5 153.5 127.7 160.8 128.6 168.0 131.1 174.8 135.0 180.9 139.7 186.6 144.7 191.7 149.5 196.6 153.8 201.4 157.3 206.5 159.9 211.9 161.9 217.7 163.6 223.9 165.2 230.2 167.1 236.4 169.6 242.2 172.9 247.6 176.9 252.4 181.6 256.5 186.9 260.2 192.5 263.3 198.5 266.2 204.7 268.7 211.0 270.9 217.5 272.7 224.2 273.8 231.1 274.2 238.0" fill="none" stroke="var(--violet-500)" stroke-width="1.4" opacity="0.40" stroke-linejoin="round"/>
@@ -281,7 +281,7 @@
                 <rect class="al-bar-set" x="318.0" y="339.0" width="31.0" height="7" rx="2" fill="var(--violet-700)" opacity="1.00"/>
                 <rect class="al-bar-set" x="340.4" y="339.0" width="19.4" height="7" rx="2" fill="var(--violet-700)" opacity="1.00"/>
                 <line x1="308" y1="215.0" x2="452" y2="215.0" stroke="var(--violet-700)" stroke-width="2"/>
-                <text x="235" y="418" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">the early passes still move, the settled ones do not</text>
+                <text x="235" y="418" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">early passes move, settled ones do not</text>
                 <text x="235" y="440" text-anchor="middle" font-size="15" fill="var(--muted)">and the loop ends where the moving stops</text>
                 <text x="235" y="478" text-anchor="middle" font-size="15" fill="var(--muted)">runtime compiles <tspan class="mono">no_std</tspan> to bare metal</text>
               </svg>
@@ -313,8 +313,8 @@
                   <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">240 bars, and one cut decides which are real</text>
                   <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">long bars are structure, short bars are noise</text>
                   <text x="235" y="438" text-anchor="middle" font-size="18" font-weight="600" fill="var(--violet-700)">what crosses the cut becomes a feature</text>
-                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">an ordinary column, usable by anyone already building a model</text>
-                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">persistent homology and Betti-curve features, Rust core with a Python API</text>
+                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">an ordinary column any model can use</text>
+                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">persistent homology, Rust core with a Python API</text>
                 </svg>
               </div>
             <figcaption class="fig__cap">Long bars are structure, short bars are noise, and the cut is the feature.</figcaption>
@@ -371,7 +371,7 @@
                 <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="nv-t nv-d">
                   <title id="nv-t">Four of his own hypotheses, tested against a control that could kill them</title>
                   <desc id="nv-d">Four columns of evidence standing against the control they were all tested with. Three come apart and fall away, because three of the four hypotheses did not survive it, and one holds. The control was built to be capable of killing the result and what it said was published either way, across 224 passing tests.</desc>
-                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">four hypotheses, and the control that could kill them</text>
+                  <text x="235" y="34" text-anchor="middle" font-size="16" font-weight="600" fill="var(--ink)">four hypotheses, and a control that could kill them</text>
                   <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">built on purpose to be able to</text>
                   <text x="235" y="434" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">3 of its own 4 hypotheses withdrawn</text>
                   <text x="235" y="458" text-anchor="middle" font-size="15" fill="var(--muted)">the one left is worth more because the others were let go</text>
@@ -445,7 +445,7 @@
                   <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">neither of them contains the coupling</text>
                   <text x="235" y="430" text-anchor="middle" font-size="18" font-weight="600" fill="var(--violet-700)">it exists only where they overlap</text>
                   <text x="235" y="454" text-anchor="middle" font-size="15" fill="var(--muted)">and states settle onto it rather than being put there</text>
-                  <text x="235" y="494" text-anchor="middle" font-size="16" fill="var(--muted)">computational Faraday tensor, coupling by fixed point projection</text>
+                  <text x="235" y="494" text-anchor="middle" font-size="16" fill="var(--muted)">Faraday tensor, coupling by fixed point projection</text>
                 </svg>
               </div>
             <figcaption class="fig__cap">Two fields at right angles, and the third quantity that falls out where they meet.</figcaption>
@@ -475,7 +475,7 @@
                   <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">a real gap, or no answer at all</text>
                   <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">32 comparisons, and the gap narrows going down</text>
                   <text x="235" y="438" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">once the intervals touch, nothing is returned</text>
-                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">the ordering would have been the arithmetic and not the data</text>
+                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">the ordering would be the arithmetic, not the data</text>
                   <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">top-k, argmin and threshold, certified or refused</text>
                 </svg>
               </div>
@@ -509,7 +509,7 @@
                   <text x="350" y="112" text-anchor="middle" font-size="17" font-weight="700" fill="var(--coral-700)">shapely</text>
                   <text x="350" y="134" text-anchor="middle" font-size="15" fill="var(--muted)">0 refused, 336 wrong</text>
                   <text x="235" y="446" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">refusing is the price of never being wrong</text>
-                  <text x="235" y="470" text-anchor="middle" font-size="15" fill="var(--muted)">a wrong answer does not announce itself, which is why they are scattered</text>
+                  <text x="235" y="470" text-anchor="middle" font-size="15" fill="var(--muted)">a wrong answer does not announce itself</text>
                   <text x="235" y="504" text-anchor="middle" font-size="16" fill="var(--muted)">pieces and enclosed faces, or nothing at all</text>
                 </svg>
               </div>
@@ -564,7 +564,7 @@
 
 </main>
 
-<script src="fig.js?v=38" defer></script>
-<script src="site.js?v=38" defer></script>
+<script src="fig.js?v=39" defer></script>
+<script src="site.js?v=39" defer></script>
 </body>
 </html>
