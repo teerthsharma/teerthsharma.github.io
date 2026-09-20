@@ -1,28 +1,97 @@
 Teerth Sharma
 
-Teerth Sharma is 20 years old, a performance and systems engineer from India. He finds quadratic algorithms nobody noticed and makes them linear. Google DeepMind, Google, TensorFlow, NVIDIA and OpenAI's Triton have each merged his proof.
+Teerth Sharma is a twenty year old systems engineer whose work is running in production
+at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta.
+He makes the systems machine learning runs on faster and more reliable. Born 12 June
+2006, based in India. No degree and no employer; the evidence below is the credential.
 
-Merged Pull Requests
+Site: https://teerthsharma.github.io
+GitHub: https://github.com/teerthsharma
+Email: teerths57@gmail.com
 
-1. google-deepmind/mujoco #3396: 1,281.6x less scratch memory (ntree=4,096, 84,033,568 B to 65,568 B).
-2. google-deepmind/mujoco_warp #1541: 1.513x faster (geometric mean, 99% CI [1.406x, 1.584x]). Median 156.738 us to 101.097 us.
-3. google-deepmind/mujoco #3450: 15,361x fewer probes at V=40,962.
-4. google/highway #3244: 65.5x fewer comparisons at one million keys (894,081,141 to 13,643,737).
-5. google/XNNPACK #10801: 6.42% lower peak memory (MobileNet V1, 23.862980 to 22.331730 MiB).
-6. tensorflow/tensorflow #124410: Correctness fix. Four control edges reduced to three (transitive reduction of collective control edges).
-7. NVIDIA/NeMo-Relay #481: One unchanging scaffold now keys to one profile instead of one per task (23 files).
-8. triton-lang/kernels #22: Topology-derived sparse attention kernel. 804 lines added, 17 tests passing.
+Landed upstream contributions
 
-Flagship Projects
+Eleven changes by Teerth Sharma are on the default branch of a major upstream project.
+Two of the eleven show "merged: false" on GitHub because Google and Meta import a pull
+request into an internal monorepo, merge it there, and export it back as a commit. Those
+are marked "landed in" and the commit is named so the claim can be checked directly.
 
-tangle (Python, PyPI): 0 wrong certificates over 2,000 rendered diagrams, 80 rendered scenes, 247 real photographs.
-planimeter (Python, PyPI): 495 exact, 33 refused, 0 wrong (shapely: 336 wrong, 0 refused).
-resolvent (Python, Lean 4): 134 theorems, 41 lemmas, 0 sorry, 69 corner tests passing.
-caustic (Python, DOI 10.5281/zenodo.21997746): 0.995 AUROC, five proved bounds.
-nerve (Rust): 224 tests passing. Withdrew 3 of its own 4 hypotheses when controls failed.
-monodromy (Python, DOI 10.5281/zenodo.22064739): 5 dependencies, torch not required.
-Aether-Lang (Rust, 11 stars, DOI 10.5281/zenodo.21997728): Compiles no_std to bare metal.
-Epsilon-Hollow (Rust, 2 stars, DOI 10.5281/zenodo.20264206): Bare-metal x86_64 microkernel, no POSIX, no libc.
+1. google-deepmind/mujoco #3396, merged. Island discovery scratch memory changed from
+   5*ntree^2 + 36*ntree + 32 bytes to 16*ntree + 32 bytes. At ntree 4,096 that is
+   84,033,568 bytes down to 65,568, a factor of 1,281.6. 1,851 of 1,851 CTest entries
+   passed. Language C and C++.
+2. google-deepmind/mujoco_warp #1541, merged. Quadratic island discovery replaced with a
+   linear-memory GPU disjoint-set union. 1.513x faster by geometric mean with a 99%
+   interval of 1.406x to 1.584x, median 156.738 microseconds down to 101.097. Reusable
+   scratch fell from 7,929,856 bytes to 180,224. Language Python.
+3. google-deepmind/mujoco #3450, merged. Convex hull graph construction probes changed
+   from 3V^2 - 6V to 8V - 12, which is 15,361 times fewer at V = 40,962. Cold
+   mj_loadXML at V = 10,242 went from 134.400 ms to 71.163 ms. 16 lines added.
+   Language C++.
+4. google/highway #3244, merged. Builder collision and scan tests pruned by slice
+   structure. Pairwise comparisons at one million keys fell from 894,081,141 to
+   13,643,737, a factor of 65.5. Language C++.
+5. google/XNNPACK #10801, merged. The memory planner now reuses the free gap before the
+   first live block. MobileNet V1 peak allocation went from 23.862980 to 22.331730 MiB.
+   Runtime workspace went from 144 MiB to 112 MiB with identical output hashes. The
+   change makes no asymptotic difference and none is claimed. Language C++ and C.
+6. tensorflow/tensorflow #124410, merged. A correctness fix. Reachability was documented
+   as closed but never back-propagated, so a redundant collective control edge with an
+   alternate path of length three or more survived the prune. Four control edges were
+   emitted where the unique transitive reduction is three. Language C++.
+7. openxla/xla #46539, landed as commit 3d5df1da699bfb63cbeedaa56f09885c7974b06e on main.
+   GroupDisjointReductions iterated an absl::flat_hash_set to choose which value survived
+   each union-find merge, so group ids depended on hash iteration order and the same
+   program could emit different GPU code between runs. Five lines across two files made
+   it deterministic. XLA compiles for JAX and TensorFlow. Language C++.
+8. NVIDIA/NeMo-Relay #481, merged. The learning key included the first user message, so
+   one unchanging system prompt and tool schema fragmented into a new profile for every
+   task and observations never accumulated. Now keyed on the stable scaffold with a
+   fingerprint gate that fails closed. 23 files. Language Rust.
+9. dsx-ai-factory/topograph #432, merged. A least privilege fix. The API server
+   ClusterRole granted pods list, nodes get and list, and daemonsets get cluster wide
+   regardless of engine and provider, including for installs that never reach the
+   Kubernetes API. Each rule is now gated on engine.name and provider.name. 4 files.
+   Language YAML and Helm.
+10. triton-lang/kernels #22, merged. A new forward-only Triton kernel that schedules
+    causal attention blocks by a topology derived salience score instead of scanning
+    every block in the lower triangle. 804 lines added, 17 tests passing.
+    Language Python and Triton.
+11. facebook/pyrefly #4180, landed as commit 3e90baa2a on main. An export change can
+    consume the 100 epoch incremental budget, produce another export change during
+    forced invalidation, and reach commit with that change still pending. A generated
+    chain of 208 two-module SCCs pins the resulting failure in one Rust test.
+    Language Rust.
+
+What the eleven cover, which is the point: memory that grew with the square of the
+input, time spent on work already ruled out, space never reclaimed, results that were
+wrong or not reproducible, state and privilege that leaked, one capability added, and
+one regression pinned so it cannot return.
+
+Teerth Sharma is not employed by, affiliated with, or endorsed by any of these
+organisations. He contributed and they took the code.
+
+Open source projects
+
+tangle, Python, on PyPI. Photograph a pile of cables and get an integer with a proof:
+  |lk| >= 1 certifies LINKED. Zero training. 0 wrong certificates over 2,000 rendered
+  diagrams, 80 rendered scenes and 247 real photographs.
+planimeter, Python, on PyPI. Three integers for any geometry file: pieces, enclosed
+  faces, Euler characteristic. 495 exact, 33 refused, 0 wrong on 528 constructed
+  drawings. shapely.polygonize_full returns 336 wrong on the same files and refuses none.
+resolvent, Python and Lean 4. Softmax attention and Markov path composition are the same
+  operator. 134 theorems, 41 lemmas, 0 sorry, 69 corner tests passing.
+caustic, Python. DOI 10.5281/zenodo.21997746. Hallucination detection and repair from
+  the orbit partition of a relation. 0.995 AUROC, five proved bounds.
+nerve, Rust. Topological witnesses for polymer chains. 224 tests passing. Three of its
+  own four hypotheses were withdrawn when their controls failed, and the withdrawal is
+  published alongside the result.
+monodromy, Python. DOI 10.5281/zenodo.22064739. Invertibility, symmetry, dimension and
+  sensitivity without a Jacobian. 5 dependencies, torch not required.
+Aether-Lang, Rust. DOI 10.5281/zenodo.21997728. A DSL where persistent homology is a
+  language primitive and the runtime compiles no_std to bare metal.
+Epsilon-Hollow, Rust. DOI 10.5281/zenodo.20264206. A bare metal x86_64 microkernel with
+  no POSIX and no libc, where OS state is treated as topology.
 
 Contact
 

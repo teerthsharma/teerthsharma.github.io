@@ -18,7 +18,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css">
+<link rel="stylesheet" href="site.css?v=3">
 
 <script type="application/ld+json">
 {
@@ -98,7 +98,7 @@
 <header class="hero">
   <div class="wrap">
     <h1 class="hero__h1">The work nobody asked me to do.</h1>
-    <p class="hero__sub">Fourteen public repositories. Each one starts with a piece of mathematics that predicts a number, and ends with code that measures it.</p>
+    <p class="hero__sub">Fourteen public repositories. In each one I start with a piece of mathematics that predicts a number, and write the code that measures it.</p>
   </div>
 </header>
 
@@ -116,25 +116,22 @@
 
       <article class="proj" id="p-tangle" data-lang="Python" data-doi="false">
         <h3 class="proj__name">tangle</h3>
-        <p class="proj__claim">It never returns a wrong answer, because it would rather return none.</p>
+        <p class="proj__claim">I built tangle to never return a wrong answer. It refuses rather than guesses.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 260" role="img" aria-labelledby="t1-title t1-desc">
-              <title id="t1-title">Three evaluation sets for tangle, all at zero wrong certificates</title>
-              <desc id="t1-desc">Bar chart of 2,000 rendered diagrams, 80 rendered scenes and 247 real photographs, resting on a hard zero line for wrong certificates.</desc>
-              <line x1="40" y1="220" x2="360" y2="220" stroke="var(--ink)" stroke-width="2"/>
-              <rect x="60" y="60" width="60" height="160" fill="var(--green-500)"/>
-              <rect x="170" y="188" width="60" height="32" fill="var(--green-500)"/>
-              <rect x="280" y="163.8" width="60" height="56.2" fill="var(--green-500)"/>
-              <text x="90" y="50" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">2,000</text>
-              <text x="200" y="178" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">80</text>
-              <text x="310" y="153.8" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">247</text>
-              <text x="90" y="238" text-anchor="middle" fill="var(--muted)" font-size="11">diagrams</text>
-              <text x="200" y="238" text-anchor="middle" fill="var(--muted)" font-size="11">scenes</text>
-              <text x="310" y="238" text-anchor="middle" fill="var(--muted)" font-size="11">photographs</text>
-              <text x="200" y="254" text-anchor="middle" fill="var(--green-700)" font-size="11" font-weight="600">0 wrong certificates</text>
+            <svg viewBox="0 0 340 300" role="img" aria-labelledby="t1-title t1-desc">
+              <title id="t1-title">A Hopf link, two loops crossing twice, certified linked</title>
+              <desc id="t1-desc">Two closed loops passing through each other with two crossings, the under strand broken at each crossing to read as physical cable, marked |lk| = 1 and the verdict LINKED.</desc>
+              <path pathLength="1" class="draw" d="M160.52,213.00 A70,70 0 1,1 178.49,200.48" fill="none" stroke="var(--ink)" stroke-width="7" stroke-linecap="round"/>
+              <path pathLength="1" class="draw" d="M179.48,87.00 A70,70 0 1,1 161.51,99.52" fill="none" stroke="var(--muted)" stroke-width="7" stroke-linecap="round"/>
+              <circle class="pop" cx="170" cy="92.55" r="5" fill="var(--ink)"/>
+              <circle class="pop" cx="170" cy="207.45" r="5" fill="var(--ink)"/>
+              <text x="184" y="88" fill="var(--muted)" font-family="var(--font-mono)" font-size="11">1</text>
+              <text x="184" y="216" fill="var(--muted)" font-family="var(--font-mono)" font-size="11">2</text>
+              <text x="170" y="260" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="16" font-weight="700">|lk| = 1</text>
+              <text class="pop" x="170" y="285" text-anchor="middle" fill="var(--green-700)" font-size="14" font-weight="700">LINKED</text>
             </svg>
-            <figcaption class="fig__cap">Evaluation counts against a hard zero line.</figcaption>
+            <figcaption class="fig__cap">Two crossings, one linking number, a certificate.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
@@ -143,32 +140,31 @@
           <span>247 photographs</span>
           <span>0 wrong certificates</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Python</span>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">certificate or nothing</li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/tangle">View tangle on GitHub</a>
       </article>
 
       <article class="proj" id="p-planimeter" data-lang="Python" data-doi="false">
         <h3 class="proj__name">planimeter</h3>
-        <p class="proj__claim">It never returns a wrong answer, because it would rather return none.</p>
+        <p class="proj__claim">shapely.polygonize_full returns 336 wrong answers on the files where planimeter returns none.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 200" role="img" aria-labelledby="t2-title t2-desc">
-              <title id="t2-title">planimeter's exact and refused counts opposed against shapely's wrong count</title>
-              <desc id="t2-desc">Two bars opposed around a shared zero axis: planimeter scores 495 exact and 33 refused with 0 wrong, shapely.polygonize_full scores 336 wrong with 0 refused.</desc>
-              <line x1="200" y1="60" x2="200" y2="170" stroke="var(--ink)" stroke-width="1.5"/>
-              <rect x="200" y="72" width="168.75" height="32" fill="var(--green-500)"/>
-              <rect x="368.75" y="72" width="11.25" height="32" fill="var(--hair2)"/>
-              <rect x="85.455" y="126" width="114.545" height="32" fill="var(--coral-500)"/>
-              <rect x="20" y="126" width="65.455" height="32" fill="var(--hair2)"/>
-              <text x="290" y="66" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="600">planimeter</text>
-              <text x="110" y="120" text-anchor="middle" fill="var(--ink)" font-size="12" font-weight="600">shapely</text>
-              <text x="284" y="44" text-anchor="middle" fill="var(--green-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">495 exact</text>
-              <text x="398" y="44" text-anchor="end" fill="var(--muted)" font-family="var(--font-mono)" font-size="11">33 refused</text>
-              <text x="143" y="176" text-anchor="middle" fill="var(--coral-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">336 wrong</text>
+            <svg viewBox="0 0 400 260" role="img" aria-labelledby="t2-title t2-desc">
+              <title id="t2-title">A closed outline with an enclosed hole, and planimeter's tally against shapely</title>
+              <desc id="t2-desc">A hand drawn boundary with a lightly shaded enclosed face around a hole, annotated with the pieces, enclosed faces and Euler characteristic it returns, and a tally of planimeter's 495 exact and 33 refused against shapely's 336 wrong.</desc>
+              <path pathLength="1" class="draw" d="M200,20 C235,17 262,38 270,72 C278,105 265,138 235,157 C208,174 172,172 148,151 C124,131 118,95 133,65 C146,39 168,23 200,20 Z M200,74 C216,73 228,83 230,98 C232,112 222,124 207,128 C193,132 178,126 172,113 C167,101 172,86 186,78 C191,75 195,74 200,74 Z" fill-rule="evenodd" fill="var(--green-100)" stroke="var(--ink)" stroke-width="3"/>
+              <text x="200" y="192" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="12">pieces 1 &#183; enclosed faces 1 &#183; &#967; = 0</text>
+              <line x1="20" y1="208" x2="380" y2="208" stroke="var(--hair2)" stroke-width="1"/>
+              <rect x="20" y="222" width="168.75" height="16" fill="var(--green-500)"/>
+              <rect x="188.75" y="222" width="11.25" height="16" fill="var(--hair2)"/>
+              <text x="20" y="216" fill="var(--green-700)" font-family="var(--font-mono)" font-size="12" font-weight="700">planimeter: 495 exact, 33 refused, 0 wrong</text>
+              <rect x="20" y="246" width="200" height="16" fill="var(--coral-500)"/>
+              <text x="20" y="245" fill="var(--coral-700)" font-family="var(--font-mono)" font-size="12" font-weight="700">shapely.polygonize_full: 336 wrong, 0 refused</text>
             </svg>
-            <figcaption class="fig__cap">His result opposed against shapely's.</figcaption>
+            <figcaption class="fig__cap">I set my tally against shapely's.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
@@ -177,9 +173,10 @@
           <span>0 wrong</span>
           <span>shapely.polygonize_full: 336 wrong, 0 refused</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Python</span>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">exact or refused</li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/planimeter">View planimeter on GitHub</a>
       </article>
 
@@ -188,192 +185,55 @@
         <p class="proj__claim">Softmax attention and Markov path composition are the same operator.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 150" role="img" aria-labelledby="t3-title t3-desc">
-              <title id="t3-title">175 cells, one per theorem and lemma, no gaps</title>
-              <desc id="t3-desc">A filled grid of 175 cells with no gaps: 134 cells for theorems and 41 cells for lemmas, all proved with 0 sorry.</desc>
-              <g transform="translate(1,4)">
-          <rect x="0" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="16" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="32" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="48" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="64" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="80" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="96" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="112" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="128" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="144" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="160" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="176" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="192" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="208" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="224" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="240" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="256" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="272" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="288" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="304" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="320" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="336" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="352" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="368" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="384" y="0" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="0" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="16" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="32" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="48" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="64" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="80" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="96" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="112" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="128" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="144" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="160" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="176" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="192" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="208" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="224" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="240" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="256" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="272" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="288" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="304" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="320" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="336" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="352" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="368" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="384" y="16" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="0" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="16" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="32" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="48" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="64" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="80" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="96" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="112" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="128" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="144" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="160" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="176" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="192" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="208" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="224" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="240" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="256" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="272" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="288" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="304" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="320" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="336" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="352" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="368" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="384" y="32" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="0" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="16" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="32" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="48" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="64" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="80" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="96" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="112" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="128" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="144" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="160" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="176" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="192" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="208" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="224" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="240" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="256" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="272" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="288" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="304" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="320" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="336" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="352" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="368" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="384" y="48" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="0" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="16" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="32" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="48" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="64" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="80" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="96" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="112" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="128" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="144" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="160" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="176" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="192" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="208" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="224" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="240" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="256" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="272" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="288" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="304" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="320" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="336" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="352" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="368" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="384" y="64" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="0" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="16" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="32" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="48" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="64" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="80" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="96" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="112" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="128" y="80" width="14" height="14" rx="1.5" fill="var(--blue-500)"/>
-          <rect x="144" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="160" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="176" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="192" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="208" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="224" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="240" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="256" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="272" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="288" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="304" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="320" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="336" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="352" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="368" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="384" y="80" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="0" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="16" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="32" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="48" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="64" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="80" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="96" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="112" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="128" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="144" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="160" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="176" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="192" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="208" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="224" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="240" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="256" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="272" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="288" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="304" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="320" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="336" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="352" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="368" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
-          <rect x="384" y="96" width="14" height="14" rx="1.5" fill="var(--blue-700)"/>
+            <svg viewBox="0 0 460 210" role="img" aria-labelledby="t3-title t3-desc">
+              <title id="t3-title">A causal attention grid and a path graph, shown as the same operator</title>
+              <desc id="t3-desc">A 4 by 4 lower triangular grid on the left and a 4 node path graph with composing directed arrows on the right, joined by an equals sign to state they are the same operator.</desc>
+              <defs>
+                <marker id="rv-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 Z" fill="var(--blue-700)"/>
+                </marker>
+                <filter id="rv-grid-field" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB">
+                  <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="11" result="rv-noise"/>
+                  <feDisplacementMap in="SourceGraphic" in2="rv-noise" scale="2" xChannelSelector="R" yChannelSelector="G"/>
+                </filter>
+              </defs>
+              <g filter="url(#rv-grid-field)">
+                <rect class="pop" x="20" y="20" width="34" height="34" rx="3" fill="var(--blue-700)"/>
+                <rect x="58" y="20" width="34" height="34" rx="3" fill="none" stroke="var(--hair2)"/>
+                <rect x="96" y="20" width="34" height="34" rx="3" fill="none" stroke="var(--hair2)"/>
+                <rect x="134" y="20" width="34" height="34" rx="3" fill="none" stroke="var(--hair2)"/>
+                <rect class="pop" x="20" y="58" width="34" height="34" rx="3" fill="var(--blue-500)"/>
+                <rect class="pop" x="58" y="58" width="34" height="34" rx="3" fill="var(--blue-700)"/>
+                <rect x="96" y="58" width="34" height="34" rx="3" fill="none" stroke="var(--hair2)"/>
+                <rect x="134" y="58" width="34" height="34" rx="3" fill="none" stroke="var(--hair2)"/>
+                <rect class="pop" x="20" y="96" width="34" height="34" rx="3" fill="var(--blue-500)"/>
+                <rect class="pop" x="58" y="96" width="34" height="34" rx="3" fill="var(--blue-500)"/>
+                <rect class="pop" x="96" y="96" width="34" height="34" rx="3" fill="var(--blue-700)"/>
+                <rect x="134" y="96" width="34" height="34" rx="3" fill="none" stroke="var(--hair2)"/>
+                <rect class="pop" x="20" y="134" width="34" height="34" rx="3" fill="var(--blue-500)"/>
+                <rect class="pop" x="58" y="134" width="34" height="34" rx="3" fill="var(--blue-500)"/>
+                <rect class="pop" x="96" y="134" width="34" height="34" rx="3" fill="var(--blue-500)"/>
+                <rect class="pop" x="134" y="134" width="34" height="34" rx="3" fill="var(--blue-700)"/>
               </g>
-              <rect x="1" y="128" width="10" height="10" fill="var(--blue-500)"/>
-              <text x="15" y="137" fill="var(--blue-700)" font-size="11">134 theorems</text>
-              <rect x="141" y="128" width="10" height="10" fill="var(--blue-700)"/>
-              <text x="155" y="137" fill="var(--blue-700)" font-size="11">41 lemmas</text>
+              <text x="94" y="192" text-anchor="middle" fill="var(--muted)" font-size="11">causal mask, 4 tokens</text>
+              <text x="205" y="102" text-anchor="middle" fill="var(--ink)" font-size="30" font-weight="700">=</text>
+              <path pathLength="1" class="draw" d="M245,151 Q250,90 325,90 Q400,90 405,151" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-dasharray="1 5" stroke-linecap="round" marker-end="url(#rv-arrow)"/>
+              <path pathLength="1" class="draw" d="M261,151 Q285,110 335,151" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-dasharray="1 5" stroke-linecap="round" marker-end="url(#rv-arrow)"/>
+              <path pathLength="1" class="draw" d="M311,151 Q335,110 385,151" fill="none" stroke="var(--blue-500)" stroke-width="2" stroke-dasharray="1 5" stroke-linecap="round" marker-end="url(#rv-arrow)"/>
+              <line pathLength="1" class="draw" x1="261" y1="161" x2="289" y2="161" stroke="var(--blue-700)" stroke-width="3" marker-end="url(#rv-arrow)"/>
+              <line pathLength="1" class="draw" x1="311" y1="161" x2="339" y2="161" stroke="var(--blue-700)" stroke-width="3" marker-end="url(#rv-arrow)"/>
+              <line pathLength="1" class="draw" x1="361" y1="161" x2="389" y2="161" stroke="var(--blue-700)" stroke-width="3" marker-end="url(#rv-arrow)"/>
+              <circle class="pop" cx="250" cy="161" r="11" fill="var(--blue-100)" stroke="var(--blue-700)" stroke-width="2"/>
+              <circle class="pop" cx="300" cy="161" r="11" fill="var(--blue-100)" stroke="var(--blue-700)" stroke-width="2"/>
+              <circle class="pop" cx="350" cy="161" r="11" fill="var(--blue-100)" stroke="var(--blue-700)" stroke-width="2"/>
+              <circle class="pop" cx="400" cy="161" r="11" fill="var(--blue-100)" stroke="var(--blue-700)" stroke-width="2"/>
+              <text x="250" y="165" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="700">1</text>
+              <text x="300" y="165" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="700">2</text>
+              <text x="350" y="165" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="700">3</text>
+              <text x="400" y="165" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="700">4</text>
+              <text x="325" y="192" text-anchor="middle" fill="var(--muted)" font-size="11">Markov path composition</text>
             </svg>
-            <figcaption class="fig__cap">Every theorem and lemma, one cell each.</figcaption>
+            <figcaption class="fig__cap">The mask and the graph, one operator drawn twice.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
@@ -382,9 +242,10 @@
           <span>0 sorry</span>
           <span>69 corner tests</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Python</span>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">Lean 4 verified, 0 sorry</li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/resolvent">View resolvent on GitHub</a>
       </article>
 
@@ -393,70 +254,97 @@
         <p class="proj__claim">Detects and repairs hallucination from the orbit partition of a relation.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 260" role="img" aria-labelledby="t4-title t4-desc">
-              <title id="t4-title">ROC curve for caustic at 0.995 AUROC</title>
-              <desc id="t4-desc">Receiver operating characteristic curve rising almost immediately toward the top-left corner, with five proved bounds marked along it, well above the diagonal chance line.</desc>
-              <line x1="60" y1="210" x2="360" y2="210" stroke="var(--ink)" stroke-width="1"/>
-              <line x1="60" y1="210" x2="60" y2="20" stroke="var(--ink)" stroke-width="1"/>
-              <line x1="60" y1="210" x2="360" y2="20" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="4 4"/>
-              <path d="M60,210 L66,48.5 L78,27.6 L105,21.9 L180,20.95 L360,20" fill="none" stroke="var(--violet-500)" stroke-width="2.5" stroke-linejoin="round"/>
-              <circle cx="66" cy="48.5" r="4" fill="var(--violet-700)"/>
-              <circle cx="78" cy="27.6" r="4" fill="var(--violet-700)"/>
-              <circle cx="105" cy="21.9" r="4" fill="var(--violet-700)"/>
-              <circle cx="180" cy="20.95" r="4" fill="var(--violet-700)"/>
-              <circle cx="360" cy="20" r="4" fill="var(--violet-700)"/>
-              <text x="52" y="214" text-anchor="end" fill="var(--muted)" font-size="10">0</text>
-              <text x="360" y="224" text-anchor="middle" fill="var(--muted)" font-size="10">1</text>
-              <text x="52" y="24" text-anchor="end" fill="var(--muted)" font-size="10">1</text>
-              <text x="210" y="244" text-anchor="middle" fill="var(--muted)" font-size="11">false positive rate</text>
-              <text x="24" y="115" text-anchor="middle" fill="var(--muted)" font-size="11" transform="rotate(-90 24 115)">true positive rate</text>
-              <text x="220" y="45" text-anchor="middle" fill="var(--violet-700)" font-family="var(--font-mono)" font-size="14" font-weight="700">0.995 AUROC</text>
+            <svg viewBox="0 0 320 280" role="img" aria-labelledby="t4-title t4-desc">
+              <title id="t4-title">Five entities, three collapsing onto one shared answer</title>
+              <desc id="t4-desc">Five distinct entity dots on the left. Arrows carry three of them onto a single shared answer in the middle, the collapse that is the hallucination, while the other two reach their own separate answers. Annotated at 0.995 AUROC.</desc>
+              <defs>
+                <marker id="ca-arrow-c" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 Z" fill="var(--coral-500)"/>
+                </marker>
+                <marker id="ca-arrow-v" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 Z" fill="var(--violet-500)"/>
+                </marker>
+              </defs>
+              <path pathLength="1" class="draw" d="M52,30 C130,40 190,60 236,76" fill="none" stroke="var(--coral-500)" stroke-width="2.5" marker-end="url(#ca-arrow-c)"/>
+              <path pathLength="1" class="draw" d="M52,80 C120,79 180,78 236,79" fill="none" stroke="var(--coral-500)" stroke-width="2.5" marker-end="url(#ca-arrow-c)"/>
+              <path pathLength="1" class="draw" d="M52,130 C130,120 190,100 236,82" fill="none" stroke="var(--coral-500)" stroke-width="2.5" marker-end="url(#ca-arrow-c)"/>
+              <path pathLength="1" class="draw" d="M52,180 C120,178 170,178 236,178" fill="none" stroke="var(--violet-500)" stroke-width="2.5" marker-end="url(#ca-arrow-v)"/>
+              <path pathLength="1" class="draw" d="M52,230 C120,225 170,228 236,228" fill="none" stroke="var(--violet-500)" stroke-width="2.5" marker-end="url(#ca-arrow-v)"/>
+              <circle class="pop" cx="40" cy="30" r="10" fill="var(--blue-500)"/>
+              <circle class="pop" cx="40" cy="80" r="10" fill="var(--violet-500)"/>
+              <circle class="pop" cx="40" cy="130" r="10" fill="var(--amber-500)"/>
+              <circle class="pop" cx="40" cy="180" r="10" fill="var(--mint-500)"/>
+              <circle class="pop" cx="40" cy="230" r="10" fill="var(--violet-700)"/>
+              <circle class="pop" cx="250" cy="80" r="14" fill="var(--ink)"/>
+              <circle class="pop" cx="250" cy="178" r="9" fill="var(--ink)"/>
+              <circle class="pop" cx="250" cy="228" r="9" fill="var(--ink)"/>
+              <text x="250" y="104" text-anchor="middle" fill="var(--coral-700)" font-size="11" font-weight="600">shared answer</text>
+              <text x="20" y="258" fill="var(--muted)" font-size="11">five entities</text>
+              <text x="230" y="258" text-anchor="middle" fill="var(--violet-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">0.995 AUROC</text>
             </svg>
-            <figcaption class="fig__cap">Detection rate against false alarms.</figcaption>
+            <figcaption class="fig__cap">Three entities collapse onto one answer. That collapse is the hallucination.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
           <span>0.995 AUROC</span>
           <span>five proved bounds</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Python</span>
-          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">0.995 AUROC</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a></li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/caustic">View caustic on GitHub</a>
       </article>
 
       <article class="proj" id="p-nerve" data-lang="Rust" data-doi="false">
         <h3 class="proj__name">nerve</h3>
-        <p class="proj__claim">He built the control that could kill his own result, then published what it said.</p>
+        <p class="proj__claim">I built the control that could kill my own result, then published what it said.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 220" role="img" aria-labelledby="t5-title t5-desc">
-              <title id="t5-title">Four hypotheses, three struck through by nerve's own controls</title>
-              <desc id="t5-desc">Four panels for nerve's four hypotheses. The first three carry a strike mark where the control failed; the fourth stands unmarked.</desc>
-              <rect x="20" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
-              <line x1="20" y1="60" x2="100" y2="140" stroke="var(--coral-500)" stroke-width="3"/>
-              <rect x="120" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
-              <line x1="120" y1="60" x2="200" y2="140" stroke="var(--coral-500)" stroke-width="3"/>
-              <rect x="220" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
-              <line x1="220" y1="60" x2="300" y2="140" stroke="var(--coral-500)" stroke-width="3"/>
-              <rect x="320" y="60" width="80" height="80" rx="4" fill="var(--amber-100)" stroke="var(--ink)" stroke-width="2"/>
-              <text x="60" y="158" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">1</text>
-              <text x="160" y="158" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">2</text>
-              <text x="260" y="158" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">3</text>
-              <text x="360" y="158" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="12" font-weight="700">4</text>
-              <text x="200" y="195" text-anchor="middle" fill="var(--coral-700)" font-size="13" font-weight="600">3 of 4 withdrawn</text>
+            <svg viewBox="0 0 300 320" role="img" aria-labelledby="t5-title t5-desc">
+              <title id="t5-title">A polymer chain with one self crossing, and four hypothesis chips, three struck through</title>
+              <desc id="t5-desc">A squiggling open chain of linked beads with one self crossing marked, above four hypothesis chips of which three are struck through by nerve's own controls.</desc>
+              <polyline pathLength="1" class="draw" points="40,50 90,40 140,70 170,120 150,170 100,190 70,150 110,110 160,90 200,60 230,90 220,140" fill="none" stroke="var(--amber-700)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle class="pop" cx="40" cy="50" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="90" cy="40" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="140" cy="70" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="170" cy="120" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="150" cy="170" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="100" cy="190" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="70" cy="150" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="110" cy="110" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="160" cy="90" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="200" cy="60" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="230" cy="90" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="220" cy="140" r="6" fill="var(--amber-500)"/>
+              <circle class="pop" cx="153.6" cy="92.6" r="11" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="2 3"/>
+              <text x="168" y="90" fill="var(--muted)" font-size="10">self crossing</text>
+              <rect class="pop" x="15" y="230" width="60" height="42" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
+              <line pathLength="1" class="draw" x1="15" y1="230" x2="75" y2="272" stroke="var(--coral-500)" stroke-width="3"/>
+              <rect class="pop" x="85" y="230" width="60" height="42" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
+              <line pathLength="1" class="draw" x1="85" y1="230" x2="145" y2="272" stroke="var(--coral-500)" stroke-width="3"/>
+              <rect class="pop" x="155" y="230" width="60" height="42" rx="4" fill="var(--amber-100)" stroke="var(--amber-700)" stroke-width="1.5"/>
+              <line pathLength="1" class="draw" x1="155" y1="230" x2="215" y2="272" stroke="var(--coral-500)" stroke-width="3"/>
+              <rect class="pop" x="225" y="230" width="60" height="42" rx="4" fill="var(--amber-100)" stroke="var(--ink)" stroke-width="2"/>
+              <text x="45" y="255" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">H1</text>
+              <text x="115" y="255" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">H2</text>
+              <text x="185" y="255" text-anchor="middle" fill="var(--muted)" font-family="var(--font-mono)" font-size="12">H3</text>
+              <text x="255" y="255" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="12" font-weight="700">H4</text>
+              <text x="150" y="298" text-anchor="middle" fill="var(--coral-700)" font-size="13" font-weight="600">3 of its own 4 hypotheses withdrawn</text>
+              <text x="150" y="315" text-anchor="middle" fill="var(--amber-700)" font-size="13" font-weight="600">224 tests passing</text>
             </svg>
-            <figcaption class="fig__cap">Four hypotheses, three struck through.</figcaption>
+            <figcaption class="fig__cap">One chain, one crossing. I tested four hypotheses against their own controls.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
           <span>224 tests passing</span>
           <span>3 of its own 4 hypotheses withdrawn</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Rust</span>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Rust</li>
+          <li class="tag tag--class">3 of 4 hypotheses withdrawn</li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/nerve">View nerve on GitHub</a>
       </article>
 
@@ -465,34 +353,52 @@
         <p class="proj__claim">Data analysis and machine learning without the Jacobian.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 300 300" role="img" aria-labelledby="t6-title t6-desc">
-              <title id="t6-title">Five dependencies orbiting monodromy's core</title>
-              <desc id="t6-desc">A single core dot with five dependency dots spaced evenly around it, no sixth dot for torch.</desc>
-              <circle cx="150" cy="150" r="100" fill="none" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="3 3"/>
-              <line x1="150" y1="150" x2="150.0" y2="50.0" stroke="var(--mint-100)" stroke-width="2"/>
-              <line x1="150" y1="150" x2="245.1" y2="119.1" stroke="var(--mint-100)" stroke-width="2"/>
-              <line x1="150" y1="150" x2="208.8" y2="230.9" stroke="var(--mint-100)" stroke-width="2"/>
-              <line x1="150" y1="150" x2="91.2" y2="230.9" stroke="var(--mint-100)" stroke-width="2"/>
-              <line x1="150" y1="150" x2="54.9" y2="119.1" stroke="var(--mint-100)" stroke-width="2"/>
-              <circle cx="150.0" cy="50.0" r="7" fill="var(--mint-500)"/>
-              <circle cx="245.1" cy="119.1" r="7" fill="var(--mint-500)"/>
-              <circle cx="208.8" cy="230.9" r="7" fill="var(--mint-500)"/>
-              <circle cx="91.2" cy="230.9" r="7" fill="var(--mint-500)"/>
-              <circle cx="54.9" cy="119.1" r="7" fill="var(--mint-500)"/>
-              <circle cx="150" cy="150" r="12" fill="var(--mint-700)"/>
-              <text x="150" y="178" text-anchor="middle" fill="var(--mint-700)" font-size="11" font-weight="600">monodromy</text>
+            <svg viewBox="0 0 320 330" role="img" aria-labelledby="t6-title t6-desc">
+              <title id="t6-title">A frame transported around a loop, returning visibly rotated</title>
+              <desc id="t6-desc">A closed loop with a small frame carried around it through four stations. The frame that arrives back at the start is visibly rotated from the frame it left with, the monodromy, computed with no derivative.</desc>
+              <defs>
+                <marker id="mo-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                  <path d="M0,0 L10,5 L0,10 Z" fill="var(--mint-700)"/>
+                </marker>
+              </defs>
+              <circle class="pop" cx="170" cy="165" r="95" fill="none" stroke="var(--mint-500)" stroke-width="2.5"/>
+              <path pathLength="1" class="draw" d="M75,165 A95,95 0 0,1 170,70" fill="none" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="3 4"/>
+              <g transform="translate(170,70) rotate(0)">
+                <circle class="pop" r="5" fill="var(--mint-500)"/>
+                <line pathLength="1" class="draw" x1="0" y1="0" x2="0" y2="-26" stroke="var(--mint-700)" stroke-width="3" stroke-linecap="round" marker-end="url(#mo-arrow)"/>
+              </g>
+              <g transform="translate(265,165) rotate(25)">
+                <circle class="pop" r="5" fill="var(--mint-500)"/>
+                <line pathLength="1" class="draw" x1="0" y1="0" x2="0" y2="-26" stroke="var(--mint-700)" stroke-width="3" stroke-linecap="round" marker-end="url(#mo-arrow)"/>
+              </g>
+              <g transform="translate(170,260) rotate(50)">
+                <circle class="pop" r="5" fill="var(--mint-500)"/>
+                <line pathLength="1" class="draw" x1="0" y1="0" x2="0" y2="-26" stroke="var(--mint-700)" stroke-width="3" stroke-linecap="round" marker-end="url(#mo-arrow)"/>
+              </g>
+              <g transform="translate(75,165) rotate(75)">
+                <circle class="pop" r="5" fill="var(--mint-500)"/>
+                <line pathLength="1" class="draw" x1="0" y1="0" x2="0" y2="-26" stroke="var(--mint-700)" stroke-width="3" stroke-linecap="round" marker-end="url(#mo-arrow)"/>
+              </g>
+              <g transform="translate(170,35) rotate(100)">
+                <circle class="pop" r="5" fill="var(--ink)"/>
+                <line pathLength="1" class="draw" x1="0" y1="0" x2="0" y2="-26" stroke="var(--ink)" stroke-width="3" stroke-linecap="round" marker-end="url(#mo-arrow)"/>
+              </g>
+              <text x="170" y="18" text-anchor="middle" fill="var(--ink)" font-size="11" font-weight="600">back at start, rotated</text>
+              <text x="170" y="305" text-anchor="middle" fill="var(--mint-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">5 dependencies</text>
+              <text x="170" y="322" text-anchor="middle" fill="var(--muted)" font-size="12">torch not required</text>
             </svg>
-            <figcaption class="fig__cap">Five dependencies in orbit around the core.</figcaption>
+            <figcaption class="fig__cap">Four stations around the loop, no derivative needed.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
           <span>5 dependencies</span>
           <span>torch not required</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Python</span>
-          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">no Jacobian required</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a></li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/monodromy">View monodromy on GitHub</a>
       </article>
 
@@ -501,35 +407,57 @@
         <p class="proj__claim">Programs are point clouds. Convergence is a Betti number.</p>
         <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 220" role="img" aria-labelledby="t7-title t7-desc">
-              <title id="t7-title">Step function converging on a Betti number</title>
-              <desc id="t7-desc">A staircase of decreasing steps flattening toward a dashed asymptote, the runtime's persistent homology convergence check.</desc>
-              <line x1="20" y1="210" x2="380" y2="210" stroke="var(--hair2)" stroke-width="1"/>
-              <line x1="20" y1="50" x2="380" y2="50" stroke="var(--hair2)" stroke-width="1.5" stroke-dasharray="4 4"/>
-              <path d="M40,200 H80 V140 H120 V105 H160 V85 H200 V73 H240 V66 H280 V61 H320 V58 H360 V56" fill="none" stroke="var(--violet-500)" stroke-width="2.5"/>
-              <circle cx="40" cy="200" r="3" fill="var(--violet-700)"/>
-              <circle cx="80" cy="140" r="3" fill="var(--violet-700)"/>
-              <circle cx="120" cy="105" r="3" fill="var(--violet-700)"/>
-              <circle cx="160" cy="85" r="3" fill="var(--violet-700)"/>
-              <circle cx="200" cy="73" r="3" fill="var(--violet-700)"/>
-              <circle cx="240" cy="66" r="3" fill="var(--violet-700)"/>
-              <circle cx="280" cy="61" r="3" fill="var(--violet-700)"/>
-              <circle cx="320" cy="58" r="3" fill="var(--violet-700)"/>
-              <circle cx="360" cy="56" r="3" fill="var(--violet-700)"/>
-              <text x="378" y="44" text-anchor="end" fill="var(--violet-700)" font-size="11" font-weight="600">Betti number</text>
-              <text x="200" y="214" text-anchor="middle" fill="var(--muted)" font-size="11">iterations</text>
+            <svg viewBox="0 0 300 300" role="img" aria-labelledby="t7-title t7-desc">
+              <title id="t7-title">A point cloud with a hole, and the detected loop traced around it</title>
+              <desc id="t7-desc">A scattered point cloud arranged so an empty hole is clearly visible in the middle, with the detected loop traced around the hole in a heavier stroke, annotated with the Betti number it represents.</desc>
+              <g>
+                <circle class="pop" cx="218.2" cy="147.5" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="214.1" cy="165.8" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="217.6" cy="180.7" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="217.3" cy="189.9" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="206.2" cy="201.4" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="188.3" cy="204.4" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="178.2" cy="232.5" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="162.8" cy="219.1" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="138.1" cy="239.8" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="125.6" cy="221.0" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="111.9" cy="203.0" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="97.9" cy="199.8" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="98.7" cy="193.5" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="72.1" cy="188.5" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="72.8" cy="171.9" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="75.6" cy="147.8" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="85.8" cy="135.7" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="83.9" cy="127.6" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="90.3" cy="103.1" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="93.9" cy="92.4" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="113.2" cy="87.7" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="129.1" cy="69.1" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="137.4" cy="70.9" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="159.7" cy="62.0" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="175.5" cy="82.6" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="189.3" cy="95.4" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="205.9" cy="85.7" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="209.4" cy="99.9" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="222.0" cy="109.2" r="4" fill="var(--violet-500)"/>
+                <circle class="pop" cx="229.1" cy="137.7" r="4" fill="var(--violet-500)"/>
+              </g>
+              <circle class="pop" cx="150" cy="150" r="80" fill="none" stroke="var(--violet-700)" stroke-width="4"/>
+              <text x="150" y="150" text-anchor="middle" dominant-baseline="central" fill="var(--muted)" font-size="11">hole</text>
+              <text x="150" y="278" text-anchor="middle" fill="var(--violet-700)" font-family="var(--font-mono)" font-size="15" font-weight="700">b&#8321; = 1</text>
             </svg>
-            <figcaption class="fig__cap">Convergence toward a topological invariant.</figcaption>
+            <figcaption class="fig__cap">The loop the runtime detects around the empty middle.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
           <span>11 stars</span>
           <span>compiles no_std to bare metal</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Rust</span>
-          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997728">DOI</a>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Rust</li>
+          <li class="tag tag--class">topology as a primitive</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997728">DOI</a></li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/Aether-Lang">View Aether-Lang on GitHub</a>
       </article>
 
@@ -539,40 +467,46 @@
         <div class="proj__art">
           <figure class="fig">
             <svg viewBox="0 0 300 300" role="img" aria-labelledby="t8-title t8-desc">
-              <title id="t8-title">A point cloud sampled near a circle</title>
-              <desc id="t8-desc">Scattered points clustering around a circle, the manifold Epsilon-Hollow's kernel eviction model collapses along.</desc>
-              <circle cx="150" cy="150" r="100" fill="none" stroke="var(--hair2)" stroke-width="1.5"/>
-              <circle cx="250.0" cy="150.0" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="252.4" cy="173.4" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="247.1" cy="196.8" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="233.8" cy="216.8" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="214.5" cy="230.9" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="192.6" cy="238.5" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="170.9" cy="241.4" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="150.0" cy="242.0" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="129.1" cy="241.4" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="107.4" cy="238.5" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="85.5" cy="230.9" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="66.2" cy="216.8" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="52.9" cy="196.8" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="47.6" cy="173.4" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="50.0" cy="150.0" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="57.4" cy="128.9" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="66.9" cy="110.0" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="77.5" cy="92.1" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="89.8" cy="74.5" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="105.8" cy="58.3" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="126.4" cy="46.4" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="150.0" cy="42.0" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="173.6" cy="46.4" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="194.2" cy="58.3" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="210.2" cy="74.5" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="222.5" cy="92.1" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="233.1" cy="110.0" r="3.4" fill="var(--blue-500)"/>
-              <circle cx="242.6" cy="128.9" r="3.4" fill="var(--blue-500)"/>
-              <text x="150" y="24" text-anchor="middle" fill="var(--blue-700)" font-family="var(--font-mono)" font-size="13" font-weight="700">S&#185;</text>
+              <title id="t8-title">A sphere with latitude and longitude arcs and three labelled clusters</title>
+              <desc id="t8-desc">A circle drawn as a sphere with one latitude arc and two longitude arcs for volume, and three labelled clusters of points on its surface for memory, files and scheduler, lit with a soft glow.</desc>
+              <defs>
+                <filter id="eh-cluster-glow" x="-60%" y="-60%" width="220%" height="220%" color-interpolation-filters="sRGB">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="1.6" result="eh-blur"/>
+                  <feColorMatrix in="eh-blur" type="matrix" values="0 0 0 0 0.141  0 0 0 0 0.337  0 0 0 0 0.863  0 0 0 0.8 0" result="eh-glow"/>
+                  <feMerge>
+                    <feMergeNode in="eh-glow"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
+              </defs>
+              <circle class="pop" cx="150" cy="150" r="95" fill="none" stroke="var(--blue-700)" stroke-width="2.5"/>
+              <ellipse class="pop" cx="150" cy="150" rx="95" ry="26" fill="none" stroke="var(--blue-500)" stroke-width="1.5"/>
+              <ellipse class="pop" cx="150" cy="150" rx="32" ry="95" fill="none" stroke="var(--blue-500)" stroke-width="1.5"/>
+              <ellipse class="pop" cx="150" cy="150" rx="60" ry="95" fill="none" stroke="var(--blue-500)" stroke-width="1.5"/>
+              <g filter="url(#eh-cluster-glow)">
+                <circle class="pop" cx="66.5" cy="120.9" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="72.4" cy="119.3" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="74.2" cy="126.0" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="61.1" cy="113.3" r="3.2" fill="var(--blue-700)"/>
+              </g>
+              <text x="42" y="100" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="600">memory</text>
+              <g filter="url(#eh-cluster-glow)">
+                <circle class="pop" cx="232.9" cy="122.0" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="231.8" cy="125.6" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="227.8" cy="113.3" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="237.4" cy="121.3" r="3.2" fill="var(--blue-700)"/>
+              </g>
+              <text x="258" y="100" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="600">files</text>
+              <g filter="url(#eh-cluster-glow)">
+                <circle class="pop" cx="150.7" cy="232.1" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="146.9" cy="236.4" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="143.2" cy="237.4" r="3.2" fill="var(--blue-700)"/>
+                <circle class="pop" cx="156.3" cy="236.4" r="3.2" fill="var(--blue-700)"/>
+              </g>
+              <text x="150" y="264" text-anchor="middle" fill="var(--blue-700)" font-size="11" font-weight="600">scheduler</text>
+              <text x="150" y="20" text-anchor="middle" fill="var(--ink)" font-family="var(--font-mono)" font-size="12" font-weight="700">bare metal x86_64 &#183; no POSIX &#183; no libc</text>
             </svg>
-            <figcaption class="fig__cap">Samples scattered on the underlying circle.</figcaption>
+            <figcaption class="fig__cap">One sphere, three subsystems living on its surface.</figcaption>
           </figure>
         </div>
         <div class="proj__nums">
@@ -580,10 +514,11 @@
           <span>no POSIX</span>
           <span>no libc</span>
         </div>
-        <div class="proj__tags">
-          <span class="tag">Rust</span>
-          <a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.20264206">DOI</a>
-        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Rust</li>
+          <li class="tag tag--class">bare metal, no libc</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.20264206">DOI</a></li>
+        </ul>
         <a class="card__link" href="https://github.com/teerthsharma/Epsilon-Hollow">View Epsilon-Hollow on GitHub</a>
       </article>
 
@@ -593,6 +528,6 @@
 
 </main>
 
-<script src="site.js" defer></script>
+<script src="site.js?v=3" defer></script>
 </body>
 </html>

@@ -73,8 +73,26 @@ img,svg{ max-width:100%; display:block; }
 
 @media (prefers-reduced-motion: reduce){
   [data-reveal]{ opacity:1; transform:none; transition:none; }
-  .card, .proj, .btn, .filter{ transition:none; }
-  .card:hover, .proj:hover{ transform:none; }
+  .card, .proj, .btn, .filter, .proofcell{ transition:none; }
+  .card:hover, .proj:hover, .proofcell:hover{ transform:none; }
+  .mosaic__grid i, .mosaic__read{ transition:none; }
+}
+
+/* ---------- SVG animation system (draw / pop / wipe / pulse) ----------
+   Base state for .draw/.pop/.wipe is the plain, fully-visible SVG markup —
+   nothing here hides them. site.js (initArt) sets the "hidden" starting
+   inline style only at animation time, then transitions it away, so the
+   page is correct with JS disabled and does nothing extra when
+   prefers-reduced-motion is set (initArt bails out before touching the DOM). */
+.pop, .pulse{ transform-box:fill-box; transform-origin:center; }
+
+@keyframes art-pulse{
+  0%, 100%{ transform:scale(1); }
+  50%{ transform:scale(1.15); }
+}
+.is-pulsing{
+  animation:art-pulse 900ms var(--hover-ease) 2;
+  animation-delay:var(--pulse-delay, 0ms);
 }
 
 /* ---------- Layout ---------- */
@@ -83,11 +101,13 @@ img,svg{ max-width:100%; display:block; }
 .band{ padding:88px 0; background:var(--ground); }
 .band--tint{ background:var(--ground2); }
 
-.grid{ display:grid; gap:24px; }
+.grid{ display:grid; gap:24px; align-items:stretch; }
 .grid--3{ grid-template-columns:repeat(3,1fr); }
 .grid--2{ grid-template-columns:repeat(2,1fr); }
 @media (max-width:1080px){
   .grid--3{ grid-template-columns:repeat(2,1fr); }
+  /* same orphan guard as .proofgrid: only fires when the child count is odd. */
+  .grid--3 > *:nth-child(2n+1):last-child{ grid-column:span 2; }
 }
 @media (max-width:760px){
   .grid--3{ grid-template-columns:1fr; }
@@ -135,6 +155,60 @@ img,svg{ max-width:100%; display:block; }
 .hero__art svg{ width:100%; height:auto; }
 
 .cta-row{ display:flex; flex-wrap:wrap; align-items:center; gap:16px; margin-top:32px; }
+
+/* ---------- Hero (two column, with proof panel) ---------- */
+.hero--split{
+  display:grid; grid-template-columns:1.1fr 1fr; gap:48px; align-items:center;
+}
+.hero--split .hero__copy{ min-width:0; }
+.hero__proof{ min-width:0; }
+
+.proofgrid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+}
+.proofcell{
+  display:flex; flex-direction:column; gap:6px;
+  padding:14px;
+  background:var(--raised);
+  border:1px solid var(--hair);
+  border-radius:8px;
+  box-shadow:var(--e1);
+  min-width:0;
+  transition:box-shadow 140ms var(--hover-ease), transform 140ms var(--hover-ease), border-color 140ms var(--hover-ease);
+}
+.proofcell:hover{
+  box-shadow:var(--e2);
+  transform:translateY(-2px);
+  border-color:var(--hair2);
+}
+.proofcell:focus-visible{
+  outline:2px solid var(--blue-500);
+  outline-offset:2px;
+  box-shadow:var(--e2);
+}
+.proofcell__mark{ width:20px; height:20px; object-fit:contain; flex:none; }
+.proofcell__art{ width:100%; }
+.proofcell__art svg{ width:100%; height:auto; display:block; }
+.proofcell__num{
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-weight:800; font-size:var(--fs-1);
+  color:var(--ink);
+  overflow-wrap:anywhere;
+  min-width:0;
+}
+.proofcell__org{
+  font-family:var(--font-mono); font-size:var(--fs-0);
+  text-transform:uppercase; letter-spacing:0.08em;
+  color:var(--muted);
+}
+@media (max-width:900px){
+  .hero--split{ grid-template-columns:1fr; }
+  .proofgrid{ grid-template-columns:repeat(2,1fr); }
+  /* eleven cells at 2 columns leaves a lone 11th on its own row; give it
+     the full row instead of stranding it. No-op whenever the child count
+     is even. */
+  .proofcell:nth-child(2n+1):last-child{ grid-column:span 2; }
+}
 
 .btn{
   display:inline-flex; align-items:center; justify-content:center;
@@ -232,7 +306,8 @@ img,svg{ max-width:100%; display:block; }
   color:var(--muted);
 }
 .card__link{
-  margin-top:16px;
+  margin-top:auto;
+  padding-top:16px;
   font-weight:600; font-size:var(--fs-0);
   color:var(--blue-700);
   align-self:flex-start;
@@ -286,17 +361,81 @@ img,svg{ max-width:100%; display:block; }
   font-size:var(--fs-0); color:var(--ink);
 }
 .proj__tags{ margin-top:16px; display:flex; flex-wrap:wrap; gap:8px; }
+.tags{ display:flex; flex-wrap:wrap; gap:8px; }
 .tag{
+  display:inline-flex;
+  align-items:center;
+  max-width:100%;
   padding:4px 10px;
   border-radius:999px;
   background:var(--ground2);
   color:var(--muted);
+  font-family:var(--font-mono);
   font-size:var(--fs-0);
-  font-weight:500;
+  font-weight:600;
   text-transform:uppercase;
-  letter-spacing:0.08em;
+  letter-spacing:0.06em;
+  line-height:1.3;
+  overflow-wrap:anywhere;
 }
+.tag--lang{ background:var(--blue-100); color:var(--blue-700); }
+.tag--class{ background:var(--mint-100); color:var(--mint-700); }
 .tag--doi{ background:var(--green-100); color:var(--green-700); }
+
+/* ---------- Mosaic (assembling pictogram, replaces the number strip) ---------- */
+.mosaic{ background:var(--ground2); }
+.mosaic__inner{
+  display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;
+}
+.mosaic__grid{
+  display:grid; grid-template-columns:repeat(40,1fr); gap:2px;
+  max-width:640px;
+}
+.mosaic__grid i{
+  display:block; aspect-ratio:1; border-radius:2px;
+  background:var(--blue-500);
+  opacity:0; transform:scale(.6);
+  transition:opacity 420ms cubic-bezier(.2,.8,.3,1), transform 420ms cubic-bezier(.2,.8,.3,1);
+}
+.mosaic__grid i.is-lit{ opacity:1; transform:scale(1); }
+.mosaic__grid i.is-accent{ background:var(--blue-700); }
+
+.mosaic__read{ transition:opacity 260ms ease; }
+.mosaic__read.is-fading{ opacity:0; }
+.mosaic__org{
+  font-family:var(--font-mono); font-size:var(--fs-0); color:var(--muted);
+  text-transform:uppercase; letter-spacing:0.08em;
+}
+.mosaic__num{
+  margin-top:8px;
+  font-family:var(--font-mono); font-variant-numeric:tabular-nums;
+  font-weight:800; font-size:5.6rem; line-height:1; letter-spacing:-0.02em;
+  color:var(--ink);
+  overflow-wrap:anywhere;
+}
+.mosaic__label{ margin-top:8px; font-size:var(--fs-2); font-weight:600; color:var(--ink); }
+.mosaic__sub{ margin-top:4px; font-size:var(--fs-0); color:var(--muted); }
+
+.mosaic__pause{
+  margin-top:20px;
+  display:inline-flex; align-items:center; gap:6px;
+  padding:8px 14px;
+  border:1px solid var(--hair2);
+  border-radius:999px;
+  background:var(--raised);
+  font-size:var(--fs-0); font-weight:600; color:var(--ink);
+  cursor:pointer;
+  transition:border-color 140ms var(--hover-ease), box-shadow 140ms var(--hover-ease);
+}
+.mosaic__pause:hover{ box-shadow:var(--e1); }
+
+@media (max-width:900px){
+  .mosaic__inner{ grid-template-columns:1fr; }
+}
+@media (max-width:480px){
+  .mosaic__grid{ grid-template-columns:repeat(24,1fr); max-width:420px; }
+  .mosaic__num{ font-size:2.8rem; }
+}
 
 /* ---------- Figures ---------- */
 .fig{ width:100%; }
@@ -319,6 +458,41 @@ img,svg{ max-width:100%; display:block; }
   font-size:var(--fs-1); font-weight:600; color:var(--ink);
 }
 
+/* ---------- Triton block scatter (pr-triton-kernels-22 card) ----------
+   .tri-block goes on every rect of the lower-triangular matrix. Rest state
+   is untouched (no transform), so the triangle is correct with this block
+   absent, with JS disabled, or under reduced motion. The animation only
+   ever departs from and returns to that resting position: translate(0,0)
+   at 0%/8% and again at 58%/100%, so blocks always re-form the exact
+   drawn triangle. nth-of-type buckets give each block a different
+   direction (7 offsets) and a different start delay (4 steps), and both
+   are modulo-based so they hold for any number of rects, not just today's
+   count. 7s per loop, roughly half of it spent at rest, so it reads as a
+   deliberate breath rather than restless jitter. */
+@media (prefers-reduced-motion: no-preference){
+  .tri-block{
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: tri-scatter 7s var(--hover-ease) infinite;
+  }
+  @keyframes tri-scatter{
+    0%, 8%    { transform: translate(0,0); }
+    32%       { transform: translate(var(--tx,0px), var(--ty,0px)); }
+    58%, 100% { transform: translate(0,0); }
+  }
+  .tri-block:nth-of-type(7n+1){ --tx:-16px; --ty:-14px; }
+  .tri-block:nth-of-type(7n+2){ --tx:18px;  --ty:-10px; }
+  .tri-block:nth-of-type(7n+3){ --tx:-12px; --ty:16px; }
+  .tri-block:nth-of-type(7n+4){ --tx:20px;  --ty:12px; }
+  .tri-block:nth-of-type(7n+5){ --tx:-20px; --ty:6px; }
+  .tri-block:nth-of-type(7n+6){ --tx:10px;  --ty:-18px; }
+  .tri-block:nth-of-type(7n)  { --tx:-8px;  --ty:20px; }
+  .tri-block:nth-of-type(4n+1){ animation-delay:0ms; }
+  .tri-block:nth-of-type(4n+2){ animation-delay:70ms; }
+  .tri-block:nth-of-type(4n+3){ animation-delay:140ms; }
+  .tri-block:nth-of-type(4n)  { animation-delay:210ms; }
+}
+
 /* ---------- 11. Responsive ---------- */
 @media (max-width:1080px){
   .hero__h1{ font-size:var(--fs-5); }
@@ -333,4 +507,75 @@ img,svg{ max-width:100%; display:block; }
   .band{ padding:48px 0; }
   .hero__h1{ font-size:var(--fs-6); }
   .card--panel{ padding:40px 24px; }
+}
+
+/* ------------------------------------------------------------------
+   Diagram motion, pure CSS.
+   Driven by CSS animation rather than JavaScript on purpose: an
+   IntersectionObserver plus getTotalLength was silently doing nothing in
+   testing, and a diagram that animates by script is a diagram that can be
+   left invisible when the script does not run. pathLength="1" on every
+   .draw element normalises each path to a length of 1, so one keyframe
+   draws any path without measuring it.
+   Everything here sits inside prefers-reduced-motion: no-preference, so
+   the reduced-motion state is simply the finished state.
+   ------------------------------------------------------------------ */
+@media (prefers-reduced-motion: no-preference){
+  @keyframes art-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+  @keyframes art-pop  { from { opacity: 0; transform: scale(.55); } to { opacity: 1; transform: scale(1); } }
+  @keyframes art-wipe { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+  @keyframes art-pulse{ 0%,100% { r: var(--r0); } 50% { r: calc(var(--r0) * 1.6); } }
+
+  .draw {
+    stroke-dasharray: 1;
+    animation: art-draw 1100ms cubic-bezier(.2,.7,.3,1) both;
+  }
+  .pop {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: art-pop 520ms cubic-bezier(.2,.8,.3,1) both;
+  }
+  .wipe {
+    animation: art-wipe 1250ms cubic-bezier(.4,0,.2,1) both;
+  }
+  .pop:nth-of-type(1){ animation-delay: 26ms; }
+  .pop:nth-of-type(2){ animation-delay: 52ms; }
+  .pop:nth-of-type(3){ animation-delay: 78ms; }
+  .pop:nth-of-type(4){ animation-delay: 104ms; }
+  .pop:nth-of-type(5){ animation-delay: 130ms; }
+  .pop:nth-of-type(6){ animation-delay: 156ms; }
+  .pop:nth-of-type(7){ animation-delay: 182ms; }
+  .pop:nth-of-type(8){ animation-delay: 208ms; }
+  .pop:nth-of-type(9){ animation-delay: 234ms; }
+  .pop:nth-of-type(10){ animation-delay: 260ms; }
+  .pop:nth-of-type(11){ animation-delay: 286ms; }
+  .pop:nth-of-type(12){ animation-delay: 312ms; }
+  .pop:nth-of-type(13){ animation-delay: 338ms; }
+  .pop:nth-of-type(14){ animation-delay: 364ms; }
+  .pop:nth-of-type(15){ animation-delay: 390ms; }
+  .pop:nth-of-type(16){ animation-delay: 416ms; }
+  .pop:nth-of-type(17){ animation-delay: 442ms; }
+  .pop:nth-of-type(18){ animation-delay: 468ms; }
+  .pop:nth-of-type(19){ animation-delay: 494ms; }
+  .pop:nth-of-type(20){ animation-delay: 520ms; }
+  .pop:nth-of-type(21){ animation-delay: 546ms; }
+  .pop:nth-of-type(22){ animation-delay: 572ms; }
+  .pop:nth-of-type(23){ animation-delay: 598ms; }
+  .pop:nth-of-type(24){ animation-delay: 624ms; }
+  .pop:nth-of-type(25){ animation-delay: 650ms; }
+  .pop:nth-of-type(26){ animation-delay: 676ms; }
+  .pop:nth-of-type(27){ animation-delay: 700ms; }
+  .pop:nth-of-type(28){ animation-delay: 700ms; }
+  .pop:nth-of-type(29){ animation-delay: 700ms; }
+  .pop:nth-of-type(30){ animation-delay: 700ms; }
+
+  /* Scroll-driven where the browser supports it, so a diagram draws as it
+     arrives rather than all at once on load. Falls back to the time-based
+     animation above everywhere else. */
+  @supports (animation-timeline: view()) {
+    .draw, .pop, .wipe {
+      animation-timeline: view();
+      animation-range: entry 15% cover 45%;
+    }
+  }
 }
