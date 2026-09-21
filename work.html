@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=42">
-<link rel="stylesheet" href="motion.css?v=42">
-<link rel="stylesheet" href="art.css?v=42">
+<link rel="stylesheet" href="site.css?v=44">
+<link rel="stylesheet" href="motion.css?v=44">
+<link rel="stylesheet" href="art.css?v=44">
 
 <script type="application/ld+json">
 {
@@ -119,13 +119,13 @@
       <article class="proj" id="p-resolvent" data-lang="Python" data-doi="false">
 <div class="proj__text">
         <h3 class="proj__name">resolvent</h3>
-        <p class="proj__claim">I proved softmax attention and Markov path composition are the same operator, then checked the whole argument in Lean until nothing was left standing on my word.</p>
+        <p class="proj__claim">I proved softmax attention and Markov path composition are settings of one operator, then found that reading it through a resolvent gives the same closed form Wheeler's S-matrix had in 1937.</p>
         
         <div class="proj__nums">
-          <span>134 theorems</span>
-          <span>41 lemmas</span>
-          <span>0 sorry</span>
-          <span>69 corner tests</span>
+          <span>175 declarations</span>
+          <span>Lean 4</span>
+          <span>zero sorry</span>
+          <span>S-matrix read</span>
         </div>
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Python</li>
@@ -136,43 +136,21 @@
 <div class="proj__figure">
 <div class="proj__art">
           <figure class="fig">
-            <svg viewBox="0 0 400 375" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="p-resolvent-title p-resolvent-desc">
-  <title id="p-resolvent-title">A causal attention matrix and a Markov path are the same staircase, seen twice</title>
-  <desc id="p-resolvent-desc">A staircase of filled cells growing toward the bottom right is the causal attention mask, row k holding k cells because token k can only attend to the k tokens before it. Two of those cells, the weight from token 3 to token 2 and the weight from token 4 to token 3, carry a white-ringed node at their own center and a line runs from each node down to a third cell, the two-step composition. The nodes and the lines are a path graph drawn inside the same cells the matrix already fills, so the staircase is read once as a matrix and once as a path, and the two readings occupy the identical squares.</desc>
-
-  <text x="200" y="30" text-anchor="middle" font-size="16" fill="var(--ink)" font-weight="600">the same weight, two names</text>
-
-  <!-- the staircase, row k has k cells: this is the causal mask -->
-  <rect class="pop" data-label="token 1 attends only itself" x="60" y="60" width="70" height="50" rx="3" fill="var(--blue-100)"/>
-
-  <rect class="pop" data-label="token 2 attends token 1" x="60" y="112" width="70" height="50" rx="3" fill="var(--blue-100)"/>
-  <rect class="pop" data-label="token 2 attends itself" x="132" y="112" width="70" height="50" rx="3" fill="var(--blue-100)"/>
-
-  <rect class="pop" data-label="token 3 attends token 1" x="60" y="164" width="70" height="50" rx="3" fill="var(--blue-500)"/>
-  <rect class="pop" data-label="a32, the weight from token 3 to token 2" x="132" y="164" width="70" height="50" rx="3" fill="var(--blue-700)"/>
-  <rect class="pop" data-label="token 3 attends itself" x="204" y="164" width="70" height="50" rx="3" fill="var(--blue-500)"/>
-
-  <rect class="pop" data-label="token 4 attends token 1" x="60" y="216" width="70" height="50" rx="3" fill="var(--blue-500)"/>
-  <rect class="pop" data-label="the two-step composition, token 4 to token 2" x="132" y="216" width="70" height="50" rx="3" fill="var(--blue-700)"/>
-  <rect class="pop" data-label="a43, the weight from token 4 to token 3" x="204" y="216" width="70" height="50" rx="3" fill="var(--blue-700)"/>
-  <rect class="pop" data-label="token 4 attends itself" x="276" y="216" width="70" height="50" rx="3" fill="var(--blue-500)"/>
-
-  
-  
-
-  <!-- the same two cells, read as a path graph riding inside the mask -->
-  <line class="draw" pathLength="1" data-label="a32 feeds the composition" x1="167" y1="189" x2="167" y2="241" stroke="#ffffff" stroke-width="2.5"/>
-  <line class="draw" pathLength="1" data-label="a43 feeds the composition" x1="239" y1="241" x2="167" y2="241" stroke="#ffffff" stroke-width="2.5"/>
-
-  <circle class="pop" data-label="a32, read as a graph node" cx="167" cy="189" r="9" fill="var(--blue-700)" stroke="#ffffff" stroke-width="2"/>
-  <circle class="pop" data-label="a43, read as a graph node" cx="239" cy="241" r="9" fill="var(--blue-700)" stroke="#ffffff" stroke-width="2"/>
-  <circle class="pop" data-label="the composition, same value either way it is read" cx="167" cy="241" r="9" fill="var(--blue-700)" stroke="#ffffff" stroke-width="2"/>
-
-  <text x="200" y="300" text-anchor="middle" font-size="13" fill="var(--muted)">a32 &#215; a43 equals the two-step composition</text>
-
-  <text x="200" y="330" text-anchor="middle" font-size="14" fill="var(--ink)">134 theorems &#183; 41 lemmas</text>
-  <text x="200" y="352" text-anchor="middle" font-size="14" fill="var(--ink)">0 sorry &#183; 69 corner tests</text>
-</svg>
+            <div class="figc" style="--figc-ar:470/540">
+                <canvas data-fig="smatrix" data-vb="470 540" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="rv-t rv-d">
+                  <title id="rv-t">Every path summed, and one arrow that mentions none of them</title>
+                  <desc id="rv-d">An in-state on the left and an out-state on the right. Between them the figure draws every path the hop expansion sums, order by order: the direct hop, then the two hop paths, then three, each order fainter than the last because each carries another factor of gamma. Laid over all of them is a single arrow, which is the S-matrix, and which gives no account of the path between them. The strip below is the weight of each order, and it shrinks geometrically, which is why the sum is finite when gamma times the spectral radius of P stays under one.</desc>
+                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">every path between them, summed</text>
+                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">Wheeler, 1937: no account of the path between them</text>
+                  <text x="58" y="248" text-anchor="middle" font-size="15" font-weight="600" fill="var(--blue-700)">in</text>
+                  <text x="412" y="248" text-anchor="middle" font-size="15" font-weight="600" fill="var(--blue-700)">out</text>
+                  <text x="235" y="392" text-anchor="middle" font-size="15" fill="var(--muted)">each order weighs another factor of gamma</text>
+                  <text x="235" y="470" text-anchor="middle" font-size="17" font-weight="600" fill="var(--blue-700)">the sum is finite while the terms keep shrinking</text>
+                  <text x="235" y="494" text-anchor="middle" font-size="15" fill="var(--muted)">which is the convergence law the physics already had</text>
+                  <text x="235" y="526" text-anchor="middle" font-size="16" fill="var(--muted)">175 declarations in Lean 4, zero sorry</text>
+                </svg>
+              </div>
             <figcaption class="fig__cap">The mask and the graph, one operator drawn twice.</figcaption>
           </figure>
         </div>
@@ -619,7 +597,7 @@
 
 </main>
 
-<script src="fig.js?v=42" defer></script>
-<script src="site.js?v=42" defer></script>
+<script src="fig.js?v=44" defer></script>
+<script src="site.js?v=44" defer></script>
 </body>
 </html>

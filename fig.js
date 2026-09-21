@@ -688,10 +688,98 @@
     }
   }
 
+  /* ==================================================================== */
+  /* smatrix — resolvent                                                  */
+  /* ==================================================================== */
+  /* Wheeler wrote the S-matrix in 1937 as the matrix connecting in-states to
+     out-states with no account of the path between them, and Heisenberg
+     carried it through the 1940s. This project reads one attention head that
+     way: (I - gP)^-1, the same closed form the Lippmann-Schwinger equation
+     gives the scattering operator, with the hop expansion as the Born series.
+     So the figure is that sentence.
+     An in-state on the left and an out-state on the right. Between them every
+     path the series sums, drawn by order: the direct hop, then the two hop
+     paths, the three hop paths and so on, each order fainter than the last
+     because each carries another factor of gamma. Over all of them one solid
+     arrow straight across, which is the S-matrix and which says nothing about
+     any of it. The orders arrive one after another, which is the series being
+     summed, and they fade rather than stop because the convergence law is
+     what makes the sum finite. */
+  function smatrix(g, vb, t) {
+    var IX = 58, OX = 412, MY = 286;
+    var ORDERS = 6, PER = 7;
+    var blue = token('--blue-500', '#2456dc');
+    var blue7 = token('--blue-700', '#163a9a');
+    var ink = token('--ink', '#1c1b19');
+    var hair = token('--hair2', '#cfcbc1');
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    var cyc = REDUCED ? 1 : (t % 9000) / 9000;
+
+    for (var k = 1; k <= ORDERS; k++) {
+      /* each order enters in turn, and its weight is gamma^k */
+      var arrive = REDUCED ? 1 : ease((cyc * (ORDERS + 2) - k) / 1.4);
+      if (arrive <= 0.004) continue;
+      var weight = Math.pow(0.62, k - 1);
+      for (var p = 0; p < (k === 1 ? 1 : PER); p++) {
+        var s = Math.sin((k * 17.3 + p * 7.13)) * 43758.5453;
+        var u = s - Math.floor(s);
+        var spread = (p - (PER - 1) / 2) / ((PER - 1) / 2);
+        var amp = Math.min(86, 22 + k * 11) * spread * (0.65 + 0.35 * u);
+        g.strokeStyle = rgba(blue, 0.38 * weight * arrive + 0.05);
+        g.lineWidth = 1.3;
+        g.beginPath();
+        g.moveTo(IX, MY);
+        for (var h = 1; h <= k; h++) {
+          var f = h / k;
+          var x = IX + (OX - IX) * f;
+          var y = MY + Math.sin(f * Math.PI) * amp;
+          g.lineTo(x, y);
+          if (h < k) {
+            g.stroke();
+            g.fillStyle = rgba(blue7, 0.55 * weight * arrive);
+            g.beginPath(); g.arc(x, y, 2.6, 0, Math.PI * 2); g.fill();
+            g.beginPath(); g.moveTo(x, y);
+            g.strokeStyle = rgba(blue, 0.38 * weight * arrive + 0.05);
+          }
+        }
+        g.stroke();
+      }
+    }
+
+    /* the S-matrix itself: one arrow, and it accounts for none of the above */
+    var lit = REDUCED ? 1 : ease(Math.min(1, cyc * 1.25));
+    g.strokeStyle = rgba(ink, 0.30 + 0.62 * lit);
+    g.lineWidth = 4.2; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(IX + 20, MY); g.lineTo(OX - 26, MY); g.stroke();
+    g.beginPath();
+    g.moveTo(OX - 26, MY - 9); g.lineTo(OX - 10, MY); g.lineTo(OX - 26, MY + 9);
+    g.closePath(); g.fillStyle = rgba(ink, 0.30 + 0.62 * lit); g.fill();
+
+    /* the two states */
+    [[IX, blue7], [OX, blue7]].forEach(function (n) {
+      g.beginPath(); g.arc(n[0], MY, 17, 0, Math.PI * 2);
+      g.fillStyle = rgba(token('--raised', '#ffffff'), 1); g.fill();
+      g.strokeStyle = rgba(n[1], 1); g.lineWidth = 3; g.stroke();
+    });
+
+    /* the decaying terms, drawn as a strip so the convergence is a picture */
+    var BX = 128, BY = 402, BW = 214;
+    g.strokeStyle = rgba(hair, 1); g.lineWidth = 1.4;
+    g.beginPath(); g.moveTo(BX, BY + 26); g.lineTo(BX + BW, BY + 26); g.stroke();
+    for (var m = 0; m < ORDERS; m++) {
+      var h2 = 24 * Math.pow(0.62, m);
+      var a2 = REDUCED ? 1 : ease((cyc * (ORDERS + 2) - (m + 1)) / 1.4);
+      g.fillStyle = rgba(blue7, 0.30 + 0.62 * a2);
+      g.fillRect(BX + m * (BW / ORDERS), BY + 26 - h2, BW / ORDERS - 6, h2);
+    }
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
-                 refuse: refuse, cut: cut, certify: certify };
+                 refuse: refuse, cut: cut, certify: certify,
+                 smatrix: smatrix };
 
   /* ------------------------------------------------------------------ */
   var live = [];
