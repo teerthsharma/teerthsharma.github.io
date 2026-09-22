@@ -4122,68 +4122,32 @@
   /* smatrix — resolvent                                                 */
   /* ==================================================================== */
   function smatrix(g, vb, t, st) {
-    /* resolvent reads one causal attention head through a resolvent,
-       (I - gP)^-1 = I + gP + g^2 P^2 + ..., the closed form the
-       Lippmann-Schwinger equation gives the scattering operator. Wheeler's
-       S-matrix (1937) maps in-states to out-states "with no account of the
-       path between them".
+    /* resolvent. The series (I - gP)^-1 = I + gP + g^2 P^2 + ... drawn as the
+       reel the owner asked for: every hop is one slice of a block, stacked in
+       order from the in-state at the front, each fainter by one more factor
+       of g. The camera orbits the block and once each turn looks straight
+       down the stack, where the slices land on their sum on the back wall
+       and nothing is left of the path between them.
 
-       The figure builds that series as a solid, the way a video becomes a
-       block when its frames are stacked along time: the plane of each slice
-       is the state space of a 40 by 40 lattice and the depth is hop order.
+       The operator is real, as it was measured. The docs give every gate a
+       phase as well as a magnitude, but that phase is gauge-trivial on every
+       bed that has been read, so drawing one would be decoration; the slices
+       are one violet, brightness is the modulus, contour rings are its level
+       sets, and colour is kept for one thing only.
 
-       The fourth dimension is the phase. The project's gate is
-       G_ij = prod m_k e^(i theta_k): every hop passes a gate that scales by
-       a magnitude and turns by a phase. So here every hop multiplies by
-       g = 0.82 and by e^(i theta) at the site it enters, and slice k,
-       g^k (DP)^k x0, is a complex field. Each slice is drawn in domain
-       colour: opacity is the modulus, hue is the phase. On a path the phase
-       could be gauged away (the project's docs say so of every bed they
-       show); on this lattice the mass circles the centre, the graph has
-       genuine cycles, and routes of different length reach the same site
-       with different phase. The back wall is their complex sum, the
-       out-state, so it is an interference pattern: where the orders that
-       land on a site disagree in phase, the sum there is darker than the
-       orders were; where they agree, it is brighter.
+       That thing is dimension. A path of k hops is a point in a k-dimensional
+       space, so inside the block one hypercube gains a dimension at a time:
+       a line swept into a square, a cube, a tesseract, a 5-cube and a 6-cube.
+       It is a single 6-cube with only its first d axes opened, which is
+       exactly the d-cube, and every edge takes the colour of the axis it runs
+       along, so the colours count the dimensions. It turns in its own
+       dimensions, is projected to three by perspective one dimension at a
+       time, and flattens onto the sum when the camera reaches the axis.
 
-       theta = 2 pi / 5 + 0.6 sin(angle round the centre): the phase turns
-       about a fifth of a turn per hop, a little faster on one side of the
-       lattice than the other. P is a directed transition matrix, a drift
-       forward round the centre and slightly inward plus a Gaussian spread;
-       every column sums to one, so rho(P) = 1 and g = 0.82 converges. The
-       lattice, P and theta are made up for the picture; the slices are
-       computed from them exactly, and the label layer says so.
-
-       Path space. The order-k term sums over every path of k hops, and a
-       path of k hops is a point in k copies of the state space, so each
-       slice is the shadow of a k-dimensional object. For orders 1 to 6 a
-       hypercube of that dimension (a segment, a square, a cube, a tesseract,
-       a 5-cube, a 6-cube) turns in its own k dimensions over its slice,
-       projected by perspective one dimension at a time, and its shadow along
-       the depth axis lies on the slice. When the camera looks down the
-       stack, every cube flattens onto its shadow and every slice onto the
-       sum.
-
-       Hue wheel. The palette has no yellow, so a full hue circle through it
-       would pass through mud between amber and mint. The wheel is folded:
-       mint at phase 0, blue, violet, coral, amber at half a turn, and back
-       the same way. Hue shows how far the phase has turned from the
-       in-state's; the tube through the stack joins the orders in the order
-       they come, so which way it turns is read along the tube.
-
-       Motion, as before: a scan plane develops the orders at 220 ms each
-       from t = 0, the walls fill behind it and the back wall runs through
-       the partial sums, which here brighten and darken as each order lands
-       in or out of phase. The camera orbits once every 20 s and holds on
-       the axis for 2.2 s. The cubes turn continuously, slowest plane 23 s.
-
-       Drawing. Textures are painted on first use from B-spline upsampled
-       real and imaginary parts, so the phase is interpolated as a complex
-       number, never as an angle. A slice is one drawImage under an affine
-       transform; the cubes are one path per layer. */
+       The lattice and P are made up for the picture, as the desc says. */
     var TAU = Math.PI * 2;
     var N = 40, K = 22, GAM = 0.82, TX = 128;
-    var OM0 = TAU / 5, OM1 = 0.6;              /* the gate's phase per hop */
+    var OM0 = 0, OM1 = 0;                      /* the operator as measured: real, no phase */
     var NC = 6;                                /* orders drawn with their path-space cube */
     var D = 2.3, GAP = 0.36, Z0 = (D + GAP) / 2, ZS = -Z0;
     var S = 102, CX = 235, CY = 247;
@@ -4208,7 +4172,7 @@
       var wrap = function (p) { return p - TAU * Math.round(p / TAU); };
       /* the folded wheel: |phase| from 0 to pi runs mint, blue, violet, coral, amber */
       var wheelInto = function (ph, W, o) {
-        var u = Math.abs(wrap(ph)) / Math.PI * 4, i = Math.min(3, Math.floor(u)), f = u - i;
+        var i = 2, f = 0;                        /* one violet: colour is kept for dimension */
         o[0] = W[i][0] + (W[i + 1][0] - W[i][0]) * f;
         o[1] = W[i][1] + (W[i + 1][1] - W[i][1]) * f;
         o[2] = W[i][2] + (W[i + 1][2] - W[i][2]) * f;
@@ -4462,23 +4426,25 @@
       L.floorTex = side(mxR, mxI, false);   /* rows: k from the front; columns: x */
       L.sideTex = side(myR, myI, true);     /* columns: k from the front; rows: y from the top */
 
-      /* path space: the d-cube for d = 1..NC, vertices at +-1/sqrt(d) so its
-         circumradius is 1, embedded in max(d, 3) dimensions so a segment
-         and a square can turn in space; edges join vertices one bit apart */
-      L.cube = [];
-      var PL = [[0, 1], [0, 2], [1, 2], [0, 3], [1, 3], [2, 4], [3, 5], [4, 5], [1, 4], [2, 5], [0, 5], [3, 4]];
-      for (var dd = 1; dd <= NC; dd++) {
-        var nd = Math.max(dd, 3), nv = 1 << dd, vs = [], es = [], pls = [];
-        for (var vi = 0; vi < nv; vi++) {
-          var vv = new Float64Array(nd);
-          for (var ax = 0; ax < dd; ax++) vv[ax] = (vi >> ax & 1 ? 1 : -1) / Math.sqrt(dd);
-          vs.push(vv);
-          for (ax = 0; ax < dd; ax++) if (!(vi >> ax & 1)) es.push(vi, vi | (1 << ax));
+      /* path space: one 6-cube, vertices at +-1 in six dimensions, each edge
+         labelled by the one axis it runs along. Shown with only its first d
+         axes opened, it is exactly the d-cube, so opening one axis at a time
+         sweeps a line into a square, a cube, a tesseract, a 5-cube, a 6-cube */
+      var HV = [], HE = [];
+      for (var vi = 0; vi < 64; vi++) {
+        var vv = new Float64Array(6);
+        for (var ax = 0; ax < 6; ax++) {
+          vv[ax] = vi >> ax & 1 ? 1 : -1;
+          if (!(vi >> ax & 1)) HE.push(vi, vi | (1 << ax), ax);
         }
-        for (q = 0; q < PL.length; q++) if (PL[q][0] < nd && PL[q][1] < nd) pls.push(PL[q]);
-        L.cube.push({ d: dd, nd: nd, v: vs, e: es, pl: pls, w: new Float64Array(nd),
-                      px: new Float64Array(nv), py: new Float64Array(nv), pz: new Float64Array(nv) });
+        HV.push(vv);
       }
+      L.hv = HV; L.he = HE;
+      L.hx = new Float64Array(64); L.hy = new Float64Array(64); L.hz = new Float64Array(64);
+      L.dimC5 = [hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'), hex('--mint-500', '#0b93ab'),
+                 hex('--coral-500', '#d9376e'), hex('--amber-500', '#d96a06'), hex('--green-500', '#146a32')];
+      L.dimC7 = [hex('--blue-700', '#163a9a'), hex('--violet-700', '#6b35c4'), hex('--mint-700', '#0a6b7c'),
+                 hex('--coral-700', '#a0183f'), hex('--amber-700', '#9a4906'), hex('--green-700', '#0e4a23')];
       M = smatrix.cache = L;
     }
 
@@ -4694,80 +4660,71 @@
     g.lineWidth = 1.2;
     quad(mS); g.stroke();
 
-    /* --- path space: turn each d-cube in its own d dimensions and project it
-       to three by perspective, one dimension at a time ------------------------ */
-    var CUBE0 = 0.055, CUBE1 = 0.01, PD = 2.4;
-    /* one cube at a time is featured, full size: the featured dimension
-       climbs from 1 to 6 through each orbit and fades out before the
-       camera reaches the axis, so its wrap from 6 back to 1 is never seen */
-    var fdim = 4, fenv = 1;
+    /* --- path space: a path of k hops is a point in a k-dimensional space.
+       One hypercube stands in the block and gains a dimension at a time: a
+       line, swept into a square, a cube, a tesseract, a 5-cube, a 6-cube.
+       Every edge takes the colour of the axis it runs along, so the colours
+       count the dimensions. It turns in its own dimensions and is projected
+       to three by perspective, one dimension at a time, and when the camera
+       looks down the stack it flattens onto the sum. -------------------- */
+    var PD = 2.6, dm = 3.5, oenv = 1;
     if (!RED) {
       var u2 = (T - TA) / C;
       u2 -= Math.floor(u2);
-      fdim = 1 + 5 * Math.max(0, Math.min(1, (u2 - 0.1) / 0.72));
-      fenv = ease((u2 - 0.06) / 0.1) * (1 - ease((u2 - 0.86) / 0.08)) * ease((T - 2500) / 1500);
+      /* the dimension climbs 1 to 6 through each orbit; it fades out before
+         the camera reaches the axis, so the fall from 6 back to 1 is unseen */
+      dm = 1 + 5 * Math.max(0, Math.min(1, (u2 - 0.1) / 0.7));
+      oenv = ease((u2 - 0.05) / 0.08) * (1 - ease((u2 - 0.88) / 0.07)) * ease((T - 1500) / 1500);
     }
-    var flat = RED ? 0 : hero;                            /* the cube flattens onto its shadow */
-    for (var cq = 0; cq < NC; cq++) {
-      var cb = M.cube[cq], nd2 = cb.nd, wv = cb.w;
-      for (var vk = 0; vk < cb.v.length; vk++) {
-        var v0 = cb.v[vk];
-        for (var a1 = 0; a1 < nd2; a1++) wv[a1] = v0[a1];
-        for (var pl = 0; pl < cb.pl.length; pl++) {
-          var pa1 = cb.pl[pl][0], pb1 = cb.pl[pl][1];
-          var an = (RED ? 0.7 + 0.4 * pl : T / (23000 - 1500 * pl) * TAU) + 0.5 * cq;
-          var cA = Math.cos(an), sA = Math.sin(an), wa = wv[pa1], wb = wv[pb1];
-          wv[pa1] = cA * wa - sA * wb; wv[pb1] = sA * wa + cA * wb;
-        }
-        var fk = 1;
-        for (var dd2 = nd2 - 1; dd2 >= 3; dd2--) fk *= PD / (PD - wv[dd2] * fk);
-        cb.px[vk] = wv[0] * fk; cb.py[vk] = wv[1] * fk; cb.pz[vk] = wv[2] * fk;
+    var flat = RED ? 0 : hero;
+    var open = [];                                    /* how far each axis is opened */
+    for (var ax2 = 0; ax2 < 6; ax2++) open.push(ease(Math.max(0, Math.min(1, dm - ax2))));
+    var OSZ = 0.62 / Math.sqrt(Math.max(1, dm)), OZ = Z0 - D * 0.45;
+    var PLN = [[0, 2], [1, 2], [0, 3], [1, 4], [2, 5], [3, 4], [4, 5], [0, 1]];
+    var wv = new Float64Array(6);
+    for (var vk = 0; vk < 64; vk++) {
+      var v0 = M.hv[vk];
+      for (var a1 = 0; a1 < 6; a1++) wv[a1] = v0[a1] * open[a1];
+      for (var pl = 0; pl < PLN.length; pl++) {
+        var pa1 = PLN[pl][0], pb1 = PLN[pl][1];
+        var an = RED ? 0.6 + 0.35 * pl : T / (21000 - 1700 * pl) * TAU + 0.4 * pl;
+        var cA = Math.cos(an), sA = Math.sin(an), wa = wv[pa1], wb = wv[pb1];
+        wv[pa1] = cA * wa - sA * wb; wv[pb1] = sA * wa + cA * wb;
       }
+      var fk = 1;
+      for (var dd2 = 5; dd2 >= 3; dd2--) fk *= PD / (PD - wv[dd2] * fk * 0.55);
+      M.hx[vk] = wv[0] * fk; M.hy[vk] = wv[1] * fk; M.hz[vk] = wv[2] * fk;
     }
-    function drawCube(cq2, k3, dev3) {
-      var cb2 = M.cube[cq2], ft = fenv * ease(1 - Math.abs(fdim - cb2.d));
-      var sz2 = (CUBE0 + CUBE1 * cb2.d + ft * (0.26 + 0.045 * cb2.d)) * (0.35 + 0.65 * dev3);
-      var cxk = M.com[k3][0], cyk = M.com[k3][1], zz = zk(k3), es = cb2.e, m, a, b;
-      var fade = dev3 * (1 - 0.75 * hero) * (0.3 + 0.7 * ft);
+    function drawObject() {
+      var fade = oenv * (1 - 0.55 * hero);
       if (fade <= 0.004) return;
-      var Pa = [0, 0, 0], Pb = [0, 0, 0];
-      /* the shadow: the cube projected along the depth axis onto its slice */
-      g.strokeStyle = M.css(M.pc7[k3], 0.26 * fade);
-      g.lineWidth = 0.8;
-      g.beginPath();
-      for (m = 0; m < es.length; m += 2) {
-        a = es[m]; b = es[m + 1];
-        P(cxk + sz2 * cb2.px[a], cyk + sz2 * cb2.py[a], zz, Pa);
-        P(cxk + sz2 * cb2.px[b], cyk + sz2 * cb2.py[b], zz, Pb);
-        g.moveTo(Pa[0], Pa[1]); g.lineTo(Pb[0], Pb[1]);
-      }
-      g.stroke();
-      /* the cube, its back edges then its front edges */
-      var zs = sz2 * (1 - flat);
-      for (var layer = 0; layer < 3; layer++) {
-        /* layer 0 far edges, 1 a soft glow under the near edges of the
-           featured cube, 2 the near edges */
-        if (layer === 1 && ft < 0.05) continue;
-        g.strokeStyle = layer === 1 ? M.css(M.pc5[k3], 0.16 * fade * ft)
-                                    : M.css(layer ? M.pc7[k3] : M.pc5[k3], (layer ? 0.9 : 0.5) * fade);
-        g.lineWidth = layer === 1 ? 5 : layer ? 1.25 + 0.6 * ft : 0.9;
-        g.beginPath();
-        for (m = 0; m < es.length; m += 2) {
-          a = es[m]; b = es[m + 1];
-          if ((cb2.pz[a] + cb2.pz[b] > 0) !== (layer >= 1)) continue;
-          P(cxk + sz2 * cb2.px[a], cyk + sz2 * cb2.py[a], zz + zs * cb2.pz[a], Pa);
-          P(cxk + sz2 * cb2.px[b], cyk + sz2 * cb2.py[b], zz + zs * cb2.pz[b], Pb);
-          g.moveTo(Pa[0], Pa[1]); g.lineTo(Pb[0], Pb[1]);
+      var es = M.he, Pa = [0, 0, 0], Pb = [0, 0, 0], m, a, b, axx, pass;
+      var zsz = OSZ * (1 - flat);
+      /* far edges thin, then a soft glow and the near edges, one path per axis */
+      for (pass = 0; pass < 3; pass++) {
+        for (axx = 0; axx < 6; axx++) {
+          if (open[axx] < 0.01) continue;
+          if (pass === 1) { g.strokeStyle = M.css(M.dimC5[axx], 0.14 * fade); g.lineWidth = 5.5; }
+          else if (pass === 0) { g.strokeStyle = M.css(M.dimC5[axx], 0.45 * fade); g.lineWidth = 1; }
+          else { g.strokeStyle = M.css(M.dimC7[axx], 0.95 * fade); g.lineWidth = 1.7; }
+          g.beginPath();
+          for (m = 0; m < es.length; m += 3) {
+            if (es[m + 2] !== axx) continue;
+            a = es[m]; b = es[m + 1];
+            if ((M.hz[a] + M.hz[b] > 0) !== (pass > 0)) continue;
+            P(OSZ * M.hx[a], OSZ * M.hy[a], OZ + zsz * M.hz[a], Pa);
+            P(OSZ * M.hx[b], OSZ * M.hy[b], OZ + zsz * M.hz[b], Pb);
+            g.moveTo(Pa[0], Pa[1]); g.lineTo(Pb[0], Pb[1]);
+          }
+          g.stroke();
         }
-        g.stroke();
       }
       /* its vertices */
-      var vr = 2.1 - 0.15 * cb2.d;
-      g.fillStyle = M.css(M.pc7[k3], 0.85 * fade);
+      g.fillStyle = M.css(M.dimC7[Math.min(5, Math.max(0, Math.floor(dm - 0.001)))], 0.9 * fade);
       g.beginPath();
-      for (m = 0; m < cb2.px.length; m++) {
-        P(cxk + sz2 * cb2.px[m], cyk + sz2 * cb2.py[m], zz + zs * cb2.pz[m], Pa);
-        g.moveTo(Pa[0] + vr, Pa[1]); g.arc(Pa[0], Pa[1], vr, 0, TAU);
+      for (m = 0; m < 64; m++) {
+        P(OSZ * M.hx[m], OSZ * M.hy[m], OZ + zsz * M.hz[m], Pa);
+        g.moveTo(Pa[0] + 2.2, Pa[1]); g.arc(Pa[0], Pa[1], 2.2, 0, TAU);
       }
       g.fill();
     }
@@ -4845,11 +4802,8 @@
       }
     }
     if (!scanDrawn) drawScan();
-    /* the path-space cubes ride with their slices but draw over the stack,
-       so the rings of nearer orders never cut through their edges */
-    for (k2 = NC; k2 >= 1; k2--) {
-      drawCube(k2 - 1, k2, RED || k2 === 0 ? 1 : ease((built - k2 + 0.4) / 1.2));
-    }
+    /* the object stands in the block and draws over the stack */
+    drawObject();
 
     /* --- the in-state: one site, on the front face -------------------------- */
     P(M.x0[0], M.x0[1], Z0, O);
