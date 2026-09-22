@@ -75,7 +75,7 @@ img,svg{ max-width:100%; display:block; }
   [data-reveal]{ opacity:1; transform:none; transition:none; }
   .card, .proj, .btn, .filter, .proofcell{ transition:none; }
   .card:hover, .proj:hover, .proofcell:hover{ transform:none; }
-  .mosaic__grid i, .mosaic__read{ transition:none; }
+  .mosaic__read{ transition:none; }
 }
 
 /* ---------- SVG animation system (draw / pop / wipe / pulse) ----------
@@ -348,18 +348,10 @@ img,svg{ max-width:100%; display:block; }
 .mosaic__inner{
   display:grid; grid-template-columns:1fr 1fr; gap:48px; align-items:center;
 }
-.mosaic__grid{
-  display:grid; grid-template-columns:repeat(40,1fr); gap:2px;
-  max-width:640px;
-}
-.mosaic__grid i{
-  display:block; aspect-ratio:1; border-radius:2px;
-  background:var(--blue-500);
-  opacity:0; transform:scale(.6);
-  transition:opacity 420ms cubic-bezier(.2,.8,.3,1), transform 420ms cubic-bezier(.2,.8,.3,1);
-}
-.mosaic__grid i.is-lit{ opacity:1; transform:scale(1); }
-.mosaic__grid i.is-accent{ background:var(--blue-700); }
+/* One canvas, 40 x 10 cells plus a swarm margin, fitted to this width by
+   initMosaic, which also sets its height. */
+.mosaic__grid{ max-width:640px; min-width:0; }
+.mosaic__grid canvas{ display:block; width:100%; }
 
 .mosaic__read{ transition:opacity 260ms ease; }
 .mosaic__read.is-fading{ opacity:0; }
@@ -394,7 +386,6 @@ img,svg{ max-width:100%; display:block; }
   .mosaic__inner{ grid-template-columns:1fr; }
 }
 @media (max-width:480px){
-  .mosaic__grid{ grid-template-columns:repeat(24,1fr); max-width:420px; }
   .mosaic__num{ font-size:2.8rem; }
 }
 
@@ -689,39 +680,6 @@ img,svg{ max-width:100%; display:block; }
   position:absolute; left:-18px; top:.62em;
   width:7px; height:7px; border-radius:50%;
   background:var(--green-500);
-}
-
-/* ---------- The mosaic assembles rather than fades --------------------
-   A cell that is not part of the current shape waits out at its own
-   offset, rotated and small. Lit, it returns to translate(0,0) rotate(0)
-   scale(1), which is its true place in the grid. So a shape is built out
-   of parts that arrived from elsewhere, and the resting state is always
-   the exact figure.
-
-   transform and opacity only, so four hundred cells stay on the
-   compositor. The delay per cell is set in script, which is what makes
-   the arrival look like a swarm settling rather than a row sweeping.
-   -------------------------------------------------------------------- */
-.mosaic__grid i{
-  transform: translate(var(--dx,0), var(--dy,0)) rotate(var(--rot,0)) scale(.42);
-  opacity:0;
-  transition: transform 460ms cubic-bezier(.22,.9,.24,1) cubic-bezier(.22,.9,.24,1),
-              opacity 140ms ease-out;
-  will-change: transform, opacity;
-}
-.mosaic__grid i.is-lit{
-  transform: translate(0,0) rotate(0) scale(1);
-  opacity:1;
-}
-
-@media (prefers-reduced-motion: reduce){
-  /* No travel, no spin: the shape is simply present and correct. */
-  .mosaic__grid i{
-    transform:none;
-    transition:none;
-    opacity:0;
-  }
-  .mosaic__grid i.is-lit{ opacity:1; }
 }
 
 /* ---------- The proof wall: marks the size they were, cells wide enough

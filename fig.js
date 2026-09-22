@@ -81,109 +81,225 @@
   /* ==================================================================== */
   /* caustic                                                              */
   /* ==================================================================== */
-  /* A caustic is the bright curve light makes where distinct rays crowd onto
-     one place, and that is exactly the claim the project makes about a model
-     that cannot reach a fact. So this is not a picture of the idea, it is the
-     thing itself: every ray is reflected off the inside of a circular wall by
-     the actual law of reflection, and the cusp appears because they genuinely
-     cross there. Nobody draws the cusp. It arrives.
+  function caustic(g, vb, t, st) {
+    /* A caustic is where distinct rays crowd onto one place, and that is the
+       claim the project makes about a model that cannot reach a fact. So every
+       entity here is a beam of rays in its own colour, and every beam focuses
+       on its answer. Where the fact is reached, each focuses on an answer of
+       its own. Where it is not, beams of different colours bend and focus on
+       the same answer, and the knot there is bright only because their rays
+       genuinely converge on it. Nobody draws the crowding. It arrives.
 
-     The blending is ordinary alpha, and that choice is load bearing. Adding
-     light to a white ground produces nothing, so lighter is useless here.
-     Multiply looks right until it is measured: repeated multiply converges on
-     black, and the cusp came out at 78 of 765 on the first render, which is
-     darker than anything allowed on this page. Repeated alpha converges on the
-     stroke colour instead and can never go past it, so a hundred overlapping
-     rays saturate to solid coral and no further. The density lands exactly on
-     the crossings and the page keeps its palette. */
-  function caustic(g, vb, t) {
-    var CX = 236, CY = 232, R = 150;
-    var N = 620;
+       The answers are the partition, drawn as petals: one petal for each
+       entity that landed there. A reached answer has one. The knot has one
+       for every entity collapsed onto it, and it rings coral on every arrival,
+       several times as often as any single answer. Which entity is which is
+       never needed to see the difference, which is the point.
+
+       Each ray is stroked on its own, because one path of many subpaths paints
+       their union once and the crowding never accumulates. Blending is plain
+       source-over: it converges on the stroke colour and never past it.
+
+       Measured, in the preview harness:
+       - A bead's whole tail vanished in one frame the moment it reached its
+         answer, because the build-front test still applied after the build:
+         the answer's ink dropped by 20 unit^2 in one frame. The test now
+         clamps the head to the answer column first, and every swell leaves
+         zero with zero slope. The largest single-frame ink jump left is a
+         bead crossing a tile, not anything appearing.
+       - --blue-700 and --green-500 are left out of the entity colours. At
+         full alpha they composited at luminance 58 and channel sum 171, at or
+         below #3a3a3a. Without them the darkest pixel is sum 229, luminance 73.
+       - Worst frame is 249 strokes and fills. */
+    var N = 18, R = 5, BW = 7;             /* entities, rays per entity, beam width */
+    var SX = 26, AX = 398;                 /* entities enter at SX, answers sit at AX */
+    var XA = 112, XB = 372;                /* the model: the only place a path may bend */
+    var Y0 = 96, Y1 = 404, KY = 250, GAP = 50;
+    var COLLAPSED = [1, 4, 6, 9, 12, 14, 17];
+    var RANK = [2, 5, 0, 3, 6, 1, 4];      /* the order they land in the knot */
+    var BUILD = 2600, V = 0.105, RIP = 1400;
+    var TT = (AX - SX) / V;                /* one bead's crossing, 3,543 ms */
+    var PAL = [['--blue-500', '#2456dc'], ['--amber-500', '#d96a06'], ['--violet-500', '#a66cf0'],
+               ['--mint-500', '#0b93ab'], ['--amber-700', '#9a4906'], ['--violet-700', '#6b35c4'],
+               ['--mint-700', '#0a6b7c']];
+
+    function bend(x) { return ease((x - XA) / (XB - XA)); }
+    function yAt(b, x, o) { var s = bend(x); return b.y0 + (b.T - b.y0) * s + o * (1 - s); }
+    function hash(i, k) { var s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); }
+
+    var G = caustic.geo;
+    if (!G) {
+      G = caustic.geo = { xs: [], beams: [] };
+      for (var x = SX; x < AX; x += 6) G.xs.push(x);
+      G.xs.push(AX);
+      var ci = {}, up = [], dn = [], slot = {}, i, k;
+      for (k = 0; k < COLLAPSED.length; k++) ci[COLLAPSED[k]] = k;
+      for (i = 0; i < N; i++) {
+        if (i in ci) continue;
+        (Y0 + (Y1 - Y0) * i / (N - 1) < KY ? up : dn).push(i);
+      }
+      for (k = 0; k < up.length; k++) slot[up[k]] = Y0 + (KY - GAP - Y0) * k / (up.length - 1);
+      for (k = 0; k < dn.length; k++) slot[dn[k]] = KY + GAP + (Y1 - KY - GAP) * k / (dn.length - 1);
+      for (i = 0; i < N; i++) {
+        var col = i in ci;
+        var b = { y0: Y0 + (Y1 - Y0) * i / (N - 1), col: col, j: col ? ci[i] : -1, pal: i % PAL.length,
+                  D: col ? 200 + RANK[ci[i]] * 210 : 700 * hash(i, 1),
+                  P: 1500 + 700 * hash(i, 2), rays: [] };
+        b.T = col ? KY : slot[i];
+        b.phi = hash(i, 3) * b.P;
+        for (var r = 0; r < R; r++) {
+          var o = (r / (R - 1) - 0.5) * BW, ys = new Float32Array(G.xs.length);
+          for (var s = 0; s < G.xs.length; s++) ys[s] = yAt(b, G.xs[s], o);
+          b.rays.push(ys);
+        }
+        G.beams.push(b);
+      }
+    }
+
+    var T = REDUCED ? 9000 : t;
+    var cs = [];
+    for (var p = 0; p < PAL.length; p++) cs.push(token(PAL[p][0], PAL[p][1]));
     var coral = token('--coral-500', '#d9376e');
-    var mint = token('--mint-500', '#0b93ab');
-    var hair = token('--hair2', '#cfcbc1');
-
-    /* The whole bundle tilts very slowly. The cusp is a function of the
-       incoming angle, so tilting it makes the bright curve breathe and
-       re-form, which is the figure performing its own mechanism rather
-       than a decoration laid over it. */
-    var a = REDUCED ? 0 : Math.sin(t / 6400) * 0.26;
-    var band = REDUCED ? -9 : ((t % 6400) / 6400) * 2.4 - 1.2;
-    var dx = Math.cos(a), dy = Math.sin(a);
-    var pxv = -dy, pyv = dx;
+    var TAU = Math.PI * 2;
 
     g.clearRect(0, 0, vb[0], vb[1]);
-
     g.globalCompositeOperation = 'source-over';
-    g.lineWidth = 1.4;
-    g.strokeStyle = rgba(hair, 0.9);
-    g.beginPath();
-    g.arc(CX, CY, R, 0, Math.PI * 2);
-    g.stroke();
+    g.lineCap = 'round';
 
-    /* Incoming rays are drawn only up to the wall, never across the inside.
-       Physically they do cross it, but drawn that way they filled the whole
-       interior and the cusp stopped standing out: measured, the crowded region
-       came back at a mean of 343 against 335 for an empty one, which is no
-       difference at all. The interior belongs to the reflected bundle alone,
-       so the only dense structure in it is the one the rays actually make. */
-    g.strokeStyle = rgba(mint, 0.28);
-    g.lineWidth = 0.9;
-    g.beginPath();
-    for (var i = 0; i < N; i += 4) {
-      var b = (-0.965 + 1.93 * i / (N - 1)) * R;
-      var k = Math.sqrt(Math.max(R * R - b * b, 1e-9));
-      var ex = CX + b * pxv - k * dx, ey = CY + b * pyv - k * dy;
-      g.moveTo(ex - dx * 150, ey - dy * 150);
-      g.lineTo(ex, ey);
+    var n, q, bm, front = [], land = [], pile = 0;
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      front[n] = SX + (AX - SX) * ease((T - bm.D) / BUILD);
+      land[n] = ease((T - bm.D - 0.86 * BUILD) / 620);
+      if (bm.col) pile += land[n] / COLLAPSED.length;
     }
-    g.stroke();
 
-    /* Reflected: the same rays, now crowding. Each one is stroked on its own,
-       and that is the difference between this figure working and not working.
+    /* one cached ray into the current path, cut at the build front */
+    function run(ys, fx) {
+      var xs = G.xs, last = 0;
+      while (last + 1 < xs.length && xs[last + 1] <= fx) last++;
+      g.moveTo(xs[0], ys[0]);
+      for (var m = 1; m <= last; m++) g.lineTo(xs[m], ys[m]);
+      if (last + 1 < xs.length) {
+        g.lineTo(fx, ys[last] + (ys[last + 1] - ys[last]) * (fx - xs[last]) / (xs[last + 1] - xs[last]));
+      }
+    }
 
-       Built as one path with 620 subpaths and a single stroke, canvas paints
-       the union once, so crossings do not accumulate any opacity and every
-       part of the interior comes out the same weight. Measured that way the
-       crowded region read 383 against 384 for an empty one, which is nothing,
-       and the caustic was invisible although the geometry was right: counting
-       the chords numerically, 172 of them pass within two units of the cusp
-       against a median of 10 elsewhere. Stroking each ray separately lets that
-       seventeen to one concentration actually land on the pixels.
+    /* the knot's halo sits behind everything that lands in it */
+    if (pile > 0.01) {
+      var br = REDUCED ? 1 : 0.84 + 0.16 * Math.sin(T / 5200 * TAU);
+      var hg = g.createRadialGradient(AX, KY, 0, AX, KY, 54);
+      hg.addColorStop(0, rgba(coral, 0.30 * pile * br));
+      hg.addColorStop(0.45, rgba(coral, 0.12 * pile * br));
+      hg.addColorStop(1, rgba(coral, 0));
+      g.fillStyle = hg;
+      g.beginPath(); g.arc(AX, KY, 54, 0, TAU); g.fill();
+    }
 
-       The opacity is then set from that ratio rather than by eye. Saturation
-       after n overlapping strokes is 1-(1-a)^n, so at the 0.085 that looked
-       right, ten rays already reach 0.58 and the cusp's 172 reach 1.00: both
-       the empty interior and the bright curve paint solid coral and the whole
-       measurement is clipped away, which is exactly what the pixels showed.
-       At 0.018 ten rays sit at 0.17 and 172 reach 0.96, so the sparse field
-       stays pale and only the crowding goes solid. */
-    g.lineWidth = 1.0;
-    for (var j = 0; j < N; j++) {
-      var bb = (-0.965 + 1.93 * j / (N - 1)) * R;
-      var kk = Math.sqrt(Math.max(R * R - bb * bb, 1e-9));
-      var px = CX + bb * pxv + kk * dx, py = CY + bb * pyv + kk * dy;
-      var nx = -(px - CX) / R, ny = -(py - CY) / R;
-      var dn = dx * nx + dy * ny;
-      var rx = dx - 2 * dn * nx, ry = dy - 2 * dn * ny;
-      var tt = -2 * ((px - CX) * rx + (py - CY) * ry);
-      /* a band of brighter rays travels across the bundle, so light is seen
-         moving through it instead of the whole figure fading together */
-      var f = bb / R - band;
-      g.strokeStyle = rgba(coral, 0.024 + 0.07 * Math.exp(-f * f * 11));
+    /* beams: reached first, collapsed on top so the collapse is never hidden */
+    g.lineWidth = 1.25;
+    for (var pass = 0; pass < 2; pass++) {
+      for (n = 0; n < N; n++) {
+        bm = G.beams[n];
+        if (bm.col !== (pass === 1) || front[n] <= SX + 0.5) continue;
+        g.strokeStyle = rgba(cs[bm.pal], 0.34);
+        for (q = 0; q < R; q++) {
+          g.beginPath(); run(bm.rays[q], front[n]); g.stroke();
+        }
+      }
+    }
+
+    /* beads of light travel each beam and are carried into its answer */
+    var rip = [], hit = [], TAIL = 30;
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      var base = bm.D + 600 + bm.phi;
+      hit[n] = 0;
+      if (T < base) continue;
+      var c2 = cs[bm.pal];
+      for (var m = Math.floor((T - base) / bm.P); m >= 0; m--) {
+        var age = T - base - m * bm.P;
+        if (age > TT + RIP) break;
+        if (age >= TT) {
+          rip.push([bm, (age - TT) / RIP]);
+          /* (s e^(1-s))^2 leaves zero with zero slope, so a landing swells and never pops */
+          var a3 = (age - TT) / 200;
+          hit[n] = Math.max(hit[n], a3 * a3 * Math.exp(2 - 2 * a3));
+        }
+        var xh = SX + V * age;
+        if (xh - TAIL >= AX || Math.min(xh, AX) > front[n] + 1) continue;
+        var xa = Math.max(SX, xh - TAIL), xb = Math.min(AX, xh);
+        var pg = g.createLinearGradient(xh - TAIL, 0, xh, 0);
+        pg.addColorStop(0, rgba(c2, 0));
+        pg.addColorStop(1, rgba(c2, 0.95 * ease((xh - SX) / 14)));
+        g.strokeStyle = pg;
+        g.lineWidth = 3.4;
+        g.lineCap = 'butt';
+        g.beginPath();
+        for (q = 0; q <= 5; q++) {
+          var px = xa + (xb - xa) * q / 5;
+          g.lineTo(px, yAt(bm, px, 0));
+        }
+        g.stroke();
+        /* the head grows out of its entity and shrinks into its answer */
+        var hs = ease(Math.min(xh - SX, AX - xh) / 14);
+        if (hs > 0) {
+          var hy = yAt(bm, xh, 0);
+          g.fillStyle = rgba(c2, 0.18);
+          g.beginPath(); g.arc(xh, hy, 6.5 * hs, 0, TAU); g.fill();
+          g.fillStyle = rgba(c2, 1);
+          g.beginPath(); g.arc(xh, hy, 2.6 * hs, 0, TAU); g.fill();
+        }
+        g.lineCap = 'round';
+      }
+    }
+
+    /* Each arrival rings its answer in that answer's colour. A reached answer
+       holds one entity, so it rings in that entity's colour, once a cycle. The
+       knot is coral and rings for every entity it holds, so it rings several
+       times as often: the crowding shows, and nothing has to be labelled. */
+    for (q = 0; q < rip.length; q++) {
+      bm = rip[q][0];
+      var k2 = rip[q][1], out = 1 - (1 - k2) * (1 - k2) * (1 - k2);
+      g.strokeStyle = rgba(bm.col ? coral : cs[bm.pal], 0.55 * (1 - k2) * (1 - k2) * ease(k2 / 0.14));
+      g.lineWidth = bm.col ? 2.2 : 1.6;
       g.beginPath();
-      g.moveTo(px, py);
-      g.lineTo(px + tt * rx, py + tt * ry);
+      g.arc(AX, bm.T, bm.col ? 20 + 24 * out : 8 + 9 * out, 0, TAU);
       g.stroke();
     }
 
-    /* the wall itself, drawn last so it reads as the surface */
-    g.strokeStyle = rgba(token('--ink', '#1c1b19'), 0.92);
-    g.lineWidth = 3.4;
-    g.lineCap = 'round';
-    g.beginPath();
-    g.arc(CX, CY, R, -Math.PI / 2 + a, Math.PI / 2 + a);
-    g.stroke();
+    /* Every answer is drawn as petals, one per entity that landed on it. A
+       reached answer has one petal. The knot has one for each entity the
+       model collapsed onto it, all round the same centre. */
+    var rot = REDUCED ? 0 : T / 18000 * TAU;
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      if (land[n] <= 0) continue;
+      var c3 = cs[bm.pal], L = land[n] * (1 + 0.28 * (hit[n] || 0));
+      if (!bm.col) {
+        g.fillStyle = rgba(c3, 1);
+        g.beginPath(); g.arc(AX, bm.T, 5 * L, 0, TAU); g.fill();
+        continue;
+      }
+      var th = rot + bm.j * TAU / COLLAPSED.length;
+      g.fillStyle = rgba(c3, 0.74);
+      g.beginPath();
+      g.ellipse(AX + Math.cos(th) * 10 * L, KY + Math.sin(th) * 10 * L, 11.5 * L, 6 * L, th, 0, TAU);
+      g.fill();
+    }
+    if (pile > 0) {
+      g.fillStyle = rgba(coral, 1);
+      g.beginPath(); g.arc(AX, KY, 6 * Math.sqrt(pile), 0, TAU); g.fill();
+    }
+
+    /* the entities, each swelling a little as a bead leaves it */
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      var since = T - bm.D - 600 - bm.phi + 240, sw = 0;
+      if (since >= 0 && !REDUCED) { since = (since % bm.P) / 240; sw = 1.1 * since * since * Math.exp(2 - 2 * since); }
+      g.fillStyle = rgba(cs[bm.pal], 1);
+      g.beginPath(); g.arc(SX - 4, bm.y0, 5.2 + sw, 0, TAU); g.fill();
+    }
   }
 
   /* ==================================================================== */
@@ -244,71 +360,307 @@
   /* ==================================================================== */
   /* transport — monodromy                                                */
   /* ==================================================================== */
-  /* The previous drawing was a circle with four triangles on it, and nothing
-     in it ever came back changed, which is the only thing monodromy is about.
-     Carry a frame all the way round a closed loop and it returns pointing
-     somewhere else. The angle it fails to close by is the whole subject, and
-     it is visible without a derivative being computed anywhere, which is the
-     claim the project makes.
+  /* The question is whether a transformation can be undone, and the answer
+     is read off by going round a loop rather than by differentiating. So the
+     picture is the oldest honest example there is: squaring, w = z*z, and
+     the surface above the floor is its inverse, the square root, drawn as
+     the graph of Re(sqrt w). Every point of the floor has two square roots,
+     and the surface is both of them at once.
 
-     So the loop is drawn with the frame stamped at forty stations, turning as
-     it goes, and at the start the frame it set out with is drawn beside the
-     frame it came back with. The gap between those two is the measurement. */
-  function transport(g, vb, t) {
-    var CX = 235, CY = 236, R = 132;
-    var STATIONS = 40;
-    var TWIST = Math.PI * 0.62;          /* what the loop fails to close by */
-    var mint = token('--mint-500', '#0b93ab');
-    var mint7 = token('--mint-700', '#0a6b7c');
-    var ink = token('--ink', '#1c1b19');
-    var hair = token('--hair2', '#cfcbc1');
+     A point walks a closed loop on the floor round the one place where the
+     two roots meet. Directly above it the inverse is carried along the edge
+     of the surface, continuously, never jumping. When the floor point is home
+     the loop below has closed, but the carried value is on the other sheet,
+     directly under the one it set out with: same floor point, opposite root.
+     Only a second lap brings it home. That gap, seen by going round and
+     looking, is the answer that squaring has no single-valued inverse here,
+     and not one derivative was taken to find it.
 
-    function at(th) {
-      var rr = R * (1 + 0.15 * Math.sin(3 * th));
-      return [CX + rr * Math.cos(th), CY + rr * Math.sin(th)];
+     Everything on the surface is true to the formula. The height is
+     sqrt(r) cos(theta/2) and the colour is cos(theta/2), the sign of that
+     root, running mint where it is positive through blue and violet to coral
+     where it is negative, so a colour change is a change of root and nothing
+     else. The start is a hollow mint ring; the walker fills it only when it
+     is genuinely back. The floor has a ring too, and the floor walker fills
+     that one every lap, which is the whole contrast: below closes, above not.
+
+     Drawing is painter's order, far to near, over every quad, every edge
+     segment, the axis and the markers, re-sorted each frame because the view
+     sways. Shading is alpha and hue only, a mix from each -500 token toward
+     its -700 on the side facing away from the light, so no fill is ever
+     darker than the palette. Geometry and colours are built once and cached
+     on the function. About 1,000 fills and strokes a frame. */
+  function transport(g, vb, t, st) {
+    var TAU = Math.PI * 2;
+    var NT = 112, NR = 7;                /* 112 steps round two laps, 7 rings */
+    var H = 0.56, ZF = -0.84;            /* sheet height, floor level (R = 1) */
+    var EL = 0.46, PHI0 = -0.45, SWAY = 0.2;
+    var S = 168, CX = 235, CY = 212;
+    var LAP = 5000, T0 = 900, RAMP = 1100, BUILD = 1700;
+    var TAIL = TAU * 0.85;
+
+    var M = transport._m;
+    if (!M) {
+      M = transport._m = {};
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      var C5 = [hex('--mint-500', '#0b93ab'), hex('--blue-500', '#2456dc'),
+                hex('--violet-500', '#a66cf0'), hex('--coral-500', '#d9376e')];
+      var C7 = [hex('--mint-700', '#0a6b7c'), hex('--blue-700', '#163d9a'),
+                hex('--violet-700', '#6b35c4'), hex('--coral-700', '#a01c3f')];
+      /* v = +1 mint ... -1 coral, through blue and violet */
+      var ramp = function (C, v) {
+        var k = (1 - v) * 1.5, i = Math.min(2, Math.floor(k)), f = k - i;
+        return [C[i][0] + (C[i + 1][0] - C[i][0]) * f,
+                C[i][1] + (C[i + 1][1] - C[i][1]) * f,
+                C[i][2] + (C[i + 1][2] - C[i][2]) * f];
+      };
+      var css = function (c) {
+        return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')';
+      };
+      M.ramp = ramp; M.css = css; M.C5 = C5; M.C7 = C7;
+      M.mint7 = css(C7[0]);
+      M.coral7 = token('--coral-700', '#a01c3f');
+      M.muted = token('--muted', '#5f5b53');
+      M.hair = token('--hair2', '#cfcbc1');
+      M.amber = token('--amber-500', '#d96a06');
+
+      /* vertices, world space: x, y on the floor, z the real part of the root */
+      var NV = (NR + 1) * (NT + 1);
+      M.wx = new Float32Array(NV); M.wy = new Float32Array(NV); M.wz = new Float32Array(NV);
+      for (var j = 0; j <= NR; j++) {
+        /* rings spaced so the root, not the radius, steps evenly: the throat
+           at the branch point is vertical and gets the rings it needs */
+        var r = (j / NR) * (j / NR);
+        for (var i = 0; i <= NT; i++) {
+          var th = i / NT * 2 * TAU, o = j * (NT + 1) + i;
+          M.wx[o] = r * Math.cos(th); M.wy[o] = r * Math.sin(th);
+          M.wz[o] = H * Math.sqrt(r) * Math.cos(th / 2);
+        }
+      }
+      M.sx = new Float32Array(NV); M.sy = new Float32Array(NV); M.sd = new Float32Array(NV);
+
+      /* quads: a fill colour and alpha each, shaded once against a fixed light */
+      var L = [-0.42, -0.5, 0.76], ll = Math.hypot(L[0], L[1], L[2]);
+      M.qcol = []; M.qa = []; M.qth = [];
+      for (j = 0; j < NR; j++) {
+        for (i = 0; i < NT; i++) {
+          var a = j * (NT + 1) + i, b = a + 1, c = a + NT + 2, d = a + NT + 1;
+          var ux = M.wx[c] - M.wx[a], uy = M.wy[c] - M.wy[a], uz = M.wz[c] - M.wz[a];
+          var vx = M.wx[d] - M.wx[b], vy = M.wy[d] - M.wy[b], vz = M.wz[d] - M.wz[b];
+          var nx = uy * vz - uz * vy, ny = uz * vx - ux * vz, nz = ux * vy - uy * vx;
+          var nn = Math.hypot(nx, ny, nz) || 1;
+          var lam = Math.abs((nx * L[0] + ny * L[1] + nz * L[2]) / (nn * ll));
+          var thm = (i + 0.5) / NT * 2 * TAU;
+          var v = Math.cos(thm / 2);
+          var c5 = ramp(C5, v), c7 = ramp(C7, v), m = 0.62 * (1 - lam);
+          M.qcol.push(css([c5[0] + (c7[0] - c5[0]) * m, c5[1] + (c7[1] - c5[1]) * m,
+                           c5[2] + (c7[2] - c5[2]) * m]));
+          /* every fourth step a little denser, so the ramp reads as ruled bands */
+          M.qa.push(0.34 + 0.26 * lam + (i % 4 === 0 ? 0.1 : 0));
+          M.qth.push(thm / (2 * TAU));
+        }
+      }
+      M.rcol = [];
+      for (i = 0; i < NT; i++) {
+        var vm = Math.cos((i + 0.5) / NT * TAU);
+        M.rcol.push(css(ramp(C7, vm)));
+      }
+
+      /* one persistent record per drawable, sorted in place every frame */
+      M.items = [];
+      var push = function (k, i) { M.items.push({ k: k, i: i, d: 0 }); };
+      for (i = 0; i < NR * NT; i++) push(0, i);   /* surface quad */
+      for (i = 0; i < NT; i++) push(1, i);        /* rim segment + tail */
+      for (i = 0; i < 8; i++) push(2, i);         /* axis segment */
+      push(3, 0);                                 /* start stalk + gap */
+      push(4, 0);                                 /* walker + its stalk */
+      push(5, 0);                                 /* start ring */
     }
-    function frame(x, y, ang, col, w, len) {
-      g.strokeStyle = col; g.lineWidth = w; g.lineCap = 'round';
+
+    /* --- time ---------------------------------------------------------- */
+    var RED = REDUCED;
+    var phi = RED ? PHI0 : PHI0 + SWAY * Math.sin(TAU * t / 16000);
+    var build = RED ? 1 : ease(t / BUILD);
+    /* laps travelled: it pulls away from rest, then keeps a pace that dips
+       to 0.4 of the mean at the start point every lap, where the comparison
+       is made, and never stops. Position and speed are both continuous. */
+    var tau = t - T0, u;
+    if (RED) u = 1;
+    else if (tau <= 0) u = 0;
+    else if (tau < RAMP) u = tau * tau / (2 * RAMP * LAP);
+    else u = (tau - RAMP / 2) / LAP;
+    var p = u - 0.6 * Math.sin(TAU * u) / TAU;
+    var TH = p * TAU;                    /* unwrapped angle travelled */
+    var odd = Math.abs(u - (2 * Math.floor((u - 1) / 2 + 0.5) + 1));
+    var cmp = RED ? 1 : (u > 0.4 ? Math.exp(-Math.pow(odd / 0.2, 2)) : 0);
+    var ev = Math.abs(u - 2 * Math.round(u / 2));
+    var home = RED ? 0 : (u > 1.4 ? Math.exp(-Math.pow(ev / 0.2, 2)) : 0);
+    var tailLen = RED ? TAU : Math.min(TAIL, TH);
+
+    /* --- projection ---------------------------------------------------- */
+    var ca = Math.cos(phi), sa = Math.sin(phi), ce = Math.cos(EL), se = Math.sin(EL);
+    function proj(x, y, z, out) {
+      var X = x * ca - y * sa, Y = x * sa + y * ca;
+      out[0] = CX + S * X; out[1] = CY - S * (z * ce + Y * se); out[2] = -Y * ce + z * se;
+      return out;
+    }
+    var q = [0, 0, 0];
+    var NV2 = M.wx.length;
+    for (var n = 0; n < NV2; n++) {
+      proj(M.wx[n], M.wy[n], M.wz[n], q);
+      M.sx[n] = q[0]; M.sy[n] = q[1]; M.sd[n] = q[2];
+    }
+    function rimAt(th, out) {           /* point on the lifted loop, any angle */
+      return proj(Math.cos(th), Math.sin(th), H * Math.cos(th / 2), out);
+    }
+    var W = rimAt(TH, [0, 0, 0]);
+    var WF = proj(Math.cos(TH), Math.sin(TH), ZF, [0, 0, 0]);
+    var S0 = rimAt(0, [0, 0, 0]), S1 = rimAt(TAU, [0, 0, 0]);
+    var F0 = proj(1, 0, ZF, [0, 0, 0]);
+
+    /* --- depths -------------------------------------------------------- */
+    var it = M.items;
+    for (n = 0; n < it.length; n++) {
+      var e = it[n], i0;
+      if (e.k === 0) {
+        i0 = ((e.i / NT) | 0) * (NT + 1) + (e.i % NT);
+        e.d = (M.sd[i0] + M.sd[i0 + 1] + M.sd[i0 + NT + 1] + M.sd[i0 + NT + 2]) / 4;
+      } else if (e.k === 1) {
+        i0 = NR * (NT + 1) + e.i;
+        e.d = (M.sd[i0] + M.sd[i0 + 1]) / 2 + 0.004;
+      } else if (e.k === 2) {
+        e.d = ((ZF + (H + 0.14 - ZF) * (e.i + 0.5) / 8)) * se;
+      } else if (e.k === 3) e.d = S1[2] - 0.006;
+      else if (e.k === 4) e.d = W[2] + 0.008;
+      else e.d = S0[2] + 0.012;
+    }
+    it.sort(function (a, b) { return a.d - b.d; });
+
+    /* --- draw ---------------------------------------------------------- */
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* the floor: the loop that closes, round the point where the roots meet */
+    var fc = proj(0, 0, ZF, [0, 0, 0]);
+    g.globalAlpha = 1;
+    g.fillStyle = rgba(M.hair, 0.28);
+    g.beginPath(); g.ellipse(fc[0], fc[1], S, S * se, 0, 0, TAU); g.fill();
+    g.strokeStyle = rgba(M.muted, 0.72); g.lineWidth = 2.2;
+    g.beginPath(); g.ellipse(fc[0], fc[1], S, S * se, 0, 0, TAU); g.stroke();
+    /* the floor walker's recent path, so the lap below is watched closing */
+    if (TH > 0.001) {
+      g.strokeStyle = rgba(M.muted, 0.5); g.lineWidth = 3;
       g.beginPath();
-      g.moveTo(x, y); g.lineTo(x + Math.cos(ang) * len, y + Math.sin(ang) * len);
-      g.moveTo(x, y); g.lineTo(x + Math.cos(ang + Math.PI / 2) * len * 0.62,
-                               y + Math.sin(ang + Math.PI / 2) * len * 0.62);
+      var fl = Math.min(TAU * 0.5, TH), fq = [0, 0, 0];
+      for (n = 0; n <= 24; n++) {
+        var fth = TH - fl * (1 - n / 24);
+        proj(Math.cos(fth), Math.sin(fth), ZF, fq);
+        if (n === 0) g.moveTo(fq[0], fq[1]); else g.lineTo(fq[0], fq[1]);
+      }
       g.stroke();
     }
+    var near = RED ? 1 : Math.exp(-Math.pow((u - Math.round(u)) / 0.2, 2)) * (u > 0.4 ? 1 : 0);
+    g.strokeStyle = rgba(M.muted, 0.95); g.lineWidth = 2;
+    g.beginPath(); g.arc(F0[0], F0[1], 6.5 + 2.5 * near, 0, TAU); g.stroke();
+    g.fillStyle = rgba(M.muted, 1);
+    g.beginPath(); g.arc(WF[0], WF[1], 4.2, 0, TAU); g.fill();
+    g.fillStyle = rgba(M.muted, 0.9);
+    g.beginPath(); g.arc(fc[0], fc[1], 3.2, 0, TAU); g.fill();
 
-    g.clearRect(0, 0, vb[0], vb[1]);
-
-    g.strokeStyle = rgba(token('--muted', '#5f5b53'), 0.5); g.lineWidth = 2.4; g.beginPath();
-    for (var s = 0; s <= 240; s++) {
-      var p = at(s / 240 * Math.PI * 2);
-      if (s === 0) g.moveTo(p[0], p[1]); else g.lineTo(p[0], p[1]);
+    var P0 = [0, 0, 0], P1 = [0, 0, 0];
+    for (n = 0; n < it.length; n++) {
+      var e2 = it[n], k = e2.k, i1 = e2.i;
+      if (k === 0) {
+        var a0 = ((i1 / NT) | 0) * (NT + 1) + (i1 % NT);
+        var rv = ease((build * 1.35 - M.qth[i1]) / 0.35);
+        g.globalAlpha = M.qa[i1] * (0.24 + 0.76 * rv);
+        g.fillStyle = M.qcol[i1];
+        g.beginPath();
+        g.moveTo(M.sx[a0], M.sy[a0]);
+        g.lineTo(M.sx[a0 + 1], M.sy[a0 + 1]);
+        g.lineTo(M.sx[a0 + NT + 2], M.sy[a0 + NT + 2]);
+        g.lineTo(M.sx[a0 + NT + 1], M.sy[a0 + NT + 1]);
+        g.closePath(); g.fill();
+      } else if (k === 1) {
+        var r0 = NR * (NT + 1) + i1;
+        var rv2 = ease((build * 1.35 - (i1 + 0.5) / NT) / 0.35);
+        /* butt caps: segments meet end to end, so a translucent edge does not
+           bead where round caps would overlap and double the alpha */
+        g.lineCap = 'butt';
+        g.globalAlpha = 0.66 * (0.3 + 0.7 * rv2);
+        g.strokeStyle = M.rcol[i1]; g.lineWidth = 1.8;
+        g.beginPath(); g.moveTo(M.sx[r0], M.sy[r0]); g.lineTo(M.sx[r0 + 1], M.sy[r0 + 1]); g.stroke();
+        /* the carried value's recent path, brightest at the walker */
+        var tA = i1 / NT * 2 * TAU, tB = (i1 + 1) / NT * 2 * TAU;
+        var lo = TH - tailLen, hi = TH, base = Math.floor(TH / (2 * TAU)) * 2 * TAU;
+        for (var w = -1; w <= 0; w++) {       /* this segment in this cycle or the last */
+          var a1 = Math.max(tA + base + w * 2 * TAU, lo), b1 = Math.min(tB + base + w * 2 * TAU, hi);
+          if (b1 <= a1) continue;
+          var x = (hi - (a1 + b1) / 2) / (RED ? TAU * 1.1 : TAIL);
+          var fade = Math.max(0, Math.min(1, 1 - x * x));
+          g.globalAlpha = 0.12 + 0.88 * fade;
+          g.strokeStyle = M.rcol[i1]; g.lineWidth = 1.6 + 4 * fade;
+          rimAt(a1, P0); rimAt(b1, P1);
+          g.beginPath(); g.moveTo(P0[0], P0[1]); g.lineTo(P1[0], P1[1]); g.stroke();
+        }
+        g.lineCap = 'round';
+      } else if (k === 2) {
+        var z0 = ZF + (H + 0.14 - ZF) * i1 / 8, z1 = ZF + (H + 0.14 - ZF) * (i1 + 1) / 8;
+        proj(0, 0, z0, P0); proj(0, 0, z1, P1);
+        g.globalAlpha = 1;
+        g.strokeStyle = rgba(M.muted, 0.55); g.lineWidth = 1.4;
+        g.setLineDash([3, 4]);
+        g.beginPath(); g.moveTo(P0[0], P0[1]); g.lineTo(P1[0], P1[1]); g.stroke();
+        g.setLineDash([]);
+      } else if (k === 3) {
+        /* the start, both roots of it: dashed from the floor, and the gap
+           between the root it set out with and the one it came back with */
+        g.globalAlpha = 1;
+        g.strokeStyle = rgba(M.muted, 0.6); g.lineWidth = 1.4;
+        g.setLineDash([4, 4]);
+        g.beginPath(); g.moveTo(F0[0], F0[1] - 7); g.lineTo(S0[0], S0[1]); g.stroke();
+        g.setLineDash([]);
+        if (cmp > 0.01) {
+          g.strokeStyle = rgba(M.amber, 0.9 * cmp); g.lineWidth = 5;
+          g.beginPath(); g.moveTo(S1[0], S1[1] - 9); g.lineTo(S0[0], S0[1] + 11); g.stroke();
+        }
+      } else if (k === 4) {
+        var vw = Math.cos(TH / 2);
+        g.globalAlpha = 1;
+        g.strokeStyle = rgba(M.muted, 0.5); g.lineWidth = 1.3;
+        g.beginPath(); g.moveTo(WF[0], WF[1]); g.lineTo(W[0], W[1]); g.stroke();
+        var wc = M.ramp(M.C5, vw);
+        g.fillStyle = M.css(wc);
+        g.globalAlpha = 0.2;
+        g.beginPath(); g.arc(W[0], W[1], 12, 0, TAU); g.fill();
+        g.globalAlpha = 1;
+        g.beginPath(); g.arc(W[0], W[1], 7, 0, TAU); g.fill();
+        g.strokeStyle = M.css(M.ramp(M.C7, vw)); g.lineWidth = 2;
+        g.stroke();
+        /* it has come back to the start point and is not the root it left
+           with: the ring rides on the walker, so it marks the arrival */
+        if (cmp > 0.01) {
+          g.strokeStyle = rgba(M.coral7, 0.55 * cmp);
+          g.beginPath(); g.arc(W[0], W[1], 11 + 5 * cmp, 0, TAU); g.stroke();
+        }
+      } else {
+        g.globalAlpha = 1;
+        if (home > 0.01) {
+          g.strokeStyle = M.mint7; g.globalAlpha = 0.45 * home; g.lineWidth = 2;
+          g.beginPath(); g.arc(S0[0], S0[1], 12 + 6 * home, 0, TAU); g.stroke();
+          g.globalAlpha = 1;
+        }
+        g.strokeStyle = M.mint7; g.lineWidth = 3;
+        g.beginPath(); g.arc(S0[0], S0[1], 10, 0, TAU); g.stroke();
+      }
     }
-    g.closePath(); g.stroke();
-
-    for (var i = 0; i < STATIONS; i++) {
-      var f = i / STATIONS, th = f * Math.PI * 2, q = at(th);
-      frame(q[0], q[1], th + TWIST * f, rgba(mint, 0.42 + 0.48 * f), 2.8, 19);
-    }
-
-    /* the one that is travelling now, so the turning is watched and not
-       merely inferred from a row of stamps */
-    /* eased so the frame slows through the start, where the angle it
-       failed to close by is being compared */
-    var raw = REDUCED ? 0.999 : (t % 7600) / 7600;
-    var cyc = REDUCED ? 0.999 : raw * 0.35 + ease(raw) * 0.65;
-    var tp = at(cyc * Math.PI * 2);
-    frame(tp[0], tp[1], cyc * Math.PI * 2 + TWIST * cyc, rgba(mint7, 1), 4.2, 28);
-    g.fillStyle = rgba(mint7, 1);
-    g.beginPath(); g.arc(tp[0], tp[1], 5, 0, Math.PI * 2); g.fill();
-
-    /* set out with, and came back with */
-    var st = at(0);
-    frame(st[0], st[1], 0, rgba(ink, 0.9), 4.2, 34);
-    frame(st[0], st[1], TWIST, rgba(mint7, 1), 4.2, 34);
-    g.strokeStyle = rgba(mint7, 0.75); g.lineWidth = 2.4;
-    g.setLineDash([4, 4]);
-    g.beginPath(); g.arc(st[0], st[1], 44, 0, TWIST); g.stroke();
-    g.setLineDash([]);
+    g.globalAlpha = 1;
   }
 
   /* ==================================================================== */

@@ -330,10 +330,19 @@
   }
 
   /*
-   * initMosaic — the assembling mosaic that replaces the number strip.
+   * initMosaic — the moving mosaic that replaces the number strip.
+   * A fixed population of blocks lives on one canvas and is never still.
+   * Each achievement's SHAPE is a set of cells on a 40 x 10 grid. On a
+   * switch every block travels on a damped spring from wherever it is to a
+   * cell of the next shape, departures sweeping left to right so the new
+   * shape assembles as a wave. Blocks the shape does not need drift, small
+   * and faint, in a calm swarm around the grid until a later shape recruits
+   * them. While a shape holds, a slow wave runs through it. Positions are in
+   * cell units, so a resize rescales the picture without disturbing motion.
+   * The canvas draws no words; the readout is the accessible content.
    * DOM contract (index.html owns the markup, this only fills it in):
    *   section.mosaic > .wrap.mosaic__inner
-   *     .mosaic__grid#mosaic-grid            populated here, 40x10 <i> cells
+   *     .mosaic__grid#mosaic-grid            gets one aria-hidden <canvas>
    *     .mosaic__read > .mosaic__org #mosaic-org, .mosaic__num #mosaic-num,
    *                     .mosaic__label #mosaic-label, .mosaic__sub #mosaic-sub
    * No-op if #mosaic-grid is absent (work.html has none of this markup).
@@ -341,9 +350,20 @@
   function initMosaic() {
     var grid = document.getElementById('mosaic-grid');
     if (!grid) return;
+    var canvas = document.createElement('canvas');
+    var ctx = canvas.getContext && canvas.getContext('2d');
+    if (!ctx) return;
+    canvas.setAttribute('aria-hidden', 'true');
+    grid.appendChild(canvas);
 
     var COLS = 40, ROWS = 10;
-    var CYCLE_MS = 5000;
+    var MX = 1, MY = 2;               // swarm room around the grid, in cells
+    var CYCLE = 6;                    // seconds per achievement
+    var SWEEP = 1.2;                  // departures sweep left to right over this
+    var OMEGA = 3.6, ZETA = 0.78;     // spring: settles in ~1.4s, ~2% overshoot
+    var WAVE_T = 2.8, WAVE_K = 0.28;  // hold wave: period (s), phase per column
+    var WAVE_A = reduceMotion ? 0 : 0.12, WAVE_S = reduceMotion ? 0 : 0.08;
+    var SWARM_SIZE = 0.42, SWARM_ALPHA = 0.3;
 
     var ACHIEVEMENTS = [
       { org: 'google-deepmind/mujoco #3396', num: '1,281.6x', label: 'less scratch memory', sub: 'island discovery, ntree 4,096', shape: 'quadratic' },
@@ -455,18 +475,6 @@
     var subEl = document.getElementById('mosaic-sub');
     var readEl = grid.parentNode.querySelector('.mosaic__read');
 
-    var cells = [];
-    var frag = document.createDocumentFragment();
-    for (var r = 0; r < ROWS; r++) {
-      for (var c = 0; c < COLS; c++) {
-        var i = document.createElement('i');
-        frag.appendChild(i);
-        cells.push(i);
-      }
-    }
-    grid.appendChild(frag);
-    cells.forEach(scatter);   // every cell starts out in the swarm
-
     function litMap(shapeName) {
       var fn = SHAPES[shapeName];
       var accentFn = ACCENT[shapeName];
@@ -486,36 +494,91 @@
       if (subEl) subEl.textContent = a.sub;
     }
 
-    /* Where a cell waits when it is not part of the current shape. Far
-       enough out to read as travel, not so far that four hundred of them
-       become noise across the band. */
-    function scatter(cell) {
-      var dx = (Math.random() * 2 - 1) * 46;
-      var dy = (Math.random() * 2 - 1) * 34;
-      var rot = (Math.random() * 2 - 1) * 110;
-      cell.style.setProperty('--dx', dx.toFixed(1) + 'px');
-      cell.style.setProperty('--dy', dy.toFixed(1) + 'px');
-      cell.style.setProperty('--rot', rot.toFixed(1) + 'deg');
+    var css = getComputedStyle(document.documentElement);
+    function tok(name) {
+      var h = (css.getPropertyValue(name).trim() || '#2456dc').slice(1);
+      if (h.length === 3) h = h.replace(/./g, '$&$&');
+      var n = parseInt(h, 16);
+      return [n >> 16 & 255, n >> 8 & 255, n & 255];
+    }
+    // Formed blocks are --blue-500 (the accent cell --blue-700); the swarm
+    // is a faint mix that turns blue as each block is recruited.
+    var BLUE = tok('--blue-500'), DEEP = tok('--blue-700');
+    var TINTS = [BLUE, BLUE, tok('--violet-500'), tok('--mint-500')];
+
+    function rand(a, b) { return a + Math.random() * (b - a); }
+    function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+
+    var most = 0;
+    ACHIEVEMENTS.forEach(function (a) { most = Math.max(most, Object.keys(litMap(a.shape)).length); });
+    var blocks = [];
+    for (var i = 0; i < most + 40; i++) {
+      var hx = rand(0, COLS), hy = rand(-1.2, ROWS + 1.2);
+      blocks.push({
+        x: hx, y: hy, vx: 0, vy: 0, f: 0,       // f: 0 swarm .. 1 formed
+        cell: -1, acc: false, next: null, nacc: false, at: 0,
+        hx: hx, hy: hy, gx: hx, gy: hy, tint: TINTS[i % TINTS.length], rot: rand(-0.6, 0.6),
+        w1: 2 * Math.PI / rand(9, 16), w2: 2 * Math.PI / rand(6, 11),
+        p1: rand(0, 6.3), p2: rand(0, 6.3), p3: rand(0, 6.3)
+      });
     }
 
+    var clock = 0, switchedAt = 0, currentIdx = 0;
+
+    // Where block b is heading at this instant, written into tgt.
+    var tgt = { x: 0, y: 0 };
+    function aim(b) {
+      if (b.cell >= 0) {
+        var c = b.cell % COLS;
+        tgt.x = c + 0.5;
+        tgt.y = (b.cell - c) / COLS + 0.5 + WAVE_A * Math.sin(clock * 2 * Math.PI / WAVE_T - c * WAVE_K);
+      } else {
+        tgt.x = clamp(b.hx + 1.8 * Math.sin(clock * b.w1 + b.p1) + 0.5 * Math.sin(clock * b.w2 * 1.7 + b.p2), -0.4, COLS + 0.4);
+        tgt.y = clamp(b.hy + 0.6 * Math.sin(clock * b.w2 + b.p3) + 0.25 * Math.sin(clock * b.w1 * 1.9 + b.p1), 0.6 - MY, ROWS + MY - 0.6);
+      }
+    }
+
+    function depart(b) {
+      b.cell = b.next; b.acc = b.nacc; b.next = null;
+      // A released block joins the swarm where it is, then roams slowly to a
+      // random spot, so the swarm evens out instead of piling up where shapes were.
+      if (b.cell < 0) { b.hx = b.x; b.hy = b.y; b.gx = rand(0, COLS); b.gy = rand(-1.2, ROWS + 1.2); }
+    }
+    function flush() { blocks.forEach(function (b) { if (b.next !== null) depart(b); }); }
+
+    /* Every cell of the next shape gets a block. A block already on one of
+       its cells stays put. The other cells are handed out left to right, each
+       taking the nearest block still free, with blocks of the old shape
+       preferred over swarm blocks (the +2 cells) so the old shape visibly
+       flows into the new one. A block leaves when the sweep reaches its
+       target column, so the shape assembles as a wave from the left, and
+       leftovers rejoin the swarm on the same sweep. */
     function applyShape(idx, animate) {
-      var a = ACHIEVEMENTS[idx];
-      var map = litMap(a.shape);
-
-      cells.forEach(function (cell, i) {
-        var shouldLight = Object.prototype.hasOwnProperty.call(map, i);
-        var wasLit = cell.classList.contains('is-lit');
-        var delay = animate ? Math.round(Math.random() * (shouldLight ? 700 : 400)) : 0;
-        cell.style.transitionDelay = delay + 'ms';
-
-        /* A cell going dark is thrown to a fresh position, so the next shape
-           that needs it flies in from somewhere it has never been. Re-rolling
-           only on the way out means a cell already travelling is never yanked
-           to a new vector mid-flight. */
-        if (animate && wasLit && !shouldLight) scatter(cell);
-
-        cell.classList.toggle('is-lit', shouldLight);
-        cell.classList.toggle('is-accent', shouldLight && !!map[i]);
+      var a = ACHIEVEMENTS[idx], map = litMap(a.shape), kept = {}, pool = [];
+      function send(b, cell, acc, delay) {
+        b.next = cell; b.nacc = acc; b.at = clock + (animate ? delay + rand(0, 0.12) : 0);
+      }
+      flush();
+      blocks.forEach(function (b) {
+        if (b.cell >= 0 && b.cell in map) { kept[b.cell] = 1; b.acc = map[b.cell]; }
+        else pool.push(b);
+      });
+      Object.keys(map).map(Number).filter(function (k) { return !kept[k]; })
+        .sort(function (p, q) { return p % COLS - q % COLS || p - q; })
+        .forEach(function (k) {
+          var c = k % COLS, r = (k - c) / COLS, best = 0, bestD = Infinity;
+          for (var i = 0; i < pool.length; i++) {
+            var b = pool[i];
+            if (!b) continue;
+            var dx = b.x - c - 0.5, dy = b.y - r - 0.5;
+            var d = Math.sqrt(dx * dx + dy * dy) + (b.cell < 0 ? 2 : 0);
+            if (d < bestD) { bestD = d; best = i; }
+          }
+          send(pool[best], k, map[k], SWEEP * c / (COLS - 1));
+          pool[best] = null;
+        });
+      pool.forEach(function (b) {
+        if (b && b.cell >= 0) send(b, -1, false, 0.8 * SWEEP * clamp(b.x / COLS, 0, 1));
       });
 
       if (animate && readEl) {
@@ -529,13 +592,81 @@
       }
     }
 
-    applyShape(0, false);
-    if (reduceMotion) return; // first achievement lit, no cycling, no controls.
+    // Damped spring toward aim(b), in 20ms substeps so a 50ms interval tick
+    // stays as smooth and stable as a 16ms frame. Returns whether anything moves.
+    function physics(dt) {
+      var n = Math.ceil(dt / 0.02), h = dt / n, k = OMEGA * OMEGA, damp = 2 * ZETA * OMEGA;
+      var ease = 1 - Math.exp(-dt / 0.35), roam = userPaused ? 0 : 1 - Math.exp(-dt / 5), moving = false;
+      blocks.forEach(function (b) {
+        if (b.next !== null && clock >= b.at) depart(b);
+        if (b.cell < 0) { b.hx += (b.gx - b.hx) * roam; b.hy += (b.gy - b.hy) * roam; }
+        aim(b);
+        for (var s = 0; s < n; s++) {
+          b.vx += (k * (tgt.x - b.x) - damp * b.vx) * h; b.x += b.vx * h;
+          b.vy += (k * (tgt.y - b.y) - damp * b.vy) * h; b.y += b.vy * h;
+        }
+        var goal = b.cell >= 0 ? 1 : 0;
+        b.f += (goal - b.f) * ease;
+        if (Math.abs(b.vx) + Math.abs(b.vy) > 0.02 || Math.abs(tgt.x - b.x) + Math.abs(tgt.y - b.y) > 0.01 ||
+            Math.abs(goal - b.f) > 0.01) moving = true;
+      });
+      return moving;
+    }
 
-    var currentIdx = 0;
-    var timer = null;
-    var inView = false;
-    var userPaused = false;
+    var pitch = 0, dpr = 1, lastW = 0, round = !!ctx.roundRect;
+    function draw() {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!pitch) return;
+      var u = pitch * dpr, full = u * 0.84, ph = clock * 2 * Math.PI / WAVE_T;
+      // Swarm underneath, formed blocks on top.
+      for (var pass = 0; pass < 2; pass++) {
+        for (var i = 0; i < blocks.length; i++) {
+          var b = blocks[i], f = b.f;
+          if ((f > 0.5) !== (pass === 1) || (reduceMotion && b.cell < 0)) continue;
+          var t = b.tint, to = b.acc ? DEEP : BLUE;
+          var s = full * (SWARM_SIZE + (1 - SWARM_SIZE) * f) *
+                  (1 - WAVE_S * f * (0.5 - 0.5 * Math.sin(ph - b.x * WAVE_K)));
+          var ang = (1 - f) * (b.rot + 0.35 * Math.sin(clock * b.w2 + b.p2)) + clamp(b.vx * 0.012, -0.35, 0.35);
+          var cs = Math.cos(ang), sn = Math.sin(ang);
+          ctx.globalAlpha = SWARM_ALPHA + (1 - SWARM_ALPHA) * f;
+          ctx.fillStyle = 'rgb(' + Math.round(t[0] + (to[0] - t[0]) * f) + ',' +
+            Math.round(t[1] + (to[1] - t[1]) * f) + ',' + Math.round(t[2] + (to[2] - t[2]) * f) + ')';
+          ctx.setTransform(cs, sn, -sn, cs, (b.x + MX) * u, (b.y + MY) * u);
+          if (round) { ctx.beginPath(); ctx.roundRect(-s / 2, -s / 2, s, s, s * 0.14); ctx.fill(); }
+          else ctx.fillRect(-s / 2, -s / 2, s, s);
+        }
+      }
+    }
+
+    // 40 x 10 cells plus the swarm margin, fitted to the container width.
+    function resize() {
+      var w = grid.clientWidth, r = Math.min(2, window.devicePixelRatio || 1);
+      if (w && (w !== lastW || r !== dpr)) {
+        lastW = w; dpr = r;
+        pitch = w / (COLS + 2 * MX);
+        var h = pitch * (ROWS + 2 * MY);
+        canvas.style.height = h + 'px';
+        canvas.width = Math.round(w * dpr);
+        canvas.height = Math.round(h * dpr);
+      }
+      draw();
+    }
+
+    // First shape already formed, painted now, whatever the frame loop does later.
+    applyShape(0, false);
+    flush();
+    blocks.forEach(function (b) {
+      if (b.cell < 0) { b.hx = b.gx = rand(0, COLS); b.hy = b.gy = rand(-1.2, ROWS + 1.2); }   // swarm spread evenly
+      aim(b); b.x = tgt.x; b.y = tgt.y; b.f = b.cell >= 0 ? 1 : 0;
+    });
+    resize();
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(grid);
+    window.addEventListener('resize', resize, {passive:true});
+    if (reduceMotion) return; // first achievement formed and still, no cycling, no controls.
+
+    var inView = false, userPaused = false, settled = false;
+    var running = false, useInterval = false, rafSeen = false, rafId = 0, ivId = 0, dogId = 0, last = 0;
 
     function pickNext(exclude) {
       var choices = [];
@@ -543,9 +674,50 @@
       return choices[Math.floor(Math.random() * choices.length)];
     }
 
-    function tick() {
-      currentIdx = pickNext(currentIdx);
-      applyShape(currentIdx, true);
+    function step() {
+      var now = performance.now(), dt = clamp((now - last) / 1000, 0, 0.1);
+      last = now;
+      if (!userPaused) {
+        clock += dt;
+        if (clock - switchedAt >= CYCLE) {
+          switchedAt = clock;
+          currentIdx = pickNext(currentIdx);
+          applyShape(currentIdx, true);
+        }
+      }
+      var moving = physics(dt);
+      draw();
+      // Paused: the clock stops, blocks settle where they are, then the loop stops.
+      if (userPaused && !moving) { settled = true; stop(); }
+    }
+
+    /* requestAnimationFrame is not guaranteed to run (it never fired in the
+       embedded preview this site is checked in). If no frame arrives within
+       1.2s, a 50ms interval drives the same step instead. */
+    function onFrame() {
+      rafSeen = true;
+      if (!running || useInterval) return;
+      step();
+      if (running) rafId = requestAnimationFrame(onFrame);
+    }
+    function start() {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      if (useInterval) { ivId = setInterval(step, 50); return; }
+      rafId = requestAnimationFrame(onFrame);
+      if (!rafSeen) dogId = setTimeout(function () {
+        if (rafSeen || !running) return;
+        useInterval = true;
+        cancelAnimationFrame(rafId);
+        ivId = setInterval(step, 50);
+      }, 1200);
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(rafId);
+      clearInterval(ivId);
+      clearTimeout(dogId);
     }
 
     function onScreen() {
@@ -554,13 +726,8 @@
     }
 
     function sync() {
-      var shouldRun = (inView || onScreen()) && !document.hidden && !userPaused;
-      if (shouldRun && !timer) {
-        timer = setInterval(tick, CYCLE_MS);
-      } else if (!shouldRun && timer) {
-        clearInterval(timer);
-        timer = null;
-      }
+      var shouldRun = (inView || onScreen()) && !document.hidden && !(userPaused && settled);
+      if (shouldRun) start(); else stop();
     }
 
     var section = grid.closest('.mosaic');
@@ -574,7 +741,6 @@
       io.observe(section);
     } else {
       inView = true;
-      sync();
     }
 
     document.addEventListener('visibilitychange', sync);
@@ -592,6 +758,8 @@
       pauseBtn.textContent = 'Pause';
       pauseBtn.addEventListener('click', function () {
         userPaused = !userPaused;
+        settled = false;
+        if (userPaused) flush();   // finish the shape in progress, then hold still
         pauseBtn.textContent = userPaused ? 'Resume' : 'Pause';
         sync();
       });

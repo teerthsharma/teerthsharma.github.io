@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=48">
-<link rel="stylesheet" href="motion.css?v=48">
-<link rel="stylesheet" href="art.css?v=48">
+<link rel="stylesheet" href="site.css?v=49">
+<link rel="stylesheet" href="motion.css?v=49">
+<link rel="stylesheet" href="art.css?v=49">
 
 <script type="application/ld+json">
 {
@@ -349,16 +349,16 @@
 <div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/540"><canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="cs-t cs-d">
-                  <title id="cs-t">Six hundred and twenty separate rays, and one bright place they all land on</title>
-                  <desc id="cs-d">Six hundred and twenty rays enter evenly spaced and distinct, reflect off the inside of a curved wall by the actual law of reflection, and cross one another so densely along one curve that the curve itself darkens. Nothing draws that curve. It appears because the rays genuinely meet there, which is what a model does with a fact it cannot reach: distinct things stop being distinguishable. The crowding can be measured without knowing which ray is which, at 0.995 AUROC, with no ground truth used.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">620 distinct entities, evenly spaced</text>
-                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">none of them is special going in</text>
-                  <text x="235" y="446" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">nothing draws the bright curve</text>
-                  <text x="235" y="468" text-anchor="middle" font-size="15" fill="var(--muted)">it is only where they crowd, and crowding can be measured</text>
-                  <text x="235" y="508" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
-                  <text x="235" y="530" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
+                  <title id="cs-t">Distinct entities focus on distinct answers, except the ones the model cannot reach, which collapse onto one</title>
+                  <desc id="cs-d">Distinct entities enter on the left, each a beam of light in its own colour, evenly spaced, and none of them is special going in. Every beam passes through the model and focuses on an answer on the right. Where the model reaches the fact, each beam focuses on an answer of its own, and each of those answers holds one colour. Where it cannot, beams of several different colours bend and focus on the same answer, piling up into one bright knot that holds a petal of every colour that landed on it. That collapse can be seen without knowing which entity is which, and it is measurable with no ground truth at all: caustic turns the partition into a certified lower bound on error rate, with five proved bounds and 0.995 AUROC.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">distinct entities stream through the model</text>
+                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">reached, each lands on its own answer</text>
+                  <text x="235" y="450" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">out of reach, they collapse onto one answer</text>
+                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">which gives a certified lower bound on error rate</text>
+                  <text x="235" y="510" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
+                  <text x="235" y="532" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
                 </svg></div>
-            <figcaption class="fig__cap">Three entities collapse onto one answer. That collapse is the hallucination.</figcaption>
+            <figcaption class="fig__cap">Distinct entities collapse onto one answer. That collapse is the hallucination.</figcaption>
           </figure>
         </div>
 </div>
@@ -420,15 +420,15 @@
 <div class="proj__art">
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520"><canvas data-fig="transport" data-vb="470 520" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="mo-t mo-d">
-                  <title id="mo-t">It comes back pointing somewhere else</title>
-                  <desc id="mo-d">A frame carried all the way round a closed loop and stamped at forty stations along the way, turning as it goes. At the start the frame it set out with is drawn against the frame it came back with, and the angle between them is what the loop failed to close by. Nothing here is differentiated. The answer comes from going round and looking, which is the whole point of asking it from topology instead.</desc>
-                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">carry a frame all the way round</text>
-                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">and it comes back pointing somewhere else</text>
-                  <text x="235" y="432" text-anchor="middle" font-size="17" font-weight="600" fill="var(--mint-700)">the angle it fails to close by is the answer</text>
-                  <text x="235" y="456" text-anchor="middle" font-size="15" fill="var(--muted)">and no derivative was taken to find it</text>
-                  <text x="235" y="494" text-anchor="middle" font-size="16" fill="var(--muted)">5 dependencies, torch not required</text>
+                  <title id="mo-t">The loop closes below but not above</title>
+                  <desc id="mo-d">An illustration of the question monodromy answers. Above a floor sits the surface of the square root, the inverse of squaring, which holds both roots of every point on the floor. A point walks a closed loop on the floor, around the place where the two roots meet, and directly above it the root is carried continuously along the edge of the surface. When the floor point is home, the loop below has closed, but the carried root is directly under the one it set out with, on the other sheet, and only a second lap brings it back to the hollow ring it started from. The dashed line and the amber gap mark that comparison at the start. Colour shows the sign of the root, mint where it is positive and coral where it is negative. Nothing is differentiated: the answer comes from going round and looking.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">carry the inverse round a closed loop</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">and see whether it comes back unchanged</text>
+                  <text x="235" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">the loop closes below, but not above</text>
+                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">answered from topology, no Jacobian required</text>
+                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">5 dependencies, torch not required</text>
                 </svg></div>
-            <figcaption class="fig__cap">Four stations around the loop, no derivative needed.</figcaption>
+            <figcaption class="fig__cap">One lap closes the loop below but lands on the other root above, and no derivative is taken to see it.</figcaption>
           </figure>
         </div>
 </div>
@@ -597,7 +597,7 @@
 
 </main>
 
-<script src="fig.js?v=48" defer></script>
-<script src="site.js?v=48" defer></script>
+<script src="fig.js?v=49" defer></script>
+<script src="site.js?v=49" defer></script>
 </body>
 </html>
