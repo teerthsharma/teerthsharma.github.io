@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=62">
-<link rel="stylesheet" href="motion.css?v=62">
-<link rel="stylesheet" href="art.css?v=62">
+<link rel="stylesheet" href="site.css?v=63">
+<link rel="stylesheet" href="motion.css?v=63">
+<link rel="stylesheet" href="art.css?v=63">
 
 <script type="application/ld+json">
 {
@@ -105,8 +105,8 @@
       <li><a class="psub__link" href="#p-monodromy">monodromy</a></li>
       <li class="psub__sep" aria-hidden="true"></li>
       <li><a class="psub__link" href="#p-topological-ml-toolkit">topological-ml-toolkit</a></li>
-      <li><a class="psub__link" href="#p-nerve">nerve</a></li>
       <li><a class="psub__link" href="#p-faraday">faraday</a></li>
+      <li><a class="psub__link" href="#p-nerve">nerve</a></li>
       <li><a class="psub__link" href="#p-separatrix">separatrix</a></li>
       <li><a class="psub__link" href="#p-planimeter">planimeter</a></li>
       <li><a class="psub__link" href="#p-tangle">tangle</a></li>
@@ -391,49 +391,6 @@
 </div>
 </article>
 
-<article class="proj pt" id="p-nerve" data-lang="Rust" data-doi="false">
-<div class="pt__head">
-        <div class="pt__titles">
-          <h2 class="proj__name">nerve</h2>
-          <p class="pt__tagline">The control that could kill my result.</p>
-        </div>
-        <div class="pt__ctas">
-          <a class="pt__cta" href="https://github.com/teerthsharma/nerve">View on GitHub<span class="sr-only">: nerve</span></a>
-          <a class="pt__more" href="https://github.com/teerthsharma/nerve#readme">Read how it works<span class="sr-only"> in the nerve README</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
-        </div>
-</div>
-<div class="proj__figure">
-<div class="proj__art">
-          <figure class="fig">
-            <div class="figc" style="--figc-ar:470/560">
-                <canvas data-fig="witness" data-vb="470 560" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 470 560" role="img" aria-labelledby="p-nerve-t p-nerve-d">
-                  <title id="p-nerve-t">One polymer chain, its one crossing, and four hypotheses tested against a control that could kill them</title>
-                  <desc id="p-nerve-d">An illustration of the method, not measured data. A polymer chain, drawn as a shaded tube of beads coloured from blue to violet, writhes slowly in three dimensions. Its outline is searched for crossings in every frame, and the one place where the chain passes over itself, drawn with a gap round the strand on top, is ringed in amber as its topological witness. Behind it, faint randomised chains are the control: they writhe too, and they cross themselves as well, which is why a crossing alone proves nothing. Below are four lanes, one for each hypothesis. The witness sends a blue bead down to each lane, the value that hypothesis measured on the chain, and then the same measurement taken on the control rains into the lane grain by grain and settles into a heap. Where the control's heap buries the bead, the control reproduces the result: three beads are buried and marked with hollow coral rings, withdrawn but kept on the record. One sits far out where the control never lands, and it survives. The control was built on purpose to be able to kill the result, and what it said was published either way: 3 of its own 4 hypotheses withdrawn, 224 tests passing.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">a polymer chain and its topological witness</text>
-                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">four hypotheses, each tested against its own control</text>
-                  <text x="235" y="490" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">3 of its own 4 hypotheses withdrawn</text>
-                  <text x="235" y="513" text-anchor="middle" font-size="15" fill="var(--muted)">when the control built to kill them said so</text>
-                  <text x="235" y="546" text-anchor="middle" font-size="16" fill="var(--muted)">224 tests passing</text>
-                </svg>
-              </div>
-            <figcaption class="fig__cap">One chain, one crossing. I tested four hypotheses against their own controls.</figcaption>
-          </figure>
-        </div>
-</div>
-<div class="pt__body">
-        <p class="proj__claim">I built the control that could kill my own result, then published what it said.</p>
-        <div class="proj__nums pt__specs">
-          <span class="spec"><b class="spec__n">224</b> <span class="spec__l">tests passing</span></span>
-          <span class="spec"><b class="spec__n">3</b> <span class="spec__l">of its own 4 hypotheses withdrawn</span></span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Rust</li>
-          <li class="tag tag--class">3 of 4 hypotheses withdrawn</li>
-        </ul>
-</div>
-</article>
-
 <article class="proj pt" id="p-faraday" data-lang="Python" data-doi="false">
 <div class="pt__head">
         <div class="pt__titles">
@@ -473,6 +430,49 @@
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Python</li>
           <li class="tag tag--class">coupling, not assumption</li>
+        </ul>
+</div>
+</article>
+
+<article class="proj pt" id="p-nerve" data-lang="Rust" data-doi="false">
+<div class="pt__head">
+        <div class="pt__titles">
+          <h2 class="proj__name">nerve</h2>
+          <p class="pt__tagline">The control that could kill my result.</p>
+        </div>
+        <div class="pt__ctas">
+          <a class="pt__cta" href="https://github.com/teerthsharma/nerve">View on GitHub<span class="sr-only">: nerve</span></a>
+          <a class="pt__more" href="https://github.com/teerthsharma/nerve#readme">Read how it works<span class="sr-only"> in the nerve README</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
+        </div>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
+          <figure class="fig">
+            <div class="figc" style="--figc-ar:470/560">
+                <canvas data-fig="witness" data-vb="470 560" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 560" role="img" aria-labelledby="p-nerve-t p-nerve-d">
+                  <title id="p-nerve-t">One polymer chain, its one crossing, and four hypotheses tested against a control that could kill them</title>
+                  <desc id="p-nerve-d">An illustration of the method, not measured data. A polymer chain, drawn as a shaded tube of beads coloured from blue to violet, writhes slowly in three dimensions. Its outline is searched for crossings in every frame, and the one place where the chain passes over itself, drawn with a gap round the strand on top, is ringed in amber as its topological witness. Behind it, faint randomised chains are the control: they writhe too, and they cross themselves as well, which is why a crossing alone proves nothing. Below are four lanes, one for each hypothesis. The witness sends a blue bead down to each lane, the value that hypothesis measured on the chain, and then the same measurement taken on the control rains into the lane grain by grain and settles into a heap. Where the control's heap buries the bead, the control reproduces the result: three beads are buried and marked with hollow coral rings, withdrawn but kept on the record. One sits far out where the control never lands, and it survives. The control was built on purpose to be able to kill the result, and what it said was published either way: 3 of its own 4 hypotheses withdrawn, 224 tests passing.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">a polymer chain and its topological witness</text>
+                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">four hypotheses, each tested against its own control</text>
+                  <text x="235" y="490" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">3 of its own 4 hypotheses withdrawn</text>
+                  <text x="235" y="513" text-anchor="middle" font-size="15" fill="var(--muted)">when the control built to kill them said so</text>
+                  <text x="235" y="546" text-anchor="middle" font-size="16" fill="var(--muted)">224 tests passing</text>
+                </svg>
+              </div>
+            <figcaption class="fig__cap">One chain, one crossing. I tested four hypotheses against their own controls.</figcaption>
+          </figure>
+        </div>
+</div>
+<div class="pt__body">
+        <p class="proj__claim">I built the control that could kill my own result, then published what it said.</p>
+        <div class="proj__nums pt__specs">
+          <span class="spec"><b class="spec__n">224</b> <span class="spec__l">tests passing</span></span>
+          <span class="spec"><b class="spec__n">3</b> <span class="spec__l">of its own 4 hypotheses withdrawn</span></span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Rust</li>
+          <li class="tag tag--class">3 of 4 hypotheses withdrawn</li>
         </ul>
 </div>
 </article>
@@ -615,8 +615,8 @@
       <button class="pgal__btn pgal__prev" type="button" aria-label="Previous project" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="pgal__dots" role="group" aria-label="Choose a project">
         <a class="pgal__dot" href="#p-topological-ml-toolkit" aria-label="topological-ml-toolkit" aria-current="true"><span class="pgal__fill" aria-hidden="true"></span></a>
-        <a class="pgal__dot" href="#p-nerve" aria-label="nerve" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-faraday" aria-label="faraday" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
+        <a class="pgal__dot" href="#p-nerve" aria-label="nerve" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-separatrix" aria-label="separatrix" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-planimeter" aria-label="planimeter" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-tangle" aria-label="tangle" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
@@ -629,7 +629,7 @@
 
 </main>
 
-<script src="fig.js?v=62" defer></script>
-<script src="site.js?v=62" defer></script>
+<script src="fig.js?v=63" defer></script>
+<script src="site.js?v=63" defer></script>
 </body>
 </html>
