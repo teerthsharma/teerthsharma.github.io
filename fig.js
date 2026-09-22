@@ -4465,20 +4465,30 @@
     g.lineJoin = 'round'; g.lineCap = 'round';
     g.imageSmoothingEnabled = true;
 
-    /* --- the floor: a soft shadow under the block ------------------------- */
-    if (se > 0.03) {
-      var fy = -1.02, sh = Math.min(1, (se - 0.03) / 0.17);
-      P(-1.65, fy, Z0 + 0.35, O); P(1.65, fy, Z0 + 0.35, Ua); P(-1.65, fy, ZS - 0.35, Va);
+    /* --- the scene: a studio floor the block stands on ------------------------
+       The floor is lit from the front, falls away into the page at its rim,
+       carries the block's contact shadow, and takes the violet light of the
+       sum through the glass, strongest when the camera looks down the stack. */
+    if (!M.glassT) {
+      var mixc = function (a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
+      M.glassT = mixc(M.hair, M.vio5, 0.22);
+      M.edgeCore = mixc(M.muted, M.vio7, 0.25);
+    }
+    var fy = -1.03;
+    function floorPatch(x0, x1, z0, z1, stops) {
+      P(x0, fy, z0, O); P(x1, fy, z0, Ua); P(x0, fy, z1, Va);
       g.save();
       g.transform(Ua[0] - O[0], Ua[1] - O[1], Va[0] - O[0], Va[1] - O[1], O[0], O[1]);
       var fg = g.createRadialGradient(0.5, 0.5, 0, 0.5, 0.5, 0.5);
-      fg.addColorStop(0, M.css(M.hair, 0.42 * sh));
-      fg.addColorStop(0.55, M.css(M.hair, 0.16 * sh));
-      fg.addColorStop(1, M.css(M.hair, 0));
+      for (var si = 0; si < stops.length; si++) fg.addColorStop(stops[si][0], stops[si][1]);
       g.fillStyle = fg;
       g.fillRect(0, 0, 1, 1);
       g.restore();
     }
+    var sh = Math.min(1, Math.max(0, (se + 0.12) / 0.3));
+    floorPatch(-2.05, 2.05, Z0 + 0.25, ZS - 0.25, [[0, M.css(M.white, 0.55 * sh)], [0.55, M.css(M.hair, 0.22 * sh)], [1, M.css(M.hair, 0)]]);
+    floorPatch(-1.4, 1.4, Z0 + 0.12, ZS - 0.12, [[0, M.css(M.muted, 0.16 * sh)], [0.6, M.css(M.muted, 0.07 * sh)], [1, M.css(M.muted, 0)]]);
+    floorPatch(-1.05, 1.05, 0.1, ZS - 0.55, [[0, M.css(M.vio5, (0.1 + 0.16 * hero) * sh)], [1, M.css(M.vio5, 0)]]);
 
     /* --- the block: its eight corners, back faces and back edges ---------- */
     var BX = 1.0, cz = [Z0, ZS], cor = [];
@@ -4504,22 +4514,39 @@
       var v = vis[Math.min(ed[0], ed[1]) * 8 + Math.max(ed[0], ed[1])];
       return 0.26 + 0.36 * ease(v / 0.12);
     };
+    /* the far faces are glass seen from inside: tinted, lighter at the top */
     for (fi2 = 0; fi2 < FACES.length - 1; fi2++) {
       var F = FACES[fi2];
       if (faceDepth(F) >= 0) continue;
-      g.fillStyle = M.css(M.hair, 0.11);
+      var ytop = Math.min(cor[F[0]][1], cor[F[1]][1], cor[F[2]][1], cor[F[3]][1]);
+      var ybot = Math.max(cor[F[0]][1], cor[F[1]][1], cor[F[2]][1], cor[F[3]][1]);
+      var bg2 = g.createLinearGradient(0, ytop, 0, ybot);
+      bg2.addColorStop(0, M.css(M.white, 0.2));
+      bg2.addColorStop(1, M.css(M.glassT, 0.2));
+      g.fillStyle = bg2;
       g.beginPath();
       g.moveTo(cor[F[0]][0], cor[F[0]][1]);
       for (e = 1; e < 4; e++) g.lineTo(cor[F[e]][0], cor[F[e]][1]);
       g.closePath(); g.fill();
     }
-    g.lineWidth = 1;
-    for (e = 0; e < 12; e++) {
-      if (front(EDGES[e])) continue;
-      g.strokeStyle = M.css(M.muted, edgeA(EDGES[e]));
-      g.beginPath(); g.moveTo(cor[EDGES[e][0]][0], cor[EDGES[e][0]][1]);
-      g.lineTo(cor[EDGES[e][1]][0], cor[EDGES[e][1]][1]); g.stroke();
+    /* an edge of the block is a bar of glass: a soft body, a core, and on
+       the near side a lit lip */
+    function glassEdge(ed, near) {
+      var x0 = cor[ed[0]][0], y0 = cor[ed[0]][1], x1 = cor[ed[1]][0], y1 = cor[ed[1]][1], k0 = edgeA(ed);
+      g.lineCap = 'round';
+      g.strokeStyle = M.css(M.glassT, (near ? 0.45 : 0.25) * k0);
+      g.lineWidth = near ? 6 : 3.5;
+      g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+      g.strokeStyle = M.css(M.edgeCore, (near ? 1.05 : 0.75) * k0);
+      g.lineWidth = near ? 1.7 : 1;
+      g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+      if (near) {
+        g.strokeStyle = M.css(M.white, 0.9);
+        g.lineWidth = 0.8;
+        g.beginPath(); g.moveTo(x0 - 0.9, y0 - 1); g.lineTo(x1 - 0.9, y1 - 1); g.stroke();
+      }
     }
+    for (e = 0; e < 12; e++) if (!front(EDGES[e])) glassEdge(EDGES[e], false);
 
     /* --- the floor and the far side wall: the stack seen from below and from the side */
     var ZD = Z0 - D;
@@ -4679,7 +4706,16 @@
     /* --- front faces: a sheen; front edges ---------------------------------- */
     for (fi2 = 0; fi2 < FACES.length; fi2++) {
       F = FACES[fi2];
-      if (faceDepth(F) <= 0 || F[6] === 1) continue;
+      var fdn = faceDepth(F);
+      if (fdn <= 0) continue;
+      /* glass reflects more at a glancing angle than face on */
+      var facing = Math.min(1, fdn / (F[6] ? Z0 : BX)), fres = 0.035 + 0.14 * (1 - facing) * (1 - facing);
+      g.fillStyle = M.css(M.glassT, fres);
+      g.beginPath();
+      g.moveTo(cor[F[0]][0], cor[F[0]][1]);
+      for (e = 1; e < 4; e++) g.lineTo(cor[F[e]][0], cor[F[e]][1]);
+      g.closePath(); g.fill();
+      if (F[6] === 1) continue;
       var c0 = cor[F[0]], c2 = cor[F[2]];
       var lg = g.createLinearGradient(c0[0], c0[1], c2[0], c2[1]);
       lg.addColorStop(0, M.css(M.white, 0));
@@ -4691,12 +4727,15 @@
       for (e = 1; e < 4; e++) g.lineTo(cor[F[e]][0], cor[F[e]][1]);
       g.closePath(); g.fill();
     }
-    g.lineWidth = 1.1;
-    for (e = 0; e < 12; e++) {
-      if (!front(EDGES[e])) continue;
-      g.strokeStyle = M.css(M.muted, edgeA(EDGES[e]));
-      g.beginPath(); g.moveTo(cor[EDGES[e][0]][0], cor[EDGES[e][0]][1]);
-      g.lineTo(cor[EDGES[e][1]][0], cor[EDGES[e][1]][1]); g.stroke();
+    for (e = 0; e < 12; e++) if (front(EDGES[e])) glassEdge(EDGES[e], true);
+    /* the near corners catch the light */
+    for (c = 0; c < 8; c++) {
+      if (cor[c][2] - zc < 0.25) continue;
+      var gl2 = g.createRadialGradient(cor[c][0] - 0.8, cor[c][1] - 0.8, 0, cor[c][0] - 0.8, cor[c][1] - 0.8, 6);
+      gl2.addColorStop(0, M.css(M.white, 0.95));
+      gl2.addColorStop(1, M.css(M.white, 0));
+      g.fillStyle = gl2;
+      g.beginPath(); g.arc(cor[c][0] - 0.8, cor[c][1] - 0.8, 6, 0, TAU); g.fill();
     }
   }
 
