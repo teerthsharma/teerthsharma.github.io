@@ -2673,7 +2673,7 @@
          costs the chain and the first slice, and the rest spread over the
          build at one or two a frame. The sum is on a log scale over three
          decades of its own peak (the peak is the identity term at x0). */
-      var full = up(sums[K]), spk = 0;
+      var full = up(sums[K]), spk = 0, n;
       for (n = 0; n < full.length; n++) if (full[n] > spk) spk = full[n];
       var logv = function (f) { var v = 1 + Math.log(Math.max(f, 1e-12) / spk) / Math.LN10 / 3; return v <= 0.02 ? 0 : (v - 0.02) / 0.98; };
       var texs = [], parts = [];
@@ -5163,7 +5163,15 @@
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, f.c.width, f.c.height);
       ctx.restore();
-      f.fn(ctx, f.vb, local, f.st);
+      /* One figure that throws must not blank the page. Without this guard a
+         single renderer failing stopped the loop before the reveal, and every
+         figure on work.html stayed clipped out of sight. The failing figure is
+         logged once and left empty; the rest keep drawing. */
+      try { f.fn(ctx, f.vb, local, f.st); }
+      catch (e) {
+        if (!f.failed && window.console) console.error('figure ' + f.c.getAttribute('data-fig') + ' failed', e);
+        f.failed = true;
+      }
     }
     reveal(vh);
   }
