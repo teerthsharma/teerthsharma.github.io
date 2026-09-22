@@ -964,3 +964,30 @@ img,svg{ max-width:100%; display:block; }
   .card__figure, .proj__figure{ margin-top:20px; }
   .card__art, .proj__art{ width:100%; margin-top:0; }
 }
+
+/* ---------- Figures arrive rather than being there already ---------------
+   Uncovered top to bottom as each one reaches the reading position. Nothing
+   is moved or scaled, because a transform would carry the labels with it and
+   words on this site do not move: clip-path only decides how much is shown.
+   The hidden state exists only on a page fig.js has marked, so a failed
+   script leaves every figure visible instead of blank. The small negative
+   inset keeps the glass figure's soft shadow from being cut off. */
+.js-reveal .card__figure,
+.js-reveal .proj__figure{
+  clip-path: inset(-24px -24px 100% -24px);
+  transition: clip-path 1100ms cubic-bezier(.22,.9,.24,1);
+}
+.js-reveal .card__figure.is-in,
+.js-reveal .proj__figure.is-in{
+  clip-path: inset(-24px -24px -24px -24px);
+}
+@media (prefers-reduced-motion: reduce){
+  .js-reveal .card__figure, .js-reveal .proj__figure{ clip-path: none; transition: none; }
+}
+/* The backstop. Whatever the transition did or did not do, a revealed figure
+   ends with no clip at all. */
+.js-reveal .card__figure.is-done,
+.js-reveal .proj__figure.is-done{
+  clip-path: none;
+  transition: none;
+}

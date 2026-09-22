@@ -170,7 +170,7 @@
       /* a band of brighter rays travels across the bundle, so light is seen
          moving through it instead of the whole figure fading together */
       var f = bb / R - band;
-      g.strokeStyle = rgba(coral, 0.018 + 0.055 * Math.exp(-f * f * 11));
+      g.strokeStyle = rgba(coral, 0.024 + 0.07 * Math.exp(-f * f * 11));
       g.beginPath();
       g.moveTo(px, py);
       g.lineTo(px + tt * rx, py + tt * ry);
@@ -223,7 +223,7 @@
       var x = BOX_X + c * pitch, y = BOX_Y + r * pitch;
       var dcx = (c - midC) / cols, dcy = (r - midR) / rows;
       var dist = Math.sqrt(dcx * dcx + dcy * dcy);
-      var w = REDUCED ? 1 : 0.82 + 0.18 * Math.sin(phase * Math.PI * 2 - dist * 5.2);
+      var w = REDUCED ? 1 : 0.62 + 0.38 * Math.sin(phase * Math.PI * 2 - dist * 5.2);
       g.fillStyle = rgba(coral, 0.42 + 0.46 * w);
       g.fillRect(x, y, size, size);
     }
@@ -594,8 +594,9 @@
           col = ((i * 7) % 528) < 336 ? coral : green;
         }
         if (!REDUCED) {
-          var w = 0.86 + 0.14 * Math.sin(cyc * Math.PI * 2 - (r * 0.18));
-          a = 0.62 + 0.38 * w;
+          var scan = cyc * 27 - 1.5;
+          var d = r - scan;
+          a = 0.50 + 0.50 * Math.exp(-d * d / 2.2);
         }
         g.fillStyle = rgba(col, a);
         g.fillRect(ox + c * pitch, oy + r * pitch, size, size);
@@ -622,7 +623,7 @@
 
     g.clearRect(0, 0, vb[0], vb[1]);
     var pitch = (X1 - X0) / N;
-    var drift = REDUCED ? 0 : Math.sin(t / 4200) * 9;
+    var drift = REDUCED ? 0 : Math.sin(t / 3400) * 34;
 
     for (var i = 0; i < N; i++) {
       /* a stable height per bar: a long tail of noise and a few that persist,
@@ -668,7 +669,8 @@
       var s = Math.sin(i * 45.233) * 43758.5453;
       var u = s - Math.floor(s);
       /* the gap narrows down the stack; near the bottom the intervals touch */
-      var gap = (1 - i / ROWS) * 46 - 10 + (u - 0.5) * 14;
+      var gap = (1 - i / ROWS) * 46 - 10 + (u - 0.5) * 14
+              + (REDUCED ? 0 : Math.sin(t / 2600 + i * 0.47) * 8);
       var mid = X0 + W / 2;
       var half = 74 + u * 34;
       var g1 = mid - gap / 2, g2 = mid + gap / 2;
@@ -715,6 +717,7 @@
 
     g.clearRect(0, 0, vb[0], vb[1]);
     var cyc = REDUCED ? 1 : (t % 9000) / 9000;
+    var front = IX - 60 + (OX - IX + 120) * ((t % 2800) / 2800);
 
     for (var k = 1; k <= ORDERS; k++) {
       /* each order enters in turn, and its weight is gamma^k */
@@ -726,24 +729,29 @@
         var u = s - Math.floor(s);
         var spread = (p - (PER - 1) / 2) / ((PER - 1) / 2);
         var amp = Math.min(86, 22 + k * 11) * spread * (0.65 + 0.35 * u);
-        g.strokeStyle = rgba(blue, 0.38 * weight * arrive + 0.05);
+        /* Once every order has arrived the figure used to stand still until
+           the cycle came round, which measured under one percent of pixels
+           changing. Amplitude now flows from the in-state to the out-state
+           through every path at once: a front sweeps across and each segment
+           brightens as it passes. That is the sum being taken, all orders in
+           parallel, and it is what the single arrow above them hides. */
+        var base = 0.38 * weight * arrive + 0.05;
         g.lineWidth = 1.3;
-        g.beginPath();
-        g.moveTo(IX, MY);
+        var px = IX, py = MY;
         for (var h = 1; h <= k; h++) {
           var f = h / k;
           var x = IX + (OX - IX) * f;
           var y = MY + Math.sin(f * Math.PI) * amp;
-          g.lineTo(x, y);
+          var dd = ((px + x) / 2 - front) / 44;
+          var boost = REDUCED ? 0 : Math.exp(-dd * dd);
+          g.strokeStyle = rgba(blue, Math.min(1, base * (1 + 1.8 * boost)));
+          g.beginPath(); g.moveTo(px, py); g.lineTo(x, y); g.stroke();
           if (h < k) {
-            g.stroke();
-            g.fillStyle = rgba(blue7, 0.55 * weight * arrive);
-            g.beginPath(); g.arc(x, y, 2.6, 0, Math.PI * 2); g.fill();
-            g.beginPath(); g.moveTo(x, y);
-            g.strokeStyle = rgba(blue, 0.38 * weight * arrive + 0.05);
+            g.fillStyle = rgba(blue7, Math.min(1, 0.55 * weight * arrive * (1 + 1.2 * boost)));
+            g.beginPath(); g.arc(x, y, 2.6 + 1.4 * boost, 0, Math.PI * 2); g.fill();
           }
+          px = x; py = y;
         }
-        g.stroke();
       }
     }
 
@@ -808,17 +816,71 @@
   var ticked = false;
   var lastT = 0;
 
+  /* Every figure used to run on one global clock, so whichever point of its
+     cycle it happened to be at was what you arrived to: you never saw a figure
+     build, only one already in progress, which is most of why the motion read
+     as dull. Each figure now keeps its own clock, held at zero until it has
+     actually arrived on screen and started from there, so it constructs itself
+     in front of you. It restarts only once it has left the screen entirely, so
+     a small scroll does not replay it. */
+  function arrived(r, vh) {
+    /* A figure wholly on screen has always arrived, so one near the foot of the
+       page, which can never be scrolled up to the reading line, is not left
+       waiting for a position it cannot reach. */
+    if (r.top >= 0 && r.bottom <= vh) return true;
+    return r.top < vh * 0.86 && r.bottom > vh * 0.08;
+  }
+
   function paint(t, all) {
+    var vh = window.innerHeight || 800;
     for (var i = 0; i < live.length; i++) {
       var f = live[i];
-      if (!all && !onScreen(f.c)) continue;
+      var near = onScreen(f.c);
+      if (!near) { f.born = null; if (!all) continue; }
+      if (f.born == null && arrived(f.c.getBoundingClientRect(), vh)) f.born = t;
+      var local = f.born == null ? 0 : t - f.born;
       fit(f.c, f.vb[0], f.vb[1]);
       var ctx = f.c.getContext('2d');
       ctx.save();
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, f.c.width, f.c.height);
       ctx.restore();
-      f.fn(ctx, f.vb, t, f.st);
+      f.fn(ctx, f.vb, local, f.st);
+    }
+    reveal(vh);
+  }
+
+  /* The SVG figures get the same arrival. They are uncovered with clip-path
+     rather than moved or scaled, because a transform on the figure would carry
+     its labels with it and no word on this site moves. The class is only ever
+     added, so if this script never runs every figure is simply visible. */
+  var wraps = null;
+  function reveal(vh) {
+    if (!wraps) wraps = document.querySelectorAll('.card__figure, .proj__figure');
+    for (var i = 0; i < wraps.length; i++) {
+      var w = wraps[i], r = w.getBoundingClientRect();
+      var gone = r.bottom < -200 || r.top > vh + 200;
+      if (gone) {
+        if (w._in) {
+          w.classList.remove('is-in', 'is-done');
+          clearTimeout(w._done);
+          w._in = false;
+        }
+        continue;
+      }
+      if (!w._in && arrived(r, vh)) {
+        w.classList.add('is-in');
+        w._in = true;
+        /* Measured in the preview pane: the class went on and the clip stayed
+           at fully hidden, because the transition never advanced. A frozen or
+           throttled animation timeline would do the same to a real visitor and
+           leave the whole site blank. So a timer, which keeps firing when frames
+           do not, takes the clip off entirely once the reveal should be over.
+           The reveal is a nicety; the figure being there is not. */
+        (function (el) {
+          el._done = setTimeout(function () { el.classList.add('is-done'); }, 1250);
+        })(w);
+      }
     }
   }
 
@@ -870,7 +932,7 @@
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, f.c.width, f.c.height);
         ctx.restore();
-        f.fn(ctx, f.vb, lastT, f.st);
+        f.fn(ctx, f.vb, f.born == null ? 0 : lastT - f.born, f.st);
       }
     },
     sizeOf: function (name) {
@@ -883,6 +945,10 @@
   };
 
   function boot() {
+    /* Only a page this script is running on hides anything before it is
+       revealed. If the script fails to load, the class is never set and
+       every figure is plainly visible, which is the failure worth having. */
+    if (!REDUCED) document.documentElement.classList.add('js-reveal');
     collect();
     ensurePainted();
     requestAnimationFrame(frame);
