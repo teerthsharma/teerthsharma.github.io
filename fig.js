@@ -664,44 +664,589 @@
   }
 
   /* ==================================================================== */
-  /* funnel — 484 cells collapsing into 22                                */
+  /* funnel — mujoco-war1541                                             */
   /* ==================================================================== */
-  /* The old drawing packed 484 tall thin rects with no vertical gap, so
-     twenty two rows fused into twenty two bars and the shape said nothing.
-     Square cells with a real gap on both axes, and the collapse animated,
-     so the quadratic field is visibly emptying into the linear row. */
-  function funnel(g, vb, t) {
-    var N = 22;
-    var coral = token('--coral-500', '#d9376e');
-    var mint = token('--mint-500', '#0b93ab');
-    var TOP_X = 92, TOP_Y = 96, SPAN = 286;
-    var pitch = SPAN / N, size = pitch * 0.64;
-    var ROW_Y = 448, ROW_PITCH = SPAN / N, ROW_SIZE = ROW_PITCH * 0.64;
+  function funnel(g, vb, t, st) {
+    /* Island discovery asks which of the scene's 22 kinematic trees are joined,
+       directly or through others, by constraints. The old GPU kernel answered it
+       with a matrix: one cell for every pair of trees, 22 x 22 = 484 cells of
+       scratch, carried onto the device every step. The replacement is a
+       disjoint-set union: one entry per tree, 22 entries, each holding a pointer
+       to another tree, and a tree whose pointer ends at itself is the root that
+       names its island.
 
-    g.clearRect(0, 0, vb[0], vb[1]);
-    var cyc = REDUCED ? 0 : (t % 5200) / 5200;
+       So the figure opens on the thing that was removed. The 484-cell matrix is
+       laid out as a floor in coral, and then every row slides into its diagonal
+       cell: the 22 cells of row i collapse into the single entry for tree i. Those
+       22 entries lift off the floor and become the forest, and the floor stays
+       behind as a ghost of the scratch that is no longer allocated.
 
-    for (var r = 0; r < N; r++) {
-      for (var c = 0; c < N; c++) {
-        var x = TOP_X + c * pitch, y = TOP_Y + r * pitch;
-        /* each cell leaves in its own moment, so the field drains as a
-           body of water rather than switching off all at once */
-        var own = ((r * N + c) % 97) / 97;
-        var k = Math.max(0, Math.min(1, (cyc - own * 0.55) / 0.30));
-        var e = k * k * (3 - 2 * k);
-        var tx = TOP_X + c * ROW_PITCH, ty = ROW_Y;
-        g.fillStyle = rgba(e > 0.98 ? mint : coral, 0.22 + 0.5 * (1 - e) + 0.28 * e);
-        g.fillRect(x + (tx - x) * e, y + (ty - y) * e,
-                   size + (ROW_SIZE - size) * e, size + (ROW_SIZE - size) * e);
+       The forest then runs the union for real, one simulation step at a time,
+       on three different sets of contacts that repeat. Every step it starts over
+       with every pointer at itself (each tree alone), then takes its contacts in
+       three rounds. A contact is drawn as a bundle of fine threads between two
+       trees, the constraint rows that tie them. Each end walks its pointers up to
+       its root (the bright bead climbing), and if the two roots differ, one root's
+       pointer swings over to the other: two islands become one, the absorbed one
+       takes the survivor's colour and settles in around it. If both walks reach
+       the same root the trees were already one island and nothing is linked.
+       Height is depth in the union's tree: roots stand highest, and a tree hung
+       under a hooked root sinks a level.
+
+       Then the pointers are compressed. Every tree deeper than one level has its
+       pointer snap straight to its root and rises to join the others, so each
+       island ends as one root with every member pointing at it. That is the hero
+       moment, and straight after it the ghost floor lights every pair of trees
+       that share an island, in the island's colour: the whole 484-cell answer the
+       old kernel had to store, read off 22 entries. Beads keep flowing along every
+       pointer toward its root, which is the direction every find walks.
+
+       Everything drawn is computed: the keyframes are the actual parent arrays of
+       a union run on these contacts, the heights are actual tree depths, and the
+       lit floor is actual root equality. The scene itself (positions, contacts,
+       the order they are taken in) is an illustration, not the benchmark scene.
+
+       Drawing is orthographic 3D with a slow sway, the floor first, then halos,
+       pointers and threads, then the trees sorted far to near. Shading is alpha
+       and a mix toward each hue's -700 token, never darker than the palette.
+
+       Measured, in the preview harness:
+       - The step clock first started at 3,000 ms while the last entries were
+         still lifting until 3,778, so they jumped to their places. The lift now
+         ends at 3,394 and the clock starts at 3,400. The matrix also lists the
+         trees in the order they stand on screen, which halved the fastest lift
+         from 13.3 to 6.0 units a frame.
+       - A change of island mixed complementary hues into olive and mauve. The
+         change now takes a short window and passes through a paler tint.
+       - Darkest pixel is luma 69.9 against the floor of 58. Worst frame is 486
+         fills and strokes (the matrix build); after it, about 190. */
+    var TAU = Math.PI * 2, N = 22;
+    var F = 0.95;                              /* floor half side, world units */
+    var ZL = [1.12, 0.8, 0.56, 0.4];           /* height by depth in the union's tree */
+    var PULL = 0.6;                            /* a member sits this far out from its root */
+    var S = 150, CX = 235, YAW = -0.66, SWAY = 0.1;
+    var EL0 = 1.02, CY0 = 250, EL1 = 0.5, CY1 = 312;   /* the camera tilts from the matrix to the forest */
+    var COND0 = 1000, COND = 1200, LIFT0 = 2000, LIFT = 1100;
+    var T_S = 3400;                            /* the step clock, once the last entry has landed */
+    var INIT = 900, ROUND = 1250, COMP = 1300, HOLD = 3000;
+    var STEP = INIT + 3 * ROUND + COMP + HOLD; /* 8,950 ms; three steps repeat every 26,850 */
+
+    var C = funnel.cache;
+    if (!C) {
+      C = funnel.cache = {};
+      C.home = [[-0.246, 0.686], [-0.026, -0.858], [0.709, -0.083], [-0.879, -0.064], [0.478, 0.73],
+                [-0.04, 0.006], [-0.377, -0.448], [-0.605, 0.322], [0.41, -0.522], [0.764, 0.408],
+                [0.221, 0.327], [0.158, -0.269], [0.333, -0.834], [0.368, -0.011], [-0.452, 0.016],
+                [0.145, 0.878], [-0.681, -0.357], [-0.103, 0.405], [0.706, -0.433], [-0.293, -0.795],
+                [0.128, -0.551], [-0.536, -0.68]];
+      for (var h = 0; h < N; h++) { C.home[h][0] *= 1.1; C.home[h][1] *= 1.1; }
+      /* The matrix may list the trees in any order, so it lists them left to
+         right as they stand in the forest, and each entry rises nearly straight
+         up to its place instead of flying across the scene. */
+      var sig = [], so = [];
+      for (h = 0; h < N; h++) so.push(h);
+      so.sort(function (a, b) {
+        return (C.home[a][0] * Math.cos(YAW) - C.home[a][1] * Math.sin(YAW)) -
+               (C.home[b][0] * Math.cos(YAW) - C.home[b][1] * Math.sin(YAW));
+      });
+      for (h = 0; h < N; h++) sig[so[h]] = h;
+      C.sig = sig;
+      C.hue = [0, 3, 2, 2, 2, 1, 1, 1, 0, 3, 2, 2, 2, 0, 3, 0, 3, 3, 1, 1, 1, 3];
+      /* contacts per step, in three rounds; [a, b] hooks root(b) under root(a) */
+      var STEPS = [
+        [[[17, 0], [4, 15], [10, 13], [8, 20], [18, 2], [11, 12], [19, 21], [6, 1], [14, 7]],
+         [[10, 17], [4, 9], [20, 11], [19, 1], [14, 5]],
+         [[0, 15], [8, 18], [8, 12]]],
+        [[[17, 0], [13, 11], [4, 15], [10, 5], [8, 20], [18, 2], [12, 9], [14, 7], [3, 16], [6, 21]],
+         [[10, 17], [13, 4], [8, 18], [14, 3]],
+         [[5, 11], [8, 12], [5, 17]]],
+        [[[19, 21], [6, 16], [1, 20], [17, 0], [14, 7], [5, 3], [8, 18], [11, 13], [4, 15]],
+         [[19, 1], [17, 5], [8, 12], [4, 10]],
+         [[21, 6], [5, 14], [8, 11], [19, 20]]]];
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      C.c5 = [hex('--blue-500', '#2456dc'), hex('--mint-500', '#0b93ab'),
+              hex('--violet-500', '#a66cf0'), hex('--amber-500', '#d96a06')];
+      C.c7 = [hex('--blue-700', '#163a9a'), hex('--mint-700', '#0a6b7c'),
+              hex('--violet-700', '#6b35c4'), hex('--amber-700', '#9a4906')];
+      C.coral = hex('--coral-500', '#d9376e');
+      C.coral7 = hex('--coral-700', '#a0183f');
+      C.white = hex('--raised', '#ffffff');
+      C.muted = hex('--muted', '#5f5b53');
+
+      /* keyframes: the parent array after each phase of each step */
+      var snap = function (par) {
+        var root = [], depth = [], size = [], i, k, x;
+        for (i = 0; i < N; i++) size.push(0);
+        for (i = 0; i < N; i++) {
+          x = i; k = 0;
+          while (par[x] !== x) { x = par[x]; k++; }
+          root.push(x); depth.push(k); size[x]++;
+        }
+        return { par: par.slice(), root: root, depth: depth, size: size };
+      };
+      var findPath = function (par, x) {
+        var p = [x];
+        while (par[x] !== x) { x = par[x]; p.push(x); }
+        return p;
+      };
+      C.K = []; C.E = [];
+      for (var s = 0; s < STEPS.length; s++) {
+        var par = [], i, r;
+        for (i = 0; i < N; i++) par.push(i);
+        var ks = [snap(par)], es = [];
+        for (r = 0; r < 3; r++) {
+          var ev = [], e;
+          for (e = 0; e < STEPS[s][r].length; e++) {
+            var a = STEPS[s][r][e][0], b = STEPS[s][r][e][1];
+            var pa = findPath(par, a), pb = findPath(par, b);
+            ev.push({ a: a, b: b, pa: pa, pb: pb, ra: pa[pa.length - 1], rb: pb[pb.length - 1],
+                      ph: ((a * 7 + b * 13) % 11) / 11 });
+          }
+          for (e = 0; e < ev.length; e++) if (ev[e].ra !== ev[e].rb) par[ev[e].rb] = ev[e].ra;
+          ks.push(snap(par)); es.push(ev);
+        }
+        var fin = ks[3];
+        for (i = 0; i < N; i++) par[i] = fin.root[i];   /* compression: every pointer to its root */
+        ks.push(snap(par));
+        /* trees sorted by island, islands left to right as their roots stand on
+           screen: in that order the lit pairs fall into one square per island */
+        var cy = Math.cos(YAW), sy = Math.sin(YAW), ord = [];
+        for (i = 0; i < N; i++) ord.push(i);
+        var sx = function (i) { var hh = C.home[fin.root[i]]; return hh[0] * cy - hh[1] * sy; };
+        ord.sort(function (a, b) { return sx(a) - sx(b) || fin.root[a] - fin.root[b] || a - b; });
+        var perm = [];
+        for (i = 0; i < N; i++) perm[ord[i]] = i;
+        ks[4].perm = perm;
+        C.K.push(ks); C.E.push(es);
+      }
+      C.pos = []; C.col = []; C.col7 = []; C.scr = [];
+      for (i = 0; i < N; i++) { C.pos.push([0, 0, 0]); C.col.push([0, 0, 0]); C.col7.push([0, 0, 0]); C.scr.push([0, 0, 0]); }
+      C.rootw = new Float32Array(N); C.halo = new Float32Array(N);
+      C.from = new Int8Array(N); C.to = new Int8Array(N); C.pe = new Float32Array(N);
+      C.order = []; for (i = 0; i < N; i++) C.order.push(i);
+      C.grid = new Float32Array(23 * 23 * 2);
+    }
+
+    function hash(i, k) { var q = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return q - Math.floor(q); }
+    function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
+    function css(c, al) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + al + ')'; }
+    function clamp(k) { return k < 0 ? 0 : k > 1 ? 1 : k; }
+    /* (s e^(1-s))^2: a swell that leaves zero with zero slope and never pops */
+    function swell(k) { return k <= 0 ? 0 : k * k * Math.exp(2 - 2 * k); }
+
+    var RED = REDUCED;
+    var T = RED ? T_S + INIT + 3 * ROUND + COMP + 2400 : t;
+
+    /* --- projection ------------------------------------------------------ */
+    var phi = RED ? YAW : YAW + SWAY * Math.sin(TAU * T / 26000);
+    var tilt = RED ? 1 : ease((T - 1700) / 1500);
+    var EL = EL0 + (EL1 - EL0) * tilt, CY = CY0 + (CY1 - CY0) * tilt;
+    var ca = Math.cos(phi), sa = Math.sin(phi), ce = Math.cos(EL), se = Math.sin(EL);
+    function proj(x, y, z, o) {
+      var X = x * ca - y * sa, Y = x * sa + y * ca;
+      o[0] = CX + S * X; o[1] = CY - S * (z * ce + Y * se); o[2] = -Y * ce + z * se;
+      return o;
+    }
+
+    /* --- where the clock is ---------------------------------------------- */
+    var building = T < T_S;
+    var sIdx = 0, sT = 0, phase = 0, pk = 0, K0, K1, ksNow;
+    if (!building) {
+      var step = Math.floor((T - T_S) / STEP);
+      sT = (T - T_S) - step * STEP;
+      sIdx = step % 3;
+      var KS = C.K[sIdx];
+      ksNow = KS;
+      if (sT < INIT) {
+        phase = 0; pk = sT / INIT;
+        K0 = step === 0 ? KS[0] : C.K[(step + 2) % 3][4]; K1 = KS[0];
+      } else if (sT < INIT + 3 * ROUND) {
+        var rr = Math.floor((sT - INIT) / ROUND);
+        phase = 1 + rr; pk = (sT - INIT - rr * ROUND) / ROUND;
+        K0 = KS[rr]; K1 = KS[rr + 1];
+      } else if (sT < INIT + 3 * ROUND + COMP) {
+        phase = 4; pk = (sT - INIT - 3 * ROUND) / COMP;
+        K0 = KS[3]; K1 = KS[4];
+      } else {
+        phase = 5; pk = (sT - INIT - 3 * ROUND - COMP) / HOLD;
+        K0 = KS[4]; K1 = KS[4];
       }
     }
 
-    g.fillStyle = rgba(mint, 1);
-    for (var i = 0; i < N; i++) {
-      g.fillRect(TOP_X + i * ROW_PITCH, ROW_Y, ROW_SIZE, ROW_SIZE);
+    var home = C.home, pos = C.pos, col = C.col, col7 = C.col7, scr = C.scr, c5 = C.c5, c7 = C.c7;
+    var i, j, k, n, q = [0, 0, 0];
+    var bob = RED ? 0 : 1;
+
+    function target(K, i, out) {
+      var r = K.root[i], hx = home[i][0], hy = home[i][1];
+      if (r !== i) {
+        hx = home[r][0] + (hx - home[r][0]) * PULL;
+        hy = home[r][1] + (hy - home[r][1]) * PULL;
+      }
+      out[0] = hx; out[1] = hy; out[2] = ZL[Math.min(3, K.depth[i])];
+      return out;
+    }
+
+    /* --- per tree: position, colour, pointer ------------------------------ */
+    var A = [0, 0, 0], B = [0, 0, 0];
+    for (i = 0; i < N; i++) {
+      var e;
+      if (building) {
+        /* lift: the diagonal entry (i, i) rises out of the floor as a row,
+           then the row fans out into the forest */
+        var dx = -F + (C.sig[i] + 0.5) * 2 * F / N, lk = (T - LIFT0 - C.sig[i] * 14) / LIFT;
+        e = ease((lk - 0.3) / 0.7);
+        var h0 = home[i];
+        pos[i][0] = dx + (h0[0] - dx) * e;
+        pos[i][1] = dx + (h0[1] - dx) * e;
+        pos[i][2] = ZL[0] * ease(lk / 0.55) + bob * 0.018 * Math.sin(TAU * T / 3400 + i * 1.7) * ease(lk);
+        var ck0 = ease((lk - 0.45) / 0.3);
+        var cc = mix(mix(C.coral, c5[C.hue[i]], ck0), C.white, 0.35 * Math.sin(Math.PI * ck0));
+        var cd = mix(C.coral7, c7[C.hue[i]], ck0);
+        col[i][0] = cc[0]; col[i][1] = cc[1]; col[i][2] = cc[2];
+        col7[i][0] = cd[0]; col7[i][1] = cd[1]; col7[i][2] = cd[2];
+        C.rootw[i] = 1; C.halo[i] = 0; C.from[i] = i; C.to[i] = i; C.pe[i] = 1;
+        continue;
+      }
+      /* each tree's own progress through the phase */
+      if (phase === 0) e = ease((pk - 0.25 * hash(i, 4)) / 0.7);
+      else if (phase <= 3) e = ease((pk - 0.52) / 0.42);
+      else if (phase === 4) e = ease((pk - 0.12 - 0.22 * hash(i, 5)) / 0.42);
+      else e = 1;
+      target(K0, i, A); target(K1, i, B);
+      pos[i][0] = A[0] + (B[0] - A[0]) * e;
+      pos[i][1] = A[1] + (B[1] - A[1]) * e;
+      pos[i][2] = A[2] + (B[2] - A[2]) * e + bob * 0.018 * Math.sin(TAU * T / 3400 + i * 1.7);
+      var ca0 = c5[C.hue[K0.root[i]]], cb0 = c5[C.hue[K1.root[i]]];
+      /* a change of island passes through a paler tint rather than a muddy mix */
+      var ec = ease((e - 0.35) / 0.3);
+      var cm = mix(mix(ca0, cb0, ec), C.white, 0.35 * Math.sin(Math.PI * ec));
+      var cn = mix(c7[C.hue[K0.root[i]]], c7[C.hue[K1.root[i]]], ec);
+      col[i][0] = cm[0]; col[i][1] = cm[1]; col[i][2] = cm[2];
+      col7[i][0] = cn[0]; col7[i][1] = cn[1]; col7[i][2] = cn[2];
+      var r0 = K0.root[i] === i ? 1 : 0, r1 = K1.root[i] === i ? 1 : 0;
+      C.rootw[i] = r0 + (r1 - r0) * e;
+      var h0w = K0.size[K0.root[i]] > 1 ? 1 : 0, h1w = K1.size[K1.root[i]] > 1 ? 1 : 0;
+      C.halo[i] = h0w + (h1w - h0w) * e;
+      C.from[i] = K0.par[i]; C.to[i] = K1.par[i]; C.pe[i] = e;
+    }
+    for (i = 0; i < N; i++) proj(pos[i][0], pos[i][1], pos[i][2], scr[i]);
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* --- the floor: the pair matrix -------------------------------------- */
+    var cw = 2 * F / N;
+    var Ux = S * ca * cw, Uy = -S * sa * se * cw;       /* one column along a row, on screen */
+    var Vx = -S * sa * cw, Vy = -S * ca * se * cw;      /* one row down a column */
+    /* the cell at row rf, column cf (fractional while it slides), shrunk by sh */
+    function cellQ(rf, cf, sh) {
+      proj(-F + (cf + 0.5) * cw, -F + (rf + 0.5) * cw, 0, q);
+      var ux = Ux * sh / 2, uy = Uy * sh / 2, vx = Vx * sh / 2, vy = Vy * sh / 2;
+      g.moveTo(q[0] - ux - vx, q[1] - uy - vy);
+      g.lineTo(q[0] + ux - vx, q[1] + uy - vy);
+      g.lineTo(q[0] + ux + vx, q[1] + uy + vy);
+      g.lineTo(q[0] - ux + vx, q[1] - uy + vy);
+      g.closePath();
+    }
+    var ghost = building ? ease((T - COND0 - 400) / 900) : 1;
+    /* the rim of the floor */
+    g.strokeStyle = css(C.coral7, 0.18 + 0.1 * (1 - ghost)); g.lineWidth = 1.2;
+    g.beginPath();
+    proj(-F, -F, 0, q); g.moveTo(q[0], q[1]);
+    proj(F, -F, 0, q); g.lineTo(q[0], q[1]);
+    proj(F, F, 0, q); g.lineTo(q[0], q[1]);
+    proj(-F, F, 0, q); g.lineTo(q[0], q[1]);
+    g.closePath(); g.stroke();
+    /* the ghost: what is no longer allocated */
+    if (ghost > 0) {
+      g.fillStyle = css(C.coral, 0.075 * ghost);
+      g.beginPath();
+      for (j = 0; j < N; j++) for (i = 0; i < N; i++) cellQ(j, i, 0.8);
+      g.fill();
+    }
+    if (building) {
+      /* the matrix builds in a wave, then every row slides into its diagonal */
+      for (j = 0; j < N; j++) {
+        for (i = 0; i < N; i++) {
+          var appear = ease((T + 260 - (i + j) * 12) / 420);
+          if (appear <= 0) continue;
+          var ck = ease((T - COND0 - j * 14 - Math.abs(i - j) * 9) / (COND * 0.55));
+          var diag = i === j;
+          var lift = diag ? ease((T - LIFT0 - i * 14) / (LIFT * 0.25)) : 0;
+          var al = diag ? (0.78 + 0.22 * ck) * (1 - lift) : 0.72 * (1 - ck);
+          /* the dense kernel touching every pair: a shimmer crossing the field */
+          var sh = swell((T - 350 - (i + j) * 16) / 260);
+          al = Math.min(1, al * appear + 0.18 * sh * (1 - ck));
+          if (al <= 0.01) continue;
+          g.fillStyle = css(diag && ck > 0 ? mix(C.coral, C.coral7, 0.35 * ck) : C.coral, al);
+          g.beginPath();
+          cellQ(j, diag ? i : i + (j - i) * ck, 0.8 * appear * (diag ? 1 + 0.12 * ck : 1 - 0.3 * ck));
+          g.fill();
+        }
+      }
+    }
+
+    /* The pairs that share an island, read off the roots and lit on the floor.
+       They light where they are, then every row and column is carried to its
+       tree's place in island order, and the scatter gathers into one square per
+       island: the relation the matrix held, rebuilt from 22 entries. */
+    var plaid = 0, KP = null;
+    if (!building) {
+      if (phase === 5) { plaid = 1; KP = ksNow[4]; }
+      else if (phase === 0 && (T - T_S) >= STEP) { plaid = 1 - ease(pk / 0.7); KP = C.K[(Math.floor((T - T_S) / STEP) + 2) % 3][4]; }
+    }
+    if (plaid > 0.004) {
+      var since = phase === 5 ? sT - INIT - 3 * ROUND - COMP : 1e9;
+      var pm = KP.perm;
+      for (j = 0; j < N; j++) {
+        for (i = 0; i < N; i++) {
+          if (KP.root[i] !== KP.root[j]) continue;
+          var si = C.sig[i], sj = C.sig[j];
+          var lit = RED ? 1 : ease((since - 80 - (si + sj) * 11) / 360) * plaid;
+          if (lit <= 0.004) continue;
+          var mv = RED ? 1 : ease((since - 800 - (pm[i] + pm[j]) * 12) / 900);
+          var hc = c5[C.hue[KP.root[i]]];
+          g.fillStyle = css(hc, (i === j ? 0.82 : 0.55) * lit);
+          g.beginPath(); cellQ(sj + (pm[j] - sj) * mv, si + (pm[i] - si) * mv, 0.8); g.fill();
+        }
+      }
+    }
+
+    /* --- the forest --------------------------------------------------------- */
+    var ctl = [0, 0, 0], P0 = [0, 0, 0], P1 = [0, 0, 0], PC = [0, 0, 0];
+    /* a pointer from tree i to a point: a quadratic arc bowing upward, in screen space */
+    function arc(i, tx, ty, tz, out0, outC, out1) {
+      var ax = pos[i][0], ay = pos[i][1], az = pos[i][2];
+      var L = Math.hypot(tx - ax, ty - ay);
+      proj(ax, ay, az, out0);
+      proj((ax + tx) / 2, (ay + ty) / 2, (az + tz) / 2 + 0.1 + 0.16 * L, outC);
+      proj(tx, ty, tz, out1);
+    }
+    function bez(p0, pc, p1, u, o) {
+      var v = 1 - u;
+      o[0] = v * v * p0[0] + 2 * v * u * pc[0] + u * u * p1[0];
+      o[1] = v * v * p0[1] + 2 * v * u * pc[1] + u * u * p1[1];
+      return o;
+    }
+    /* the arc cut at u, by de Casteljau, into the current path */
+    function arcPath(p0, pc, p1, u) {
+      var qx = p0[0] + (pc[0] - p0[0]) * u, qy = p0[1] + (pc[1] - p0[1]) * u;
+      bez(p0, pc, p1, u, ctl);
+      g.moveTo(p0[0], p0[1]); g.quadraticCurveTo(qx, qy, ctl[0], ctl[1]);
+    }
+
+    /* soft pools of light on the floor under every tree; where an island
+       gathers, its pools run together */
+    var poolIn = building ? ease((T - LIFT0 - 300) / LIFT) : 1;
+    if (poolIn > 0) {
+      for (i = 0; i < N; i++) {
+        proj(pos[i][0], pos[i][1], 0, q);
+        var pr = 13 + 7 * C.halo[i];
+        g.save(); g.translate(q[0], q[1]); g.scale(1, se);
+        var pg = g.createRadialGradient(0, 0, 0, 0, 0, pr);
+        pg.addColorStop(0, css(col[i], (0.16 + 0.08 * C.halo[i]) * poolIn));
+        pg.addColorStop(1, css(col[i], 0));
+        g.fillStyle = pg;
+        g.beginPath(); g.arc(0, 0, pr, 0, TAU); g.fill();
+        g.restore();
+      }
+    }
+
+    /* island halos: every member glows, and overlapping glow is the island */
+    for (i = 0; i < N; i++) {
+      var hw = C.halo[i];
+      if (hw <= 0.01) continue;
+      var R0 = 34 + 8 * C.rootw[i];
+      var br = RED ? 1 : 0.9 + 0.1 * Math.sin(TAU * T / 4200 + i);
+      var hg = g.createRadialGradient(scr[i][0], scr[i][1], 0, scr[i][0], scr[i][1], R0);
+      hg.addColorStop(0, css(col[i], 0.26 * hw * br));
+      hg.addColorStop(0.5, css(col[i], 0.1 * hw * br));
+      hg.addColorStop(1, css(col[i], 0));
+      g.fillStyle = hg;
+      g.beginPath(); g.arc(scr[i][0], scr[i][1], R0, 0, TAU); g.fill();
+    }
+
+    /* The contacts: the constraint rows that tie two trees, drawn as a bundle
+       of threads in the colour of one tree at one end and the other at the
+       other. A contact flares while its round takes it, then stays on as a
+       faint web, the union's actual input, until the step starts over. */
+    function contact(E, al, seed) {
+      var pa = pos[E.a], pb = pos[E.b];
+      var tg = g.createLinearGradient(scr[E.a][0], scr[E.a][1], scr[E.b][0], scr[E.b][1]);
+      tg.addColorStop(0, css(col7[E.a], al));
+      tg.addColorStop(1, css(col7[E.b], al));
+      g.strokeStyle = tg; g.lineWidth = 0.85;
+      var nx = -(pb[1] - pa[1]), ny = pb[0] - pa[0], nl = Math.hypot(nx, ny) || 1;
+      proj(pa[0], pa[1], pa[2], P0);
+      proj(pb[0], pb[1], pb[2], P1);
+      g.beginPath();
+      for (var m = 0; m < 7; m++) {
+        var off = (m / 6 - 0.5) * 0.09, sag = 0.04 + 0.07 * hash(seed, m);
+        proj((pa[0] + pb[0]) / 2 + nx / nl * off, (pa[1] + pb[1]) / 2 + ny / nl * off, (pa[2] + pb[2]) / 2 - sag, PC);
+        g.moveTo(P0[0], P0[1]); g.quadraticCurveTo(PC[0], PC[1], P1[0], P1[1]);
+      }
+      g.stroke();
+    }
+    var WEB = 0.17;
+    if (!building) {
+      var evs, rN, wa;
+      if (phase === 0) {
+        if (T - T_S >= STEP) {
+          evs = C.E[(Math.floor((T - T_S) / STEP) + 2) % 3];
+          wa = WEB * (1 - ease(pk / 0.6));
+          if (wa > 0.004) for (rN = 0; rN < 3; rN++) for (n = 0; n < evs[rN].length; n++) contact(evs[rN][n], wa, n + 3 * (rN + 1));
+        }
+      } else {
+        evs = C.E[sIdx];
+        for (rN = 0; rN < 3; rN++) {
+          if (phase <= 3 && rN > phase - 1) break;
+          wa = WEB;
+          if (rN === phase - 1) {
+            var env = ease(pk / 0.12) * (1 - ease((pk - 0.42) / 0.28));
+            wa = Math.max(0.55 * env, WEB * ease((pk - 0.35) / 0.3));
+          }
+          if (wa > 0.004) for (n = 0; n < evs[rN].length; n++) contact(evs[rN][n], wa, n + 3 * (rN + 1));
+        }
+      }
+    }
+
+    /* pointers, and light flowing along each one toward its root */
+    var flows = [];
+    if (!building) {
+      for (i = 0; i < N; i++) {
+        var f0 = C.from[i], f1 = C.to[i], pe = C.pe[i], tgt, frac = 1, al2 = 1;
+        if (f0 === i && f1 === i) continue;
+        if (f0 === i) { tgt = f1; frac = pe; }                    /* hooked: the pointer grows */
+        else if (f1 === i) { tgt = f0; frac = 1 - pe; }           /* reset: it retracts */
+        else tgt = -1;                                            /* compressed: it slides */
+        if (frac <= 0.01) continue;
+        var tx, ty, tz;
+        if (tgt >= 0) { tx = pos[tgt][0]; ty = pos[tgt][1]; tz = pos[tgt][2]; }
+        else {
+          tx = pos[f0][0] + (pos[f1][0] - pos[f0][0]) * pe;
+          ty = pos[f0][1] + (pos[f1][1] - pos[f0][1]) * pe;
+          tz = pos[f0][2] + (pos[f1][2] - pos[f0][2]) * pe;
+        }
+        arc(i, tx, ty, tz, P0, PC, P1);
+        var c7i = mix(col[i], col7[i], 0.45);
+        g.strokeStyle = css(col[i], 0.16 * al2); g.lineWidth = 6;
+        g.beginPath(); arcPath(P0, PC, P1, frac); g.stroke();
+        g.strokeStyle = css(c7i, 0.78 * al2); g.lineWidth = 2;
+        g.beginPath(); arcPath(P0, PC, P1, frac); g.stroke();
+        if (frac > 0.98) flows.push([i, P0.slice(), PC.slice(), P1.slice()]);
+      }
+    }
+
+    /* contacts and the finds they start */
+    if (!building && phase >= 1 && phase <= 3) {
+      var ev = C.E[sIdx][phase - 1];
+      for (n = 0; n < ev.length; n++) {
+        var E = ev[n];
+        /* each end walks up its pointers to its root */
+        var fk = ease((pk - 0.1) / 0.4);
+        for (var side = 0; side < 2; side++) {
+          var path = side ? E.pb : E.pa;
+          if (fk <= 0 || fk >= 1) continue;
+          var segs = path.length - 1;
+          var hc2 = col[path[0]];
+          for (var tr = 4; tr >= 0; tr--) {
+            var u = Math.max(0, fk - tr * 0.035) * Math.max(segs, 0.0001);
+            var sgi = Math.min(segs - 1, Math.floor(u)), su = u - sgi;
+            var bx, by;
+            if (segs === 0) { bx = scr[path[0]][0]; by = scr[path[0]][1]; }
+            else {
+              var cN = path[sgi], pN = path[sgi + 1];
+              arc(cN, pos[pN][0], pos[pN][1], pos[pN][2], P0, PC, P1);
+              bez(P0, PC, P1, su, q); bx = q[0]; by = q[1];
+            }
+            var fa = Math.sin(Math.PI * fk);
+            g.fillStyle = tr === 0 ? css(C.white, 0.95 * fa) : css(hc2, 0.5 * fa * (1 - tr / 5));
+            g.beginPath(); g.arc(bx, by, tr === 0 ? 2.6 : 3.8 - tr * 0.4, 0, TAU); g.fill();
+            if (tr === 0) {
+              g.strokeStyle = css(mix(hc2, col7[path[0]], 0.5), 0.9 * fa); g.lineWidth = 1.6;
+              g.stroke();
+            }
+          }
+        }
+        /* both walks arrive, and the root that survives rings once; when both
+           reached the same root it rings harder, and nothing is linked */
+        var rk = (pk - 0.47) / 0.3;
+        if (rk > 0 && rk < 1) {
+          var rx = scr[E.ra], same = E.ra === E.rb;
+          g.strokeStyle = css(col[E.ra], (same ? 0.75 : 0.5) * (1 - rk) * ease(rk / 0.15));
+          g.lineWidth = same ? 2.4 : 1.6;
+          g.beginPath(); g.arc(rx[0], rx[1], 10 + 16 * (1 - (1 - rk) * (1 - rk)), 0, TAU); g.stroke();
+        }
+      }
+    }
+
+    /* compression lands: every root rings once as its island completes */
+    if (!building && phase === 4) {
+      var ck2 = (pk - 0.55) / 0.45;
+      if (ck2 > 0) {
+        for (i = 0; i < N; i++) {
+          if (K1.root[i] !== i || K1.size[i] < 2) continue;
+          g.strokeStyle = css(col[i], 0.55 * (1 - ck2) * ease(ck2 / 0.12));
+          g.lineWidth = 2.2;
+          g.beginPath(); g.arc(scr[i][0], scr[i][1], 12 + 26 * (1 - (1 - ck2) * (1 - ck2)), 0, TAU); g.stroke();
+        }
+      }
+    }
+
+    /* light flowing up every settled pointer, the way a find walks */
+    var hd = [0, 0, 0];
+    for (n = 0; n < flows.length; n++) {
+      var fl = flows[n], fi = fl[0];
+      var fu = RED ? 0.62 : ((T / 1400 + hash(fi, 6)) % 1), f0u = Math.max(0, fu - 0.3);
+      var fa2 = Math.sin(Math.PI * fu);
+      if (fa2 < 0.02) continue;
+      bez(fl[1], fl[2], fl[3], f0u, q); bez(fl[1], fl[2], fl[3], fu, hd);
+      var lg = g.createLinearGradient(q[0], q[1], hd[0], hd[1]);
+      lg.addColorStop(0, css(mix(col[fi], C.white, 0.6), 0));
+      lg.addColorStop(1, css(mix(col[fi], C.white, 0.75), 0.95 * fa2));
+      g.strokeStyle = lg; g.lineWidth = 2.6;
+      g.beginPath(); g.moveTo(q[0], q[1]);
+      for (k = 1; k <= 6; k++) { bez(fl[1], fl[2], fl[3], f0u + (fu - f0u) * k / 6, q); g.lineTo(q[0], q[1]); }
+      g.stroke();
+      g.fillStyle = css(C.white, 0.95 * fa2);
+      g.beginPath(); g.arc(hd[0], hd[1], 1.8, 0, TAU); g.fill();
+    }
+
+    /* the trees, far to near */
+    var ord = C.order;
+    ord.sort(function (a, b) { return scr[a][2] - scr[b][2]; });
+    for (n = 0; n < N; n++) {
+      i = ord[n];
+      var x = scr[i][0], y = scr[i][1], rw = C.rootw[i];
+      var rad = 6.2 + 2.4 * rw;
+      if (building) {
+        var le = ease((T - LIFT0 - C.sig[i] * 14) / (LIFT * 0.25));
+        if (le <= 0) continue;
+        rad *= le;
+      }
+      var cHi = mix(col[i], C.white, 0.5);
+      var cLo = mix(col[i], col7[i], 0.6);
+      var ng = g.createRadialGradient(x - rad * 0.35, y - rad * 0.4, rad * 0.1, x, y, rad);
+      ng.addColorStop(0, css(cHi, 1));
+      ng.addColorStop(0.55, css(col[i], 1));
+      ng.addColorStop(1, css(cLo, 1));
+      g.fillStyle = ng;
+      g.beginPath(); g.arc(x, y, rad, 0, TAU); g.fill();
+      /* a root wears a ring: the tree whose pointer ends at itself names its island */
+      if (!building && rw > 0.02 && C.halo[i] > 0.02) {
+        g.strokeStyle = css(col[i], 0.7 * rw * C.halo[i]); g.lineWidth = 1.6;
+        g.beginPath(); g.arc(x, y, rad + 3.6, 0, TAU); g.stroke();
+      }
     }
   }
-
 
   /* ==================================================================== */
   /* collapse — Epsilon-Hollow                                            */
@@ -834,84 +1379,397 @@
   }
 
   /* ==================================================================== */
-  /* gather — NeMo-Relay                                                  */
+  /* gather — nemo-relay-481                                             */
   /* ==================================================================== */
-  /* Two requests sharing a model, a system prompt hash and a tool schema hash
-     were given different learning keys because one field differed, so every
-     profile held a single observation and nothing ever accumulated.
-
-     The first build of this flew the dots from one side to the other, and
-     rendering it showed why that fails: mid flight the dots are a straggling
-     diagonal, the destination is empty, and the source has been emptied out,
-     so at no moment can the two states be compared, which is the only thing
-     the figure exists to let you do.
-
-     Both sides are permanently legible instead. On the left a new observation
-     keeps arriving and keeps replacing the one already there, so the count
-     stays at one forever and the stillness is the bug. On the right the same
-     observations land on top of each other and the pile grows. */
   function gather(g, vb, t, st) {
-    var coral = token('--coral-500', '#d9376e');
-    var coral7 = token('--coral-700', '#a0183f');
-    var violet = token('--violet-500', '#a66cf0');
-    var violet7 = token('--violet-700', '#6b35c4');
-    var hair = token('--hair2', '#cfcbc1');
+    /* Adaptive learning keeps a profile per key and adds every observation of a
+       request to the profile its key names. The key was built from the model,
+       the system prompt, the tool schema and the first user message. The first
+       three are the scaffold and never change between tasks; the first user
+       message changes every time. So every request got a key of its own, every
+       profile held a single observation, and nothing ever accumulated. The fix
+       keys on the stable scaffold alone.
+
+       Every request here is a packet: a violet core, the scaffold, identical in
+       all of them, with one coloured satellite circling it, the first user
+       message, a different colour each time. The stream comes down to a fork and
+       every packet is keyed both ways at once, so the two outcomes are always on
+       screen together for the same requests.
+
+       Left, the old key. It includes the message, so the packet takes the
+       message's colour and flies to wherever its key hashes: a fresh profile, a
+       small glass sphere holding exactly one dot. The stream is split into a fan
+       of rays by the one field that differs, and the profiles never grow.
+
+       Right, the new key. It leaves the message out, so the satellite fades and
+       every packet flies to the same place: one profile, drawn as a globe of
+       nested shells that fills from the bottom up, one dot per observation. The
+       rays all land together and thicken into one beam. When a shell closes it
+       rings once: that is the hero moment, and it keeps arriving because the
+       profile keeps growing.
+
+       Placement is computed, not drawn by hand: a left profile sits where a
+       32-bit hash of its full key puts it, so the scatter is the scatter a hash
+       really makes, and the right globe is the one place every key now shares.
+       The requests, their count and their timing are an illustration.
+
+       Drawing is source-over alpha only. The globe and the left cloud are real
+       3D point sets, rotated and sorted far to near every frame.
+
+       Measured, in the preview harness:
+       - Plain FNV-1a put keys that differ only in their last characters on a
+         straight line, so the "scatter" was a diagonal. A murmur3 finaliser
+         after it gives the scatter a hash should give.
+       - Packet tails at the top of the source reached the second top label.
+         The source now starts at y 80 and tails are clamped to it; the
+         closest label gap is 15 units. The shell ring also clipped the right
+         edge at x 469; painted extent is now x 12..461, y 75..387.
+       - Two hundred globe dots were two hundred fills. They go in eight depth
+         bands now, and settled rays in one stroke per colour. Worst frame is
+         273 fills and strokes. Darkest pixel is luma 74.6 against 58. */
+    var TAU = Math.PI * 2;
+    var DT = 200, PRE = 700, D1 = 650, D2 = 1150;       /* emission period, source leg, branch leg */
+    var FX = 235, FY = 150, SY = 80;                    /* the fork, and the top of the source */
+    var LX = 118, LY = 280, LW = 80, LH = 76, LD = 48;   /* the old key's cloud of profiles */
+    var RX = 346, RY = 272, R = 98, EL = 0.38;          /* the new key's one profile */
+    var LIFE = 32 * DT, FADE = 1600;
+    var SHELL = [16, 28, 40, 52, 64], RAD = [0.3, 0.48, 0.66, 0.83, 1.0];
+
+    var C = gather.cache;
+    if (!C) {
+      C = gather.cache = {};
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      C.v5 = hex('--violet-500', '#a66cf0'); C.v7 = hex('--violet-700', '#6b35c4');
+      /* the first user message: a different colour every task */
+      C.m5 = [hex('--amber-500', '#d96a06'), hex('--mint-500', '#0b93ab'),
+              hex('--blue-500', '#2456dc'), hex('--coral-500', '#d9376e')];
+      C.m7 = [hex('--amber-700', '#9a4906'), hex('--mint-700', '#0a6b7c'),
+              hex('--blue-700', '#163a9a'), hex('--coral-700', '#a0183f')];
+      C.white = hex('--raised', '#ffffff');
+      C.hair = hex('--hair2', '#cfcbc1');
+      /* the globe's slots: a Fibonacci sphere per shell, ordered bottom to top
+         so each shell fills like a vessel */
+      C.slot = []; C.base = [];
+      var ga = Math.PI * (3 - Math.sqrt(5)), acc = 0;
+      for (var s = 0; s < SHELL.length; s++) {
+        var n = SHELL[s], pts = [];
+        for (var i = 0; i < n; i++) {
+          var y = 1 - 2 * (i + 0.5) / n, rr = Math.sqrt(1 - y * y), th = i * ga + s * 0.7;
+          pts.push([rr * Math.cos(th), y, rr * Math.sin(th)]);
+        }
+        pts.sort(function (a, b) { return a[1] - b[1]; });
+        C.slot.push(pts); C.base.push(acc); acc += n;
+      }
+      C.cap = acc;                                      /* 120 */
+      C.keyMemo = {};
+      C.dots = [];                                      /* reused draw list for the globe */
+      for (i = 0; i < acc; i++) C.dots.push({ x: 0, y: 0, d: 0, s: 0, k: 0 });
+      C.profs = [];
+    }
+
+    /* FNV-1a over the key, then the murmur3 finaliser: a real 32-bit hash.
+       FNV alone left keys that differ only at the end in a straight line. */
+    function fnv(str) {
+      var h = 0x811c9dc5;
+      for (var i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+      h ^= h >>> 16; h = Math.imul(h, 0x85ebca6b); h ^= h >>> 13; h = Math.imul(h, 0xc2b2ae35); h ^= h >>> 16;
+      return h >>> 0;
+    }
+    function oldKey(k) {
+      var m = C.keyMemo[k];
+      if (m) return m;
+      var h = fnv('model|system prompt|tool schema|first user message ' + k);
+      m = C.keyMemo[k] = { x: (h & 1023) / 1023 * 2 - 1, y: ((h >>> 10) & 1023) / 1023 * 2 - 1,
+                           z: ((h >>> 20) & 1023) / 1023 * 2 - 1, hue: fnv('first user message ' + k) % 4 };
+      return m;
+    }
+    function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
+    function css(c, al) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + al + ')'; }
+    function swell(k) { return k <= 0 ? 0 : k * k * Math.exp(2 - 2 * k); }
+
+    var T = REDUCED ? 52000 : t;
+    var v5 = C.v5, v7 = C.v7;
+
+    /* --- 3D ---------------------------------------------------------------- */
+    var ce = Math.cos(EL), se = Math.sin(EL);
+    /* the left cloud turns slowly about its vertical axis */
+    var lth = REDUCED ? 0.4 : 0.4 + T * 0.00011;
+    var lc = Math.cos(lth), ls = Math.sin(lth);
+    function leftAt(m, o) {
+      var x = m.x * LW, y = m.y * LH, z = m.z * LD;
+      var X = x * lc + z * ls, Z = -x * ls + z * lc;
+      o[0] = LX + X; o[1] = LY - (y * ce - Z * se) * 0.92; o[2] = y * se + Z * ce;
+      return o;
+    }
+    function shellAng(s) { return (REDUCED ? 0 : T) * (0.00016 + 0.00005 * s) * (s % 2 ? -1 : 1) + s * 1.3; }
+    function slotAt(s, j, o) {
+      var p = C.slot[s][j], r = R * RAD[s], a = shellAng(s);
+      var ca = Math.cos(a), sa = Math.sin(a);
+      var x = (p[0] * ca + p[2] * sa) * r, z = (-p[0] * sa + p[2] * ca) * r, y = p[1] * r;
+      o[0] = RX + x; o[1] = RY - (y * ce - z * se); o[2] = y * se + z * ce;
+      return o;
+    }
+    function slotOf(k) {                               /* observation k: which shell, which slot */
+      if (k < C.cap) {
+        for (var s = SHELL.length - 1; s >= 0; s--) if (k >= C.base[s]) return [s, k - C.base[s]];
+      }
+      var last = SHELL.length - 1;
+      return [last, (k - C.cap) % SHELL[last]];
+    }
 
     g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.lineCap = 'round'; g.lineJoin = 'round';
 
-    var cyc = REDUCED ? 1 : (t % 7200) / 7200;
+    /* how many packets have been emitted, and landed */
+    var kNow = Math.floor((T + PRE) / DT);             /* packets emitted so far: 0 .. kNow */
+    var landed = Math.floor((T + PRE - D1 - D2) / DT) + 1;
+    if (landed < 0) landed = 0;
+    var q = [0, 0, 0], q2 = [0, 0, 0], k, i, s, j;
 
-    /* left: twenty four profiles, one observation each, forever */
-    var COLS = 4, ROWS = 6, BW = 42, BH = 33, GAP = 8;
-    var LX = 36, LY = 130;
-    for (var i = 0; i < COLS * ROWS; i++) {
-      var c = i % COLS, r = (i / COLS) | 0;
-      var bx = LX + c * (BW + GAP), by = LY + r * (BH + GAP);
-      g.strokeStyle = rgba(hair, 1); g.lineWidth = 1.4;
-      g.strokeRect(bx, by, BW, BH);
+    /* --- the source: one stream of requests ---------------------------------- */
+    var sIn = REDUCED ? 1 : ease(T / 700);
+    var sg = g.createLinearGradient(0, SY, 0, FY);
+    sg.addColorStop(0, css(v5, 0));
+    sg.addColorStop(1, css(v5, 0.22 * sIn));
+    g.strokeStyle = sg; g.lineWidth = 9;
+    g.beginPath(); g.moveTo(FX, SY); g.lineTo(FX, FY); g.stroke();
+    g.lineWidth = 1.2; g.strokeStyle = css(v5, 0.45 * sIn);
+    g.beginPath(); g.moveTo(FX, SY + 18); g.lineTo(FX, FY); g.stroke();
 
-      /* An arrival sweeps the grid. It used to jump from box to box; now the
-         highlight falls off with distance from the sweep, so a box brightens
-         and fades rather than switching. The count it holds never changes,
-         which is the point. */
-      var head = cyc * (COLS * ROWS);
-      var near = REDUCED ? 0 : Math.max(0, 1 - Math.abs(head - i) / 2.2);
-      var lift = ease(near);
-      g.beginPath();
-      g.arc(bx + BW / 2, by + BH / 2, 6.2 + 2.4 * lift, 0, Math.PI * 2);
-      g.fillStyle = lift > 0.02
-        ? rgba(coral7, 0.85 + 0.15 * lift)
-        : rgba(coral, 0.85);
-      g.fill();
+    /* --- left: a fan of rays, one to every live profile ------------------------ */
+    var profs = C.profs; profs.length = 0;
+    var k0 = Math.max(0, landed - Math.ceil((LIFE + FADE) / DT) - 1);
+    /* forget the keys of profiles that have faded, so the memo stays small */
+    if (k0 > (C.pruned || 0)) { for (var z = C.pruned || 0; z < k0; z++) delete C.keyMemo[z]; C.pruned = k0; }
+    for (k = k0; k < landed; k++) {
+      var age = T + PRE - (k * DT + D1 + D2);
+      if (age < 0) continue;
+      var life = age < LIFE ? 1 : 1 - ease((age - LIFE) / FADE);
+      if (life <= 0.004) continue;
+      var m = oldKey(k);
+      leftAt(m, q);
+      var P = (C.pool || (C.pool = []))[profs.length] || (C.pool[profs.length] = {});
+      P.k = k; P.x = q[0]; P.y = q[1]; P.d = q[2]; P.m = m; P.age = age; P.life = life;
+      profs.push(P);
+    }
+    /* settled rays go out in one stroke per colour; young and fading ones alone */
+    g.lineWidth = 1.1;
+    for (var hh = 0; hh < 4; hh++) {
+      g.strokeStyle = css(C.m5[hh], 0.22); g.beginPath();
+      var any = false;
+      for (i = 0; i < profs.length; i++) {
+        var P1 = profs[i];
+        if (P1.m.hue !== hh || P1.life < 1 || P1.age < 400) continue;
+        g.moveTo(FX, FY); g.quadraticCurveTo(FX - 30, FY + 40, P1.x, P1.y); any = true;
+      }
+      if (any) g.stroke();
+    }
+    for (i = 0; i < profs.length; i++) {
+      var P2 = profs[i];
+      if (P2.life >= 1 && P2.age >= 400) continue;
+      g.strokeStyle = css(C.m5[P2.m.hue], 0.22 * P2.life * ease(P2.age / 400));
+      g.beginPath(); g.moveTo(FX, FY); g.quadraticCurveTo(FX - 30, FY + 40, P2.x, P2.y); g.stroke();
     }
 
-    /* right: one profile, and the same observations land on each other */
-    var RX = 292, RY = 130, RW = 140, RH = ROWS * (BH + GAP) - GAP;
-    g.strokeStyle = rgba(violet, 0.95); g.lineWidth = 2.2;
-    g.fillStyle = rgba(violet, 0.06);
-    g.fillRect(RX, RY, RW, RH);
-    g.strokeRect(RX, RY, RW, RH);
-
-    /* The pile used to gain a whole dot at a time, which is 24 visible steps.
-       Each dot now grows in over its own slice of the fill, so the pile rises
-       continuously and the last one is mid-arrival rather than snapping. */
-    var fill = REDUCED ? 1 : ease(Math.min(cyc, 0.46) / 0.46);
-    for (var j = 0; j < 24; j++) {
-      var grow = REDUCED ? 1 : ease((fill * 24 - j) / 1.6);
-      if (grow <= 0.002) continue;
-      var cc = j % 4, rr = (j / 4) | 0;
-      var dx = RX + 26 + cc * 30, dy = RY + RH - 24 - rr * 27;
-      g.beginPath();
-      g.arc(dx, dy - (1 - grow) * 16, 8.6 * grow, 0, Math.PI * 2);
-      g.fillStyle = rgba(violet7, 0.94 * grow);
-      g.fill();
+    /* --- right: the rays of the last arrivals, which all land together ------- */
+    var rb = Math.max(0, landed - 18);
+    for (k = rb; k < landed; k++) {
+      var so = slotOf(k); slotAt(so[0], so[1], q);
+      var fade = 1 - (landed - k) / 19;
+      g.strokeStyle = css(v5, 0.11 * fade); g.lineWidth = 1.4;
+      g.beginPath(); g.moveTo(FX, FY);
+      g.quadraticCurveTo(FX + 34, FY + 36, q[0], q[1]); g.stroke();
     }
 
-    /* the line the observations never cross on the left */
-    g.strokeStyle = rgba(hair, 0.9); g.lineWidth = 1.5;
-    g.setLineDash([5, 6]);
-    g.beginPath(); g.moveTo(258, 120); g.lineTo(258, RY + RH + 10); g.stroke();
-    g.setLineDash([]);
+    /* --- the one profile: a globe of shells ----------------------------------- */
+    var fill = Math.min(landed, C.cap) / C.cap;
+    if (landed > 0) {
+      var br = REDUCED ? 1 : 0.92 + 0.08 * Math.sin(TAU * T / 5200);
+      var gr = R * (0.6 + 0.5 * Math.sqrt(fill));
+      var gg = g.createRadialGradient(RX, RY, 0, RX, RY, gr);
+      gg.addColorStop(0, css(v5, (0.1 + 0.2 * fill) * br));
+      gg.addColorStop(0.6, css(v5, (0.04 + 0.08 * fill) * br));
+      gg.addColorStop(1, css(v5, 0));
+      g.fillStyle = gg;
+      g.beginPath(); g.arc(RX, RY, gr, 0, TAU); g.fill();
+    }
+    /* The glass of the one profile: its silhouette grows out to each new shell
+       as that shell begins, with a tilted equator so it reads as a sphere. */
+    var rSil = 0;
+    if (landed > 0) {
+      rSil = R * RAD[0];
+      for (s = 1; s < SHELL.length; s++) {
+        var tb = C.base[s] * DT + D1 + D2 - PRE;
+        if (REDUCED ? landed > C.base[s] : T > tb) rSil += R * (RAD[s] - RAD[s - 1]) * (REDUCED ? 1 : ease((T - tb) / 700));
+      }
+      var sIn2 = REDUCED ? 1 : ease((T + PRE - D1 - D2) / 500);
+      g.strokeStyle = css(v5, 0.3 * sIn2); g.lineWidth = 1.2;
+      g.beginPath(); g.arc(RX, RY, rSil, 0, TAU); g.stroke();
+      g.strokeStyle = css(v5, 0.16 * sIn2); g.lineWidth = 1;
+      g.beginPath(); g.ellipse(RX, RY, rSil, rSil * se, 0, 0, TAU); g.stroke();
+    }
+    /* the shell being filled shows its waterline, how far up it has come */
+    for (s = 0; s < SHELL.length; s++) {
+      var start = C.base[s];
+      if (landed <= start) continue;
+      var sk = Math.min(1, (landed - start) / SHELL[s]);
+      var rs = R * RAD[s];
+      if (sk < 1) {
+        var wl = -1 + 2 * sk, wr = Math.sqrt(Math.max(0, 1 - wl * wl)) * rs;
+        g.strokeStyle = css(v5, 0.28); g.lineWidth = 1.2;
+        g.beginPath(); g.ellipse(RX, RY - wl * rs * ce, wr, wr * se, 0, 0, TAU); g.stroke();
+      }
+    }
+    /* a shell closes: the hero ring, at the moment its last dot lands */
+    for (s = 0; s < SHELL.length + 12; s++) {
+      var closeK = s < SHELL.length ? C.base[s] + SHELL[s] - 1 : C.cap - 1 + (s - SHELL.length + 1) * SHELL[SHELL.length - 1];
+      var tc = closeK * DT + D1 + D2 - PRE;
+      var ck = (T - tc) / 1500;
+      if (ck <= 0 || ck >= 1 || REDUCED) continue;
+      var rr2 = R * RAD[Math.min(s, SHELL.length - 1)];
+      g.strokeStyle = css(v7, 0.5 * (1 - ck) * (1 - ck) * ease(ck / 0.12)); g.lineWidth = 2.4;
+      g.beginPath(); g.arc(RX, RY, rr2 + 4 + 14 * (1 - (1 - ck) * (1 - ck)), 0, TAU); g.stroke();
+      g.strokeStyle = css(v5, 0.35 * (1 - ck) * ease(ck / 0.12)); g.lineWidth = 6;
+      g.beginPath(); g.arc(RX, RY, rr2, 0, TAU); g.stroke();
+    }
+    /* the dots, far to near: every one is an observation, all in one profile */
+    var dots = C.dots, nd = 0;
+    var shown = Math.min(landed, C.cap);
+    for (k = 0; k < shown; k++) {
+      var so2 = slotOf(k); slotAt(so2[0], so2[1], q);
+      var D = dots[nd++]; D.x = q[0]; D.y = q[1]; D.d = q[2]; D.s = so2[0]; D.k = k;
+    }
+    var sorted = C.sorted || (C.sorted = []);
+    sorted.length = nd;
+    for (i = 0; i < nd; i++) sorted[i] = dots[i];
+    sorted.sort(function (a, b) { return a.d - b.d; });
+    var lastK = landed - 1;
+    /* Batched by depth: eight bands, back to front, one fill each, so two
+       hundred observations cost eight fills rather than two hundred. */
+    var BINS = 8, bin = -1;
+    for (i = 0; i < sorted.length; i++) {
+      var dd = sorted[i];
+      var dn = (dd.d / R + 1) / 2;                            /* 0 at the back, 1 at the front */
+      /* the newest arrival in its slot swells in and settles */
+      var kk = dd.k;
+      if (landed > C.cap) {
+        var so3 = slotOf(lastK);
+        if (dd.s === so3[0] && dd.k - C.base[dd.s] === so3[1]) kk = lastK;
+      }
+      var since = T + PRE - (kk * DT + D1 + D2);
+      var sw = REDUCED ? 0 : swell(since / 220) * 0.9;
+      var rad = (1.6 + 2.6 * dn) * (REDUCED ? 1 : ease(since / 260) * 0.7 + 0.3) + 2.4 * sw;
+      var b2 = Math.min(BINS - 1, Math.floor(dn * BINS));
+      if (b2 !== bin) {
+        if (bin >= 0) g.fill();
+        bin = b2;
+        var dc = (b2 + 0.5) / BINS;
+        g.fillStyle = css(mix(v5, v7, 0.15 + 0.4 * dc), 0.24 + 0.74 * dc);
+        g.beginPath();
+      }
+      g.moveTo(dd.x + rad, dd.y); g.arc(dd.x, dd.y, rad, 0, TAU);
+    }
+    if (bin >= 0) g.fill();
+    /* a highlight on the glass, upper left, over everything inside it */
+    if (rSil > 0) {
+      var hx = RX - rSil * 0.38, hy = RY - rSil * 0.42;
+      var hl = g.createRadialGradient(hx, hy, 0, hx, hy, rSil * 0.6);
+      hl.addColorStop(0, css(C.white, 0.34));
+      hl.addColorStop(1, css(C.white, 0));
+      g.fillStyle = hl;
+      g.beginPath(); g.arc(hx, hy, rSil * 0.6, 0, TAU); g.fill();
+    }
+
+    /* --- the old key's profiles: one dot each, far to near --------------------- */
+    profs.sort(function (a, b) { return a.d - b.d; });
+    for (i = 0; i < profs.length; i++) {
+      var Pp = profs[i], h5 = C.m5[Pp.m.hue], h7 = C.m7[Pp.m.hue];
+      var dn2 = (Pp.d / (LH * se + LD * ce) + 1) / 2;
+      var born = REDUCED ? 1 : ease(Pp.age / 500);
+      var pr = (7.5 + 3 * dn2) * born * (0.7 + 0.3 * Pp.life);
+      var al = Pp.life * (0.55 + 0.45 * dn2);
+      /* a small glass sphere: tinted body, rim, and a highlight */
+      g.fillStyle = css(h5, 0.13 * al);
+      g.beginPath(); g.arc(Pp.x, Pp.y, pr, 0, TAU); g.fill();
+      g.strokeStyle = css(mix(h5, h7, 0.4), 0.75 * al); g.lineWidth = 1.2;
+      g.stroke();
+      g.fillStyle = css(C.white, 0.7 * al);
+      g.beginPath(); g.arc(Pp.x - pr * 0.36, Pp.y - pr * 0.4, pr * 0.28, 0, TAU); g.fill();
+      g.fillStyle = css(h5, al);
+      g.beginPath(); g.arc(Pp.x, Pp.y + pr * 0.25, 2.6 * born, 0, TAU); g.fill();
+      /* a profile is created: one ripple, and it never rings again */
+      if (!REDUCED && Pp.age < 900) {
+        var rk = Pp.age / 900;
+        g.strokeStyle = css(h5, 0.45 * (1 - rk) * (1 - rk) * ease(rk / 0.12)); g.lineWidth = 1.4;
+        g.beginPath(); g.arc(Pp.x, Pp.y, pr + 4 + 12 * (1 - (1 - rk) * (1 - rk)), 0, TAU); g.stroke();
+      }
+    }
+
+    /* --- packets in flight ----------------------------------------------------- */
+    var kFirst = Math.max(0, Math.floor((T + PRE - D1 - D2) / DT));
+    for (k = kFirst; k <= kNow; k++) {
+      var a0 = T + PRE - k * DT;                        /* this packet's age */
+      if (a0 < 0 || a0 > D1 + D2) continue;
+      var mk = oldKey(k);
+      var sat = TAU * a0 / 1100 + k * 2.1;
+      if (a0 < D1) {
+        /* down the source: the scaffold, with its message circling it */
+        var u = a0 / D1, py = SY + (FY - SY) * u, al0 = ease(a0 / 220);
+        packet(FX, py, v5, v7, C.m5[mk.hue], 1, al0, sat, FX, Math.max(SY - 6, py - 26));
+      } else {
+        var b = (a0 - D1) / D2, e2 = 1 - Math.pow(1 - b, 2.2);
+        var land = 1 - ease((b - 0.86) / 0.14);
+        /* left: keyed on everything, so it takes the message's colour */
+        leftAt(mk, q);
+        bezAt(FX, FY, FX - 30, FY + 40, q[0], q[1], e2, q2);
+        var tl = [0, 0];
+        bezAt(FX, FY, FX - 30, FY + 40, q[0], q[1], Math.max(0, e2 - 0.2), tl);
+        var cl = mix(v5, C.m5[mk.hue], ease(b / 0.35)), cl7 = mix(v7, C.m7[mk.hue], ease(b / 0.35));
+        packet(q2[0], q2[1], cl, cl7, C.m5[mk.hue], 1, land, sat, tl[0], tl[1]);
+        /* right: keyed on the scaffold, so the message drops out of the key */
+        var so4 = slotOf(k); slotAt(so4[0], so4[1], q);
+        bezAt(FX, FY, FX + 34, FY + 36, q[0], q[1], e2, q2);
+        bezAt(FX, FY, FX + 34, FY + 36, q[0], q[1], Math.max(0, e2 - 0.2), tl);
+        packet(q2[0], q2[1], v5, v7, C.m5[mk.hue], 1 - ease(b / 0.45), land, sat, tl[0], tl[1]);
+      }
+    }
+    /* the fork: where every request is keyed both ways */
+    g.fillStyle = css(v5, 0.2 * sIn);
+    g.beginPath(); g.arc(FX, FY, 9, 0, TAU); g.fill();
+    g.fillStyle = css(v7, 0.9 * sIn);
+    g.beginPath(); g.arc(FX, FY, 3.2, 0, TAU); g.fill();
+
+    function bezAt(x0, y0, cx, cy, x1, y1, u, o) {
+      var w = 1 - u;
+      o[0] = w * w * x0 + 2 * w * u * cx + u * u * x1;
+      o[1] = w * w * y0 + 2 * w * u * cy + u * u * y1;
+      return o;
+    }
+    /* one request: a comet tail, a core (the scaffold) and a satellite (the
+       first user message); msgA is how much of the message is still in the key */
+    function packet(x, y, c5, c7, cm, msgA, al, ang, tx, ty) {
+      if (al <= 0.004) return;
+      var tg = g.createLinearGradient(tx, ty, x, y);
+      tg.addColorStop(0, css(c5, 0));
+      tg.addColorStop(1, css(c5, 0.75 * al));
+      g.strokeStyle = tg; g.lineWidth = 3.4;
+      g.beginPath(); g.moveTo(tx, ty); g.lineTo(x, y); g.stroke();
+      g.fillStyle = css(c5, 0.2 * al);
+      g.beginPath(); g.arc(x, y, 8.5, 0, TAU); g.fill();
+      g.fillStyle = css(mix(c5, c7, 0.35), al);
+      g.beginPath(); g.arc(x, y, 3.8, 0, TAU); g.fill();
+      if (msgA > 0.02) {
+        g.fillStyle = css(cm, al * msgA);
+        g.beginPath(); g.arc(x + Math.cos(ang) * 6.5, y + Math.sin(ang) * 6.5 * 0.8, 2.3, 0, TAU); g.fill();
+      }
+    }
   }
 
   /* ==================================================================== */

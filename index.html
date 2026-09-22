@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=51">
-<link rel="stylesheet" href="motion.css?v=51">
-<link rel="stylesheet" href="art.css?v=51">
+<link rel="stylesheet" href="site.css?v=52">
+<link rel="stylesheet" href="motion.css?v=52">
+<link rel="stylesheet" href="art.css?v=52">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -323,15 +323,19 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <div class="figc" style="--figc-ar:470/540"><canvas data-fig="funnel" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="mw-t mw-d">
-                  <title id="mw-t">A square field draining into a single row</title>
-                  <desc id="mw-d">Four hundred and eighty four cells, one for every pair of trees, draining cell by cell into a row of twenty two, one per tree. The old kernel carried the quadratic shape onto the device and the replacement is linear, so the scratch allocation falls from 7,929,856 bytes to 180,224 bytes and the median time from 156.738 microseconds to 101.097, which is 1.513 times faster with a 99 percent confidence interval of 1.406 to 1.584.</desc>
-                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">484 cells, one per pair of trees</text>
-                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 7,929,856 B</text>
-                  <text x="235" y="414" text-anchor="middle" font-size="17" font-weight="600" fill="var(--mint-700)">22 entries, one per tree</text>
-                  <text x="235" y="500" text-anchor="middle" font-size="30" font-weight="800" fill="var(--mint-700)">1.513x faster</text>
-                  <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 180,224 B, median 156.738 us to 101.097 us</text>
-                </svg></div>
+      <div class="figc" style="--figc-ar:470/540">
+                <canvas data-fig="funnel" data-vb="470 540" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="pr-mujoco-warp-1541-t pr-mujoco-warp-1541-d">
+                  <title id="pr-mujoco-warp-1541-t">A pair matrix condensing into a disjoint-set forest</title>
+                  <desc id="pr-mujoco-warp-1541-d">An illustration of the mechanism, not of the benchmark scene. A floor of 484 coral cells, one for every pair of 22 trees, builds up, and then every row slides into its diagonal cell, so the matrix condenses into 22 entries, one per tree. Those entries lift off as a forest, and the floor stays behind as a faint ghost of the scratch that is no longer allocated. Each step the forest runs a disjoint-set union. A contact appears as a bundle of threads between two trees, a bead walks from each end up its pointers to a root, and where the two roots differ one root's pointer swings over to the other, so two islands merge and take one colour. Height is depth in the union's tree. Then every pointer snaps straight to its root, and the floor lights every pair of trees that share an island: the answer the pair matrix used to hold, read from 22 entries. The old kernel carried the quadratic shape onto the device and the replacement is linear, so scratch falls from 7,929,856 bytes to 180,224 bytes and the median time from 156.738 microseconds to 101.097, which is 1.513 times faster with a 99 percent interval of 1.406 to 1.584.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--blue-700)">22 entries, one per tree</text>
+                  <text x="235" y="53" text-anchor="middle" font-size="15" fill="var(--muted)">every pointer ends at the root of its island</text>
+                  <text x="235" y="447" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">in place of 484 cells, one per pair of trees</text>
+                  <text x="235" y="486" text-anchor="middle" font-size="30" font-weight="800" fill="var(--blue-700)">1.513x faster</text>
+                  <text x="235" y="510" text-anchor="middle" font-size="15" fill="var(--muted)">scratch 7,929,856 B to 180,224 B</text>
+                  <text x="235" y="531" text-anchor="middle" font-size="15" fill="var(--muted)">median 156.738 us to 101.097 us</text>
+                </svg>
+              </div>
         </div>
 </div>
 </article>
@@ -360,16 +364,17 @@
 <div class="card__art fig">
       <div class="figc" style="--figc-ar:470/520">
                 <canvas data-fig="gather" data-vb="470 520" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="nr-t nr-d">
-                  <title id="nr-t">The same observations, one to a box and then gathered</title>
-                  <desc id="nr-d">Two requests sharing a model, a system prompt hash and a tool schema hash were given different learning keys because one field differed, so every profile held a single observation and nothing ever accumulated. The same twenty four observations are drawn twice: one to a box on the left, which is the same quantity and worth nothing, and gathered into one profile on the right, where the pile is the whole value of the change. 1,370 lines added and 86 removed across 23 files.</desc>
-                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">one differing field split the key</text>
-                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">same model, same system prompt, same tools</text>
-                  <text x="112" y="104" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">one each, forever</text>
-                  <text x="366" y="104" text-anchor="middle" font-size="16" font-weight="600" fill="var(--violet-700)">or all in one</text>
-                  <text x="235" y="418" text-anchor="middle" font-size="18" font-weight="600" fill="var(--violet-700)">the same 24 observations, twice</text>
-                  <text x="235" y="442" text-anchor="middle" font-size="15" fill="var(--muted)">the pile on the right is the entire difference</text>
-                  <text x="235" y="486" text-anchor="middle" font-size="16" fill="var(--muted)">+1,370/-86 across 23 files</text>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="pr-nemo-relay-481-t pr-nemo-relay-481-d">
+                  <title id="pr-nemo-relay-481-t">The same requests, keyed two ways</title>
+                  <desc id="pr-nemo-relay-481-d">An illustration of the mechanism: the requests, their number and their timing are not measured. Requests stream down from the top. Each is a violet core for the scaffold, the same model, system prompt and tool schema in every one, with a coloured satellite for the first user message, a different colour for every task. At the fork every request is keyed both ways. On the left the old key includes the first user message, so each request takes its message's colour and flies to wherever its key hashes, into a new profile that holds exactly one observation: the one differing field splits the stream into a fan, and no profile ever grows. On the right the new key is the stable scaffold alone, so the message drops out of the key and every request lands in the same profile, a globe of nested shells that fills one dot per observation and rings each time a shell closes. The change is 1,370 lines added and 86 removed across 23 files, with 18 test files and 938 lines of tests, and a fingerprint gate that fails closed.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">the first user message split the key</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">same model, same system prompt, same tools</text>
+                  <text x="116" y="430" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">a new profile per task</text>
+                  <text x="116" y="452" text-anchor="middle" font-size="15" fill="var(--muted)">each holds one observation</text>
+                  <text x="346" y="430" text-anchor="middle" font-size="16" font-weight="600" fill="var(--violet-700)">one scaffold, one profile</text>
+                  <text x="346" y="452" text-anchor="middle" font-size="15" fill="var(--muted)">observations accumulate</text>
+                  <text x="235" y="488" text-anchor="middle" font-size="16" fill="var(--muted)">+1,370/-86 across 23 files</text>
+                  <text x="235" y="510" text-anchor="middle" font-size="15" fill="var(--muted)">18 test files, 938 lines of tests added</text>
                 </svg>
               </div>
         </div>
@@ -880,7 +885,7 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="fig.js?v=51" defer></script>
-<script src="site.js?v=51" defer></script>
+<script src="fig.js?v=52" defer></script>
+<script src="site.js?v=52" defer></script>
 </body>
 </html>
