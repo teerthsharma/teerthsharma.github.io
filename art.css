@@ -172,4 +172,351 @@
   #pr-tensorflow-124410:hover #tf-redundant,
   #pr-tensorflow-124410:hover #tf-link{ animation-play-state: paused; }
 
+
+  /* --- google/XNNPACK #10801 ---
+   The old planner appended every new value past the arena's right edge
+   without ever checking the free interval sitting before the first live
+   block. The mover performs the fix directly: it appears where the old
+   planner would have placed the value, past the end, then sweeps back
+   along the same arc as the arrow and settles into the leading gap, while
+   the dashed ghost position dims to show it going unused. The arena's
+   right edge never moves. */
+
+@keyframes xn-sweep {
+  0%    { transform: translate(0,0);         opacity: 1; }
+  9%    { transform: translate(0,0);         opacity: 1; }
+  13%   { transform: translate(0,0);         opacity: 0; }
+  15%   { transform: translate(360px,0);     opacity: 0; }
+  19%   { transform: translate(360px,0);     opacity: 1; }
+  40%   { transform: translate(360px,0);     opacity: 1; }
+  54%   { transform: translate(314px,-72px); opacity: 1; }
+  66%   { transform: translate(180px,-88px); opacity: 1; }
+  78%   { transform: translate(46px,-72px);  opacity: 1; }
+  92%   { transform: translate(0,0);         opacity: 1; }
+  100%  { transform: translate(0,0);         opacity: 1; }
+}
+#pr-xnnpack-10801 .xn-mover {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: xn-sweep 6s ease-in-out infinite;
+}
+
+@keyframes xn-ghost-fade {
+  0%   { opacity: 1; }
+  13%  { opacity: 1; }
+  19%  { opacity: .4; }
+  40%  { opacity: .4; }
+  54%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+#pr-xnnpack-10801 .xn-ghost {
+  animation: xn-ghost-fade 6s ease-in-out infinite;
+}
+
+#pr-xnnpack-10801:hover .xn-mover,
+#pr-xnnpack-10801:hover .xn-ghost { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce){
+  #pr-xnnpack-10801 .xn-mover,
+  #pr-xnnpack-10801 .xn-ghost { animation: none; }
+}
+
+  /* --- google-deepmind/mujoco #3450 ---
+   The old convex-hull code found a matching vertex by scanning the ring
+   one point at a time; the fix looks it up directly through an inverted
+   point-id table. The coral probe performs the old path: it steps around
+   the ring, one vertex at a time, all the way round, on a slow loop of its
+   own. The mint jump below performs the fix: it fires once, arrives, and
+   holds bright far longer than it ever dims, so the contrast between
+   "many steps" and "one jump, then holding" is the motion itself, not a
+   caption. */
+
+@keyframes mj-probe-walk {
+  0%      { cx: 253.37; cy: 47.29; }
+  5.56%   { cx: 283.48; cy: 62.63; }
+  11.11%  { cx: 307.37; cy: 86.52; }
+  16.67%  { cx: 322.71; cy: 116.63; }
+  22.22%  { cx: 328.00; cy: 150.00; }
+  27.78%  { cx: 322.71; cy: 183.37; }
+  33.33%  { cx: 307.37; cy: 213.48; }
+  38.89%  { cx: 283.48; cy: 237.37; }
+  44.44%  { cx: 253.37; cy: 252.71; }
+  50.00%  { cx: 186.63; cy: 252.71; }
+  55.56%  { cx: 156.52; cy: 237.37; }
+  61.11%  { cx: 132.63; cy: 213.48; }
+  66.67%  { cx: 117.29; cy: 183.37; }
+  72.22%  { cx: 112.00; cy: 150.00; }
+  77.78%  { cx: 117.29; cy: 116.63; }
+  83.33%  { cx: 132.63; cy: 86.52; }
+  88.89%  { cx: 156.52; cy: 62.63; }
+  94.44%  { cx: 186.63; cy: 47.29; }
+  100%    { cx: 253.37; cy: 47.29; }
+}
+#pr-mujoco-3450 .mj-probe {
+  animation: mj-probe-walk 10.8s step-end infinite;
+}
+
+@keyframes mj-src-blink {
+  0%, 60%   { opacity: 1; }
+  74%       { opacity: .5; }
+  86%, 100% { opacity: 1; }
+}
+@keyframes mj-arrow-blink {
+  0%, 60%   { opacity: 1; }
+  70%       { opacity: .35; }
+  86%, 100% { opacity: 1; }
+}
+@keyframes mj-dst-snap {
+  0%, 60%   { opacity: 1; r: 8; }
+  74%       { opacity: .55; r: 6; }
+  86%       { opacity: 1; r: 11; }
+  92%, 100% { opacity: 1; r: 8; }
+}
+#pr-mujoco-3450 .mj-src   { animation: mj-src-blink 4.4s ease-in-out infinite; }
+#pr-mujoco-3450 .mj-arrow { animation: mj-arrow-blink 4.4s ease-in-out infinite; }
+#pr-mujoco-3450 .mj-dst   { animation: mj-dst-snap 4.4s ease-in-out infinite; }
+
+#pr-mujoco-3450:hover .mj-probe,
+#pr-mujoco-3450:hover .mj-src,
+#pr-mujoco-3450:hover .mj-arrow,
+#pr-mujoco-3450:hover .mj-dst { animation-play-state: paused; }
+
+@media (prefers-reduced-motion: reduce){
+  #pr-mujoco-3450 .mj-probe,
+  #pr-mujoco-3450 .mj-src,
+  #pr-mujoco-3450 .mj-arrow,
+  #pr-mujoco-3450 .mj-dst { animation: none; }
+}
+
+  /* --- google/highway #3244 --- A perfect-hash build was comparing every pair
+   of keys in a slice; the fix prunes by slice structure first, so only the
+   pair nearest the slice boundary in each row is ever compared. The motion
+   walks that boundary top to bottom: a marker travels the dashed slice line
+   while each row's single kept circle flares in the same row order, and the
+   hollow circles the marker passes never react, because they were already
+   ruled out before any compare could run. */
+
+#pr-highway-3244 .hw-kept,
+#pr-highway-3244 .hw-scan {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@keyframes hw-kept-sweep {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.6); }
+}
+
+#pr-highway-3244 .hw-kept {
+  /* animation-delay is set per circle inline in the SVG, in row order:
+     row-index * 0.3s, so the flare visibly steps down one row at a time
+     instead of firing in the document's arbitrary modulo order. */
+  animation: hw-kept-sweep 4.8s ease-in-out infinite;
+}
+
+/* Row 0 sits 4 units below the "slice boundary" label, too close for the
+   full 1.6x flare (it would swing inside the 6-unit clearance). It keeps the
+   sweep's place in the row order but flares less and dips opacity instead,
+   so it stays just as legible as every other row without crossing the label. */
+@keyframes hw-kept-sweep-edge {
+  0%, 100% { opacity: 1;  transform: scale(1); }
+  50%      { opacity: .45; transform: scale(1.15); }
+}
+#pr-highway-3244 .hw-kept-edge {
+  animation: hw-kept-sweep-edge 4.8s ease-in-out infinite;
+}
+
+@keyframes hw-scan-sweep {
+  0%   { transform: translate(0, 0); }
+  100% { transform: translate(360px, 300px); }
+}
+
+#pr-highway-3244 .hw-scan {
+  animation: hw-scan-sweep 4.8s ease-in-out infinite alternate;
+}
+
+#pr-highway-3244:hover .hw-kept,
+#pr-highway-3244:hover .hw-scan {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #pr-highway-3244 .hw-kept,
+  #pr-highway-3244 .hw-scan { animation: none; }
+}
+
+  /* --- triton-lang/kernels #22 --- The kernel schedules only some causal
+   blocks (sink column, local window, salience picks) out of the whole valid
+   lower triangle and visits nothing else. The motion walks the schedule: the
+   violet blocks dip in true row order, top row to bottom row, every
+   scheduled block in a row firing together as the kernel reaches it, while
+   the grey valid-but-unscheduled blocks are simply never selected by this
+   rule and keep the page's ordinary ambient shimmer, reading as passed over. */
+
+@keyframes tri-visit {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: .35; transform: scale(.78); }
+}
+
+#pr-triton-kernels-22 .tri-sched {
+  transform-box: fill-box;
+  transform-origin: center;
+  /* animation-delay is set per block inline in the SVG, in row order:
+     row-index * 0.3s, so the kernel's walk reads as one clean pass down the
+     triangle instead of the generic modulo-12 shimmer it replaces. */
+  animation: tri-visit 4.8s ease-in-out infinite;
+}
+
+#pr-triton-kernels-22:hover .tri-sched {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #pr-triton-kernels-22 .tri-sched { animation: none; }
+}
+
+  /* --- openxla/xla #46539 --- GroupDisjointReductions picked which value
+   survived a union-find merge by walking a hash set, so the same program
+   could compile to two different answers depending on an order nobody
+   controlled. The before band performs that: the runs into "run A" and the
+   runs into "run B" trade the spotlight, each destination brightening while
+   the other dims, an outcome that keeps flipping cycle after cycle. The
+   after band performs the fix: every run and the single outcome brighten
+   and dim in the same instant, together, because the order is now a
+   function of the graph and there is only one answer to land on. */
+
+@keyframes oxa-hi { 0%, 100% { opacity: 1;  } 50% { opacity: .4; } }
+@keyframes oxa-lo { 0%, 100% { opacity: .4; } 50% { opacity: 1;  } }
+
+#pr-openxla-46539 .oxa-toA,
+#pr-openxla-46539 #oxa-outA {
+  animation: oxa-hi 4.8s ease-in-out infinite;
+}
+
+#pr-openxla-46539 .oxa-toB,
+#pr-openxla-46539 #oxa-outB {
+  animation: oxa-lo 4.8s ease-in-out infinite;
+}
+
+/* After: no phase offset between any element, so all ten runs and the
+   single outcome move as one, every cycle, which is the determinism. */
+#pr-openxla-46539 .oxa-toX,
+#pr-openxla-46539 #oxa-outX {
+  animation: oxa-hi 4.2s ease-in-out infinite;
+}
+
+#pr-openxla-46539:hover .oxa-toA,
+#pr-openxla-46539:hover #oxa-outA,
+#pr-openxla-46539:hover .oxa-toB,
+#pr-openxla-46539:hover #oxa-outB,
+#pr-openxla-46539:hover .oxa-toX,
+#pr-openxla-46539:hover #oxa-outX {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pr-openxla-46539 .oxa-toA,
+  #pr-openxla-46539 #oxa-outA,
+  #pr-openxla-46539 .oxa-toB,
+  #pr-openxla-46539 #oxa-outB,
+  #pr-openxla-46539 .oxa-toX,
+  #pr-openxla-46539 #oxa-outX {
+    animation: none;
+  }
+}
+
+  /* --- facebook/pyrefly #4180 --- A recheck's dependency chain can run past
+   the 100 epoch incremental budget before the export change that started it
+   ever reaches commit. A dark signal glides link by link along the chain of
+   two-module SCCs, crosses the epoch-100 door, and makes the one hop that
+   lands past it; the coral point it lands beside rises and falls once,
+   standing in for the panic, and the signal fades out and reappears at the
+   first link to make the same trip again. */
+
+@keyframes pf-travel {
+  0%   { transform: translate(0, 0);         opacity: 1; }
+  62%  { transform: translate(430px, 0);     opacity: 1; }  /* reaches the last link, at the door */
+  74%  { transform: translate(454px, -34px); opacity: 1; }  /* the one hop past the door */
+  84%  { transform: translate(454px, -34px); opacity: 1; }  /* holds while the coral point reacts */
+  88%  { transform: translate(454px, -34px); opacity: 0; }  /* fades out in place */
+  89%  { transform: translate(0, 0);         opacity: 0; }  /* resets while invisible, no jump seen */
+  100% { transform: translate(0, 0);         opacity: 1; }  /* fades back in at the first link */
+}
+
+@keyframes pf-panic {
+  0%, 70%, 100% { r: 9;  opacity: 1; }
+  77%           { r: 13; opacity: 1; }  /* the panic: a rise and fall, not a blink */
+  84%           { r: 9;  opacity: 1; }
+}
+
+#pr-pyrefly-4180 .pf-signal {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pf-travel 6s linear infinite;
+}
+
+#pr-pyrefly-4180 .pf-panic-dot {
+  animation: pf-panic 6s linear infinite;
+}
+
+#pr-pyrefly-4180:hover .pf-signal,
+#pr-pyrefly-4180:hover .pf-panic-dot {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #pr-pyrefly-4180 .pf-signal,
+  #pr-pyrefly-4180 .pf-panic-dot {
+    animation: none;
+  }
+}
+
+  /* --- topograph #432 --- The dashed boundary that used to grant every rule
+   scales down, in place, until it exactly overlaps the solid gate circle,
+   then eases back out: the same shape as least privilege being applied. As
+   the boundary sweeps inward each coral grant dims at the moment the
+   boundary passes its own radius, timed from its distance to the centre, so
+   the outer ring is cut off first and the ring nearest the gate last. The
+   mint grants inside the gate are held static through the whole cycle,
+   overriding the site-wide pulse, so the one thing that never wavers is
+   exactly what engine.name and provider.name can still reach. */
+
+#pr-topograph-432 .tg-boundary {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tg-contract 5.4s ease-in-out infinite;
+}
+@keyframes tg-contract {
+  0%, 100% { transform: scale(1); }        /* r = 163: everything granted */
+  50%      { transform: scale(0.3865); }   /* r = 63: exactly #tg-gate */
+}
+
+#pr-topograph-432 .tg-coral-g .pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: tg-coral-cut 5.4s ease-in-out infinite;
+}
+@keyframes tg-coral-cut {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: .12; }
+}
+
+/* Mint grants stay lit: pin them past the site-wide .pop pulse so the
+   surviving core reads as unchanged while everything around it moves. */
+#pr-topograph-432 .tg-mint-g .pop {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce){
+  #pr-topograph-432 .tg-boundary,
+  #pr-topograph-432 .tg-coral-g .pop {
+    animation: none;
+  }
+}
+
+#pr-topograph-432:hover .tg-boundary,
+#pr-topograph-432:hover .tg-coral-g .pop {
+  animation-play-state: paused;
+}
+
 }
