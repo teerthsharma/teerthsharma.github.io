@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=61">
-<link rel="stylesheet" href="motion.css?v=61">
-<link rel="stylesheet" href="art.css?v=61">
+<link rel="stylesheet" href="site.css?v=62">
+<link rel="stylesheet" href="motion.css?v=62">
+<link rel="stylesheet" href="art.css?v=62">
 
 <script type="application/ld+json">
 {
@@ -101,9 +101,9 @@
       <li><a class="psub__link" href="#p-resolvent">resolvent</a></li>
       <li><a class="psub__link" href="#p-epsilon-hollow">Epsilon-Hollow</a></li>
       <li><a class="psub__link" href="#p-aether-lang">Aether-Lang</a></li>
+      <li><a class="psub__link" href="#p-caustic">caustic</a></li>
       <li><a class="psub__link" href="#p-monodromy">monodromy</a></li>
       <li class="psub__sep" aria-hidden="true"></li>
-      <li><a class="psub__link" href="#p-caustic">caustic</a></li>
       <li><a class="psub__link" href="#p-topological-ml-toolkit">topological-ml-toolkit</a></li>
       <li><a class="psub__link" href="#p-nerve">nerve</a></li>
       <li><a class="psub__link" href="#p-faraday">faraday</a></li>
@@ -260,6 +260,48 @@
 </div>
 </article>
 
+<article class="proj pt" id="p-caustic" data-lang="Python" data-doi="true">
+<div class="pt__head">
+        <div class="pt__titles">
+          <h2 class="proj__name">caustic</h2>
+          <p class="pt__tagline">Hallucination, measurable with no ground truth.</p>
+        </div>
+        <div class="pt__ctas">
+          <a class="pt__cta" href="https://github.com/teerthsharma/caustic">View on GitHub<span class="sr-only">: caustic</span></a>
+          <a class="pt__more" href="https://teerthsharma.github.io/caustic/">Read how it works<span class="sr-only"> on the caustic site</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
+        </div>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
+          <figure class="fig">
+            <div class="figc" style="--figc-ar:470/540"><canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="cs-t cs-d">
+                  <title id="cs-t">Distinct entities focus on distinct answers, except the ones the model cannot reach, which collapse onto one</title>
+                  <desc id="cs-d">Distinct entities enter on the left, each a beam of light in its own colour, evenly spaced, and none of them is special going in. Every beam passes through the model and focuses on an answer on the right. Where the model reaches the fact, each beam focuses on an answer of its own, and each of those answers holds one colour. Where it cannot, beams of several different colours bend and focus on the same answer, piling up into one bright knot that holds a petal of every colour that landed on it. That collapse can be seen without knowing which entity is which, and it is measurable with no ground truth at all: caustic turns the partition into a certified lower bound on error rate, with five proved bounds and 0.995 AUROC.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">distinct entities stream through the model</text>
+                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">reached, each lands on its own answer</text>
+                  <text x="235" y="450" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">out of reach, they collapse onto one answer</text>
+                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">which gives a certified lower bound on error rate</text>
+                  <text x="235" y="510" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
+                  <text x="235" y="532" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
+                </svg></div>
+            <figcaption class="fig__cap">Distinct entities collapse onto one answer. That collapse is the hallucination.</figcaption>
+          </figure>
+        </div>
+</div>
+<div class="pt__body">
+        <p class="proj__claim">I found that when a model cannot reach a fact it collapses distinct entities onto one answer, and that collapse is measurable with no ground truth at all.</p>
+        <div class="proj__nums pt__specs">
+          <span class="spec"><b class="spec__n">0.995</b> <span class="spec__l">AUROC</span></span>
+          <span class="spec"><b class="spec__n">five</b> <span class="spec__l">proved bounds</span></span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">0.995 AUROC</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a></li>
+        </ul>
+</div>
+</article>
+
 <article class="proj pt" id="p-monodromy" data-lang="Python" data-doi="true">
 <div class="pt__head">
         <div class="pt__titles">
@@ -305,48 +347,6 @@
 
   <div class="pgal" role="region" aria-roledescription="carousel" aria-label="More projects">
     <div class="pgal__track">
-
-<article class="proj pt" id="p-caustic" data-lang="Python" data-doi="true">
-<div class="pt__head">
-        <div class="pt__titles">
-          <h2 class="proj__name">caustic</h2>
-          <p class="pt__tagline">Hallucination, measurable with no ground truth.</p>
-        </div>
-        <div class="pt__ctas">
-          <a class="pt__cta" href="https://github.com/teerthsharma/caustic">View on GitHub<span class="sr-only">: caustic</span></a>
-          <a class="pt__more" href="https://teerthsharma.github.io/caustic/">Read how it works<span class="sr-only"> on the caustic site</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
-        </div>
-</div>
-<div class="proj__figure">
-<div class="proj__art">
-          <figure class="fig">
-            <div class="figc" style="--figc-ar:470/540"><canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="cs-t cs-d">
-                  <title id="cs-t">Distinct entities focus on distinct answers, except the ones the model cannot reach, which collapse onto one</title>
-                  <desc id="cs-d">Distinct entities enter on the left, each a beam of light in its own colour, evenly spaced, and none of them is special going in. Every beam passes through the model and focuses on an answer on the right. Where the model reaches the fact, each beam focuses on an answer of its own, and each of those answers holds one colour. Where it cannot, beams of several different colours bend and focus on the same answer, piling up into one bright knot that holds a petal of every colour that landed on it. That collapse can be seen without knowing which entity is which, and it is measurable with no ground truth at all: caustic turns the partition into a certified lower bound on error rate, with five proved bounds and 0.995 AUROC.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">distinct entities stream through the model</text>
-                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">reached, each lands on its own answer</text>
-                  <text x="235" y="450" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">out of reach, they collapse onto one answer</text>
-                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">which gives a certified lower bound on error rate</text>
-                  <text x="235" y="510" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
-                  <text x="235" y="532" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
-                </svg></div>
-            <figcaption class="fig__cap">Distinct entities collapse onto one answer. That collapse is the hallucination.</figcaption>
-          </figure>
-        </div>
-</div>
-<div class="pt__body">
-        <p class="proj__claim">I found that when a model cannot reach a fact it collapses distinct entities onto one answer, and that collapse is measurable with no ground truth at all.</p>
-        <div class="proj__nums pt__specs">
-          <span class="spec"><b class="spec__n">0.995</b> <span class="spec__l">AUROC</span></span>
-          <span class="spec"><b class="spec__n">five</b> <span class="spec__l">proved bounds</span></span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">0.995 AUROC</li>
-          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a></li>
-        </ul>
-</div>
-</article>
 
 <article class="proj pt pt--long" id="p-topological-ml-toolkit" data-lang="Python" data-doi="false">
 <div class="pt__head">
@@ -614,8 +614,7 @@
     <div class="pgal__ctrl">
       <button class="pgal__btn pgal__prev" type="button" aria-label="Previous project" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="pgal__dots" role="group" aria-label="Choose a project">
-        <a class="pgal__dot" href="#p-caustic" aria-label="caustic" aria-current="true"><span class="pgal__fill" aria-hidden="true"></span></a>
-        <a class="pgal__dot" href="#p-topological-ml-toolkit" aria-label="topological-ml-toolkit" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
+        <a class="pgal__dot" href="#p-topological-ml-toolkit" aria-label="topological-ml-toolkit" aria-current="true"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-nerve" aria-label="nerve" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-faraday" aria-label="faraday" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-separatrix" aria-label="separatrix" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
@@ -630,7 +629,7 @@
 
 </main>
 
-<script src="fig.js?v=61" defer></script>
-<script src="site.js?v=61" defer></script>
+<script src="fig.js?v=62" defer></script>
+<script src="site.js?v=62" defer></script>
 </body>
 </html>
