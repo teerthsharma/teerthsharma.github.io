@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=60">
-<link rel="stylesheet" href="motion.css?v=60">
-<link rel="stylesheet" href="art.css?v=60">
+<link rel="stylesheet" href="site.css?v=61">
+<link rel="stylesheet" href="motion.css?v=61">
+<link rel="stylesheet" href="art.css?v=61">
 
 <script type="application/ld+json">
 {
@@ -101,11 +101,11 @@
       <li><a class="psub__link" href="#p-resolvent">resolvent</a></li>
       <li><a class="psub__link" href="#p-epsilon-hollow">Epsilon-Hollow</a></li>
       <li><a class="psub__link" href="#p-aether-lang">Aether-Lang</a></li>
-      <li><a class="psub__link" href="#p-topological-ml-toolkit">topological-ml-toolkit</a></li>
+      <li><a class="psub__link" href="#p-monodromy">monodromy</a></li>
       <li class="psub__sep" aria-hidden="true"></li>
       <li><a class="psub__link" href="#p-caustic">caustic</a></li>
+      <li><a class="psub__link" href="#p-topological-ml-toolkit">topological-ml-toolkit</a></li>
       <li><a class="psub__link" href="#p-nerve">nerve</a></li>
-      <li><a class="psub__link" href="#p-monodromy">monodromy</a></li>
       <li><a class="psub__link" href="#p-faraday">faraday</a></li>
       <li><a class="psub__link" href="#p-separatrix">separatrix</a></li>
       <li><a class="psub__link" href="#p-planimeter">planimeter</a></li>
@@ -260,45 +260,43 @@
 </div>
 </article>
 
-<article class="proj pt pt--long" id="p-topological-ml-toolkit" data-lang="Python" data-doi="false">
+<article class="proj pt" id="p-monodromy" data-lang="Python" data-doi="true">
 <div class="pt__head">
         <div class="pt__titles">
-          <h2 class="proj__name">topological-ml-toolkit</h2>
-          <p class="pt__tagline">The shape of data, as an ordinary feature.</p>
+          <h2 class="proj__name">monodromy</h2>
+          <p class="pt__tagline">Can it be undone? Topology answers.</p>
         </div>
         <div class="pt__ctas">
-          <a class="pt__cta" href="https://github.com/teerthsharma/topological-ml-toolkit">View on GitHub<span class="sr-only">: topological-ml-toolkit</span></a>
-          <a class="pt__more" href="https://teerthsharma.github.io/topological-ml-toolkit/">Read how it works<span class="sr-only"> on the topological-ml-toolkit site</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
+          <a class="pt__cta" href="https://github.com/teerthsharma/monodromy">View on GitHub<span class="sr-only">: monodromy</span></a>
+          <a class="pt__more" href="https://teerthsharma.github.io/monodromy/">Read how it works<span class="sr-only"> on the monodromy site</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
         </div>
 </div>
 <div class="proj__figure">
 <div class="proj__art">
           <figure class="fig">
-            <div class="figc" style="--figc-ar:470/560">
-                <canvas data-fig="cut" data-vb="470 560" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 470 560" role="img" aria-labelledby="tm-t tm-d">
-                  <title id="tm-t">Holes in a noisy cloud are born and die as the scale grows, and one cut keeps the ones that last</title>
-                  <desc id="tm-d">An illustration, computed for real inside the figure. A noisy cloud of points lies around two loops, one larger than the other. As a scale grows, points closer than that scale are joined by edges and triangles fill in, and the persistent homology of the growing complex is computed exactly: pieces merging, and every loop being born and dying. Each hole glows violet from the moment its loop closes and shrinks until the scale at which it fills. Beneath, a sweep at the same scale draws the barcode bar by bar, pieces in mint and loops in violet, and when a true loop dies, or the two pieces join, a thread of light runs from where it happened to the end of its bar. Then every bar slides to start at zero, so its length is how long it lived, and a cut sweeps in from the right. The two long loops and the two long-lived pieces cross it and each leaves a bead on the cut; the many short bars are noise and are greyed out. That column of beads is the feature, and the cloud settles back to a scale where exactly those two pieces and two holes are present. Long bars are structure, short bars are noise, and the cut between them is what makes the shape of data an ordinary column: persistent homology and Betti-curve features, with a Rust core and a Python API for anyone already building with sklearn or PyTorch.</desc>
-                  <text x="235" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">grow the scale, and holes are born and die</text>
-                  <text x="235" y="50" text-anchor="middle" font-size="15" fill="var(--muted)">long bars are structure, short bars are noise</text>
-                  <text x="235" y="502" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">what crosses the cut becomes a feature</text>
-                  <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">an ordinary column any model can use</text>
-                  <text x="235" y="550" text-anchor="middle" font-size="15" fill="var(--muted)">persistent homology, Rust core with a Python API</text>
-                </svg>
-              </div>
-            <figcaption class="fig__cap">Grow the scale and each hole in the data is born and dies. The long bars are structure, the short ones are noise, and the cut between them is the feature.</figcaption>
+            <div class="figc" style="--figc-ar:470/520"><canvas data-fig="transport" data-vb="470 520" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="mo-t mo-d">
+                  <title id="mo-t">The loop closes below but not above</title>
+                  <desc id="mo-d">An illustration of the question monodromy answers. Above a floor sits the surface of the square root, the inverse of squaring, which holds both roots of every point on the floor. A point walks a closed loop on the floor, around the place where the two roots meet, and directly above it the root is carried continuously along the edge of the surface. When the floor point is home, the loop below has closed, but the carried root is directly under the one it set out with, on the other sheet, and only a second lap brings it back to the hollow ring it started from. The dashed line and the amber gap mark that comparison at the start. Colour shows the sign of the root, mint where it is positive and coral where it is negative. Nothing is differentiated: the answer comes from going round and looking.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">carry the inverse round a closed loop</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">and see whether it comes back unchanged</text>
+                  <text x="235" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">the loop closes below, but not above</text>
+                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">answered from topology, no Jacobian required</text>
+                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">5 dependencies, torch not required</text>
+                </svg></div>
+            <figcaption class="fig__cap">One lap closes the loop below but lands on the other root above, and no derivative is taken to see it.</figcaption>
           </figure>
         </div>
 </div>
 <div class="pt__body">
-        <p class="proj__claim">I wanted the shape of data to be an ordinary feature, usable by anyone already building with sklearn or PyTorch.</p>
+        <p class="proj__claim">I wanted to know whether a transformation could be undone without ever computing a derivative, so I built the tools that answer it from topology instead.</p>
         <div class="proj__nums pt__specs">
-          <span class="spec spec--t">Rust core, Python API</span>
-          <span class="spec spec--t">persistent homology and Betti-curve features</span>
+          <span class="spec"><b class="spec__n">5</b> <span class="spec__l">dependencies</span></span>
+          <span class="spec spec--t">torch not required</span>
         </div>
         <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python and Rust</li>
-          <li class="tag tag--class">shape as a feature</li>
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">no Jacobian required</li>
+          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a></li>
         </ul>
 </div>
 </article>
@@ -350,6 +348,49 @@
 </div>
 </article>
 
+<article class="proj pt pt--long" id="p-topological-ml-toolkit" data-lang="Python" data-doi="false">
+<div class="pt__head">
+        <div class="pt__titles">
+          <h2 class="proj__name">topological-ml-toolkit</h2>
+          <p class="pt__tagline">The shape of data, as an ordinary feature.</p>
+        </div>
+        <div class="pt__ctas">
+          <a class="pt__cta" href="https://github.com/teerthsharma/topological-ml-toolkit">View on GitHub<span class="sr-only">: topological-ml-toolkit</span></a>
+          <a class="pt__more" href="https://teerthsharma.github.io/topological-ml-toolkit/">Read how it works<span class="sr-only"> on the topological-ml-toolkit site</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
+        </div>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
+          <figure class="fig">
+            <div class="figc" style="--figc-ar:470/560">
+                <canvas data-fig="cut" data-vb="470 560" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 560" role="img" aria-labelledby="tm-t tm-d">
+                  <title id="tm-t">Holes in a noisy cloud are born and die as the scale grows, and one cut keeps the ones that last</title>
+                  <desc id="tm-d">An illustration, computed for real inside the figure. A noisy cloud of points lies around two loops, one larger than the other. As a scale grows, points closer than that scale are joined by edges and triangles fill in, and the persistent homology of the growing complex is computed exactly: pieces merging, and every loop being born and dying. Each hole glows violet from the moment its loop closes and shrinks until the scale at which it fills. Beneath, a sweep at the same scale draws the barcode bar by bar, pieces in mint and loops in violet, and when a true loop dies, or the two pieces join, a thread of light runs from where it happened to the end of its bar. Then every bar slides to start at zero, so its length is how long it lived, and a cut sweeps in from the right. The two long loops and the two long-lived pieces cross it and each leaves a bead on the cut; the many short bars are noise and are greyed out. That column of beads is the feature, and the cloud settles back to a scale where exactly those two pieces and two holes are present. Long bars are structure, short bars are noise, and the cut between them is what makes the shape of data an ordinary column: persistent homology and Betti-curve features, with a Rust core and a Python API for anyone already building with sklearn or PyTorch.</desc>
+                  <text x="235" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">grow the scale, and holes are born and die</text>
+                  <text x="235" y="50" text-anchor="middle" font-size="15" fill="var(--muted)">long bars are structure, short bars are noise</text>
+                  <text x="235" y="502" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">what crosses the cut becomes a feature</text>
+                  <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">an ordinary column any model can use</text>
+                  <text x="235" y="550" text-anchor="middle" font-size="15" fill="var(--muted)">persistent homology, Rust core with a Python API</text>
+                </svg>
+              </div>
+            <figcaption class="fig__cap">Grow the scale and each hole in the data is born and dies. The long bars are structure, the short ones are noise, and the cut between them is the feature.</figcaption>
+          </figure>
+        </div>
+</div>
+<div class="pt__body">
+        <p class="proj__claim">I wanted the shape of data to be an ordinary feature, usable by anyone already building with sklearn or PyTorch.</p>
+        <div class="proj__nums pt__specs">
+          <span class="spec spec--t">Rust core, Python API</span>
+          <span class="spec spec--t">persistent homology and Betti-curve features</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python and Rust</li>
+          <li class="tag tag--class">shape as a feature</li>
+        </ul>
+</div>
+</article>
+
 <article class="proj pt" id="p-nerve" data-lang="Rust" data-doi="false">
 <div class="pt__head">
         <div class="pt__titles">
@@ -389,47 +430,6 @@
         <ul class="tags proj__tags">
           <li class="tag tag--lang">Rust</li>
           <li class="tag tag--class">3 of 4 hypotheses withdrawn</li>
-        </ul>
-</div>
-</article>
-
-<article class="proj pt" id="p-monodromy" data-lang="Python" data-doi="true">
-<div class="pt__head">
-        <div class="pt__titles">
-          <h2 class="proj__name">monodromy</h2>
-          <p class="pt__tagline">Can it be undone? Topology answers.</p>
-        </div>
-        <div class="pt__ctas">
-          <a class="pt__cta" href="https://github.com/teerthsharma/monodromy">View on GitHub<span class="sr-only">: monodromy</span></a>
-          <a class="pt__more" href="https://teerthsharma.github.io/monodromy/">Read how it works<span class="sr-only"> on the monodromy site</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
-        </div>
-</div>
-<div class="proj__figure">
-<div class="proj__art">
-          <figure class="fig">
-            <div class="figc" style="--figc-ar:470/520"><canvas data-fig="transport" data-vb="470 520" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="mo-t mo-d">
-                  <title id="mo-t">The loop closes below but not above</title>
-                  <desc id="mo-d">An illustration of the question monodromy answers. Above a floor sits the surface of the square root, the inverse of squaring, which holds both roots of every point on the floor. A point walks a closed loop on the floor, around the place where the two roots meet, and directly above it the root is carried continuously along the edge of the surface. When the floor point is home, the loop below has closed, but the carried root is directly under the one it set out with, on the other sheet, and only a second lap brings it back to the hollow ring it started from. The dashed line and the amber gap mark that comparison at the start. Colour shows the sign of the root, mint where it is positive and coral where it is negative. Nothing is differentiated: the answer comes from going round and looking.</desc>
-                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">carry the inverse round a closed loop</text>
-                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">and see whether it comes back unchanged</text>
-                  <text x="235" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">the loop closes below, but not above</text>
-                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">answered from topology, no Jacobian required</text>
-                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">5 dependencies, torch not required</text>
-                </svg></div>
-            <figcaption class="fig__cap">One lap closes the loop below but lands on the other root above, and no derivative is taken to see it.</figcaption>
-          </figure>
-        </div>
-</div>
-<div class="pt__body">
-        <p class="proj__claim">I wanted to know whether a transformation could be undone without ever computing a derivative, so I built the tools that answer it from topology instead.</p>
-        <div class="proj__nums pt__specs">
-          <span class="spec"><b class="spec__n">5</b> <span class="spec__l">dependencies</span></span>
-          <span class="spec spec--t">torch not required</span>
-        </div>
-        <ul class="tags proj__tags">
-          <li class="tag tag--lang">Python</li>
-          <li class="tag tag--class">no Jacobian required</li>
-          <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.22064739">DOI</a></li>
         </ul>
 </div>
 </article>
@@ -615,8 +615,8 @@
       <button class="pgal__btn pgal__prev" type="button" aria-label="Previous project" hidden><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 4.5 7 10l5.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="pgal__dots" role="group" aria-label="Choose a project">
         <a class="pgal__dot" href="#p-caustic" aria-label="caustic" aria-current="true"><span class="pgal__fill" aria-hidden="true"></span></a>
+        <a class="pgal__dot" href="#p-topological-ml-toolkit" aria-label="topological-ml-toolkit" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-nerve" aria-label="nerve" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
-        <a class="pgal__dot" href="#p-monodromy" aria-label="monodromy" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-faraday" aria-label="faraday" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-separatrix" aria-label="separatrix" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
         <a class="pgal__dot" href="#p-planimeter" aria-label="planimeter" aria-current="false"><span class="pgal__fill" aria-hidden="true"></span></a>
@@ -630,7 +630,7 @@
 
 </main>
 
-<script src="fig.js?v=60" defer></script>
-<script src="site.js?v=60" defer></script>
+<script src="fig.js?v=61" defer></script>
+<script src="site.js?v=61" defer></script>
 </body>
 </html>

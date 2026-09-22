@@ -1194,4 +1194,7 @@ html:has(.psub) .nav{ border-bottom-color:transparent; }
 .pgal__dots, .pgal__btn{ background:color-mix(in srgb, var(--hair) 80%, transparent); }
 @media (max-width:640px){ .proj.pt{ border-radius:30px; } }
 @media (min-width:900px){ .pgal .pt__body{ background:none; } }
+/* a long name in the gallery's narrower text column is set smaller, and
+   may break at its own hyphens rather than run past the tile */
+.pgal .pt--long .proj__name{ font-size:clamp(30px, 3.6vw, 46px); }
 /* ===================== end apple.py ===================== */
