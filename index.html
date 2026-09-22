@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=49">
-<link rel="stylesheet" href="motion.css?v=49">
-<link rel="stylesheet" href="art.css?v=49">
+<link rel="stylesheet" href="site.css?v=51">
+<link rel="stylesheet" href="motion.css?v=51">
+<link rel="stylesheet" href="art.css?v=51">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -754,45 +754,18 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <svg viewBox="0 0 500 230" role="img" aria-labelledby="pr-pyrefly-4180-t pr-pyrefly-4180-d">
-  <title id="pr-pyrefly-4180-t">A chain of links pinned the moment one arrives after the door shuts</title>
-  <desc id="pr-pyrefly-4180-d">A beaded chain stands for a truncated view of 208 chained two-module strongly connected components, alternating blue and mint. A dark bar marks where the 100 epoch incremental budget runs out and the door shuts. The last link still reaches the wire after that bar, and a pin drives through it right there, catching the export change that arrives too late. The test pins the resulting Transaction has uncommitted changes failure with should_panic, so the bug stays caught rather than argued about.</desc>
-
-  <text x="16" y="24" font-size="15" fill="var(--muted)">208 two-module SCCs, the chain that reaches the door</text>
-
-  <line pathLength="1" class="draw" x1="20" y1="90" x2="450" y2="90" stroke="var(--hair2)" stroke-width="2"/>
-  <g>
-    <circle class="pop" cx="20.0" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="48.7" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="77.3" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="106.0" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="134.7" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="163.3" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="192.0" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="220.7" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="249.3" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="278.0" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="306.7" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="335.3" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="364.0" cy="90" r="6" fill="var(--blue-500)"/>
-    <circle class="pop" cx="392.7" cy="90" r="6" fill="var(--mint-500)"/>
-    <circle class="pop" cx="421.3" cy="90" r="6" fill="var(--blue-500)"/>
-  </g>
-
-  <rect class="pop" x="433" y="65" width="6" height="50" fill="var(--ink)" data-label="the 100 epoch budget door, shut"/>
-  <text x="412" y="55" text-anchor="middle" font-size="14" fill="var(--ink)">epoch 100</text>
-
-  <circle class="pop" cx="450" cy="90" r="9" fill="var(--mint-500)" stroke="var(--coral-700)" stroke-width="2.5" data-label="the link that arrives after the door shut"/>
-  <line pathLength="1" class="draw" x1="450" y1="90" x2="474" y2="56" stroke="var(--coral-700)" stroke-width="3" stroke-linecap="round"/>
-  <circle class="pop pf-panic-dot" cx="474" cy="56" r="9" fill="var(--coral-500)" data-label="pinned"/>
-  <text x="250" y="218" text-anchor="middle" font-size="15" fill="var(--coral-700)" font-weight="600">panic, pinned</text>
-
-  <text x="16" y="150" font-size="15" fill="var(--ink)">one export change reaches commit after the door shuts</text>
-  <text x="16" y="174" font-size="14" fill="var(--muted)">the test pins it with <tspan class="mono">#[should_panic]</tspan></text>
-  <text x="16" y="198" font-size="14" fill="var(--muted)" xml:space="preserve">Transaction has uncommitted changes</text>
-
-  <circle class="pf-signal" cx="20" cy="90" r="5" fill="var(--ink)"/>
-</svg>
+      <div class="figc" style="--figc-ar:500/460">
+                <canvas data-fig="chain" data-vb="500 460" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 500 460" role="img" aria-labelledby="pr-pyrefly-4180-t pr-pyrefly-4180-d">
+                  <title id="pr-pyrefly-4180-t">An export change runs a chain of 208 components, and another reaches commit after the door shuts</title>
+                  <desc id="pr-pyrefly-4180-d">An illustration of the reproducer, not a measurement. All 208 two-module strongly connected components of the chain generated inside one Rust test are drawn, wound into a tapering coil that descends to commit at its foot. Each component is a pair of beads, one per module, bound by a short thick link, and a thin link joins it to the next. One export change enters at the top and propagates down the coil, turning each component mint as it passes. A violet hoop around the chain marks where the 100 epoch incremental budget runs out; the change consumes the budget reaching it, and a membrane closes across the hoop as the door shuts. Forced invalidation then produces another export change, in coral, on the far side of the door, and it runs the rest of the coil and reaches commit with that change still pending. That arrival bursts, the Transaction has uncommitted changes failure, and a swell runs back up every component still pending. A ring closes around the burst and holds it, as the test pins the failure with should_panic so it cannot return quietly. Then the coil eases back to blue and the next change enters.</desc>
+                  <text x="250" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">one export change, <tspan fill="var(--blue-700)">208 two-module SCCs</tspan></text>
+                  <text x="250" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">the incremental budget runs out at <tspan fill="var(--violet-700)">epoch 100</tspan></text>
+                  <text x="250" y="392" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">another change reaches commit, still pending</text>
+                  <text x="250" y="416" text-anchor="middle" font-size="15" fill="var(--coral-700)" class="mono">Transaction has uncommitted changes</text>
+                  <text x="250" y="442" text-anchor="middle" font-size="15" fill="var(--muted)">pinned with <tspan class="mono">should_panic</tspan> so it cannot return quietly</text>
+                </svg>
+              </div>
         </div>
 </div>
 </article>
@@ -819,107 +792,18 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <svg viewBox="0 0 440 420" role="img" aria-labelledby="pr-mujoco-3450-t pr-mujoco-3450-d">
-  <title id="pr-mujoco-3450-t">A tangle of one-by-one steps, cut through by a single jump</title>
-  <desc id="pr-mujoco-3450-d">A ring of vertices tied together by a scan that touches each one in turn, repeated once per directed edge, costing three V squared minus six V probes. At ten thousand two hundred and forty two vertices that is three hundred and fourteen million, six hundred and forty three thousand, three hundred and seventeen probes. Cutting straight through the tangle, one jump lands on the vertex directly through an inverted point id table, costing eight V minus twelve probes. At forty thousand nine hundred and sixty two vertices the table needs fifteen thousand three hundred and sixty one times fewer probes.</desc>
-
-  <rect x="4" y="4" width="432" height="412" rx="14" fill="var(--ground2)" stroke="var(--hair)" stroke-width="1"/>
-
-  <text x="24" y="30" font-size="17" fill="var(--coral-700)">before: walk the ring until it matches</text>
-  <g class="wipe" data-label="a linear scan, repeated once for every directed edge, three V squared minus six V probes">
-    <line x1="220.00" y1="42.00" x2="236.89" y2="43.33" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="236.89" y1="43.33" x2="253.37" y2="47.29" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="253.37" y1="47.29" x2="269.03" y2="53.77" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="269.03" y1="53.77" x2="283.48" y2="62.63" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="283.48" y1="62.63" x2="296.37" y2="73.63" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="296.37" y1="73.63" x2="307.37" y2="86.52" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="307.37" y1="86.52" x2="316.23" y2="100.97" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="316.23" y1="100.97" x2="322.71" y2="116.63" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="322.71" y1="116.63" x2="326.67" y2="133.11" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="326.67" y1="133.11" x2="328.00" y2="150.00" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="328.00" y1="150.00" x2="326.67" y2="166.89" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="326.67" y1="166.89" x2="322.71" y2="183.37" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="322.71" y1="183.37" x2="316.23" y2="199.03" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="316.23" y1="199.03" x2="307.37" y2="213.48" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="307.37" y1="213.48" x2="296.37" y2="226.37" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="296.37" y1="226.37" x2="283.48" y2="237.37" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="283.48" y1="237.37" x2="269.03" y2="246.23" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="269.03" y1="246.23" x2="253.37" y2="252.71" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="253.37" y1="252.71" x2="236.89" y2="256.67" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="236.89" y1="256.67" x2="220.00" y2="258.00" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="220.00" y1="258.00" x2="203.11" y2="256.67" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="203.11" y1="256.67" x2="186.63" y2="252.71" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="186.63" y1="252.71" x2="170.97" y2="246.23" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="170.97" y1="246.23" x2="156.52" y2="237.37" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="156.52" y1="237.37" x2="143.63" y2="226.37" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="143.63" y1="226.37" x2="132.63" y2="213.48" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="132.63" y1="213.48" x2="123.77" y2="199.03" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="123.77" y1="199.03" x2="117.29" y2="183.37" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="117.29" y1="183.37" x2="113.33" y2="166.89" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="113.33" y1="166.89" x2="112.00" y2="150.00" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="112.00" y1="150.00" x2="113.33" y2="133.11" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="113.33" y1="133.11" x2="117.29" y2="116.63" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="117.29" y1="116.63" x2="123.77" y2="100.97" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="123.77" y1="100.97" x2="132.63" y2="86.52" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="132.63" y1="86.52" x2="143.63" y2="73.63" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="143.63" y1="73.63" x2="156.52" y2="62.63" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="156.52" y1="62.63" x2="170.97" y2="53.77" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="170.97" y1="53.77" x2="186.63" y2="47.29" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <line x1="186.63" y1="47.29" x2="203.11" y2="43.33" stroke="var(--coral-500)" stroke-width="1.4" opacity="0.75"/>
-    <circle cx="220.00" cy="42.00" r="2.6" fill="var(--hair2)"/>
-    <circle cx="236.89" cy="43.33" r="2.6" fill="var(--hair2)"/>
-    <circle cx="253.37" cy="47.29" r="2.6" fill="var(--hair2)"/>
-    <circle cx="269.03" cy="53.77" r="2.6" fill="var(--hair2)"/>
-    <circle cx="283.48" cy="62.63" r="2.6" fill="var(--hair2)"/>
-    <circle cx="296.37" cy="73.63" r="2.6" fill="var(--hair2)"/>
-    <circle cx="307.37" cy="86.52" r="2.6" fill="var(--hair2)"/>
-    <circle cx="316.23" cy="100.97" r="2.6" fill="var(--hair2)"/>
-    <circle cx="322.71" cy="116.63" r="2.6" fill="var(--hair2)"/>
-    <circle cx="326.67" cy="133.11" r="2.6" fill="var(--hair2)"/>
-    <circle cx="328.00" cy="150.00" r="2.6" fill="var(--hair2)"/>
-    <circle cx="326.67" cy="166.89" r="2.6" fill="var(--hair2)"/>
-    <circle cx="322.71" cy="183.37" r="2.6" fill="var(--hair2)"/>
-    <circle cx="316.23" cy="199.03" r="2.6" fill="var(--hair2)"/>
-    <circle cx="307.37" cy="213.48" r="2.6" fill="var(--hair2)"/>
-    <circle cx="296.37" cy="226.37" r="2.6" fill="var(--hair2)"/>
-    <circle cx="283.48" cy="237.37" r="2.6" fill="var(--hair2)"/>
-    <circle cx="269.03" cy="246.23" r="2.6" fill="var(--hair2)"/>
-    <circle cx="253.37" cy="252.71" r="2.6" fill="var(--hair2)"/>
-    <circle cx="236.89" cy="256.67" r="2.6" fill="var(--hair2)"/>
-    <circle cx="220.00" cy="258.00" r="2.6" fill="var(--hair2)"/>
-    <circle cx="203.11" cy="256.67" r="2.6" fill="var(--hair2)"/>
-    <circle cx="186.63" cy="252.71" r="2.6" fill="var(--hair2)"/>
-    <circle cx="170.97" cy="246.23" r="2.6" fill="var(--hair2)"/>
-    <circle cx="156.52" cy="237.37" r="2.6" fill="var(--hair2)"/>
-    <circle cx="143.63" cy="226.37" r="2.6" fill="var(--hair2)"/>
-    <circle cx="132.63" cy="213.48" r="2.6" fill="var(--hair2)"/>
-    <circle cx="123.77" cy="199.03" r="2.6" fill="var(--hair2)"/>
-    <circle cx="117.29" cy="183.37" r="2.6" fill="var(--hair2)"/>
-    <circle cx="113.33" cy="166.89" r="2.6" fill="var(--hair2)"/>
-    <circle cx="112.00" cy="150.00" r="2.6" fill="var(--hair2)"/>
-    <circle cx="113.33" cy="133.11" r="2.6" fill="var(--hair2)"/>
-    <circle cx="117.29" cy="116.63" r="2.6" fill="var(--hair2)"/>
-    <circle cx="123.77" cy="100.97" r="2.6" fill="var(--hair2)"/>
-    <circle cx="132.63" cy="86.52" r="2.6" fill="var(--hair2)"/>
-    <circle cx="143.63" cy="73.63" r="2.6" fill="var(--hair2)"/>
-    <circle cx="156.52" cy="62.63" r="2.6" fill="var(--hair2)"/>
-    <circle cx="170.97" cy="53.77" r="2.6" fill="var(--hair2)"/>
-    <circle cx="186.63" cy="47.29" r="2.6" fill="var(--hair2)"/>
-    <circle cx="203.11" cy="43.33" r="2.6" fill="var(--hair2)"/>
-  </g>
-  <circle class="mj-probe" cx="253.37" cy="47.29" r="4" fill="var(--coral-700)"/>
-
-  <text x="24" y="280" font-size="17" fill="var(--mint-700)">after: one jump, straight to the vertex</text>
-  <line class="draw mj-arrow" pathLength="1" x1="220.00" y1="150.00" x2="283.48" y2="237.37" stroke="var(--mint-500)" stroke-width="3.4" marker-end="url(#pr-mujoco-3450-arrow)" data-label="one jump straight to the vertex through the inverted point id table"/>
-  <defs><marker id="pr-mujoco-3450-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="var(--mint-500)"/></marker></defs>
-  <circle class="pop mj-src" cx="220.00" cy="150.00" r="4.5" fill="var(--mint-500)" data-label="the edge asking the question"/>
-  <circle class="pop pulse mj-dst" cx="283.48" cy="237.37" r="8" fill="var(--mint-500)" data-label="the vertex, found directly"/>
-
-  <text x="24" y="306" font-size="17" fill="var(--muted)">V = 642 -&gt; 1,233,560 probes</text>
-  <text x="24" y="328" font-size="17" fill="var(--muted)">V = 10,242 -&gt; 314,643,317 probes</text>
-  <text x="24" y="364" font-size="30" font-weight="800" fill="var(--mint-700)">15,361x fewer probes</text>
-  <text x="24" y="396" font-size="20" fill="var(--mint-700)">at V = 40,962</text>
-</svg>
+      <div class="figc" style="--figc-ar:470/490">
+                <canvas data-fig="hull" data-vb="470 490" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 490" role="img" aria-labelledby="pr-mujoco-3450-t pr-mujoco-3450-d">
+                  <title id="pr-mujoco-3450-t">A storm of probes against a single stroke, building the same convex hull</title>
+                  <desc id="pr-mujoco-3450-d">An illustration of the change, drawn on a small convex hull of a point cloud that turns slowly in three dimensions. Building the hull's graph means finding, for every corner of every face, which hull vertex it is. The old way scans the vertex list from the top for every corner until it finds a match: coral rays spray from a corner of the face to every entry tested, the first entries in the list glow hot because every scan starts there, and in its time only a few faces are finished. The new way writes an inverted point id table once, each vertex ringing as it is written, and then every corner is one mint stroke straight to its vertex, so the whole hull closes in the same time. Both builds are drawn at the same number of probes per second, and either way the graph is identical, as its checksums were at every size. Faces are coloured by the order they were built, mint first to violet last. The scan costs three V squared minus six V probes and the table eight V minus twelve. At ten thousand two hundred and forty two vertices the scan measured three hundred and fourteen million, six hundred and forty three thousand, three hundred and seventeen probes; at forty thousand nine hundred and sixty two vertices the table needs fifteen thousand three hundred and sixty one times fewer. A cold load falls from 134.400 milliseconds to 71.163 milliseconds.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">before: scan every point to find a match</text>
+                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">V = 10,242 -&gt; 314,643,317 probes</text>
+                  <text x="235" y="416" text-anchor="middle" font-size="17" font-weight="600" fill="var(--mint-700)">after: one jump, straight to the vertex</text>
+                  <text x="235" y="449" text-anchor="middle" font-size="23" font-weight="800" fill="var(--mint-700)">15,361x fewer probes at V=40,962</text>
+                  <text x="235" y="476" text-anchor="middle" font-size="15" fill="var(--muted)">Cold load 134.400 ms to 71.163 ms</text>
+                </svg>
+              </div>
         </div>
 </div>
 </article>
@@ -946,60 +830,21 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <svg viewBox="0 0 500 530" role="img" aria-labelledby="pr-openxla-46539-t pr-openxla-46539-d">
-  <title id="pr-openxla-46539-t">A field of runs that splits in two, then settles on one</title>
-  <desc id="pr-openxla-46539-d">Before, ten runs of the same XLA program fan out from a hash set iteration order and land on one of two different emitted GPU programs, run A code X or run B code Y, depending on an order nobody controls. After, the same ten runs fan out from a fixed order and every one of them settles on the same point: code X, every run. GroupDisjointReductions, five lines changed across two files.</desc>
-
-  <text x="16" y="40" font-size="15" fill="var(--coral-700)">Before: hash set order, output splits in two</text>
-  <g stroke="var(--coral-500)" stroke-width="1.4" opacity=".55">
-    <line pathLength="1" class="draw oxa-toA" x1="40" y1="70" x2="120" y2="210"/>
-    <line pathLength="1" class="draw oxa-toB" x1="86" y1="76" x2="380" y2="210"/>
-    <line pathLength="1" class="draw oxa-toA" x1="132" y1="66" x2="120" y2="210"/>
-    <line pathLength="1" class="draw oxa-toA" x1="178" y1="78" x2="120" y2="210"/>
-    <line pathLength="1" class="draw oxa-toB" x1="224" y1="64" x2="380" y2="210"/>
-    <line pathLength="1" class="draw oxa-toA" x1="270" y1="74" x2="120" y2="210"/>
-    <line pathLength="1" class="draw oxa-toB" x1="316" y1="62" x2="380" y2="210"/>
-    <line pathLength="1" class="draw oxa-toA" x1="362" y1="76" x2="120" y2="210"/>
-    <line pathLength="1" class="draw oxa-toB" x1="408" y1="66" x2="380" y2="210"/>
-    <line pathLength="1" class="draw oxa-toA" x1="454" y1="78" x2="120" y2="210"/>
-  </g>
-  <g fill="var(--muted)">
-    <circle class="pop" cx="40" cy="70" r="5"/><circle class="pop" cx="86" cy="76" r="5"/>
-    <circle class="pop" cx="132" cy="66" r="5"/><circle class="pop" cx="178" cy="78" r="5"/>
-    <circle class="pop" cx="224" cy="64" r="5"/><circle class="pop" cx="270" cy="74" r="5"/>
-    <circle class="pop" cx="316" cy="62" r="5"/><circle class="pop" cx="362" cy="76" r="5"/>
-    <circle class="pop" cx="408" cy="66" r="5"/><circle class="pop" cx="454" cy="78" r="5"/>
-  </g>
-  <circle id="oxa-outA" class="pop" cx="120" cy="210" r="22" fill="var(--coral-500)" data-label="run A emits code X"/>
-  <circle id="oxa-outB" class="pop" cx="380" cy="210" r="22" fill="var(--violet-500)" data-label="run B emits code Y"/>
-  <text x="120" y="254" text-anchor="middle" font-size="14" fill="var(--ink)">run A, code X</text>
-  <text x="380" y="254" text-anchor="middle" font-size="14" fill="var(--ink)">run B, code Y</text>
-
-  <text x="16" y="285" font-size="15" fill="var(--blue-700)">After: fixed order, every run settles on one</text>
-  <g stroke="var(--blue-500)" stroke-width="1.4" opacity=".5">
-    <line pathLength="1" class="draw oxa-toX" x1="40" y1="315" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="86" y1="321" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="132" y1="311" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="178" y1="323" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="224" y1="309" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="270" y1="319" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="316" y1="307" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="362" y1="321" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="408" y1="311" x2="250" y2="440"/>
-    <line pathLength="1" class="draw oxa-toX" x1="454" y1="323" x2="250" y2="440"/>
-  </g>
-  <g fill="var(--muted)">
-    <circle class="pop" cx="40" cy="315" r="5"/><circle class="pop" cx="86" cy="321" r="5"/>
-    <circle class="pop" cx="132" cy="311" r="5"/><circle class="pop" cx="178" cy="323" r="5"/>
-    <circle class="pop" cx="224" cy="309" r="5"/><circle class="pop" cx="270" cy="319" r="5"/>
-    <circle class="pop" cx="316" cy="307" r="5"/><circle class="pop" cx="362" cy="321" r="5"/>
-    <circle class="pop" cx="408" cy="311" r="5"/><circle class="pop" cx="454" cy="323" r="5"/>
-  </g>
-  <circle id="oxa-outX" class="pop" cx="250" cy="440" r="28" fill="var(--blue-500)" data-label="every run emits code X"/>
-  <text x="250" y="490" text-anchor="middle" font-size="15" fill="var(--ink)">code X, every run</text>
-
-  <text x="250" y="514" text-anchor="middle" font-size="14" fill="var(--muted)"><tspan class="mono">GroupDisjointReductions</tspan>: five lines, two files changed.</text>
-</svg>
+      <div class="figc" style="--figc-ar:500/432">
+                <canvas data-fig="settle" data-vb="500 432" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 500 432" role="img" aria-labelledby="pr-openxla-46539-t pr-openxla-46539-d">
+                  <title id="pr-openxla-46539-t">Ten runs of the same program split between two outputs before, and stack into one after</title>
+                  <desc id="pr-openxla-46539-d">An illustration of the mechanism, not a measurement. The same XLA program is drawn twice, before the change on the left and after it on the right. Its reduction roots lie on a floor in groups, shown as soft regions, and that grouping is identical in both panels and in every run. What varied was the order of the groups: GroupDisjointReductions iterated a hash set to choose which value survived each union-find merge, so the order of grouped_roots depended on hash iteration order. Each run lays a thread through the roots in the order its groups came out and ends at the GPU code that order emits, and each run is laid one level above the last, so ten runs build a stack. Blue is code X and coral is code Y. On the left the ten runs split between two orders, so the stack is two tangled routes and each output column collects only some of the runs. On the right the order is fixed, every run follows the one below it, the threads join into one continuous folded curtain, and code X collects all ten runs. Five lines across two files made the order deterministic.</desc>
+                  <text x="250" y="26" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">ten runs of the same program</text>
+                  <text x="125" y="52" text-anchor="middle" font-size="15" fill="var(--coral-700)">before: hash set order</text>
+                  <text x="375" y="52" text-anchor="middle" font-size="15" fill="var(--blue-700)">after: fixed order</text>
+                  <text x="77" y="364" text-anchor="middle" font-size="14" fill="var(--ink)">code Y</text>
+                  <text x="155" y="364" text-anchor="middle" font-size="14" fill="var(--ink)">code X</text>
+                  <text x="405" y="364" text-anchor="middle" font-size="14" fill="var(--ink)">code X, every run</text>
+                  <text x="250" y="394" text-anchor="middle" font-size="15" fill="var(--ink)"><tspan class="mono">GroupDisjointReductions</tspan>: five lines, two files</text>
+                  <text x="250" y="418" text-anchor="middle" font-size="14" fill="var(--muted)">XLA compiles for JAX and TensorFlow</text>
+                </svg>
+              </div>
         </div>
 </div>
 </article>
@@ -1035,7 +880,7 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="fig.js?v=49" defer></script>
-<script src="site.js?v=49" defer></script>
+<script src="fig.js?v=51" defer></script>
+<script src="site.js?v=51" defer></script>
 </body>
 </html>

@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=49">
-<link rel="stylesheet" href="motion.css?v=49">
-<link rel="stylesheet" href="art.css?v=49">
+<link rel="stylesheet" href="site.css?v=51">
+<link rel="stylesheet" href="motion.css?v=51">
+<link rel="stylesheet" href="art.css?v=51">
 
 <script type="application/ld+json">
 {
@@ -500,17 +500,17 @@
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/520">
                 <canvas data-fig="certify" data-vb="470 520" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="sp-t sp-d">
-                  <title id="sp-t">Thirty two comparisons, certified or refused</title>
-                  <desc id="sp-d">Thirty two comparisons drawn as pairs of intervals. Where a real gap remains between them the ordering came from the data and the answer is certified. Where the intervals touch, the ordering came from where the kernel happened to round, so nothing is returned. The gap narrows down the stack until it closes, and the point at which certification stops is visible without a number being read.</desc>
-                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">a real gap, or no answer at all</text>
-                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">32 comparisons, and the gap narrows going down</text>
-                  <text x="235" y="438" text-anchor="middle" font-size="18" font-weight="600" fill="var(--coral-700)">once the intervals touch, nothing is returned</text>
-                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">the ordering would be the arithmetic, not the data</text>
-                  <text x="235" y="500" text-anchor="middle" font-size="16" fill="var(--muted)">top-k, argmin and threshold, certified or refused</text>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="p-separatrix-t p-separatrix-d">
+                  <title id="p-separatrix-t">Every answer flows to one side of the separatrix, unless rounding decides the side</title>
+                  <desc id="p-separatrix-d">An illustration of what separatrix certifies, drawn as a phase portrait. A flow with two attractors and a saddle between them carries every starting point to one attractor or the other, and the coral curve through the saddle, the separatrix, divides the two basins. Each start is known only to within rounding, drawn as a small disc. Where the disc lies wholly on one side, every value the rounding could have produced reaches the same attractor, so the answer was decided by the data: the particle is certified and rings as it settles. Where the disc touches the separatrix, inside the pale coral band, the disc slides into the saddle and is torn toward both attractors at once, so which answer comes back would be the arithmetic and not the data, and nothing is returned. Once a cycle a pulse runs along the separatrix into the saddle and parts toward both sides. The same test covers a top-k, an argmin and a threshold: certified or refused.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">decided by the data, or by the rounding?</text>
+                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">top-k, argmin and threshold, certified or refused</text>
+                  <text x="235" y="452" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">clear of the separatrix: certified</text>
+                  <text x="235" y="477" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">within rounding of it: nothing is returned</text>
+                  <text x="235" y="503" text-anchor="middle" font-size="15" fill="var(--muted)">the ordering would be the arithmetic, not the data</text>
                 </svg>
               </div>
-            <figcaption class="fig__cap">If the intervals touch, the ordering was the arithmetic and not the data.</figcaption>
+            <figcaption class="fig__cap">Every start flows to one side of the separatrix. If its rounding touches the curve, the side is the arithmetic and not the data, and nothing is returned.</figcaption>
           </figure>
         </div>
 </div>
@@ -597,7 +597,7 @@
 
 </main>
 
-<script src="fig.js?v=49" defer></script>
-<script src="site.js?v=49" defer></script>
+<script src="fig.js?v=51" defer></script>
+<script src="site.js?v=51" defer></script>
 </body>
 </html>
