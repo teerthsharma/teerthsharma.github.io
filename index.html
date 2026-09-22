@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=57">
-<link rel="stylesheet" href="motion.css?v=57">
-<link rel="stylesheet" href="art.css?v=57">
+<link rel="stylesheet" href="site.css?v=58">
+<link rel="stylesheet" href="motion.css?v=58">
+<link rel="stylesheet" href="art.css?v=58">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -493,17 +493,18 @@
       <div class="figc" style="--figc-ar:470/540">
                 <canvas data-fig="closure" data-vb="470 540" aria-hidden="true"></canvas>
                 <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="pr-tensorflow-124410-t pr-tensorflow-124410-d">
-                  <title id="pr-tensorflow-124410-t">Reachability copied once and never back-propagated, so a redundant control edge survived the prune</title>
-                  <desc id="pr-tensorflow-124410-d">Four collective ops, c4, c3, c2 and c1, sit in a row. Below the row hang the control edges the pass emits; above it, the reachability the pass holds is drawn as a triangle of crystal cells, where the cell for one node reaching another sits where the channels rising from those two nodes cross, and a cell lights when that fact is known. The figure replays the pass as it ran before the fix and then as it runs after it, on the same four nodes. Before, each edge is created in turn and its own fact rises into its cell, but all_paths copies what the target knew at the moment the edge was made and is never back-propagated, so the copies carry nothing and some cells stay empty. The one that matters, 3 reaches 1, sits empty under an amber rim; when the prune asks it, the answer is no, so the redundant edge 4 to 1 turns coral and is emitted: 4 control edges where the unique transitive reduction is 3. After the fix, facts are carried back from node to node up their channels, the fact that 3 reaches 1 arrives and its cell fills in amber, the prune asks again, the longer path 4 to 3 to 2 to 1 lights end to end, and the edge 4 to 1 comes apart, leaving a faint trace. The fix is 362 lines added and 26 removed across 4 files.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">all_paths copied once, never back-propagated</text>
-                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">so 3 never learns it reaches 1, and 4 &#8594; 1 survives</text>
-                  <text x="85" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c4</text>
-                  <text x="185" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c3</text>
-                  <text x="285" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c2</text>
-                  <text x="385" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c1</text>
-                  <text x="235" y="478" text-anchor="middle" font-size="17" font-weight="600" fill="var(--blue-700)">fixed, 3 reaches 1 and the prune removes 4 &#8594; 1</text>
-                  <text x="235" y="502" text-anchor="middle" font-size="15" fill="var(--muted)">4 edges emitted where the reduction is 3</text>
-                  <text x="235" y="528" text-anchor="middle" font-size="15" fill="var(--muted)">+362/-26 across 4 files</text>
+                  <title id="pr-tensorflow-124410-t">Four collectives run in order, and the control edge the prune should have removed</title>
+                  <desc id="pr-tensorflow-124410-d">An illustration of the change, not a measurement. Four CollectiveReduce ops on one device are drawn as rings, each an all-reduce across a ring of workers whose number is illustrative: the gradient chunks grow on the first lap and carry the sum on the second, until every worker holds the same value. The rings are stacked in the order they run, c4 first and c1 last, and the axis through them is the chain of control edges that serializes them. The edges are created in the order c4 to c3, c4 to c1, c3 to c2, c2 to c1, and the small rings round each op count what the pass believes that op reaches. Before the fix that belief was copied once, when each edge was created, and never back-propagated, so c3 never learns it reaches c1. The prune asks whether c4 reaches c1 some other way, the question stops at c2, and the bypass from c4 to c1 survives outside the tower: four control edges where the unique transitive reduction is three, and the extra edge over-serializes the collectives. After the fix reachability is closed first, climbing from c1, so c3 learns it reaches c1, the same question runs all the way down, and the prune removes the bypass. The collectives then run on three edges. The change is 362 lines added and 26 removed across 4 files.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">four <tspan class="mono">CollectiveReduce</tspan> ops, run in order</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">each waits on the one above it, by a control edge</text>
+                  <text x="82" y="127" text-anchor="end" font-size="16" font-weight="600" fill="var(--ink)" class="mono">c4</text>
+                  <text x="82" y="209" text-anchor="end" font-size="16" font-weight="600" fill="var(--ink)" class="mono">c3</text>
+                  <text x="82" y="291" text-anchor="end" font-size="16" font-weight="600" fill="var(--ink)" class="mono">c2</text>
+                  <text x="82" y="373" text-anchor="end" font-size="16" font-weight="600" fill="var(--ink)" class="mono">c1</text>
+                  <text x="235" y="454" text-anchor="middle" font-size="19" font-weight="700" fill="var(--coral-700)">4 edges emitted where the reduction is 3</text>
+                  <text x="235" y="478" text-anchor="middle" font-size="16" font-weight="600" fill="var(--blue-700)">back-propagated, the prune removes 4 → 1</text>
+                  <text x="235" y="504" text-anchor="middle" font-size="15" fill="var(--muted)">the extra edge over-serializes the collectives</text>
+                  <text x="235" y="526" text-anchor="middle" font-size="15" fill="var(--muted)">+362/-26 across 4 files</text>
                 </svg>
               </div>
         </div>
@@ -775,7 +776,7 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="fig.js?v=57" defer></script>
-<script src="site.js?v=57" defer></script>
+<script src="fig.js?v=58" defer></script>
+<script src="site.js?v=58" defer></script>
 </body>
 </html>

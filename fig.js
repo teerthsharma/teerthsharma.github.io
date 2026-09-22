@@ -6704,49 +6704,47 @@
   /* closure — tensorflow-124410                                         */
   /* ==================================================================== */
   function closure(g, vb, t, st) {
-    /* tensorflow #124410. CreateControlDependencies orders four CollectiveReduce
-       ops on one device, c4 c3 c2 c1, with control edges from the higher
-       instance key to the lower, then prunes every edge that another path
-       already implies. The prune reads all_paths, documented as full
-       reachability, but all_paths[src] only copied all_paths[dst] as it stood
-       when src -> dst was created and nothing ever propagated back. The edges
-       are created in the order 4 -> 3, 4 -> 1, 3 -> 2, 2 -> 1, so every copy is
-       of an empty set, 3 never learns it reaches 1, and 4 -> 1 survives: four
-       control edges where the unique transitive reduction is three.
+    /* tensorflow #124410, drawn as the thing it runs.
 
-       The node row is the spine. Above it, the reachability relation drawn as
-       a triangular matrix turned on its corner: the cell for "a reaches b" sits
-       exactly where the channel rising right from node a meets the channel
-       rising left from node b, so no cell needs a label. Below it hang the
-       control edges the pass emits.
+       CreateControlDependencies serializes the concurrent CollectiveReduce
+       ops on a device. Each of those ops is an all-reduce across workers, so
+       each is drawn as a ring of workers with the gradient chunks going round
+       it: they grow on the first lap as the partial sums build (reduce-
+       scatter), then come round again carrying the sum, until every worker
+       holds the same value (all-gather). The rings are stacked in the order
+       they run, c4 first, and the axis through their centres is the chain of
+       control edges that makes each one wait for the one above. No ring starts
+       until the edge above it has delivered.
 
-       Nothing is scheduled by hand except the clock. When the figure is built,
-       the old pass is run on the real edge list, copy and all, and so is the
-       fix: reachability closed in one pass in ascending instance key, then an
-       edge kept only if no other successor of its source reaches its target.
-       The animation replays those two runs. In the old pass each edge grows,
-       and its fact rises up the two channels to its cell; the copies carry
-       nothing, so the cell for 3 reaches 1 stays dark under an amber rim, and
-       when the prune asks it, it answers no and 4 -> 1 turns coral and stays.
-       In the fix the pass sweeps c1 to c4, and back-propagation is light moving
-       up a node's channel from cell to cell: "reaches 1" climbs from 2 to 3,
-       the amber cell fills, the prune asks again, the path 4 -> 3 -> 2 -> 1
-       lights, and 4 -> 1 dissolves. Then it all resets and runs again.
+       The edges are the ones in the commit's own test, created in its order:
+       4 -> 3, 4 -> 1, 3 -> 2, 2 -> 1. The small rings round each op count what
+       the pass believes that op reaches. Before the fix all_paths[src] is a
+       copy of all_paths[dst] taken when src -> dst is created and never
+       revisited, so c3 believes it reaches only c2. The prune asks whether
+       another successor of c4 already reaches c1: the check runs 4 -> 3 -> 2
+       and stops, and the bypass 4 -> 1 survives, drawn coral outside the
+       tower. Its signal reaches c1 early and is held there. Four control
+       edges where the unique transitive reduction is three, and the extra one
+       over-serializes the collectives.
 
-       Light is alpha and hue on the off-white page: mint and blue for what is
-       known and emitted, amber for the one fact that arrives late, coral for
-       the edge that should not exist. */
+       The fix closes reachability first, in ascending instance key, so light
+       climbs the axis from c1 and c3 learns it reaches c1 (amber: the fact the
+       old pass never delivered). The same check then runs all the way down,
+       the bypass snaps, and the collectives run again on three edges.
+
+       The number of workers is illustrative. The four ops, the edges, their
+       creation order and both passes are the commit's. */
     var TAU = Math.PI * 2;
-    var X = { 4: 85, 3: 185, 2: 285, 1: 385 }, NY = 296, ROW = 62, HW = 44, HH = 27;
-    var P = 16800;
-    var OLD = [700, 2000, 3500, 4800];          /* each old edge starts growing */
-    var GROWT = 650, RISE = 520;
-    var RIM = 6300, PROBE1 = 7100, KEEP = 7700, SWEEP = 9600, STEP = 700;
-    var PROBE2 = 12700, CUT = 13300, RESET = 15600, RESETD = 1100;
+    var CX = 250, R = 140, TILT = 0.27, NW = 8;
+    var Y = [0, 368, 286, 204, 122];            /* Y[k] is the axis height of op ck */
+    var P = 21600;
+    var EC = { 4: 700, 3: 1500, 2: 1900 }, E41 = 1100, GROW = 380;
 
     var M = closure.cache;
     if (!M) {
-      M = closure.cache = {};
+      /* built whole, then published, so a failure here cannot leave a half
+         built cache behind for every later frame to trip on */
+      var C = {};
       var hex = function (name, fb) {
         var h = (token(name, fb) || fb).trim().replace('#', '');
         if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
@@ -6756,379 +6754,396 @@
       var mix = function (a, b, k) {
         return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
       };
-      var css = function (c) { return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'; };
-      M.blue = token('--blue-500', '#2456dc'); M.blue7 = token('--blue-700', '#163a9a');
-      M.mint = token('--mint-500', '#0b93ab'); M.mint7 = token('--mint-700', '#0a6b7c');
-      M.amber = token('--amber-500', '#d96a06');
-      M.coral = token('--coral-500', '#d9376e');
-      M.hair = token('--hair2', '#cfcbc1'); M.raised = token('--raised', '#ffffff');
+      var rgb = function (c, a) {
+        return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a) + ')';
+      };
       var WH = [255, 255, 255];
-      M.white = token('--raised', '#ffffff');
-      /* crystal facets: upper left, upper right, lower left, lower right */
-      var m5 = hex('--mint-500', '#0b93ab'), a5 = hex('--amber-500', '#d96a06'), a7 = hex('--amber-700', '#9a4906');
-      var bl = hex('--blue-500', '#2456dc'), h2 = hex('--hair2', '#cfcbc1');
-      M.gemMint = [css(mix(m5, WH, 0.55)), css(mix(m5, WH, 0.22)), css(m5), css(mix(m5, bl, 0.55))];
-      M.gemAmber = [css(mix(a5, WH, 0.52)), css(mix(a5, WH, 0.2)), css(a5), css(mix(a5, a7, 0.5))];
-      M.glass = [css(WH), css(mix(h2, WH, 0.72)), css(mix(h2, WH, 0.48)), css(mix(h2, WH, 0.2))];
+      C.mix = mix; C.rgb = rgb; C.WH = WH;
+      C.b5 = hex('--blue-500', '#2456dc'); C.b7 = hex('--blue-700', '#163a9a');
+      C.v5 = hex('--violet-500', '#a66cf0'); C.v7 = hex('--violet-700', '#6b35c4');
+      C.m5 = hex('--mint-500', '#0b93ab'); C.m7 = hex('--mint-700', '#0a6b7c');
+      C.a5 = hex('--amber-500', '#d96a06'); C.a7 = hex('--amber-700', '#9a4906');
+      C.c5 = hex('--coral-500', '#d9376e'); C.c7 = hex('--coral-700', '#a0183f');
+      C.h2 = hex('--hair2', '#cfcbc1');
+      C.glass = mix(C.h2, C.b5, 0.28);
 
-      /* the node sprite: a sphere lit from the upper left */
-      var cv = document.createElement('canvas'), SZ = 64;
-      cv.width = cv.height = SZ;
-      var x = cv.getContext('2d'), b5 = hex('--blue-500', '#2456dc'), b7 = hex('--blue-700', '#163a9a');
-      var gr = x.createRadialGradient(SZ * 0.36, SZ * 0.32, 0, SZ * 0.46, SZ * 0.44, SZ * 0.56);
-      gr.addColorStop(0, css(mix(b5, WH, 0.75)));
-      gr.addColorStop(0.32, css(mix(b5, WH, 0.18)));
-      gr.addColorStop(0.66, css(b5));
-      gr.addColorStop(1, css(mix(b5, b7, 0.55)));
-      x.fillStyle = gr;
-      x.beginPath(); x.arc(SZ / 2, SZ / 2, SZ / 2 - 0.5, 0, TAU); x.fill();
-      M.orb = cv;
+      var orb = function (base, deep) {
+        var cv = document.createElement('canvas'), S = 48;
+        cv.width = cv.height = S;
+        var x = cv.getContext('2d');
+        var gr = x.createRadialGradient(S * 0.36, S * 0.32, 0, S * 0.46, S * 0.44, S * 0.56);
+        gr.addColorStop(0, rgb(mix(base, WH, 0.8)));
+        gr.addColorStop(0.34, rgb(mix(base, WH, 0.2)));
+        gr.addColorStop(0.7, rgb(base));
+        gr.addColorStop(1, rgb(mix(base, deep, 0.6)));
+        x.fillStyle = gr;
+        x.beginPath(); x.arc(S / 2, S / 2, S / 2 - 0.5, 0, TAU); x.fill();
+        return cv;
+      };
+      var glow = function (base) {
+        var cv = document.createElement('canvas'), S = 64;
+        cv.width = cv.height = S;
+        var x = cv.getContext('2d');
+        var gr = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+        gr.addColorStop(0, rgb(mix(base, WH, 0.4), 0.6));
+        gr.addColorStop(0.4, rgb(base, 0.2));
+        gr.addColorStop(1, rgb(base, 0));
+        x.fillStyle = gr; x.fillRect(0, 0, S, S);
+        return cv;
+      };
+      /* a worker's own gradient before its ring has run: four hues round the
+         ring; after it has run, every worker holds the same violet sum */
+      C.hue = [C.b5, C.v5, C.m5, C.a5];
+      var deep = [C.b7, C.v7, C.m7, C.a7];
+      C.orbW = []; C.glowW = [];
+      for (var i = 0; i < 4; i++) { C.orbW.push(orb(C.hue[i], deep[i])); C.glowW.push(glow(C.hue[i])); }
+      C.orbSum = orb(C.v5, C.v7); C.glowSum = glow(C.v5);
+      C.orbOp = orb(C.b5, C.b7); C.glowB = glow(C.b5);
+      C.glowA = glow(C.a5); C.glowC = glow(C.c5); C.orbC = orb(C.c5, C.c7);
 
-      /* --- run both passes on the real edge list ------------------------ */
-      var EDGES = [[4, 3], [4, 1], [3, 2], [2, 1]];   /* creation order */
-      var has = function (s, v) { return s.indexOf(v) >= 0; };
-      /* old: all_paths[src] gets dst, then a copy of all_paths[dst] as it is now */
-      var ap = { 4: [], 3: [], 2: [], 1: [] }, oldFacts = [];
-      EDGES.forEach(function (e, i) {
-        var s = e[0], d = e[1], add = [];
-        if (!has(ap[s], d)) { ap[s].push(d); add.push([s, d]); }
-        ap[d].forEach(function (v) { if (!has(ap[s], v)) { ap[s].push(v); add.push([s, v]); } });
-        oldFacts.push(add);
-      });
-      /* old prune: for n1, n2 among a node's successors, drop n2 if n1 reaches it */
-      var succ = { 4: [3, 1], 3: [2], 2: [1], 1: [] }, oldKept = {};
-      [4, 3, 2, 1].forEach(function (n) {
-        var L = succ[n].slice();
-        L.forEach(function (n1, j) {
-          if (n1 == null) return;
-          L.forEach(function (n2, k) { if (j !== k && n2 != null && has(ap[n1], n2)) L[k] = null; });
-        });
-        L.forEach(function (v) { if (v != null) oldKept[n + '>' + v] = true; });
-      });
-      /* fix: close reachability in ascending instance key; every fact that
-         arrives through a successor is recorded with the cell it came from */
-      var reach = { 1: [], 2: [], 3: [], 4: [] }, arrive = [];
-      [1, 2, 3, 4].forEach(function (k) {
-        succ[k].forEach(function (s) { if (!has(reach[k], s)) reach[k].push(s); });
-        succ[k].forEach(function (s) {
-          reach[s].forEach(function (v) {
-            if (!has(reach[k], v)) { reach[k].push(v); arrive.push({ k: k, v: v, from: s }); }
-          });
-        });
-      });
-      var newKept = {}, cutBy = {};
-      EDGES.forEach(function (e) {
-        var u = e[0], v = e[1], w0 = null;
-        succ[u].forEach(function (w) { if (w !== v && has(reach[w], v)) w0 = w; });
-        if (w0 == null) newKept[u + '>' + v] = true; else cutBy[u + '>' + v] = w0;
-      });
-      M.EDGES = EDGES; M.oldFacts = oldFacts; M.oldKept = oldKept; M.arrive = arrive;
-      M.newKept = newKept; M.cutBy = cutBy; M.oldAp = ap;
-      /* cells never lit by the old pass: the facts the prune could not see */
-      M.cells = [];
-      for (var a = 4; a >= 2; a--) for (var b = a - 1; b >= 1; b--) {
-        M.cells.push({ a: a, b: b, x: (X[a] + X[b]) / 2, y: NY - ROW * (a - b), old: has(ap[a], b) });
+      /* the bypass 4 -> 1, sampled once; it bows out past the tower */
+      var x0 = CX + 9, y0 = Y[4] + 4, x1 = CX + 9, y1 = Y[1] - 4, qx = CX + R + 92;
+      var q1 = Y[4] + 30, q2 = Y[1] - 30;
+      C.arc = [];
+      for (var s = 0; s <= 60; s++) {
+        var u = s / 60, v = 1 - u;
+        C.arc.push([v * v * v * x0 + 3 * v * v * u * qx + 3 * v * u * u * qx + u * u * u * x1,
+                    v * v * v * y0 + 3 * v * v * u * q1 + 3 * v * u * u * q2 + u * u * u * y1]);
       }
-      M.arcPts = {};
-      EDGES.forEach(function (e) {
-        var pts = [], cx = (X[e[0]] + X[e[1]]) / 2, rx = Math.abs(X[e[1]] - X[e[0]]) / 2, ry = 30 + 26 * (e[0] - e[1]);
-        for (var q = 0; q <= 48; q++) {
-          var u = q / 48;
-          pts.push([cx - rx * Math.cos(Math.PI * u), NY + ry * Math.sin(Math.PI * u)]);
-        }
-        M.arcPts[e[0] + '>' + e[1]] = pts;
-      });
-      st.sim = { old: ap, oldKept: Object.keys(oldKept), arrive: arrive, newKept: Object.keys(newKept), cut: cutBy };
-    }
 
-    var RED = REDUCED;
-    var T = RED ? 14600 : t;
-    var cyc = Math.floor(T / P), tau = T - cyc * P;
-    /* nodes, glass and channels are built once and stay; the passes repeat */
-    var build = RED ? 1 : ease(T / 900);
-    var reset = RED ? 1 : 1 - ease((tau - RESET) / RESETD);
-    var i, j, k, q, e, c, key, pts;
-
-    g.clearRect(0, 0, vb[0], vb[1]);
-    g.globalCompositeOperation = 'source-over';
-    g.globalAlpha = 1;
-    g.lineCap = 'round'; g.lineJoin = 'round';
-
-    /* --- when is each fact known, and how brightly ------------------------ */
-    function cellOf(a, b) { for (var n = 0; n < M.cells.length; n++) if (M.cells[n].a === a && M.cells[n].b === b) return M.cells[n]; }
-    var lit = {}, glow = {};
-    M.cells.forEach(function (c) { lit[c.a + '>' + c.b] = 0; glow[c.a + '>' + c.b] = 0; });
-    /* old pass: a fact lands when its comets reach the cell */
-    M.oldFacts.forEach(function (add, n) {
-      var at = OLD[n] + GROWT + RISE;
-      add.forEach(function (f) {
-        var kk = f[0] + '>' + f[1];
-        lit[kk] = Math.max(lit[kk], ease((tau - at + 80) / 380));
-        glow[kk] = Math.max(glow[kk], bump((tau - at) / 900));
-      });
-    });
-    /* fix: arrivals travel from the cell they come from, one sweep step each */
-    var arrT = [];
-    M.arrive.forEach(function (ar) {
-      var at = SWEEP + STEP * (ar.k - 1) + 520;
-      arrT.push(at);
-      var kk = ar.k + '>' + ar.v;
-      lit[kk] = Math.max(lit[kk], ease((tau - at + 60) / 420));
-      glow[kk] = Math.max(glow[kk], bump((tau - at) / 1000));
-    });
-    function bump(k) { return k <= 0 ? 0 : 2.7 * k * Math.exp(1 - 7.4 * k) * 2.74; }
-
-    /* --- channels: the lattice the matrix is read by ---------------------- */
-    function chan(n, side, u, out) {           /* point u units along node n's channel */
-      var len = Math.hypot(50, ROW), dx = side * 50 / len, dy = -ROW / len;
-      out[0] = X[n] + dx * u; out[1] = NY + dy * u;
-      return out;
-    }
-    var CL = Math.hypot(50, ROW), SP = [0, 0];  /* one cell step along a channel */
-    g.globalAlpha = build;
-    for (var n = 4; n >= 1; n--) {
-      for (var side = -1; side <= 1; side += 2) {
-        var steps = side > 0 ? n - 1 : 4 - n;   /* right from n: cells (n, n-1..1); left: (n+1..4, n) */
-        if (steps <= 0) continue;
-        var p0 = chan(n, side, 16, [0, 0]), p1 = chan(n, side, CL * steps + 14, [0, 0]);
-        g.strokeStyle = rgba(M.blue, 0.05); g.lineWidth = 11;
-        g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
-        g.strokeStyle = rgba(M.blue, 0.16); g.lineWidth = 1.2;
-        g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
+      /* when each ring gets its signal, runs, and passes it on, in both
+         passes: the ripple, then the all-reduce, then the edge carries the
+         signal down to the next op */
+      C.old = {}; C.fix = {};
+      var at = 2400, k;
+      for (k = 4; k >= 1; k--) {
+        C.old[k] = { rip: at, r0: at + 300, r1: at + 1400 };
+        at = C.old[k].r1 + 420;
       }
-    }
-    g.globalAlpha = 1;
-
-    /* Reachability flowing as light: every set cell is fed by a stream rising
-       from each of its two nodes. Streams pass behind the crystals below them,
-       and stop where the knowledge stops: before the fix the stream from c1
-       climbs to "2 reaches 1" and no further. */
-    if (!RED) {
-      M.cells.forEach(function (c) {
-        var L = lit[c.a + '>' + c.b] * reset;
-        if (L < 0.001) return;
-        var steps = c.a - c.b;
-        for (var sd = -1; sd <= 1; sd += 2) {
-          var n0 = sd > 0 ? c.a : c.b, len = CL * steps;
-          for (var m = 0; m < 3; m++) {
-            var u = ((T / 1700 + m / 3 + c.a * 0.17 + c.b * 0.29 + (sd > 0 ? 0 : 0.5)) % 1);
-            var d = 16 + (len - 16) * u, ma = L * Math.sin(Math.PI * u);
-            chan(n0, sd, d, SP);
-            g.fillStyle = rgba(c === cellOf(3, 1) ? M.amber : M.mint, 0.28 * ma);
-            g.beginPath(); g.arc(SP[0], SP[1], 4.2, 0, TAU); g.fill();
-            g.fillStyle = rgba(M.white, 0.9 * ma);
-            g.beginPath(); g.arc(SP[0], SP[1], 1.5, 0, TAU); g.fill();
-          }
-        }
-      });
+      at = 15100;
+      for (k = 4; k >= 1; k--) {
+        C.fix[k] = { rip: at, r0: at + 200, r1: at + 850 };
+        at = C.fix[k].r1 + 290;
+      }
+      /* what each op believes it reaches: [when it is learned, late?] */
+      C.halo = { 4: [[EC[4] + GROW, 0], [E41 + GROW, 0], [12850, 1]],
+                 3: [[EC[3] + GROW, 0], [12500, 1]],
+                 2: [[EC[2] + GROW, 0]], 1: [] };
+      closure.cache = M = C;
     }
 
-    /* the fixed pass is one sweep in ascending instance key, c1 to c4 */
-    var sweepK = RED ? -1 : (tau - SWEEP + 150) / (STEP * 3 + 300);
-    if (sweepK > 0 && sweepK < 1) {
-      var sx = X[1] + (X[4] - X[1]) * ease(sweepK), sa = Math.sin(Math.PI * sweepK);
-      g.save(); g.translate(sx, NY); g.scale(1, 0.34);
-      var sg2 = g.createRadialGradient(0, 0, 0, 0, 0, 70);
-      sg2.addColorStop(0, rgba(M.mint, 0.42 * sa));
-      sg2.addColorStop(1, rgba(M.mint, 0));
-      g.fillStyle = sg2;
-      g.beginPath(); g.arc(0, 0, 70, 0, TAU); g.fill();
-      g.restore();
-    }
-
-    /* --- cells: each fact is a crystal, lit from the upper left ------------ */
-    function rhomb(cx, cy, s) {
-      g.beginPath();
-      g.moveTo(cx, cy - HH * s); g.lineTo(cx + HW * s, cy); g.lineTo(cx, cy + HH * s); g.lineTo(cx - HW * s, cy);
-      g.closePath();
-    }
-    function facet(cx, cy, s, ax, ay, bx, by) {
-      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + ax * HW * s, cy + ay * HH * s); g.lineTo(cx + bx * HW * s, cy + by * HH * s);
-      g.closePath(); g.fill();
-    }
-    /* base in the darkest facet colour, then the three lighter facets over it,
-       so the seams between facets show that colour and never the page */
-    function gem(cx, cy, s, F, a, glowCol) {
-      g.globalAlpha = a;
-      if (glowCol) { g.save(); g.shadowColor = rgba(glowCol, 0.6); g.shadowBlur = 18; }
-      rhomb(cx, cy, s); g.fillStyle = F[3]; g.fill();
-      if (glowCol) g.restore();
-      g.fillStyle = F[0]; facet(cx, cy, s, -1, 0, 0, -1);
-      g.fillStyle = F[1]; facet(cx, cy, s, 0, -1, 1, 0);
-      g.fillStyle = F[2]; facet(cx, cy, s, 0, 1, -1, 0);
-      g.strokeStyle = rgba(M.white, 0.75); g.lineWidth = 1.2;
-      g.beginPath(); g.moveTo(cx - HW * s + 3, cy - 1); g.lineTo(cx, cy - HH * s + 1.5); g.lineTo(cx + HW * s - 3, cy - 1); g.stroke();
+    var tc = REDUCED ? 20150 : t % P;
+    var yaw = REDUCED ? 0.5 : t * TAU / 46000;
+    var A0 = REDUCED ? 1 : 0.35 + 0.65 * ease(t / 900);
+    var rgb = M.rgb, mix = M.mix;
+    var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+    var seg = function (a, d) { return clamp((tc - a) / d); };
+    var reset = 1 - ease(seg(20700, 800));
+    var wth = function (i) { return yaw + i * TAU / NW; };
+    var px = function (k, th) { return CX + R * Math.cos(th); };
+    var py = function (k, th) { return Y[k] + R * TILT * Math.sin(th); };
+    var spr = function (im, x, y, r, a) {
+      if (a <= 0.004) return;
+      g.globalAlpha = a > 1 ? 1 : a;
+      g.drawImage(im, x - r, y - r, 2 * r, 2 * r);
       g.globalAlpha = 1;
-    }
-    var missing = cellOf(3, 1);
-    var rimA = RED ? 0 : ease((tau - RIM) / 700) * (1 - ease((tau - (SWEEP + STEP * 2 + 520)) / 300));
-    var breathe = 0.78 + 0.22 * Math.sin(TAU * T / 2600);
-    /* the prune asks c3 whether it reaches c1, twice: before and after the fix */
-    var ask1 = bump((tau - PROBE1 - 520) / 1100), ask2 = bump((tau - PROBE2 - 520) / 1100);
-    M.cells.forEach(function (c) {
-      var kk = c.a + '>' + c.b, L = (RED ? 1 : lit[kk]) * reset, amberCell = c === missing;
-      gem(c.x, c.y, 1, M.glass, 0.95 * build, null);
-      rhomb(c.x, c.y, 1);
-      g.strokeStyle = rgba(M.hair, 0.8 * build); g.lineWidth = 1; g.stroke();
-      if (L > 0.0004) {
-        gem(c.x, c.y, 1, amberCell ? M.gemAmber : M.gemMint, L, amberCell ? M.amber : M.mint);
-        /* the set bit itself: a spark at the heart of the crystal */
-        var sp = g.createRadialGradient(c.x - 3, c.y - 3, 0, c.x - 3, c.y - 3, 13);
-        sp.addColorStop(0, rgba(M.white, 0.85 * L));
-        sp.addColorStop(1, rgba(M.white, 0));
-        g.fillStyle = sp;
-        g.beginPath(); g.arc(c.x - 3, c.y - 3, 13, 0, TAU); g.fill();
+    };
+    var allreduce = function (s) { return (tc >= s.r0 && tc < s.r1) ? (tc - s.r0) / (s.r1 - s.r0) : -1; };
+    var running = function (k) { var p = allreduce(M.old[k]); return p >= 0 ? p : allreduce(M.fix[k]); };
+    var gathered = function (p) { return clamp((ease(p) * 14 - 7) / 7); };
+    /* how far each ring's workers hold the reduced value */
+    var held = function (k) {
+      var o = M.old[k], f = M.fix[k];
+      if (tc < o.r0) return 0;
+      if (tc < o.r1) return gathered((tc - o.r0) / (o.r1 - o.r0));
+      if (tc < 14700) return 1;
+      if (tc < f.r0) return 1 - ease(seg(14700, 300));
+      if (tc < f.r1) return gathered((tc - f.r0) / (f.r1 - f.r0));
+      return reset;
+    };
+    var lit = function (k) {
+      var v = 0, ss = [M.old[k], M.fix[k]];
+      for (var i = 0; i < 2; i++) {
+        var s = ss[i];
+        if (tc >= s.rip && tc < s.r1) v = Math.max(v, ease(seg(s.rip, 260)));
+        else if (tc >= s.r1) v = Math.max(v, 1 - ease(seg(s.r1, 520)));
       }
-      var fl = (RED ? 0 : glow[kk]) * reset;
-      if (kk === '3>1') fl = Math.max(fl, ask2 * lit[kk]);
-      if (fl > 0.01) {
-        rhomb(c.x, c.y, 1 + 0.18 * fl);
-        g.strokeStyle = rgba(amberCell ? M.amber : M.mint, 0.6 * Math.min(1, fl)); g.lineWidth = 2;
-        g.stroke();
-      }
-    });
-    /* the fact that never arrives: an amber rim on an empty cell */
-    if (rimA > 0.01) {
-      rhomb(missing.x, missing.y, 1);
-      g.strokeStyle = rgba(M.amber, Math.min(1, (0.7 * breathe + 0.5 * ask1) * rimA * reset)); g.lineWidth = 2.6;
-      g.stroke();
-    }
+      return Math.max(v, 0.85 * Math.sin(Math.PI * seg(19800, 900)));
+    };
 
-    /* --- comets: facts rising up the channels, and moving along them -------- */
-    var CP = [0, 0];
-    function comet(x0, y0, x1, y1, k, col, rad) {
-      if (k <= 0 || k >= 1) return;
-      var s = ease(k), hx = x0 + (x1 - x0) * s, hy = y0 + (y1 - y0) * s;
-      var tl = Math.max(0, s - 0.35), tx = x0 + (x1 - x0) * tl, ty = y0 + (y1 - y0) * tl;
-      var a = Math.sin(Math.PI * Math.min(1, k * 1.25));
-      var lg = g.createLinearGradient(tx, ty, hx, hy);
-      lg.addColorStop(0, rgba(col, 0));
-      lg.addColorStop(1, rgba(col, 0.8 * a));
-      g.strokeStyle = lg; g.lineWidth = 3.4;
-      g.beginPath(); g.moveTo(tx, ty); g.lineTo(hx, hy); g.stroke();
-      g.fillStyle = rgba(col, 0.25 * a);
-      g.beginPath(); g.arc(hx, hy, rad * 2.2, 0, TAU); g.fill();
-      g.fillStyle = rgba(M.white, 0.9 * a);
-      g.beginPath(); g.arc(hx, hy, rad * 0.8, 0, TAU); g.fill();
-    }
-    if (!RED && reset > 0.5) {
-      /* old pass: each new fact rises from both of its nodes */
-      M.oldFacts.forEach(function (add, n) {
-        var k0 = (tau - OLD[n] - GROWT) / RISE;
-        add.forEach(function (f) {
-          var c = cellOf(f[0], f[1]), steps = f[0] - f[1];
-          chan(f[0], 1, 16, CP); comet(CP[0], CP[1], c.x, c.y, k0, M.mint, 2.6);
-          chan(f[1], -1, 16, CP); comet(CP[0], CP[1], c.x, c.y, k0, M.mint, 2.6);
-        });
-      });
-      /* both prunes ask c3 about c1: the question rises from c3 */
-      [PROBE1, PROBE2].forEach(function (p0, n) {
-        chan(3, 1, 16, CP);
-        comet(CP[0], CP[1], missing.x, missing.y, (tau - p0) / 520, n ? M.mint : M.amber, 2.4);
-      });
-      /* fix: facts move cell to cell up a node's channel, "reaches v" going back */
-      M.arrive.forEach(function (ar, n) {
-        var from = cellOf(ar.from, ar.v), to = cellOf(ar.k, ar.v);
-        comet(from.x, from.y, to.x, to.y, (tau - arrT[n] + 520) / 520, ar.v === 1 && ar.k === 3 ? M.amber : M.mint, 2.8);
-      });
-    }
+    /* the floor the tower stands on */
+    g.save();
+    g.translate(CX, 414); g.scale(1, 0.07);
+    var fl = g.createRadialGradient(0, 0, 0, 0, 0, R * 1.1);
+    fl.addColorStop(0, rgb(M.h2, 0.55 * A0)); fl.addColorStop(1, rgb(M.h2, 0));
+    g.fillStyle = fl;
+    g.beginPath(); g.arc(0, 0, R * 1.1, 0, TAU); g.fill();
+    g.restore();
 
-    /* --- edges hanging below the spine ------------------------------------- */
-    function path(pts, u0, u1) {
-      var n0 = Math.max(0, Math.floor(u0 * 48)), n1 = Math.min(48, Math.ceil(u1 * 48));
-      g.beginPath();
-      g.moveTo(pts[n0][0], pts[n0][1]);
-      for (var m = n0 + 1; m <= n1; m++) {
-        var f = Math.min(1, (u1 * 48 - (m - 1)));
-        g.lineTo(pts[m - 1][0] + (pts[m][0] - pts[m - 1][0]) * f, pts[m - 1][1] + (pts[m][1] - pts[m - 1][1]) * f);
+    var pillars = function (front) {
+      for (var i = 0; i < NW; i++) {
+        var th = wth(i), sn = Math.sin(th);
+        if ((sn > 0) !== front) continue;
+        var x = CX + R * Math.cos(th), ya = Y[4] + R * TILT * sn - 12, yb = Y[1] + R * TILT * sn + 12;
+        var a = (front ? 0.6 : 0.3) * A0;
+        var lg = g.createLinearGradient(0, ya, 0, yb);
+        lg.addColorStop(0, rgb(M.glass, 0)); lg.addColorStop(0.1, rgb(M.glass, a));
+        lg.addColorStop(0.9, rgb(M.glass, a)); lg.addColorStop(1, rgb(M.glass, 0));
+        g.strokeStyle = lg; g.lineWidth = front ? 1.4 : 1;
+        g.beginPath(); g.moveTo(x, ya); g.lineTo(x, yb); g.stroke();
+        /* each worker's own timeline runs down its pillar, all the time */
+        for (var m = 0; m < 2; m++) {
+          var u = ((REDUCED ? 0.3 : t / 3400) + i * 0.37 + m * 0.5) % 1;
+          spr(M.glowB, x, ya + (yb - ya) * u, 5, (front ? 0.55 : 0.3) * Math.sin(Math.PI * u) * A0);
+        }
       }
-    }
-    function tube(pts, u1, col, a) {
-      path(pts, 0, u1);
-      g.strokeStyle = rgba(col, 0.13 * a); g.lineWidth = 10; g.stroke();
-      g.strokeStyle = rgba(col, 0.95 * a); g.lineWidth = 3.4; g.stroke();
-      g.save(); g.translate(0, -0.9);
-      path(pts, 0, u1);
-      g.strokeStyle = rgba(M.white, 0.45 * a); g.lineWidth = 1; g.stroke();
+    };
+
+    /* part of a ring from angle a over span b, clipped to the near or far half */
+    var ringArc = function (k, a, b, front) {
+      var lo = front ? 0 : Math.PI, hi = front ? Math.PI : TAU;
+      a = a % TAU; if (a < 0) a += TAU;
+      var span = b, e = a + span;
+      for (var w = -TAU; w <= TAU; w += TAU) {          /* the two halves repeat every turn */
+        var s0 = Math.max(a, lo + w), s1 = Math.min(e, hi + w);
+        if (s1 > s0) { g.beginPath(); g.ellipse(CX, Y[k], R, R * TILT, 0, s0, s1); g.stroke(); }
+      }
+    };
+
+    /* each ring is a glass tube: a body, a darker underside, a lit lip */
+    var ring = function (k, front) {
+      var a0 = front ? 0 : Math.PI, a1 = front ? Math.PI : TAU, L = lit(k), f = front ? 1 : 0.62;
+      g.lineCap = 'butt';
+      g.strokeStyle = rgb(M.b5, (0.05 + 0.16 * L) * A0 * f);
+      g.lineWidth = 14 + 8 * L;
+      g.beginPath(); g.ellipse(CX, Y[k], R, R * TILT, 0, a0, a1); g.stroke();
+      var body = g.createLinearGradient(0, Y[k] - R * TILT, 0, Y[k] + R * TILT);
+      body.addColorStop(0, rgb(mix(M.glass, M.WH, 0.35), 0.5 * A0));
+      body.addColorStop(1, rgb(mix(M.glass, M.b5, 0.25 + 0.4 * L), 0.85 * A0));
+      g.strokeStyle = body; g.lineWidth = 5.2;
+      g.beginPath(); g.ellipse(CX, Y[k], R, R * TILT, 0, a0, a1); g.stroke();
+      g.strokeStyle = rgb(mix(M.b7, M.glass, 0.35), 0.28 * A0 * f); g.lineWidth = 1;
+      g.beginPath(); g.ellipse(CX, Y[k] + 2.4, R, R * TILT, 0, a0, a1); g.stroke();
+      g.strokeStyle = rgb(M.WH, (front ? 0.9 : 0.5) * A0); g.lineWidth = 1.1;
+      g.beginPath(); g.ellipse(CX, Y[k] - 1.5, R, R * TILT, 0, a0, a1); g.stroke();
+    };
+
+    var workers = function (k, front) {
+      var h = held(k), i, th, sn, x, y, r, a;
+      for (i = 0; i < NW; i++) {
+        th = wth(i); sn = Math.sin(th);
+        if ((sn > 0) !== front) continue;
+        x = CX + R * Math.cos(th); y = Y[k] + R * TILT * sn;
+        r = 7.2 * (1 + 0.14 * sn); a = (front ? 1 : 0.6) * A0;
+        var hi = clamp(h * 1.35 - 0.35 * i / NW);
+        spr(M.orbW[i % 4], x, y, r, a * (1 - hi));
+        spr(M.orbSum, x, y, r, a * hi);
+      }
+      var p = running(k);
+      if (p < 0) return;
+      /* each worker's chunk is a length of light going round the tube: it
+         thickens on the first lap as the partial sum builds, then goes round
+         again as the sum itself */
+      var hops = 14 * ease(p), step = TAU / NW;
+      var vel = 30 * p * p * (1 - p) * (1 - p) / 1.875;       /* smootherstep's speed, 0 to 1 */
+      var fa = (front ? 1 : 0.6) * A0;
+      g.lineCap = 'round';
+      for (var j = 0; j < NW; j++) {
+        var ph = wth(j) + hops * step, rs = hops < 7;
+        var col = rs ? M.hue[j % 4] : M.v5, len = step * (0.38 + 0.4 * vel);
+        var thick = rs ? 2.2 + 0.55 * hops : 6;
+        g.strokeStyle = rgb(col, 0.16 * fa); g.lineWidth = thick * 3.2;
+        ringArc(k, ph - len, len, front);
+        g.strokeStyle = rgb(col, 0.78 * fa); g.lineWidth = thick;
+        ringArc(k, ph - len, len, front);
+        g.strokeStyle = rgb(mix(col, M.WH, 0.6), 0.9 * fa); g.lineWidth = Math.max(1, thick * 0.3);
+        ringArc(k, ph - len * 0.45, len * 0.45, front);
+        if ((Math.sin(ph) > 0) === front) {
+          var hx = px(k, ph), hy = py(k, ph), sz = rs ? 2.8 + 0.4 * hops : 5.4;
+          spr(rs ? M.glowW[j % 4] : M.glowSum, hx, hy, sz * 3.4, 0.9 * fa);
+          spr(rs ? M.orbW[j % 4] : M.orbSum, hx, hy, sz, fa);
+        }
+      }
+    };
+
+    /* ----- behind the axis */
+    pillars(false);
+    var k;
+    for (k = 4; k >= 1; k--) { ring(k, false); workers(k, false); }
+
+    /* a running collective lights the plane of its ring */
+    for (k = 4; k >= 1; k--) {
+      var Ld = lit(k);
+      if (Ld <= 0.01) continue;
+      g.save();
+      g.translate(CX, Y[k]); g.scale(1, TILT);
+      var dg = g.createRadialGradient(0, 0, R * 0.15, 0, 0, R);
+      dg.addColorStop(0, rgb(M.b5, 0));
+      dg.addColorStop(0.75, rgb(held(k) > 0.5 ? M.v5 : M.b5, 0.07 * Ld * A0));
+      dg.addColorStop(1, rgb(held(k) > 0.5 ? M.v5 : M.b5, 0.16 * Ld * A0));
+      g.fillStyle = dg;
+      g.beginPath(); g.arc(0, 0, R, 0, TAU); g.fill();
       g.restore();
     }
-    var chainPulse = RED ? -1 : (tau - CUT + 700) / 1500;
-    M.EDGES.forEach(function (ed, n) {
-      key = ed[0] + '>' + ed[1]; pts = M.arcPts[key];
-      var grow = RED ? 1 : ease((tau - OLD[n]) / GROWT);
-      if (grow <= 0.002) return;
-      var cutW = M.cutBy[key] != null;
-      var toCoral = cutW && !M.oldKept[key] ? 0 : cutW ? ease((tau - KEEP) / 600) : 0;
-      var gone = cutW ? (RED ? 1 : ease((tau - CUT) / 520)) : 0;
-      var a = reset * (1 - gone);
-      if (a > 0.01) {
-        if (toCoral < 0.99) tube(pts, grow, M.blue, a * (1 - toCoral));
-        if (toCoral > 0.01) tube(pts, grow, M.coral, a * toCoral);
-        /* the growing head */
-        if (grow < 1) {
-          var hi = Math.round(grow * 48);
-          g.fillStyle = rgba(M.white, 0.9);
-          g.beginPath(); g.arc(pts[hi][0], pts[hi][1], 3, 0, TAU); g.fill();
-          g.fillStyle = rgba(M.mint, 0.3);
-          g.beginPath(); g.arc(pts[hi][0], pts[hi][1], 7, 0, TAU); g.fill();
-        }
+
+    /* ----- the axis: control edges, the bypass, what each op believes */
+    var spineY0 = function (k) { return Y[k] + 11; };
+    var spineY1 = function (k) { return Y[k - 1] - 11; };
+    var path = ease(seg(13850, 500)) * reset;      /* 4 -> 3 -> 2 -> 1 confirmed */
+    for (k = 4; k >= 2; k--) {
+      var c = ease(seg(EC[k], GROW)) * reset;
+      if (c <= 0) continue;
+      var ya = spineY0(k), yb = ya + (spineY1(k) - ya) * c;
+      g.lineCap = 'round';
+      g.strokeStyle = rgb(M.glass, 0.45 * A0); g.lineWidth = 9;
+      g.beginPath(); g.moveTo(CX, ya); g.lineTo(CX, yb); g.stroke();
+      g.strokeStyle = rgb(M.b5, (0.1 + 0.18 * path) * A0); g.lineWidth = 12 + 6 * path;
+      g.beginPath(); g.moveTo(CX, ya); g.lineTo(CX, yb); g.stroke();
+      g.strokeStyle = rgb(M.b5, 0.8 * A0); g.lineWidth = 2.2 + 1 * path;
+      g.beginPath(); g.moveTo(CX, ya); g.lineTo(CX, yb); g.stroke();
+    }
+
+    /* the fact that never arrived: 2 -> 1 is there, but c3 does not know it */
+    var gap = Math.sin(Math.PI * seg(10400, 1200));
+    if (gap > 0.004) {
+      g.setLineDash([4, 5]);
+      g.strokeStyle = rgb(M.a5, 0.75 * gap); g.lineWidth = 2;
+      g.beginPath(); g.moveTo(CX + 7, spineY0(2)); g.lineTo(CX + 7, spineY1(2)); g.stroke();
+      g.beginPath(); g.moveTo(CX - 7, spineY0(2)); g.lineTo(CX - 7, spineY1(2)); g.stroke();
+      g.setLineDash([]);
+    }
+
+    /* the bypass 4 -> 1 */
+    var AR = M.arc;
+    var arcSeg = function (u0, u1, col, w) {
+      var i0 = Math.max(0, Math.floor(u0 * 60)), i1 = Math.min(60, Math.ceil(u1 * 60));
+      if (i1 <= i0) return;
+      g.strokeStyle = col; g.lineWidth = w;
+      g.beginPath(); g.moveTo(AR[i0][0], AR[i0][1]);
+      for (var i = i0 + 1; i <= i1; i++) g.lineTo(AR[i][0], AR[i][1]);
+      g.stroke();
+    };
+    var grown = ease(seg(E41, GROW)) * A0;
+    var flare = Math.sin(Math.PI * seg(10700, 900));
+    var cut = seg(13850, 950), ce = ease(cut);
+    g.lineCap = 'round';
+    if (tc < 13850) {
+      if (grown > 0) {
+        arcSeg(0, grown, rgb(M.c5, (0.1 + 0.22 * flare) * reset), 7 + 6 * flare);
+        arcSeg(0, grown, rgb(M.c5, 0.8 * reset), 2.1 + 0.9 * flare);
       }
-      /* what is left of the pruned edge: a faint trace, so the removal stays visible */
-      if (gone > 0.01) {
-        path(pts, 0, 1);
-        g.strokeStyle = rgba(M.coral, 0.22 * gone * reset); g.lineWidth = 1.6; g.stroke();
-        /* and the edge itself comes apart into light that falls away */
-        var dk = RED ? 1 : (tau - CUT) / 1500;
-        if (dk > 0 && dk < 1) {
-          for (q = 2; q < 47; q += 2) {
-            var px = pts[q][0], py = pts[q][1], dr = 0.5 + 0.5 * Math.sin(q * 1.7);
-            var fall = 16 * dk * dk * (0.6 + 0.8 * dr);
-            g.fillStyle = rgba(M.coral, 0.7 * (1 - dk) * (1 - dk));
-            g.beginPath(); g.arc(px + (px - 235) * 0.04 * dk, py + fall, 2.2 * (1 - 0.6 * dk), 0, TAU); g.fill();
-          }
-        }
+    } else {
+      if (ce < 1) {
+        arcSeg(0, 0.5 - 0.5 * ce, rgb(M.c5, 0.8 * (1 - ce)), 2.1);
+        arcSeg(0.5 + 0.5 * ce, 1, rgb(M.c5, 0.8 * (1 - ce)), 2.1);
       }
-      /* motes travel each emitted edge from source to target, the order it enforces */
-      if (!RED && grow >= 1 && a > 0.05) {
-        for (q = 0; q < 4; q++) {
-          var u = (T / 2400 + q / 4 + n * 0.13) % 1, m = Math.round(u * 48), ma = Math.sin(Math.PI * u) * a;
-          g.fillStyle = rgba(M.white, 0.85 * ma);
-          g.beginPath(); g.arc(pts[m][0], pts[m][1], 1.5, 0, TAU); g.fill();
+      g.setLineDash([3, 6]);
+      arcSeg(0, 1, rgb(M.c5, 0.16 * ce * reset), 1.2);
+      g.setLineDash([]);
+      var sk = seg(13850, 750);
+      if (sk > 0 && sk < 1) {
+        var mid = AR[30];
+        for (var q = 0; q < 12; q++) {
+          var an = q * TAU / 12 + 0.3, d = 4 + 26 * ease(sk);
+          g.fillStyle = rgb(M.c5, 0.8 * (1 - sk));
+          g.beginPath(); g.arc(mid[0] + Math.cos(an) * d, mid[1] + Math.sin(an) * d * 0.8, 1.9 * (1 - 0.5 * sk), 0, TAU); g.fill();
         }
-      }
-    });
-    /* the fix: the path 4 -> 3 -> 2 -> 1 lights end to end, which is why 4 -> 1 goes */
-    if (chainPulse > 0 && chainPulse < 1) {
-      var legs = ['4>3', '3>2', '2>1'];
-      for (i = 0; i < 3; i++) {
-        var lk = chainPulse * 3 - i;
-        if (lk <= -0.3 || lk >= 1.3) continue;
-        pts = M.arcPts[legs[i]];
-        var s0 = Math.max(0, lk - 0.3), s1 = Math.min(1, lk);
-        if (s1 <= s0) continue;
-        var pa = Math.sin(Math.PI * Math.min(1, chainPulse * 1.1));
-        path(pts, s0, s1);
-        g.strokeStyle = rgba(M.mint, 0.4 * pa); g.lineWidth = 13; g.stroke();
-        g.strokeStyle = rgba(M.white, 0.9 * pa); g.lineWidth = 2.8; g.stroke();
+        spr(M.glowC, mid[0], mid[1], 22 * (1 - sk) + 6, 0.8 * (1 - sk));
       }
     }
 
-    /* --- nodes -------------------------------------------------------------- */
-    var sweepAt = function (k) { return SWEEP + STEP * (k - 1); };
-    [4, 3, 2, 1].forEach(function (k) {
-      var cx = X[k], sw = RED ? 0 : bump((tau - sweepAt(k)) / 1200) * reset;
-      var hg = g.createRadialGradient(cx, NY, 0, cx, NY, 30);
-      hg.addColorStop(0, rgba(M.mint, (0.26 + 0.2 * sw) * build));
-      hg.addColorStop(1, rgba(M.mint, 0));
-      g.fillStyle = hg;
-      g.beginPath(); g.arc(cx, NY, 30, 0, TAU); g.fill();
-      var r = 15 * (0.4 + 0.6 * build);
-      g.drawImage(M.orb, cx - r, NY - r, 2 * r, 2 * r);
-      if (sw > 0.01) {
-        g.strokeStyle = rgba(M.mint7, 0.7 * Math.min(1, sw)); g.lineWidth = 2;
-        g.beginPath(); g.arc(cx, NY, 19 + 6 * Math.min(1, sw), 0, TAU); g.stroke();
+    /* the bypass signal: it reaches c1 long before the chain does, and waits */
+    if (tc >= 3880 && tc < 4780) {
+      var au = AR[Math.round(ease(seg(3880, 900)) * 60)];
+      spr(M.glowC, au[0], au[1], 15, 0.9); spr(M.orbC, au[0], au[1], 4.2, 1);
+    }
+    if (tc >= 4780 && tc < 8120) {
+      var wv = tc < 7860 ? ease(seg(4780, 300)) : 1 - ease(seg(7860, 260));
+      var br = 0.5 + 0.5 * Math.sin((tc - 4780) / 1500 * TAU);
+      var rr = 17 + 3 * br;
+      g.strokeStyle = rgb(M.c5, (0.35 + 0.3 * br) * wv); g.lineWidth = 1.6;
+      g.beginPath(); g.ellipse(CX, Y[1], rr, rr * 0.45, 0, 0, TAU); g.stroke();
+      spr(M.glowC, AR[60][0], AR[60][1], 13, 0.75 * wv); spr(M.orbC, AR[60][0], AR[60][1], 4.2, wv);
+    }
+
+    /* what each op believes it reaches, as small rings round it */
+    for (k = 4; k >= 1; k--) {
+      var hs = M.halo[k];
+      for (var hj = 0; hj < hs.length; hj++) {
+        var gk = ease(seg(hs[hj][0], 350)) * reset * A0;
+        if (gk <= 0) continue;
+        var hr = 8 + (6 + 5 * hj) * gk, late = hs[hj][1];
+        g.strokeStyle = rgb(late ? M.a5 : M.b5, (late ? 0.9 : 0.55) * gk);
+        g.lineWidth = late ? 1.7 : 1.3;
+        g.beginPath(); g.ellipse(CX, Y[k], hr, hr * 0.42, 0, 0, TAU); g.stroke();
       }
-    });
+    }
+
+    /* the ripple that starts a ring, from its op out to the workers */
+    for (k = 4; k >= 1; k--) {
+      var ss = [M.old[k], M.fix[k]];
+      for (var si = 0; si < 2; si++) {
+        var rp = seg(ss[si].rip, ss[si].r0 - ss[si].rip + 200);
+        if (rp <= 0 || rp >= 1) continue;
+        var re = ease(rp);
+        g.strokeStyle = rgb(M.b5, 0.5 * (1 - rp)); g.lineWidth = 1.5;
+        g.beginPath(); g.ellipse(CX, Y[k], R * re, R * TILT * re, 0, 0, TAU); g.stroke();
+      }
+    }
+
+    /* the ops themselves */
+    for (k = 4; k >= 1; k--) {
+      spr(M.glowB, CX, Y[k], 17 + 6 * lit(k), (0.3 + 0.45 * lit(k)) * A0);
+      spr(M.orbOp, CX, Y[k], 8.5, A0);
+    }
+
+    /* signals travelling down the chain, both passes */
+    var mote = function (y, im, gl, r) { spr(gl, CX, y, r * 3, 0.9); spr(im, CX, y, r, 1); };
+    var passes = [M.old, M.fix];
+    for (var pi = 0; pi < 2; pi++) {
+      for (k = 4; k >= 2; k--) {
+        var s0 = passes[pi][k].r1 + 80, d0 = passes[pi][k - 1].rip - s0;
+        var mu = seg(s0, d0);
+        if (mu <= 0 || mu >= 1) continue;
+        mote(spineY0(k) + (spineY1(k) - spineY0(k)) * ease(mu), M.orbOp, M.glowB, 4);
+      }
+    }
+
+    /* the prune's question, before the fix: it dies at c2 */
+    var probe = function (start, legs, leg) {
+      for (var l = 0; l < legs; l++) {
+        var pu = seg(start + l * leg, leg);
+        if (pu <= 0 || pu >= 1) continue;
+        var kk = 4 - l;
+        mote(spineY0(kk) + (spineY1(kk) - spineY0(kk)) * ease(pu), M.orbOp, M.glowB, 3.6);
+      }
+    };
+    probe(9800, 2, 280);
+    var fz = seg(10360, 500);
+    if (fz > 0 && fz < 1) {
+      for (var fq = 0; fq < 8; fq++) {
+        var fa2 = fq * TAU / 8, fd = 3 + 14 * ease(fz);
+        g.fillStyle = rgb(M.b5, 0.7 * (1 - fz));
+        g.beginPath(); g.arc(CX + Math.cos(fa2) * fd, Y[2] + 14 + Math.sin(fa2) * fd * 0.6, 1.5, 0, TAU); g.fill();
+      }
+    }
+
+    /* the fix: reachability climbs the axis from c1, carrying what c3 lacked */
+    for (var cl = 0; cl < 3; cl++) {
+      var cu = seg(11800 + cl * 350, 350);
+      if (cu <= 0 || cu >= 1) continue;
+      var kb = cl + 2, yc = spineY1(kb) + (spineY0(kb) - spineY1(kb)) * ease(cu);
+      mote(yc, M.orbW[3], M.glowA, 4);
+    }
+
+    /* the same question after it: it reaches c1, and the bypass goes */
+    probe(13100, 3, 250);
+    var arr = seg(13850, 500);
+    if (arr > 0 && arr < 1) spr(M.glowB, CX, Y[1], 12 + 26 * ease(arr), 0.8 * (1 - arr));
+
+    /* ----- in front of the axis */
+    pillars(true);
+    for (k = 4; k >= 1; k--) { ring(k, true); workers(k, true); }
   }
 
   /* ==================================================================== */
