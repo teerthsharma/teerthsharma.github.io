@@ -303,58 +303,324 @@
   }
 
   /* ==================================================================== */
-  /* units — the island discovery field, driven by the slider             */
+  /* units — mujoco-3396                                                 */
   /* ==================================================================== */
-  /* One square is the entire scratch allocation of the new path. The field
-     holds one square for every time the old path asked for that much. The
-     reference and the field squares are drawn at the identical size, because
-     enlarging the reference to make it visible would make the picture untrue.
-
-     The count comes from the slider and runs to 1,282 at ntree = 4,096. As
-     1,282 DOM rects that was the heaviest thing on the site. As canvas it is
-     one path. */
   function units(g, vb, t, st) {
-    var BOX_X = 300, BOX_Y = 40, BOX_W = 300, BOX_H = 270;
-    var shown = Math.max(1, st.shown || 1);
-    var blue = token('--blue-500', '#2456dc');
-    var coral = token('--coral-500', '#d9376e');
+    /* Island discovery used to allocate scratch that grew with the square of
+       the tree count, 5 ntree^2 + 36 ntree + 32 bytes. Rebuilt on a
+       disjoint-set forest it needs 16 ntree + 32. The picture is a count, not
+       an axis: the small blue cube on the left is the new path's ENTIRE
+       allocation, and the coral block is made of cubes of exactly that size,
+       one for every time the old path asked for that much again. The slider
+       sets how many, ceil(before / after): 22 at ntree 64, 1,282 at 4,096.
+       Every cube is drawn at the identical size, the one on its own, the ones
+       in flight and the ones in the block, because enlarging the reference
+       to make it visible would make the picture untrue.
 
-    var cols = Math.ceil(Math.sqrt(shown));
-    var rows = Math.ceil(shown / cols);
-    var pitch = Math.min(BOX_W / cols, BOX_H / rows);
-    var size = Math.max(1.2, pitch * 0.82);
+       The block is a near cube, b by b in plan, filled a layer at a time from
+       the back, so any count is exact: at 1,282 it is ten full layers of 121
+       and 72 more on top. Full layers are drawn as one solid, lit mass with a
+       seam at every unit, so it reads as a single heavy thing made of units
+       rather than as a field of squares; only the unfinished top layer is
+       drawn cube by cube. At rest that is at most 158 fills; the worst frame,
+       mid-pour with some 300 copies in the air, measured 1,059.
 
-    g.clearRect(0, 0, vb[0], vb[1]);
-    st.size = size;
+       Motion. On arrival the block is poured: copies leave the blue cube,
+       blue, arc across and set into the block in fill order, turning coral as
+       they join it, a trickle that becomes a torrent, so the count is watched
+       being made. Then a copy leaves the blue cube every 240 ms and sinks into
+       the block, and once every 7 s the blue cube rings and a band of light
+       climbs the block layer by layer, counting it. The count itself never
+       animates: whatever st.shown says is what is standing, every frame. */
+    var TAU = Math.PI * 2;
+    var E = 12, CXK = 0.9, CYK = 0.36, CZK = 0.94;   /* unit edge, projection */
+    var BX = 462, BG = 216.5;                        /* block footprint centre */
+    var UX = 150;                                    /* the lone cube */
+    var POUR = 2300, FLY = 400, TRICKLE = 240, TFLY = 1400, WAVE = 7000, WSWEEP = 2400;
+    var GAP = 0.05;
 
-    /* A tide crosses the field rather than every cell blinking together, but
-       it has to be gentle. Phasing on (column + row) striped the block with
-       hard diagonals that read as a rendering artefact rather than as
-       movement, so it runs on distance from the centre and the swing is
-       small: the quantity should look alive, not corrupted. */
-    var phase = REDUCED ? 0 : t / 3400;
-    var midC = cols / 2, midR = rows / 2;
-    for (var k = 0; k < shown; k++) {
-      var r = (k / cols) | 0, c = k % cols;
-      var x = BOX_X + c * pitch, y = BOX_Y + r * pitch;
-      var dcx = (c - midC) / cols, dcy = (r - midR) / rows;
-      var dist = Math.sqrt(dcx * dcx + dcy * dcy);
-      var w = REDUCED ? 1 : 0.62 + 0.38 * Math.sin(phase * Math.PI * 2 - dist * 5.2);
-      g.fillStyle = rgba(coral, 0.42 + 0.46 * w);
-      g.fillRect(x, y, size, size);
+    var shown = Math.max(1, Math.round(st.shown || 1282));
+    var b = Math.max(1, Math.ceil(Math.cbrt(shown) - 1e-9));
+    var nb = b * b, L = Math.ceil(shown / nb);
+    st.size = E;
+
+    var M = units.m;
+    if (!M) {
+      M = units.m = { lay: {}, col: {} };
+      var hexc = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      M.mix = function (a, c, k) { return [a[0] + (c[0] - a[0]) * k, a[1] + (c[1] - a[1]) * k, a[2] + (c[2] - a[2]) * k]; };
+      M.css = function (c, al) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + al + ')'; };
+      var W = [255, 255, 255];
+      M.co5 = hexc('--coral-500', '#d9376e'); M.co7 = hexc('--coral-700', '#a0183f');
+      M.bl5 = hexc('--blue-500', '#2456dc'); M.bl7 = hexc('--blue-700', '#163a9a');
+      M.hair = hexc('--hair2', '#cfcbc1'); M.W = W;
+      /* one material per family: top lit, the +j face mid, the +i face in shade */
+      M.face = [[M.mix(M.co5, W, 0.36), M.mix(M.co5, W, 0.08), M.mix(M.co5, M.co7, 0.4)],
+                [M.mix(M.bl5, W, 0.42), M.mix(M.bl5, W, 0.06), M.mix(M.bl5, M.bl7, 0.45)]];
+      /* the solid mass: gradients run from these at the top to these at the foot */
+      M.mTop = [M.css(M.mix(M.co5, W, 0.5), 0.97), M.css(M.mix(M.co5, W, 0.3), 0.97)];
+      M.mL = [M.css(M.mix(M.co5, W, 0.08), 0.96), M.css(M.mix(M.co5, M.co7, 0.22), 0.96)];
+      M.mR = [M.css(M.mix(M.co5, M.co7, 0.4), 0.96), M.css(M.mix(M.co5, M.co7, 0.72), 0.96)];
+    }
+    /* a face colour at a light level, cached. fam runs 0 (coral, the old
+       path) to 8 (blue, the new one), so a copy changes colour smoothly */
+    function col(fam, f, lv) {
+      var key = fam * 64 + f * 16 + lv, s = M.col[key];
+      if (!s) s = M.col[key] = M.css(M.mix(M.mix(M.face[0][f], M.face[1][f], fam / 8), M.W, lv / 15 * 0.6), 0.96);
+      return s;
+    }
+    /* fill order within a layer, back first, cached per b */
+    var lay = M.lay[b];
+    if (!lay) {
+      lay = M.lay[b] = { rank: new Int32Array(nb), cell: [] };
+      for (var i = 0; i < b; i++) for (var j = 0; j < b; j++) lay.cell.push([i, j]);
+      lay.cell.sort(function (p, q) { return (p[0] + p[1]) - (q[0] + q[1]) || p[0] - q[0]; });
+      for (var r = 0; r < nb; r++) lay.rank[lay.cell[r][0] * b + lay.cell[r][1]] = r;
     }
 
-    /* The reference is one allocation of the new path and is drawn at exactly
-       the size of a field cell, because enlarging it to make it visible would
-       make the picture untrue. At ntree = 4,096 that is six pixels, which
-       disappears. The ring around it is annotation and carries no quantity,
-       so it can be seen without the square lying about its size. */
-    var RX = 22, RY = 62;
-    g.strokeStyle = rgba(blue, 0.34); g.lineWidth = 1.6;
-    g.beginPath(); g.arc(RX + size / 2, RY + size / 2, 19, 0, Math.PI * 2); g.stroke();
-    g.fillStyle = rgba(blue, 1);
-    g.fillRect(RX, RY, Math.max(size, 3), Math.max(size, 3));
-    st.refAt = [RX + size / 2, RY + size / 2];
+    /* projection: +i runs right and down, +j left and down, +k up */
+    var ex = E * CXK, ey = E * CYK, ez = E * CZK;
+    function PX(i, j) { return BX + (i - j) * ex; }
+    function PY(i, j, k) { return BG + (i + j - b) * ey - k * ez; }
+
+    var RED = REDUCED;
+    var T = RED ? 60000 : t;
+
+    /* --- the pour: copy f leaves at POUR * (f / shown)^(1 / 1.4) ---------- */
+    function depart(f) { return POUR * Math.pow(f / shown, 1 / 1.4); }
+    var landed = shown, flying = shown;
+    if (!RED && T < POUR + FLY) {
+      var u0 = Math.max(0, T - FLY) / POUR, u1 = Math.min(1, Math.max(0, T) / POUR);
+      landed = Math.min(shown, Math.floor(shown * Math.pow(u0, 1.4)));
+      flying = Math.min(shown, Math.floor(shown * Math.pow(u1, 1.4)) + 1);
+    }
+    var Lf = Math.floor(landed / nb), part = landed - Lf * nb;   /* full layers, top layer */
+
+    /* --- light: the counting band, the ring, the trickle ----------------- */
+    var after = POUR + FLY + 400;
+    var cyc = RED ? -1 : (T - after) % WAVE, kw = -9, ring = -1;
+    if (cyc >= 0 && T > after) {
+      if (cyc < 900) ring = cyc / 900;
+      var wp = (cyc - 300) / WSWEEP;
+      if (wp > 0 && wp < 1) kw = -1.5 + (L + 3) * ease(wp);
+    }
+    var trick = [], glint = [];
+    if (!RED && T > after - TFLY) {
+      var n0 = Math.floor((T - after + TFLY) / TRICKLE);
+      for (var m = n0; m >= n0 - 9; m--) {
+        var dep = after - TFLY + m * TRICKLE, age = T - dep;
+        if (age < 0 || age > TFLY + 600) continue;
+        var hsh = Math.sin(m * 91.7 + 3.1) * 43758.5453; hsh -= Math.floor(hsh);
+        var cl0 = lay.cell[Math.floor(hsh * nb)];
+        var hgt = Lf + (lay.rank[cl0[0] * b + cl0[1]] < part ? 1 : 0);
+        if (age < TFLY) trick.push([cl0[0], cl0[1], hgt, age / TFLY]);
+        else { var s3 = (age - TFLY) / 200; glint.push([cl0[0], cl0[1], hgt, s3 * s3 * Math.exp(2 - 2 * s3)]); }
+      }
+    }
+    /* the still frame keeps three copies on their way, so it tells the story */
+    if (RED) for (var rq = 0; rq < 3; rq++) {
+      var rc = lay.cell[Math.floor(nb * (0.2 + 0.3 * rq)) % nb];
+      trick.push([rc[0], rc[1], Lf + (lay.rank[rc[0] * b + rc[1]] < part ? 1 : 0), 0.28 + 0.24 * rq]);
+    }
+    var breath = RED ? 1 : 0.85 + 0.15 * Math.sin(T / 2600 * TAU);
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.lineJoin = 'round'; g.lineCap = 'round';
+
+    function quad(a0, a1, b0, b1, c0, c1, d0, d1) {
+      g.beginPath(); g.moveTo(a0, a1); g.lineTo(b0, b1); g.lineTo(c0, c1); g.lineTo(d0, d1); g.closePath();
+    }
+
+    /* --- ground: soft shadows under the block and the lone cube ---------- */
+    var hx = b * ex, hy = b * ey, grown = RED ? 1 : Math.min(1, landed / shown + 0.25);
+    g.fillStyle = M.css(M.hair, 0.5 * grown);
+    g.shadowColor = M.css(M.hair, 0.9); g.shadowBlur = 12;
+    quad(BX - hx - 4, BG + 2, BX, BG - hy - 1, BX + hx + 7, BG + 3, BX + 2, BG + hy + 4); g.fill();
+    if (Lf > 0 || part > 0) {
+      var sl = Math.min(20, (Lf + (part > 0 ? 0.5 : 0)) * ez * 0.3);
+      g.fillStyle = M.css(M.hair, 0.34 * grown);
+      quad(BX, BG + hy + 2, BX + hx + 4, BG + 2, BX + hx + 4 + sl, BG + 2 - sl * 0.22, BX + sl, BG + hy + 2 - sl * 0.22); g.fill();
+    }
+    g.fillStyle = M.css(M.hair, 0.5);
+    g.beginPath(); g.ellipse(UX, BG + 1.5, E * 1.25, E * 0.46, 0, 0, TAU); g.fill();
+    g.shadowBlur = 0; g.shadowColor = 'rgba(0,0,0,0)';
+
+    /* --- the lone cube's light, and its ring once a cycle ---------------- */
+    var UY = BG - ez * 0.5;
+    var halo = g.createRadialGradient(UX, UY, 0, UX, UY, 36);
+    halo.addColorStop(0, M.css(M.bl5, 0.32 * breath));
+    halo.addColorStop(0.45, M.css(M.bl5, 0.11 * breath));
+    halo.addColorStop(1, M.css(M.bl5, 0));
+    g.fillStyle = halo;
+    g.beginPath(); g.arc(UX, UY, 36, 0, TAU); g.fill();
+    if (ring >= 0) {
+      var ro = 1 - Math.pow(1 - ring, 3);
+      g.strokeStyle = M.css(M.bl5, 0.55 * Math.pow(1 - ring, 2) * Math.min(1, ring / 0.12));
+      g.lineWidth = 2;
+      g.beginPath(); g.ellipse(UX, UY + 2, 12 + 30 * ro, (12 + 30 * ro) * 0.62, 0, 0, TAU); g.stroke();
+    }
+
+    /* one cube, (ox, oy) its (i, j, k) corner, size s, the faces asked for */
+    function cube(ox, oy, fam, lv, fT, fL, fR, s) {
+      var a = GAP * s, z = s - GAP * s;
+      if (fT) {
+        g.fillStyle = col(fam, 0, lv);
+        quad(ox, oy + 2 * a * ey - ez * s, ox + (z - a) * ex, oy + (z + a) * ey - ez * s,
+             ox, oy + 2 * z * ey - ez * s, ox + (a - z) * ex, oy + (a + z) * ey - ez * s);
+        g.fill();
+      }
+      if (fL) {
+        g.fillStyle = col(fam, 1, lv);
+        quad(ox + (a - s) * ex, oy + (a + s) * ey - ez * a, ox + (z - s) * ex, oy + (z + s) * ey - ez * a,
+             ox + (z - s) * ex, oy + (z + s) * ey - ez * z, ox + (a - s) * ex, oy + (a + s) * ey - ez * z);
+        g.fill();
+      }
+      if (fR) {
+        g.fillStyle = col(fam, 2, lv);
+        quad(ox + (s - a) * ex, oy + (s + a) * ey - ez * a, ox + (s - z) * ex, oy + (s + z) * ey - ez * a,
+             ox + (s - z) * ex, oy + (s + z) * ey - ez * z, ox + (s - a) * ex, oy + (s + a) * ey - ez * z);
+        g.fill();
+      }
+    }
+    function band(k) { return Math.round(11 * Math.exp(-Math.pow((k - kw) / 0.9, 2))); }
+
+    /* --- the solid mass: Lf full layers, one lit body with a seam per unit - */
+    if (Lf > 0) {
+      var xL = PX(0, b), xF = PX(b, b), xR = PX(b, 0), xB = PX(0, 0);
+      var yL0 = PY(0, b, 0), yF0 = PY(b, b, 0), yR0 = PY(b, 0, 0);
+      var yLt = PY(0, b, Lf), yFt = PY(b, b, Lf), yRt = PY(b, 0, Lf), yBt = PY(0, 0, Lf);
+      var gL = g.createLinearGradient(0, yFt, 0, yF0);
+      gL.addColorStop(0, M.mL[0]); gL.addColorStop(1, M.mL[1]);
+      g.fillStyle = gL; quad(xL, yL0, xF, yF0, xF, yFt, xL, yLt); g.fill();
+      var gR = g.createLinearGradient(0, yFt, 0, yF0);
+      gR.addColorStop(0, M.mR[0]); gR.addColorStop(1, M.mR[1]);
+      g.fillStyle = gR; quad(xF, yF0, xR, yR0, xR, yRt, xF, yFt); g.fill();
+      var gT = g.createLinearGradient(xB, yBt, xF, yFt);
+      gT.addColorStop(0, M.mTop[0]); gT.addColorStop(1, M.mTop[1]);
+      g.fillStyle = gT; quad(xB, yBt, xR, yRt, xF, yFt, xL, yLt); g.fill();
+      var hl = g.createLinearGradient(xL, 0, xF, 0);
+      hl.addColorStop(0, 'rgba(255,255,255,0)'); hl.addColorStop(1, 'rgba(255,255,255,0.16)');
+      g.fillStyle = hl; quad(xL, yL0, xF, yF0, xF, yFt, xL, yLt); g.fill();
+      var hr = g.createLinearGradient(xF, 0, xR, 0);
+      hr.addColorStop(0, 'rgba(255,255,255,0.1)'); hr.addColorStop(1, 'rgba(255,255,255,0)');
+      g.fillStyle = hr; quad(xF, yF0, xR, yR0, xR, yRt, xF, yFt); g.fill();
+      /* the counting light, climbing both faces a layer at a time */
+      if (kw > -1.4 && kw < Lf + 1.4) {
+        for (var sb = -4; sb <= 4; sb++) {
+          var k0 = kw + sb * 0.22 - 0.11, k1 = k0 + 0.22;
+          if (k1 <= 0 || k0 >= Lf) continue;
+          k0 = Math.max(0, k0); k1 = Math.min(Lf, k1);
+          g.fillStyle = 'rgba(255,255,255,' + (0.3 * Math.exp(-sb * sb / 6)).toFixed(3) + ')';
+          quad(xL, PY(0, b, k0), xF, PY(b, b, k0), xF, PY(b, b, k1), xL, PY(0, b, k1)); g.fill();
+          quad(xF, PY(b, b, k0), xR, PY(b, 0, k0), xR, PY(b, 0, k1), xF, PY(b, b, k1)); g.fill();
+        }
+      }
+      var bt = band(Lf);
+      if (bt > 0) {
+        g.fillStyle = 'rgba(255,255,255,' + (bt / 11 * 0.32).toFixed(3) + ')';
+        quad(xB, yBt, xR, yRt, xF, yFt, xL, yLt); g.fill();
+      }
+      /* the foot sits in its own shade */
+      var ao = g.createLinearGradient(0, yF0 - ez * 1.4, 0, yF0);
+      ao.addColorStop(0, M.css(M.co7, 0)); ao.addColorStop(1, M.css(M.co7, 0.28));
+      g.fillStyle = ao;
+      var ak = Math.min(Lf, 1.4);
+      quad(xL, yL0, xF, yF0, xF, PY(b, b, ak), xL, PY(0, b, ak)); g.fill();
+      quad(xF, yF0, xR, yR0, xR, PY(b, 0, ak), xF, PY(b, b, ak)); g.fill();
+      /* a seam at every unit, so the count can be read off the mass */
+      g.strokeStyle = 'rgba(255,255,255,0.22)'; g.lineWidth = 0.65;
+      g.beginPath();
+      for (var s1 = 1; s1 < b; s1++) {
+        g.moveTo(PX(s1, b), PY(s1, b, 0)); g.lineTo(PX(s1, b), PY(s1, b, Lf));   /* left face */
+        g.moveTo(PX(b, s1), PY(b, s1, 0)); g.lineTo(PX(b, s1), PY(b, s1, Lf));   /* right face */
+        g.moveTo(PX(s1, 0), PY(s1, 0, Lf)); g.lineTo(PX(s1, b), PY(s1, b, Lf));  /* top */
+        g.moveTo(PX(0, s1), PY(0, s1, Lf)); g.lineTo(PX(b, s1), PY(b, s1, Lf));
+      }
+      for (var s2 = 1; s2 < Lf; s2++) {
+        g.moveTo(xL, PY(0, b, s2)); g.lineTo(xF, PY(b, b, s2)); g.lineTo(xR, PY(b, 0, s2));
+      }
+      g.stroke();
+      /* light along the edges nearest the eye */
+      g.strokeStyle = 'rgba(255,255,255,0.8)'; g.lineWidth = 1.4;
+      g.beginPath(); g.moveTo(xL, yLt); g.lineTo(xF, yFt); g.lineTo(xR, yRt); g.moveTo(xF, yFt); g.lineTo(xF, yF0); g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,0.5)'; g.lineWidth = 1;
+      g.beginPath(); g.moveTo(xL, yLt); g.lineTo(xB, yBt); g.lineTo(xR, yRt); g.stroke();
+    }
+
+    /* --- the unfinished top layer, cube by cube, back to front ----------- */
+    if (part > 0) {
+      var lvT = band(Lf + 0.5);
+      for (var p = 0; p < part; p++) {
+        var cc = lay.cell[p], ci = cc[0], cj = cc[1];
+        var rgt = ci + 1 >= b || lay.rank[(ci + 1) * b + cj] >= part;
+        var lft = cj + 1 >= b || lay.rank[ci * b + cj + 1] >= part;
+        cube(PX(ci, cj), PY(ci, cj, Lf), 0, lvT, true, lft, rgt, 1);
+      }
+    }
+    /* where a copy has just sunk in, the cell it chose glows */
+    for (var gq = 0; gq < glint.length; gq++) {
+      var gl = glint[gq], gi = gl[0], gj = gl[1], gk = gl[2];
+      g.fillStyle = 'rgba(255,255,255,' + (0.6 * gl[3]).toFixed(3) + ')';
+      quad(PX(gi, gj), PY(gi, gj, gk), PX(gi + 1, gj), PY(gi + 1, gj, gk),
+           PX(gi + 1, gj + 1), PY(gi + 1, gj + 1, gk), PX(gi, gj + 1), PY(gi, gj + 1, gk));
+      g.fill();
+    }
+
+    /* --- copies in the air ------------------------------------------------ */
+    var sx = UX, sy = BG - ey;                      /* the lone cube's corner */
+    function flyer(tx, ty, k3, lift, sink) {
+      /* an arc from the lone cube to its place, blue turning coral as it joins */
+      var cxp = (sx + tx) / 2, cyp = Math.max(72, Math.min(sy, ty) - lift);
+      var e3 = ease(k3), a = 1 - e3;
+      var x = a * a * sx + 2 * a * e3 * cxp + e3 * e3 * tx;
+      var y = a * a * sy + 2 * a * e3 * cyp + e3 * e3 * ty;
+      var fk = ease((k3 - 0.3) / 0.4), fam = Math.round(8 * (1 - fk));
+      if (sink) {
+        /* a short tail of light along the arc behind it */
+        var eb = ease(Math.max(0, k3 - 0.16)), ab = 1 - eb;
+        var bx = ab * ab * sx + 2 * ab * eb * cxp + eb * eb * tx, by = ab * ab * sy + 2 * ab * eb * cyp + eb * eb * ty;
+        var oxy = ey - ez / 2 + ey;
+        var tg2 = g.createLinearGradient(bx, by + oxy, x, y + oxy);
+        var tc = M.mix(M.bl5, M.co5, fk), ta = 0.5 * Math.min(1, k3 / 0.15) * (1 - ease((k3 - 0.75) / 0.2));
+        tg2.addColorStop(0, M.css(tc, 0)); tg2.addColorStop(1, M.css(tc, ta));
+        g.strokeStyle = tg2; g.lineWidth = 3.2;
+        g.beginPath(); g.moveTo(bx, by + oxy);
+        for (var w = 1; w <= 6; w++) {
+          var ew = eb + (e3 - eb) * w / 6, aw = 1 - ew;
+          g.lineTo(aw * aw * sx + 2 * aw * ew * cxp + ew * ew * tx, aw * aw * sy + 2 * aw * ew * cyp + ew * ew * ty + oxy);
+        }
+        g.stroke();
+      }
+      var s = 1;
+      if (sink) { s = 1 - 0.8 * ease((k3 - 0.82) / 0.18); y += (1 - s) * ez; }
+      cube(x, y + (1 - s) * ey, fam, 2 + Math.round(fam / 8), true, true, true, s);
+    }
+    if (!RED && flying > landed) {
+      for (var f1 = landed; f1 < flying; f1++) {
+        var k4 = (T - depart(f1)) / FLY;
+        if (k4 <= 0 || k4 >= 1) continue;
+        var kL = Math.floor(f1 / nb), c1 = lay.cell[f1 - kL * nb];
+        flyer(PX(c1[0], c1[1]), PY(c1[0], c1[1], kL), k4, 40 + 36 * ((f1 * 0.618) % 1), false);
+      }
+    }
+    for (var tq = 0; tq < trick.length; tq++) {
+      var tr = trick[tq];
+      flyer(PX(tr[0], tr[1]), PY(tr[0], tr[1], tr[2]), tr[3], 70 + 40 * ((tq * 0.618) % 1), true);
+    }
+
+    /* --- the lone cube: the new path's whole allocation ------------------ */
+    cube(sx, sy, 8, RED ? 3 : Math.round(3 + 4 * (breath - 0.7) / 0.3), true, true, true, 1);
+    g.strokeStyle = 'rgba(255,255,255,0.85)'; g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(sx + (GAP - 1) * ex, sy + (GAP + 1) * ey - ez); g.lineTo(sx, sy + 2 * ey - ez);
+    g.lineTo(sx + (1 - GAP) * ex, sy + (1 + GAP) * ey - ez);
+    g.stroke();
   }
 
   /* ==================================================================== */
@@ -3404,6 +3670,979 @@
     }
   }
 
+  /* ==================================================================== */
+  /* arena — xnnpack-10801                                               */
+  /* ==================================================================== */
+  function arena(g, vb, t, st) {
+    /* A memory plan, drawn the way a planner engineer reads one: time runs
+       left to right in operator steps, memory offset runs upward from the
+       floor of the arena, and every value is a glass slab spanning the steps
+       it is live for, at the offset it was given. The arena has to be as tall
+       as the highest slab, for the whole run, so its lid is the peak.
+
+       The plan is real, not sketched. Fifty values were generated and placed
+       by greedy by size, largest first, each into the smallest gap between
+       the live blocks that overlap it in time, else on top of them. Run twice,
+       once never looking below the first live block and once also taking the
+       leading gap, the two plans agree on 49 values and differ on one. The
+       rest of the wall is identical both ways; only that value moves.
+
+       The wall builds itself in placement order. Then the amber value
+       arrives. The old search starts at the first live block, sweeps upward,
+       finds no gap and stacks it on top: the lid rises from 112 to 144 across
+       the whole run, although the value lives for four steps. Then the fix
+       looks from the floor, finds the cave under the first live block, lifts
+       the value off, carries it down and sets it in. The lid comes down with
+       it to 112, with the old peak left as a faint high water mark. A time
+       cursor sweeps the run throughout and lights whatever is live under it.
+
+       Peaks are drawn in MiB: the generated plan was chosen so that its two
+       peaks are exactly 144 and 112, the workspace the card reports. It is an
+       illustration of the decision, not the MobileNet plan itself. Shading is
+       alpha and hue only, -500 fronts toward -700 sides, so nothing is darker
+       than the palette. At most 315 fills and strokes a frame, measured. */
+    var OPS = 24, XL = 30, OW = 16.25, Y0 = 404, SY = 2.15, DX = 9, DY = -7;
+    var HERO = 4, NEW_TOP = 112, OLD_TOP = 144;
+    var BUILD = 2600, C = 11200, SWEEP = 5600;
+    var TAU = Math.PI * 2;
+
+    var A = arena.geo;
+    if (!A) {
+      /* [first step, last step, MiB, offset] in the fixed plan; the hero's
+         offset in the old plan is 112 */
+      var P = [[0,8,38,0],[16,23,38,0],[5,12,37,38],[6,17,37,75],[10,13,32,0],[19,23,18,63],
+        [3,5,14,91],[19,21,8,99],[13,19,25,38],[23,23,3,105],[4,5,16,75],[0,2,24,38],[21,21,4,57],
+        [20,21,4,53],[18,21,3,107],[4,4,13,56],[21,23,18,81],[20,21,15,38],[13,17,12,63],[0,1,3,80],
+        [4,4,3,69],[0,4,7,105],[22,22,5,105],[2,2,10,94],[3,3,5,83],[22,23,24,38],[2,3,21,62],
+        [0,1,8,72],[3,3,23,38],[4,4,18,38],[22,23,6,99],[18,20,3,95],[18,18,24,63],[23,23,3,108],
+        [1,1,4,100],[1,1,8,62],[1,1,6,94],[0,0,7,94],[0,2,11,83],[19,19,14,81],[0,0,10,62],
+        [20,20,3,57],[20,20,14,81],[18,18,8,87],[0,0,3,101],[4,4,3,72],[5,5,4,105],[20,20,3,60],
+        [18,18,3,98],[18,18,3,101]];
+      A = arena.geo = { s: [], order: [] };
+      var hexc = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      var mix = function (a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
+      var css = function (c, al) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + al + ')'; };
+      A.mix = mix; A.css = css;
+      var B5 = hexc('--blue-500', '#2456dc'), V5 = hexc('--violet-500', '#a66cf0'), M5 = hexc('--mint-500', '#0b93ab');
+      var B7 = hexc('--blue-700', '#163a9a'), V7 = hexc('--violet-700', '#6b35c4'), M7 = hexc('--mint-700', '#0a6b7c');
+      /* offset ramp: mint on the floor, through blue, to violet at the lid */
+      var ramp = function (a, b, c, v) { return v < 0.5 ? mix(a, b, v * 2) : mix(b, c, v * 2 - 1); };
+      var WH = [255, 255, 255];
+      A.am5 = hexc('--amber-500', '#d96a06'); A.am7 = hexc('--amber-700', '#9a4906');
+      A.co5 = hexc('--coral-500', '#d9376e'); A.co7 = hexc('--coral-700', '#a0183f');
+      A.bl7 = B7; A.ink = hexc('--ink', '#1c1b19'); A.hair = hexc('--hair2', '#cfcbc1');
+      for (var i = 0; i < P.length; i++) {
+        var p = P[i];
+        var jit = Math.sin(i * 12.9898) * 43758.5453; jit = jit - Math.floor(jit);
+        var v = Math.max(0, Math.min(1, Math.pow((p[3] + p[2] / 2) / NEW_TOP, 1.25) + (jit - 0.5) * 0.3));
+        var c5 = i === HERO ? A.am5 : ramp(M5, B5, V5, v), c7 = i === HERO ? A.am7 : ramp(M7, B7, V7, v);
+        A.s.push({ a: p[0], b: p[1], z: p[2], off: p[3],
+          x0: XL + p[0] * OW, x1: XL + (p[1] + 1) * OW,
+          top: css(mix(c5, WH, 0.5), 0.72), side: css(mix(c7, c5, 0.35), 0.62),
+          hi: css(mix(c5, WH, 0.82), 0.95), rule: css(WH, 0.2),
+          fT: css(mix(c5, WH, 0.3), 0.6), fM: css(mix(c5, WH, 0.12), 0.7), fB: css(c5, 0.88),
+          lo: css(c7, 0.45), refl: css(c5, 0.2), c5: c5 });
+        A.order.push(i);
+      }
+      /* the order the planner placed them: largest first, then earliest */
+      A.order.sort(function (m, n) { return P[n][2] - P[m][2] || P[m][0] - P[n][0] || m - n; });
+      A.rank = [];
+      for (var i2 = 0, r2 = 0; i2 < A.order.length; i2++) if (A.order[i2] !== HERO) A.rank[A.order[i2]] = r2++;
+    }
+
+    var RED = REDUCED;
+    var T = RED ? BUILD + C : t;
+    function Y(m) { return Y0 - m * SY; }
+    function rr(x0, y0, x1, y1, r) {             /* rounded rect, into the current path */
+      r = Math.min(r, (x1 - x0) / 2, (y1 - y0) / 2);
+      g.moveTo(x0 + r, y0); g.lineTo(x1 - r, y0); g.arcTo(x1, y0, x1, y0 + r, r);
+      g.lineTo(x1, y1 - r); g.arcTo(x1, y1, x1 - r, y1, r); g.lineTo(x0 + r, y1);
+      g.arcTo(x0, y1, x0, y1 - r, r); g.lineTo(x0, y0 + r); g.arcTo(x0, y0, x0 + r, y0, r);
+      g.closePath();
+    }
+    function sm(k) { k = k < 0 ? 0 : k > 1 ? 1 : k; return k * k * (3 - 2 * k); }
+
+    /* --- the hero's story, once per cycle after the build ------------------ */
+    var p = RED ? 8600 : (T < BUILD ? -1 : (T - BUILD) % C);
+    var lap = RED ? 1 : Math.floor((T - BUILD) / C);
+    var hOff = OLD_TOP, hA = 0, lift = 0, rim = NEW_TOP;
+    var oldScan = -1, newGlow = 0, ghost = 0, water = 0, ring = -1;
+    if (p >= 0) {
+      /* arrive: materialise above the wall and settle on it */
+      var arr = ease(p / 1100);
+      hA = arr * (1 - ease((p - 10000) / 1000));
+      hOff = NEW_TOP + 6 * (1 - arr);
+      /* the old search: from the first live block upward, never below it */
+      if (p > 150 && p < 1250) oldScan = 38 + (NEW_TOP - 38) * ease((p - 150) / 1000);
+      rim = NEW_TOP + 32 * ease((p - 900) / 800);
+      /* the fix: look from the floor, and the cave fills with light */
+      newGlow = ease((p - 3100) / 1000) * (1 - ease((p - 10000) / 1000));
+      /* lift toward the viewer, carry down, set in */
+      lift = ease((p - 4300) / 500) * (1 - ease((p - 6200) / 550));
+      if (p >= 4800) hOff = NEW_TOP * (1 - ease((p - 4800) / 1400));
+      if (p >= 4300) rim = Math.max(NEW_TOP, hOff + 32);
+      ghost = ease((p - 4300) / 700) * (1 - ease((p - 9900) / 1100));
+      water = ghost;
+      if (p > 6500 && p < 8300) ring = (p - 6500) / 1800;
+    }
+
+    if (A.gctx !== g) { A.gctx = g; for (var z0 = 0; z0 < A.s.length; z0++) A.s[z0].gr = null; }
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.lineJoin = 'round';
+    var XR = XL + OPS * OW;
+
+    /* --- the floor of the arena: offset zero, a glossy shelf with a tick for
+       every operator step, and the slabs that stand on it reflected in it --- */
+    g.fillStyle = A.css(A.hair, 0.5);
+    g.beginPath();
+    g.moveTo(XL - 12, Y0); g.lineTo(XR + 8, Y0); g.lineTo(XR + 8 + DX, Y0 + DY); g.lineTo(XL - 12 + DX, Y0 + DY);
+    g.closePath(); g.fill();
+    var fl = g.createLinearGradient(0, Y0, 0, Y0 + 16);
+    fl.addColorStop(0, A.css(A.hair, 0.75)); fl.addColorStop(1, A.css(A.hair, 0));
+    g.fillStyle = fl;
+    g.fillRect(XL - 12, Y0, XR - XL + 20, 16);
+    g.strokeStyle = A.css(A.hair, 1); g.lineWidth = 1;
+    g.beginPath();
+    for (var q = 0; q <= OPS; q++) { g.moveTo(XL + q * OW, Y0 + 1); g.lineTo(XL + q * OW, Y0 + (q % 4 === 0 ? 7 : 4)); }
+    g.stroke();
+
+    /* --- the cave: the leading gap, lit once the fix looks from the floor -- */
+    var cx0 = XL + 9 * OW, cx1 = XL + 16 * OW;
+    if (newGlow > 0.005) {
+      var gh = 38 * newGlow;
+      var cg = g.createLinearGradient(0, Y0, 0, Y(38));
+      cg.addColorStop(0, A.css(A.am5, 0.34 * newGlow));
+      cg.addColorStop(1, A.css(A.am5, 0.06 * newGlow));
+      g.fillStyle = cg;
+      g.beginPath(); rr(cx0 + 1, Y(gh), cx1 - 1, Y0, 3); g.fill();
+    }
+
+    /* --- the arena growth: every step pays for the tallest, 112 up to rim --- */
+    if (rim > NEW_TOP + 0.2) {
+      g.fillStyle = A.css(A.co5, 0.1 * sm((rim - NEW_TOP) / 8));
+      g.beginPath(); rr(XL - 6, Y(rim), XR + 4, Y(NEW_TOP), 3); g.fill();
+    }
+
+    /* --- the wall: build-in, cursor light ---------------------------------- */
+    var cur = RED ? -1 : (T - BUILD) / SWEEP;
+    var cOn = RED ? 0 : ease((T - BUILD + 400) / 1200);
+    var cx = XL + (cur - Math.floor(cur)) * OPS * OW;
+    var S = A.s, k, s, dy = [], al = [], boost = [], built = 0;
+    for (k = 0; k < S.length; k++) {
+      s = S[k];
+      if (k === HERO) { dy[k] = 0; al[k] = 0; boost[k] = 0; continue; }
+      var st0 = A.rank[k] * 40 - 260, f = RED ? 1 : ease((T - st0) / 560);
+      dy[k] = -26 * (1 - f); al[k] = f;
+      built = Math.max(built, (s.off + s.z) * ease((T - st0 - 380) / 180));
+      /* A value is only live between its first and last step. Under the
+         cursor it is live and vivid; elsewhere it is planned space, pale.
+         A slab lands vivid and relaxes, so the build reads as placement. */
+      var inside = Math.min(cx - s.x0, s.x1 - cx);
+      boost[k] = RED ? 0.5 : Math.max(cOn * sm((inside + 5) / 10), 1 - ease((T - st0 - 560) / 900));
+    }
+
+    /* while the wall builds, the lid is the arena so far: its tallest slab */
+    if (p < 0) rim = built;
+
+    function faces(s, oy, a, sc) {                /* top and side, behind every front */
+      var x0 = s.x0 + 0.8, x1 = s.x1 - 0.8, y0 = Y(s.off + s.z) + 0.8 + oy, y1 = Y(s.off) - 0.8 + oy;
+      g.globalAlpha = a;
+      g.fillStyle = s.top;
+      g.beginPath(); g.moveTo(x0 + 2, y0); g.lineTo(x1, y0); g.lineTo(x1 + DX * sc, y0 + DY * sc);
+      g.lineTo(x0 + 2 + DX * sc, y0 + DY * sc); g.closePath(); g.fill();
+      g.fillStyle = s.side;
+      g.beginPath(); g.moveTo(x1, y0); g.lineTo(x1 + DX * sc, y0 + DY * sc);
+      g.lineTo(x1 + DX * sc, y1 + DY * sc - 2); g.lineTo(x1, y1 - 2); g.closePath(); g.fill();
+    }
+    function front(s, oy, a, b) {
+      var x0 = s.x0 + 0.8, x1 = s.x1 - 0.8, y0 = Y(s.off + s.z) + 0.8 + oy, y1 = Y(s.off) - 0.8 + oy;
+      /* a landed slab never moves, so its gradient is made once per canvas */
+      var gr = oy === 0 && A.gctx === g ? s.gr : null;
+      if (!gr) {
+        gr = g.createLinearGradient(0, y0, 0, y1);
+        gr.addColorStop(0, s.fT); gr.addColorStop(0.42, s.fM); gr.addColorStop(1, s.fB);
+        if (oy === 0 && A.gctx === g) s.gr = gr;
+      }
+      g.globalAlpha = a * (0.48 + 0.52 * b);
+      g.fillStyle = gr;
+      g.beginPath(); rr(x0, y0, x1, y1, 3); g.fill();
+      /* ruled every 2 MiB, so a slab's height can be counted as memory */
+      g.globalAlpha = a * (0.5 + 0.5 * b);
+      g.strokeStyle = s.rule; g.lineWidth = 0.7;
+      g.beginPath();
+      for (var m = 2; m < s.z - 0.5; m += 2) { var yy = Y(s.off + m) + oy; g.moveTo(x0 + 2, yy); g.lineTo(x1 - 2, yy); }
+      g.stroke();
+      /* light catches the upper edge */
+      g.globalAlpha = a * (0.6 + 0.4 * b);
+      g.strokeStyle = s.hi; g.lineWidth = 1.2;
+      g.beginPath(); g.moveTo(x1 - 2.5, y0 + 1.1); g.lineTo(x0 + 2.5, y0 + 1.1);
+      g.quadraticCurveTo(x0 + 1.1, y0 + 1.1, x0 + 1.1, y0 + 2.5); g.lineTo(x0 + 1.1, y1 - 3); g.stroke();
+      /* and the lower edge sits in its own shade */
+      g.globalAlpha = a * (0.45 + 0.55 * b);
+      g.strokeStyle = s.lo; g.lineWidth = 1.2;
+      g.beginPath(); g.moveTo(x0 + 3, y1 - 0.8); g.lineTo(x1 - 3, y1 - 0.8); g.stroke();
+    }
+
+    function reflect(s, a, oy) {
+      var rg = g.createLinearGradient(0, Y0 + 1 + oy, 0, Y0 + 15 + oy);
+      rg.addColorStop(0, s.refl); rg.addColorStop(1, A.css(s.c5, 0));
+      g.globalAlpha = a; g.fillStyle = rg;
+      g.fillRect(s.x0 + 1, Y0 + 1 + oy, s.x1 - s.x0 - 2, 14);
+    }
+    for (k = 0; k < S.length; k++) if (S[k].off === 0 && al[k] > 0.01) reflect(S[k], al[k] * al[k], 0);
+    for (k = 0; k < S.length; k++) if (al[k] > 0.01) faces(S[k], dy[k], al[k] * (0.55 + 0.45 * boost[k]), 1);
+    for (k = 0; k < S.length; k++) if (al[k] > 0.01) front(S[k], dy[k], al[k], boost[k]);
+
+    /* --- where the old planner put it, left behind as a ghost -------------- */
+    var H = S[HERO];
+    if (ghost > 0.01) {
+      g.globalAlpha = 1;
+      g.fillStyle = A.css(A.co5, 0.16 * ghost);
+      g.beginPath(); rr(H.x0 + 0.8, Y(OLD_TOP) + 0.8, H.x1 - 0.8, Y(NEW_TOP) - 0.8, 3); g.fill();
+      g.strokeStyle = A.css(A.co7, 0.42 * water); g.lineWidth = 1.5;
+      g.beginPath(); g.moveTo(XL - 6, Y(OLD_TOP)); g.lineTo(XR + 4, Y(OLD_TOP)); g.stroke();
+    }
+
+    /* --- the lid: the arena is as tall as its tallest slab, for every step -- */
+    var lidA = sm(rim / 12);
+    var rk = sm((rim - NEW_TOP) / 32);
+    var rc = A.mix(A.bl7, A.co7, rk);
+    var ry = Y(rim);
+    g.globalAlpha = lidA;
+    g.fillStyle = A.css(rc, 0.1);
+    g.beginPath(); g.moveTo(XL - 6, ry); g.lineTo(XR + 4, ry); g.lineTo(XR + 4 + DX, ry + DY); g.lineTo(XL - 6 + DX, ry + DY);
+    g.closePath(); g.fill();
+    var seat = ring >= 0 ? Math.pow(ring * 3 * Math.exp(1 - ring * 3), 2) : 0;
+    g.shadowColor = A.css(rc, 0.5); g.shadowBlur = 6 + 8 * seat;
+    g.strokeStyle = A.css(rc, 0.92); g.lineWidth = 2.6;
+    g.beginPath(); g.moveTo(XL - 6, ry); g.lineTo(XR + 4, ry); g.stroke();
+    g.shadowBlur = 0; g.shadowColor = 'rgba(0,0,0,0)';
+    g.globalAlpha = 1;
+
+    /* --- the old search, sweeping up from the first live block ------------- */
+    if (oldScan > 0) {
+      var sa = sm((oldScan - 38) / 8) * (1 - sm((oldScan - NEW_TOP + 10) / 10));
+      var sy = Y(oldScan);
+      var sg = g.createLinearGradient(0, sy, 0, sy + 22);
+      sg.addColorStop(0, A.css(A.am5, 0.34 * sa)); sg.addColorStop(1, A.css(A.am5, 0));
+      g.fillStyle = sg;
+      g.fillRect(H.x0 + 1, sy, H.x1 - H.x0 - 2, 22);
+      g.strokeStyle = A.css(A.am5, 0.95 * sa); g.lineWidth = 2.4; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(H.x0 + 2, sy); g.lineTo(H.x1 - 2, sy); g.stroke();
+    }
+
+    /* --- the value itself: stacked, lifted, carried, set in ---------------- */
+    if (hA > 0.01) {
+      var lx = -3 * lift, ly = -3 * lift, sc = 1 + 0.05 * lift;
+      var hy0 = Y(hOff + 32), hy1 = Y(hOff), hcx = (H.x0 + H.x1) / 2, hcy = (hy0 + hy1) / 2;
+      if (lift > 0.01) {                          /* its shadow stays on the wall */
+        g.globalAlpha = hA * lift;
+        g.fillStyle = A.css(A.ink, 0.1);
+        g.shadowColor = A.css(A.ink, 0.16); g.shadowBlur = 10;
+        g.beginPath(); rr(H.x0 + 3, hy0 + 3, H.x1 + 3, hy1 + 3, 4); g.fill();
+        g.shadowBlur = 0; g.shadowColor = 'rgba(0,0,0,0)';
+      }
+      g.save();
+      g.translate(hcx + lx, hcy + ly); g.scale(sc, sc); g.translate(-hcx, -hcy);
+      var ho = { x0: H.x0, x1: H.x1, off: hOff, z: 32, top: H.top, side: H.side, hi: H.hi, fT: H.fT, fB: H.fB };
+      faces(ho, 0, hA, 1 - lift * 0.3);
+      g.shadowColor = A.css(A.am5, 0.45); g.shadowBlur = 4 + 10 * lift + 10 * seat;
+      var hf = g.createLinearGradient(0, hy0, 0, hy1);
+      hf.addColorStop(0, A.css(A.mix(A.am5, [255, 255, 255], 0.25), 1));
+      hf.addColorStop(1, A.css(A.am5, 1));
+      g.globalAlpha = hA; g.fillStyle = hf;
+      g.beginPath(); rr(H.x0 + 0.8, hy0 + 0.8, H.x1 - 0.8, hy1 - 0.8, 3); g.fill();
+      g.shadowBlur = 0; g.shadowColor = 'rgba(0,0,0,0)';
+      g.strokeStyle = A.css(A.am7, 0.7); g.lineWidth = 1.1; g.stroke();
+      g.strokeStyle = 'rgba(255,255,255,0.22)'; g.lineWidth = 0.7;
+      g.beginPath();
+      for (var m2 = 2; m2 < 31.5; m2 += 2) { var y2 = Y(hOff + m2); g.moveTo(H.x0 + 3, y2); g.lineTo(H.x1 - 3, y2); }
+      g.stroke();
+      g.strokeStyle = H.hi; g.lineWidth = 1.3;
+      g.beginPath(); g.moveTo(H.x1 - 3.5, hy0 + 2); g.lineTo(H.x0 + 3.5, hy0 + 2);
+      g.quadraticCurveTo(H.x0 + 2, hy0 + 2, H.x0 + 2, hy0 + 3.5); g.lineTo(H.x0 + 2, hy1 - 3); g.stroke();
+      g.restore();
+      /* standing on the floor, it shows in the floor */
+      var onF = sm(1 - hOff / 6) * (1 - lift);
+      if (onF > 0.01) reflect(H, hA * onF, 0);
+    }
+
+    /* --- set in: one ring leaves the cave, and the lid glows at 112 -------- */
+    if (ring >= 0 && ring < 1) {
+      var out = 1 - Math.pow(1 - ring, 3), ra = Math.pow(1 - ring, 2) * sm(ring / 0.12);
+      var e = 3 + 16 * out;
+      g.globalAlpha = 1;
+      g.strokeStyle = A.css(A.am5, 0.6 * ra); g.lineWidth = 2;
+      g.beginPath(); rr(H.x0 - e, Y(32) - e, H.x1 + e, Y0 + Math.min(e, 5), 6 + e / 2); g.stroke();
+    }
+
+    /* --- the time cursor: the step being executed ------------------------ */
+    if (cOn > 0.01) {
+      var ca = cOn * sm((cx - XL) / 10) * sm((XR - cx) / 10);
+      g.globalAlpha = 1;
+      var cgr = g.createLinearGradient(0, Y(NEW_TOP), 0, Y0);
+      cgr.addColorStop(0, A.css(A.bl7, 0)); cgr.addColorStop(1, A.css(A.bl7, 0.5 * ca));
+      g.strokeStyle = cgr; g.lineWidth = 1.4;
+      g.beginPath(); g.moveTo(cx, Y(NEW_TOP) + 4); g.lineTo(cx, Y0 + 2); g.stroke();
+      g.fillStyle = A.css(A.bl7, 0.85 * ca);
+      g.beginPath(); g.arc(cx, Y0 + 4.5, 2.8, 0, TAU); g.fill();
+    }
+    g.globalAlpha = 1;
+    st.lap = lap;
+  }
+
+  /* ==================================================================== */
+  /* prune — highway-3244                                                */
+  /* ==================================================================== */
+  function prune(g, vb, t, st) {
+    /* Building a perfect hash, a candidate seed places every key of a bucket
+       on a slot, and the builder rejects the seed if two keys share one. The
+       old check found out by comparing every pair of keys, for every seed.
+       But a key can only ever land inside its own slice: a window of slots
+       fixed by its hash alone, whatever the seed. Two keys whose windows do
+       not overlap can never share a slot, so comparing them can never find
+       anything. The change collects the overlapping pairs once and compares
+       only those, and it finds exactly the duplicates the full check found.
+
+       So the slot table is the dotted line along the bottom, each key is a
+       bead inside its own translucent window, and every comparison is an arc
+       between two keys. An arc's height grows with the distance between the
+       two windows, and that is the whole trick in one picture: two windows
+       overlap exactly when their arc is lower than the arc of one window's
+       width, so the pairs worth comparing are precisely the low arcs hugging
+       the table, and every arc above that height is a pair the slice
+       structure has already ruled out. The cut is a horizontal line.
+
+       Each cycle runs one seed through both checks. First the old one: a
+       front sweeps the keys, each key compares against every key before it,
+       a fan of warm arcs fires, and the whole dome of pairs lights up. Then
+       the light drains: a curtain falls from the top of the dome and stops
+       at the cut, then what is left beneath it fades, and only the low arcs
+       stay lit. Then the new check sweeps again and only those low mint
+       arcs fire. A duplicate, two beads on one slot, can only happen where
+       windows overlap, so the same amber pairs flare in both sweeps.
+       Between cycles the beads hop to where the next seed puts them.
+
+       This is an illustration of the mechanism, 48 keys and not a measured
+       build. Arcs are cached as one Path2D per key, of every arc that ends
+       on that key, and stroked one key at a time so overlapping arcs still
+       accumulate. */
+    var TAU = Math.PI * 2;
+    var N = 48, L = 12, SEED = 143;       /* keys, slice width in units, layout */
+    var XL = 26, XR = 444, YB = 388, TOP = 80, GAM = 0.7;
+    var BUILD = 1300, CY = 12800, PASS = 4300;
+    var OLD = 0, DRAIN = 4900, DRLEN = 1900, NEW = 6900, REST = 11300;
+
+    function hash(i, k) { var s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); }
+
+    var G = prune.geo;
+    if (!G) {
+      G = prune.geo = {};
+      /* windows: gaps with a floor and an exponential tail, so keys clump
+         the way hashed keys do, and no two windows start at the same place */
+      var xs = [0], i, j;
+      for (i = 1; i < N; i++) xs.push(xs[i - 1] + 0.35 - Math.log(1 - 0.999 * hash(i, SEED)));
+      var sc = (XR - L - XL) / xs[N - 1];
+      G.b = xs.map(function (x) { return XL + x * sc; });
+      G.c = G.b.map(function (x) { return x + L / 2; });
+      var DM = G.c[N - 1] - G.c[0], HM = YB - TOP;
+      G.hf = function (d) { return HM * Math.pow(d / DM, GAM); };
+      G.cut = G.hf(L);
+      /* one path per key of every arc that ends on it: pruned and kept apart */
+      G.dome = []; G.keep = []; G.kp = [];
+      for (j = 0; j < N; j++) {
+        var pd = new Path2D(), pk = new Path2D(), nk = 0;
+        for (i = 0; i < j; i++) {
+          var d = G.c[j] - G.c[i], p = d < L ? pk : pd;
+          p.moveTo(G.c[i], YB);
+          p.ellipse((G.c[i] + G.c[j]) / 2, YB, d / 2, G.hf(d), 0, Math.PI, TAU);
+          if (d < L) { nk++; G.kp.push([i, j]); }
+        }
+        G.dome.push(pd); G.keep.push(nk ? pk : null);
+      }
+      /* when the sweep reaches each key: its progress runs u - sin(2 pi u)/2 pi,
+         which leaves and arrives at rest, so invert that once per key */
+      G.at = [];
+      for (j = 0; j < N; j++) {
+        var target = (j + 0.5) / N, lo = 0, hi = 1;
+        for (var it = 0; it < 40; it++) {
+          var mid = (lo + hi) / 2;
+          if (mid - Math.sin(TAU * mid) / TAU < target) lo = mid; else hi = mid;
+        }
+        G.at.push(lo * PASS);
+      }
+      /* each seed: where every bead lands, and which overlapping pairs share a slot */
+      G.seed = function (k) {
+        var s = G.seedCache || (G.seedCache = {});
+        if (s[k]) return s[k];
+        var pos = [], dup = [], used = {};
+        for (var a = 0; a < N; a++) pos.push(G.b[a] + L * (0.14 + 0.72 * hash(a, k * 3 + 7)));
+        for (var m = 0; m < 2; m++) {
+          var q = G.kp[Math.floor(hash(k, 11 + m * 5) * G.kp.length)];
+          if (used[q[0]] || used[q[1]]) continue;
+          used[q[0]] = used[q[1]] = 1;
+          var lo2 = G.b[q[1]], hi2 = G.b[q[0]] + L;
+          pos[q[0]] = pos[q[1]] = lo2 + (hi2 - lo2) * (0.3 + 0.4 * hash(k, 23 + m));
+          dup.push(q);
+        }
+        var keys = Object.keys(s);
+        if (keys.length > 6) delete s[keys[0]];
+        return (s[k] = { pos: pos, dup: dup });
+      };
+    }
+
+    var RED = REDUCED;
+    var blue = token('--blue-500', '#2456dc'), blue7 = token('--blue-700', '#163a9a');
+    var mint = token('--mint-500', '#0b93ab'), mint7 = token('--mint-700', '#0a6b7c');
+    var coral = token('--coral-500', '#d9376e'), violet = token('--violet-500', '#a66cf0');
+    var amber = token('--amber-500', '#d96a06'), amber7 = token('--amber-700', '#9a4906');
+    var hair = token('--hair2', '#cfcbc1'), muted = token('--muted', '#5f5b53');
+
+    /* --- time ---------------------------------------------------------- */
+    var c = RED ? 0 : t - BUILD, k = 0;
+    if (c >= 0) { k = Math.floor(c / CY); c -= k * CY; }
+    function swell(tau, w) {             /* (s e^(1-s))^2: leaves zero with zero slope */
+      if (tau <= 0) return 0;
+      var s = tau / w; return s * s * Math.exp(2 - 2 * s);
+    }
+    function sweep(p0) {                 /* where the front is, as an x on the table */
+      var u = (c - p0) / PASS;
+      if (u <= 0 || u >= 1) return null;
+      var f = (u - Math.sin(TAU * u) / TAU) * N - 0.5;
+      var f0 = Math.max(0, Math.min(N - 2, Math.floor(f)));
+      return G.c[f0] + (G.c[f0 + 1] - G.c[f0]) * Math.max(0, Math.min(1, f - f0));
+    }
+    var inOld = !RED && c >= OLD && c < DRAIN + DRLEN;
+    var inNew = !RED && c >= NEW && c < REST + 900;
+    /* the curtain falls to the cut, then what is left under it fades */
+    var curtain = c < DRAIN ? TOP - 12 : TOP - 12 + (YB - G.cut - TOP + 12) * ease((c - DRAIN) / (DRLEN * 0.62));
+    var under = c < DRAIN + DRLEN * 0.55 ? 1 : 1 - ease((c - DRAIN - DRLEN * 0.55) / (DRLEN * 0.45));
+    /* the dome goes quiet while the new check runs, and wakes for the next old one */
+    var quiet = RED ? 0.3 : c < 0 ? 0.3 : 0.3 - 0.2 * (ease((c - DRAIN) / 1400) - ease((c - REST) / 1400));
+    /* the low band brightens once the dome above it has drained */
+    var band = RED ? 1 : c < 0 ? 0.4 : 0.4 + 0.6 * (ease((c - DRAIN - DRLEN * 0.5) / 900) - ease((c - REST - 200) / 1300));
+    var S = G.seed(k), S2 = G.seed(k + 1);
+    var hop = RED || c < REST + 400 ? 0 : ease((c - REST - 400) / 1100);
+    var j, fl, x;
+    function hex3(h) {
+      h = h.trim().replace('#', '');
+      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+      var v = parseInt(h, 16); return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+    }
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* The dome never changes shape, so it is rasterised once, off screen, at
+       this canvas's own pixel scale, and blitted. Stroking its 1,081 arcs
+       every frame held 8 to 20 frames a second in the preview; a blit is one
+       draw call. The quiet dome is one bitmap. The lit dome is a second one
+       that the old check fills in as it goes: each key's fan is stroked into
+       it once, when the sweep reaches that key. */
+    var tr = g.getTransform ? g.getTransform() : null;
+    var PX = +((tr ? Math.hypot(tr.a, tr.b) : g.canvas.width / vb[0]) || 1).toFixed(3);
+    var BX = XL - 6, BY = TOP - 6, BW = XR - XL + 12, BH = YB + 3 - BY;
+    function layer(name) {
+      var o = st[name];
+      if (!o || o.px !== PX) {
+        o = st[name] = { cv: document.createElement('canvas'), px: PX, n: -1, k: -1 };
+        o.cv.width = Math.ceil(BW * PX); o.cv.height = Math.ceil(BH * PX);
+        o.g = o.cv.getContext('2d');
+        o.g.setTransform(PX, 0, 0, PX, -BX * PX, -BY * PX);
+        o.g.lineCap = 'round'; o.g.lineJoin = 'round';
+      }
+      return o;
+    }
+    /* blit the band of a layer between y0 and y1, in viewBox units */
+    function blit(o, y0, y1, a) {
+      y0 = Math.max(BY, y0); y1 = Math.min(BY + BH, y1);
+      if (y1 <= y0 || a <= 0.004) return;
+      g.globalAlpha = Math.min(1, a);
+      g.drawImage(o.cv, 0, (y0 - BY) * PX, o.cv.width, (y1 - y0) * PX, BX, y0, o.cv.width / PX, y1 - y0);
+      g.globalAlpha = 1;
+    }
+    /* a layer whose top edge is soft: full below yc + fw, tapering to 0 at yc */
+    function soft(o, yc, a, fw, nb) {
+      blit(o, yc + fw, BY + BH, a);
+      for (var b2 = 0; b2 < nb; b2++) blit(o, yc + b2 * fw / nb, yc + (b2 + 1) * fw / nb, a * ease((b2 + 0.5) / nb));
+    }
+    var cA = hex3(coral), cB = hex3(violet);
+    function warm(gg) {                  /* warm at the table, cooling toward the top */
+      var gr = gg.createLinearGradient(0, YB, 0, TOP - 12);
+      gr.addColorStop(0, coral); gr.addColorStop(0.45, coral); gr.addColorStop(1, violet);
+      return gr;
+    }
+
+    var Q0 = layer('quiet');
+    if (Q0.n < 0) {
+      Q0.g.lineWidth = 0.8; Q0.g.strokeStyle = rgba(hair, 0.3);
+      for (j = 1; j < N; j++) Q0.g.stroke(G.dome[j]);
+      Q0.n = N;
+    }
+    /* the dome, every pair, quiet. It rises from the table as the keys arrive */
+    var rise = RED || t >= BUILD ? -1e9 : YB - 30 - (YB - TOP + 50) * ease(t / BUILD);
+    soft(Q0, rise, (quiet + 0.02) / 0.3, 64, 10);
+
+    /* the old check: each key's fan fires as the sweep reaches it, and the
+       compared dome stays lit until the curtain takes it */
+    if (RED || inOld) {
+      var L0 = layer('lit'), reach = 0;
+      for (j = 0; j < N; j++) if (RED || c - OLD - G.at[j] > 60) reach = j + 1;
+      if (L0.k !== k || reach < L0.n) {
+        L0.g.clearRect(BX, BY, BW, BH); L0.n = 1; L0.k = k;
+      }
+      if (reach > L0.n) {
+        L0.g.lineWidth = 0.8; L0.g.strokeStyle = warm(L0.g); L0.g.globalAlpha = 0.2;
+        for (j = L0.n; j < reach; j++) L0.g.stroke(G.dome[j]);
+        L0.g.globalAlpha = 1; L0.n = reach;
+      }
+      if (RED) blit(L0, BY, BY + BH, 0.9);
+      else soft(L0, c >= DRAIN ? curtain : -1e9, under, 22, 6);
+      /* the fans that have just fired, bright over the afterglow: the two
+         newest only, since each is up to 47 long arcs and older ones are
+         already in the lit layer */
+      if (!RED) {
+        g.strokeStyle = warm(g);
+        var jf = N - 1;
+        while (jf >= 1 && c - OLD - G.at[jf] <= 0) jf--;
+        for (var nf = 0; jf >= 1 && nf < 2; jf--, nf++) {
+          fl = swell(c - OLD - G.at[jf], 120);
+          if (fl < 0.06) continue;
+          g.globalAlpha = 0.62 * fl; g.lineWidth = 0.8 + 0.6 * fl;
+          g.stroke(G.dome[jf]);
+        }
+        g.globalAlpha = 1;
+      }
+    }
+
+    /* the sweep front, a soft light travelling the table */
+    var fx = inOld ? sweep(OLD) : inNew ? sweep(NEW) : null;
+    if (fx != null) {
+      var rg = g.createRadialGradient(fx, YB, 0, fx, YB, 17);
+      var fc = c < DRAIN ? coral : mint;
+      rg.addColorStop(0, rgba(fc, 0.3)); rg.addColorStop(1, rgba(fc, 0));
+      g.fillStyle = rg;
+      g.beginPath(); g.arc(fx, YB, 17, 0, TAU); g.fill();
+    }
+
+    /* the slot table, and each key's window: a slice it cannot leave */
+    g.setLineDash([0.01, 2.6]);
+    g.lineWidth = 1.3;
+    g.strokeStyle = rgba(muted, 0.55);
+    g.beginPath(); g.moveTo(XL - 6, YB); g.lineTo(XR + 6, YB); g.stroke();
+    g.setLineDash([]);
+    g.lineWidth = 7;
+    for (j = 0; j < N; j++) {
+      var w = RED ? 1 : 0.4 + 0.6 * ease((t - j * 12) / 520);
+      var hw = (L / 2 - 3.5) * w;
+      g.strokeStyle = rgba(blue, 0.26 * w);
+      g.beginPath(); g.moveTo(G.c[j] - hw, YB); g.lineTo(G.c[j] + hw + 0.01, YB); g.stroke();
+    }
+
+    /* the kept arcs, the only comparisons the new check makes, with a glow */
+    for (j = 1; j < N; j++) {
+      if (!G.keep[j]) continue;
+      var fo = inOld ? swell(c - OLD - G.at[j], 170) : 0;
+      var fn = inNew ? swell(c - NEW - G.at[j], 170) : 0;
+      fl = Math.max(fo, fn);
+      var kb = RED ? 1 : Math.min(1, ease(t / BUILD));
+      /* each hoop holds a little light of its own, so the band glows */
+      g.fillStyle = rgba(mint, (0.05 + 0.1 * band + 0.22 * fl) * kb);
+      g.fill(G.keep[j]);
+      if (band + fl > 0.5) {
+        g.lineWidth = 5 + 3 * fl;
+        g.strokeStyle = rgba(mint, (0.1 * band + 0.14 * fl) * kb);
+        g.stroke(G.keep[j]);
+      }
+      g.lineWidth = 1.4 + 1.1 * fl;
+      g.strokeStyle = rgba(fn > 0.05 ? mint : mint7, Math.min(1, (0.3 + 0.5 * band + 0.4 * fl) * kb));
+      g.stroke(G.keep[j]);
+    }
+
+    /* duplicates: two beads on one slot. Both checks find them, at the same key */
+    var q, n, dups = S.dup;
+    for (n = 0; n < dups.length; n++) {
+      q = dups[n];
+      var ta = c - OLD - G.at[q[1]], tb = c - NEW - G.at[q[1]];
+      var env = RED ? 1 : (ta > 0 ? ease(ta / 300) * (1 - 0.4 * ease((ta - 500) / 900)) : 0);
+      if (!RED && tb > 0) env = Math.max(env, 0.6 + 0.4 * swell(tb, 280));
+      env *= 1 - hop;
+      if (env <= 0.01) continue;
+      var d0 = G.c[q[1]] - G.c[q[0]];
+      g.lineWidth = 2.3;
+      g.strokeStyle = rgba(amber, 0.95 * env);
+      g.beginPath(); g.moveTo(G.c[q[0]], YB);
+      g.ellipse((G.c[q[0]] + G.c[q[1]]) / 2, YB, d0 / 2, G.hf(d0), 0, Math.PI, TAU);
+      g.stroke();
+    }
+
+    /* the beads: where this seed puts each key, glinting as a sweep passes */
+    g.fillStyle = rgba(blue7, 1);
+    for (j = 0; j < N; j++) {
+      x = S.pos[j] + (S2.pos[j] - S.pos[j]) * hop;
+      var hb = Math.max(inOld ? swell(c - OLD - G.at[j], 170) : 0, inNew ? swell(c - NEW - G.at[j], 170) : 0);
+      var bw = RED ? 1 : ease((t - 150 - j * 12) / 420);
+      if (bw <= 0) continue;
+      if (hb > 0.02) {
+        g.fillStyle = rgba(blue, 0.24 * hb);
+        g.beginPath(); g.arc(x, YB, 3 + 5 * hb, 0, TAU); g.fill();
+        g.fillStyle = rgba(blue7, 1);
+      }
+      g.beginPath(); g.arc(x, YB, 2.3 * bw + 0.8 * hb, 0, TAU); g.fill();
+    }
+    for (n = 0; n < dups.length; n++) {
+      q = dups[n];
+      var sx = S.pos[q[0]], tA = c - OLD - G.at[q[1]], tB = c - NEW - G.at[q[1]];
+      var mark = (RED ? 1 : ease(tA / 300)) * (1 - hop);
+      if (mark > 0.01) {
+        g.fillStyle = rgba(amber7, mark);
+        g.beginPath(); g.arc(sx, YB, 3.1, 0, TAU); g.fill();
+        g.strokeStyle = rgba(amber, 0.85 * mark); g.lineWidth = 1.8;
+        g.beginPath(); g.arc(sx, YB, 6.5, 0, TAU); g.stroke();
+      }
+      /* the ring each check sends out when it finds this pair */
+      var rings = RED ? [] : [tA, tB];
+      for (var r2 = 0; r2 < rings.length; r2++) {
+        var kk = rings[r2] / 1300;
+        if (kk <= 0 || kk >= 1) continue;
+        var out = 1 - (1 - kk) * (1 - kk) * (1 - kk);
+        g.strokeStyle = rgba(amber, 0.75 * (1 - kk) * (1 - kk) * ease(kk / 0.12));
+        g.lineWidth = 2;
+        g.beginPath(); g.arc(sx, YB, 7 + 6 * out, 0, TAU); g.stroke();
+      }
+    }
+  }
+
+  /* ==================================================================== */
+  /* schedule — triton-kernels-22                                        */
+  /* ==================================================================== */
+  function schedule(g, vb, t, st) {
+    /* A causal attention matrix, 16 query blocks by 16 key blocks, laid down
+       as a floor in perspective: queries run from the far edge toward the
+       viewer, keys run left to right, and only the lower triangle exists.
+       Every query is a ridgeline across that floor, and the height of the
+       ridge over a key is how strongly that query attends to it.
+
+       The schedule is the kernel's input: for every query block, a sorted
+       list of the key blocks it may read. It holds the sink column (block
+       0), the local window (the diagonal block and the one before it), and
+       the key blocks with the highest salience, which every later query
+       block reads too, so they run down the floor as whole columns.
+
+       Salience is topology. Up in the empty half of the matrix sit the
+       sixteen key-block centroids. Discs grow round every centroid at once,
+       and two groups join when their discs touch: that is 0D persistence,
+       single linkage in the order of distance. A block's salience is the
+       distance at which its group was swallowed by a bigger one, so the
+       blocks whose centroids stand apart from the rest keep their own disc
+       longest. The two last to join are picked, and a pulse runs from each
+       down to its column of the floor.
+
+       Then the kernel launches one program per query block, all at once.
+       Each walks its own list in order: it loads a key block, that tile's
+       scores are computed, and the ridges over the tile rise out of the
+       floor as it is folded into the program's running softmax. Then it
+       jumps straight to the next scheduled block, over the ones it skips,
+       which stay flat and grey because they are never computed. A program
+       glows larger as it accumulates, and when its list is done it writes
+       its output and leaves a coral bead at the end of its row, so the
+       outputs finish as a chain along the diagonal, the longer lists last.
+       Then the terrain sinks back into the floor and it all runs again.
+
+       The centroids and the attention values are an illustration, shaped
+       the way a sink, a local window and salient keys shape real attention.
+       The schedule, the salience rule, the launch and the order of the walk
+       follow the kernel. */
+    var TAU = Math.PI * 2;
+    var NB = 16, KS = 8, QS = 4;           /* blocks, key samples and query rows per block */
+    var NK = NB * KS, NR = NB * QS;
+    var XC = 236, WN = 416, YN = 402, HS = 640, DD = 0.74, HZ = 50;
+    var SAL = [4, 10];                     /* the two blocks the filtration below picks */
+    var BUILD = 1300, CY = 10600;
+    var FIL = 1700, PULSE = 650, T1 = 2400, STEP = 950, HOP = 300, COMP = 560;
+    var HOLD = 7400, SINK = 8700, SLEN = 1500;
+    /* the centroid cloud, in the upper right */
+    var CCX = 352, CCY = 150;
+
+    function hash(i, k) { var s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); }
+
+    var G = schedule.geo;
+    if (!G) {
+      G = schedule.geo = {};
+      /* the CSR schedule, exactly as the builder makes it: sink, local radius
+         one, and the salience blocks at or before each query block */
+      G.rows = [];
+      for (var q = 0; q < NB; q++) {
+        var set = {}; set[0] = 1; set[q] = 1; if (q > 0) set[q - 1] = 1;
+        for (var s0 = 0; s0 < SAL.length; s0++) if (SAL[s0] <= q) set[SAL[s0]] = 1;
+        G.rows.push(Object.keys(set).map(Number).sort(function (a, b) { return a - b; }));
+      }
+      /* attention of query position Qp on key k: a sink, a local window,
+         the two salient keys, and a low ripple of everything else */
+      G.v = new Float32Array(NR * (NK + 1));
+      for (var r = 0; r < NR; r++) {
+        var Qp = 2 * r + 1;
+        for (var k = 0; k <= Qp; k++) {
+          var v = 1.0 * Math.exp(-k / 1.6) + 0.8 * Math.exp(-(Qp - k) / 4) +
+                  0.72 * Math.exp(-Math.pow((k - 36.5) / 1.4, 2)) + 0.64 * Math.exp(-Math.pow((k - 84.5) / 1.4, 2)) +
+                  0.05 + 0.09 * (0.5 + 0.5 * Math.sin(k * 0.9 + Qp * 0.37) * Math.sin(k * 0.23 - Qp * 0.61));
+          G.v[r * (NK + 1) + k] = Math.min(1.1, v);
+        }
+      }
+      G.px = new Float32Array(NR * (NK + 1)); G.py = new Float32Array(NR * (NK + 1));
+      /* sixteen centroids: three tight groups, and blocks 4 and 10 apart */
+      var home = { 4: [-62, -44], 10: [70, -34] };
+      var grp = [[0, 1, 2, 3, 5], [6, 7, 8, 9], [11, 12, 13, 14, 15]];
+      var at = [[-34, 30], [8, -8], [40, 40]];
+      G.cx = []; G.cy = [];
+      for (var b = 0; b < NB; b++) { G.cx.push(0); G.cy.push(0); }
+      for (var gi = 0; gi < grp.length; gi++) {
+        for (var m = 0; m < grp[gi].length; m++) {
+          var bb = grp[gi][m], an = hash(bb, 3) * TAU, rr = 5 + 11 * hash(bb, 5);
+          G.cx[bb] = CCX + at[gi][0] + rr * Math.cos(an); G.cy[bb] = CCY + at[gi][1] + rr * Math.sin(an);
+        }
+      }
+      G.cx[4] = CCX + home[4][0]; G.cy[4] = CCY + home[4][1];
+      G.cx[10] = CCX + home[10][0]; G.cy[10] = CCY + home[10][1];
+      /* single linkage, as the salience score runs it: edges by distance,
+         union-find, and the smaller side takes the merge distance */
+      var E = [];
+      for (var i = 0; i < NB; i++) for (var j = i + 1; j < NB; j++) E.push([Math.hypot(G.cx[i] - G.cx[j], G.cy[i] - G.cy[j]), i, j]);
+      E.sort(function (a, b) { return a[0] - b[0]; });
+      var par = [], mem = [];
+      for (i = 0; i < NB; i++) { par.push(i); mem.push([i]); }
+      function find(x) { while (par[x] !== x) x = par[x] = par[par[x]]; return x; }
+      G.mst = []; G.sal = new Float32Array(NB);
+      for (var e = 0; e < E.length; e++) {
+        var ra = find(E[e][1]), rb2 = find(E[e][2]);
+        if (ra === rb2) continue;
+        if (mem[ra].length > mem[rb2].length) { var tmp = ra; ra = rb2; rb2 = tmp; }
+        for (var mm = 0; mm < mem[ra].length; mm++) G.sal[mem[ra][mm]] = E[e][0];
+        par[ra] = rb2; mem[rb2] = mem[rb2].concat(mem[ra]); mem[ra] = [];
+        G.mst.push(E[e]);
+      }
+      G.dmax = G.mst[G.mst.length - 1][0];
+    }
+
+    var RED = REDUCED;
+    var violet = token('--violet-500', '#a66cf0'), violet7 = token('--violet-700', '#6b35c4');
+    var amber = token('--amber-500', '#d96a06'), coral = token('--coral-500', '#d9376e'), coral7 = token('--coral-700', '#a0183f');
+    var hair = token('--hair2', '#cfcbc1'), ground = token('--ground', '#fbfaf7');
+
+    /* --- the floor in perspective: depth d runs 1 near to 1 + DD far ---- */
+    function D(u) { return 1 + DD * (1 - u); }                 /* u: 0 far edge, 1 near edge */
+    function X(k, u) { return XC + (k / NK - 0.5) * WN / D(u); }
+    function Y(u) { return YN - HS + HS / D(u); }
+    function S(u) { return 1 / D(u); }
+    function uRow(r) { return (r + 0.5) / NR; }                /* a query row */
+    function uEdge(rr) { return rr / NR; }                      /* between rows */
+
+    /* --- time ---------------------------------------------------------- */
+    var c = RED ? 0 : t - BUILD, cyc = 0;
+    if (c >= 0) { cyc = Math.floor(c / CY); c -= cyc * CY; }
+    var build = RED ? 1 : 0.35 + 0.65 * ease(t / BUILD);
+    function swell(tau, w) {             /* (s e^(1-s))^2: leaves zero with zero slope */
+      if (tau <= 0) return 0;
+      var s = tau / w; return s * s * Math.exp(2 - 2 * s);
+    }
+    var sinkAll = RED || c < SINK ? 1 : 1 - ease((c - SINK) / SLEN);
+    /* how far a tile has risen: its program reaches it at step s */
+    function grown(rb, s) {
+      if (RED) return 1;
+      if (c < T1) return 0;
+      var t0 = T1 + s * STEP + (s > 0 ? HOP : 0);
+      var sink = c < SINK ? 1 : 1 - ease((c - SINK - (NB - 1 - rb) * 30) / SLEN);
+      return ease((c - t0) / COMP) * sink;
+    }
+    var breathe = RED || c < HOLD ? 1 : 1 + 0.04 * Math.sin((c - HOLD) / 1300 * Math.PI) * (c < SINK ? 1 : 0);
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    var rb, s, kb, k, r, u;
+    function quad(kb0, kb1, rb0, rb1) {
+      var ua = uEdge(rb0 * QS), ub = uEdge(rb1 * QS);
+      g.moveTo(X(kb0 * KS, ua), Y(ua)); g.lineTo(X(kb1 * KS, ua), Y(ua));
+      g.lineTo(X(kb1 * KS, ub), Y(ub)); g.lineTo(X(kb0 * KS, ub), Y(ub)); g.closePath();
+    }
+
+    /* --- the salience filtration, up in the empty half ------------------ */
+    var RM = G.dmax / 2 + 6;
+    var grow = RED ? RM : c < 0 ? 0 : RM * ease(c / FIL);   /* monotone: the merges it has reached */
+    var rho = RED ? 15 : c < 0 ? 0 : c < FIL ? grow : c < SINK ? RM - (RM - 15) * ease((c - FIL - 250) / 800) : 15 * (1 - ease((c - SINK) / SLEN));
+    var cloudA = RED ? 1 : ease((t - 300) / 700);
+    var picked = RED ? 1 : c < FIL * 0.9 ? 0 : ease((c - FIL * 0.9) / 300) * sinkAll;
+    for (var b = 0; b < NB; b++) {
+      if (rho < 0.5) break;
+      var dg = g.createRadialGradient(G.cx[b], G.cy[b], 0, G.cx[b], G.cy[b], rho);
+      dg.addColorStop(0, rgba(violet, 0.16 * cloudA)); dg.addColorStop(0.8, rgba(violet, 0.1 * cloudA)); dg.addColorStop(1, rgba(violet, 0));
+      g.fillStyle = dg;
+      g.beginPath(); g.arc(G.cx[b], G.cy[b], rho, 0, TAU); g.fill();
+    }
+    /* the merges, drawn as the discs touch, each with a soft glow under it */
+    for (var e2 = 0; e2 < G.mst.length; e2++) {
+      var me = G.mst[e2], ja = ease((2 * grow - me[0]) / 8) * sinkAll;
+      if (ja <= 0) continue;
+      var ax = G.cx[me[1]], ay = G.cy[me[1]], bx = G.cx[me[2]], by = G.cy[me[2]];
+      var ex2 = ax + (bx - ax) * ja, ey2 = ay + (by - ay) * ja;
+      g.strokeStyle = rgba(violet, 0.16 * ja * cloudA); g.lineWidth = 7;
+      g.beginPath(); g.moveTo(ax, ay); g.lineTo(ex2, ey2); g.stroke();
+      g.strokeStyle = rgba(violet7, 0.75 * ja * cloudA); g.lineWidth = 2;
+      g.beginPath(); g.moveTo(ax, ay); g.lineTo(ex2, ey2); g.stroke();
+    }
+    for (b = 0; b < NB; b++) {
+      var sel = (b === SAL[0] || b === SAL[1]) ? picked : 0;
+      if (sel > 0.01) {
+        g.strokeStyle = rgba(violet7, 0.9 * sel); g.lineWidth = 2;
+        g.beginPath(); g.arc(G.cx[b], G.cy[b], 7.5, 0, TAU); g.stroke();
+      }
+      g.fillStyle = rgba(violet7, cloudA);
+      g.beginPath(); g.arc(G.cx[b], G.cy[b], 3 + 0.8 * sel, 0, TAU); g.fill();
+    }
+
+    /* --- the floor: the causal triangle, and the schedule on it --------- */
+    g.fillStyle = rgba(hair, 0.26 * build);
+    g.beginPath();
+    for (rb = 0; rb < NB; rb++) quad(0, rb + 1, rb, rb + 1);
+    g.fill();
+    /* a pulse from each picked centroid to the far end of its column */
+    for (var p = 0; p < 2; p++) {
+      var sb = SAL[p], tp = RED ? 1 : (c - FIL) / PULSE;
+      if (RED || tp <= 0 || tp >= 1.4) continue;
+      var u0 = uEdge(sb * QS), ex = X((sb + 0.5) * KS, u0), ey = Y(u0);
+      var sx = G.cx[sb], sy = G.cy[sb], mx = (sx + ex) / 2 - 30, my = Math.min(sy, ey) - 10;
+      var hd = ease(Math.min(1, tp)), tl = Math.max(0, hd - 0.35);
+      var pa = 1 - ease((tp - 1) / 0.4);
+      g.strokeStyle = rgba(violet7, 0.85 * pa);
+      g.lineWidth = 2.8;
+      g.beginPath();
+      for (var z = 0; z <= 16; z++) {
+        var w2 = tl + (hd - tl) * z / 16, iw = 1 - w2;
+        var qx = iw * iw * sx + 2 * iw * w2 * mx + w2 * w2 * ex, qy = iw * iw * sy + 2 * iw * w2 * my + w2 * w2 * ey;
+        if (z === 0) g.moveTo(qx, qy); else g.lineTo(qx, qy);
+      }
+      g.stroke();
+      g.fillStyle = rgba(violet7, pa);
+      g.beginPath(); g.arc(qx, qy, 3.4, 0, TAU); g.fill();
+      g.fillStyle = rgba(violet, 0.25 * pa);
+      g.beginPath(); g.arc(qx, qy, 9, 0, TAU); g.fill();
+    }
+    for (rb = 0; rb < NB; rb++) {
+      var row = G.rows[rb];
+      for (s = 0; s < row.length; s++) {
+        kb = row[s];
+        /* the schedule draws itself: sink first, then the window, then the salience columns */
+        var kind = kb === 0 ? 0 : kb >= rb - 1 ? 1 : 2;
+        var bt = RED || (kind === 2 && cyc > 0) ? 1 : kind < 2 ? ease((t - 150 - kind * 350 - rb * 24) / 500) :
+                 ease((c - FIL - PULSE * 0.8 - (rb - kb) * 45) / 380);
+        var gr = grown(rb, s);
+        var fl = RED ? 0 : swell(c - T1 - s * STEP - (s > 0 ? HOP : 0), 260);
+        var a = (0.12 + 0.14 * gr + 0.22 * fl) * bt;
+        if (a <= 0.005) continue;
+        g.fillStyle = rgba(fl > 0.3 ? amber : violet, a);
+        g.beginPath(); quad(kb + 0.05, kb + 0.95, rb + 0.03, rb + 0.97); g.fill();
+      }
+    }
+
+    /* --- ridgelines, far to near --------------------------------------- */
+    for (r = 0; r < NR; r++) {
+      rb = (r / QS) | 0;
+      u = uRow(r);
+      var sc = S(u), yb = Y(u), Qp = 2 * r + 1, o = r * (NK + 1), row2 = G.rows[rb], hmax = 0;
+      for (k = 0; k <= Qp; k++) {
+        kb = (k / KS) | 0; if (kb > rb) kb = rb;
+        var gk = 0;
+        for (s = 0; s < row2.length; s++) if (row2[s] === kb) { gk = grown(rb, s); break; }
+        var h = G.v[o + k] * gk * HZ * sc * breathe;
+        G.px[o + k] = X(k, u); G.py[o + k] = yb - h;
+        if (h > hmax) hmax = h;
+      }
+      if (hmax > 0.3) {
+        /* the ridge body: paper that hides what is behind it, then heat */
+        g.beginPath(); g.moveTo(G.px[o], yb);
+        for (k = 0; k <= Qp; k++) g.lineTo(G.px[o + k], G.py[o + k]);
+        g.lineTo(G.px[o + Qp], yb); g.closePath();
+        g.fillStyle = ground; g.fill();
+        var hg = g.createLinearGradient(0, yb, 0, yb - HZ * sc);
+        hg.addColorStop(0, rgba(violet, 0.05)); hg.addColorStop(1, rgba(violet, 0.55));
+        g.fillStyle = hg; g.fill();
+      }
+      /* grey at the floor for the whole row; violet over every tile a
+         program has computed, fading in and out with that tile */
+      g.lineWidth = 0.7 + 0.6 * u;
+      g.strokeStyle = rgba(hair, 0.7 * build);
+      g.beginPath(); g.moveTo(G.px[o], yb); g.lineTo(G.px[o + Qp], yb); g.stroke();
+      g.lineWidth = 0.9 + 0.7 * u;
+      for (s = 0; s < row2.length; s++) {
+        var gt = grown(rb, s);
+        if (gt <= 0.004) continue;
+        var k0 = row2[s] * KS, k1 = Math.min(Qp, k0 + KS);
+        g.strokeStyle = rgba(violet7, 0.9 * Math.min(1, gt * 3));
+        g.beginPath(); g.moveTo(G.px[o + k0], G.py[o + k0]);
+        for (k = k0 + 1; k <= k1; k++) g.lineTo(G.px[o + k], G.py[o + k]);
+        g.stroke();
+      }
+    }
+
+    /* --- the programs, one per query block ----------------------------- */
+    for (rb = 0; rb < NB; rb++) {
+      var list = G.rows[rb], n = list.length;
+      var uf = uEdge(rb * QS + QS) + 0.004, ufy = Y(uf), fs = S(uf);
+      var tEnd = T1 + n * STEP;
+      var ox = X((rb + 1) * KS + 2.5, uf), oy = ufy;
+      if (!RED && c >= T1 - 300 && c < tEnd) {
+        var sNow = Math.min(n - 1, Math.max(0, Math.floor((c - T1) / STEP)));
+        var into = c - T1 - sNow * STEP;
+        var kFrom = sNow > 0 ? list[sNow - 1] : list[0], kTo = list[sNow];
+        var hk = sNow > 0 ? ease(into / HOP) : 1;
+        var hx = X((kFrom + (kTo - kFrom) * hk + 0.5) * KS, uf), hy = ufy;
+        var acc = Math.max(0, Math.min(n, (c - T1 - HOP) / STEP + 0.5)) / 5;
+        var on2 = ease((c - T1 + 300) / 300);
+        /* the jump over skipped blocks, a streak that fades behind it */
+        if (sNow > 0 && into < HOP + 260 && kTo - kFrom > 1) {
+          var x0 = X((kFrom + 0.5) * KS, uf);
+          var sg = g.createLinearGradient(x0, 0, hx, 0);
+          sg.addColorStop(0, rgba(amber, 0)); sg.addColorStop(1, rgba(amber, 0.6 * (1 - ease((into - HOP) / 260))));
+          g.strokeStyle = sg; g.lineWidth = 2.6 * fs;
+          g.beginPath(); g.moveTo(x0, hy); g.lineTo(hx, hy); g.stroke();
+        }
+        var rh = (7 + 7 * acc) * fs;
+        var hgr = g.createRadialGradient(hx, hy, 0, hx, hy, rh);
+        hgr.addColorStop(0, rgba(amber, 0.42 * on2)); hgr.addColorStop(1, rgba(amber, 0));
+        g.fillStyle = hgr;
+        g.beginPath(); g.arc(hx, hy, rh, 0, TAU); g.fill();
+        g.fillStyle = rgba(amber, on2);
+        g.beginPath(); g.arc(hx, hy, (2.6 + 1.2 * acc) * fs, 0, TAU); g.fill();
+      }
+      /* written: a ring goes out, and the output stays at the row's end */
+      var ob = RED ? 1 : c > tEnd - 100 ? ease((c - tEnd + 100) / 300) * sinkAll : 0;
+      if (!RED && c > tEnd - 100) {
+        var kk = (c - tEnd + 100) / 1000;
+        if (kk < 1) {
+          g.strokeStyle = rgba(coral, 0.75 * (1 - kk) * (1 - kk) * ease(kk / 0.15));
+          g.lineWidth = 2;
+          g.beginPath(); g.arc(ox, oy, (5 + 13 * (1 - (1 - kk) * (1 - kk))) * fs, 0, TAU); g.stroke();
+        }
+      }
+      if (ob > 0.01) {
+        /* when the last program has written, light runs down the chain */
+        var wv = RED ? 0 : swell(c - T1 - 5 * STEP - 250 - rb * 60, 240);
+        g.fillStyle = rgba(coral, (0.22 + 0.3 * wv) * ob);
+        g.beginPath(); g.arc(ox, oy, (7 + 5 * wv) * fs, 0, TAU); g.fill();
+        g.fillStyle = rgba(coral7, ob);
+        g.beginPath(); g.arc(ox, oy, 3.2 * fs, 0, TAU); g.fill();
+      }
+    }
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
@@ -3411,7 +4650,10 @@
                  smatrix: smatrix,
                  settle: settle,
                  chain: chain,
-                 hull: hull };
+                 hull: hull,
+                 arena: arena,
+                 prune: prune,
+                 schedule: schedule };
 
   /* ------------------------------------------------------------------ */
   var live = [];

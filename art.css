@@ -173,141 +173,6 @@
   #pr-tensorflow-124410:hover #tf-link{ animation-play-state: paused; }
 
 
-  /* --- google/XNNPACK #10801 ---
-   The old planner appended every new value past the arena's right edge
-   without ever checking the free interval sitting before the first live
-   block. The mover performs the fix directly: it appears where the old
-   planner would have placed the value, past the end, then sweeps back
-   along the same arc as the arrow and settles into the leading gap, while
-   the dashed ghost position dims to show it going unused. The arena's
-   right edge never moves. */
-
-@keyframes xn-sweep {
-  0%    { transform: translate(0,0);         opacity: 1; }
-  9%    { transform: translate(0,0);         opacity: 1; }
-  13%   { transform: translate(0,0);         opacity: 0; }
-  15%   { transform: translate(360px,0);     opacity: 0; }
-  19%   { transform: translate(360px,0);     opacity: 1; }
-  40%   { transform: translate(360px,0);     opacity: 1; }
-  54%   { transform: translate(314px,-72px); opacity: 1; }
-  66%   { transform: translate(180px,-88px); opacity: 1; }
-  78%   { transform: translate(46px,-72px);  opacity: 1; }
-  92%   { transform: translate(0,0);         opacity: 1; }
-  100%  { transform: translate(0,0);         opacity: 1; }
-}
-#pr-xnnpack-10801 .xn-mover {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: xn-sweep 6s ease-in-out infinite;
-}
-
-@keyframes xn-ghost-fade {
-  0%   { opacity: 1; }
-  13%  { opacity: 1; }
-  19%  { opacity: .4; }
-  40%  { opacity: .4; }
-  54%  { opacity: 1; }
-  100% { opacity: 1; }
-}
-#pr-xnnpack-10801 .xn-ghost {
-  animation: xn-ghost-fade 6s ease-in-out infinite;
-}
-
-#pr-xnnpack-10801:hover .xn-mover,
-#pr-xnnpack-10801:hover .xn-ghost { animation-play-state: paused; }
-
-@media (prefers-reduced-motion: reduce){
-  #pr-xnnpack-10801 .xn-mover,
-  #pr-xnnpack-10801 .xn-ghost { animation: none; }
-}
-
-  /* --- google/highway #3244 --- A perfect-hash build was comparing every pair
-   of keys in a slice; the fix prunes by slice structure first, so only the
-   pair nearest the slice boundary in each row is ever compared. The motion
-   walks that boundary top to bottom: a marker travels the dashed slice line
-   while each row's single kept circle flares in the same row order, and the
-   hollow circles the marker passes never react, because they were already
-   ruled out before any compare could run. */
-
-#pr-highway-3244 .hw-kept,
-#pr-highway-3244 .hw-scan {
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-@keyframes hw-kept-sweep {
-  0%, 100% { transform: scale(1); }
-  50%      { transform: scale(1.6); }
-}
-
-#pr-highway-3244 .hw-kept {
-  /* animation-delay is set per circle inline in the SVG, in row order:
-     row-index * 0.3s, so the flare visibly steps down one row at a time
-     instead of firing in the document's arbitrary modulo order. */
-  animation: hw-kept-sweep 4.8s ease-in-out infinite;
-}
-
-/* Row 0 sits 4 units below the "slice boundary" label, too close for the
-   full 1.6x flare (it would swing inside the 6-unit clearance). It keeps the
-   sweep's place in the row order but flares less and dips opacity instead,
-   so it stays just as legible as every other row without crossing the label. */
-@keyframes hw-kept-sweep-edge {
-  0%, 100% { opacity: 1;  transform: scale(1); }
-  50%      { opacity: .45; transform: scale(1.15); }
-}
-#pr-highway-3244 .hw-kept-edge {
-  animation: hw-kept-sweep-edge 4.8s ease-in-out infinite;
-}
-
-@keyframes hw-scan-sweep {
-  0%   { transform: translate(0, 0); }
-  100% { transform: translate(360px, 300px); }
-}
-
-#pr-highway-3244 .hw-scan {
-  animation: hw-scan-sweep 4.8s ease-in-out infinite alternate;
-}
-
-#pr-highway-3244:hover .hw-kept,
-#pr-highway-3244:hover .hw-scan {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce){
-  #pr-highway-3244 .hw-kept,
-  #pr-highway-3244 .hw-scan { animation: none; }
-}
-
-  /* --- triton-lang/kernels #22 --- The kernel schedules only some causal
-   blocks (sink column, local window, salience picks) out of the whole valid
-   lower triangle and visits nothing else. The motion walks the schedule: the
-   violet blocks dip in true row order, top row to bottom row, every
-   scheduled block in a row firing together as the kernel reaches it, while
-   the grey valid-but-unscheduled blocks are simply never selected by this
-   rule and keep the page's ordinary ambient shimmer, reading as passed over. */
-
-@keyframes tri-visit {
-  0%, 100% { opacity: 1;   transform: scale(1); }
-  50%      { opacity: .35; transform: scale(.78); }
-}
-
-#pr-triton-kernels-22 .tri-sched {
-  transform-box: fill-box;
-  transform-origin: center;
-  /* animation-delay is set per block inline in the SVG, in row order:
-     row-index * 0.3s, so the kernel's walk reads as one clean pass down the
-     triangle instead of the generic modulo-12 shimmer it replaces. */
-  animation: tri-visit 4.8s ease-in-out infinite;
-}
-
-#pr-triton-kernels-22:hover .tri-sched {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce){
-  #pr-triton-kernels-22 .tri-sched { animation: none; }
-}
-
   /* --- topograph #432 --- The dashed boundary that used to grant every rule
    scales down, in place, until it exactly overlaps the solid gate circle,
    then eases back out: the same shape as least privilege being applied. As
@@ -355,6 +220,7 @@
 #pr-topograph-432:hover .tg-coral-g .pop {
   animation-play-state: paused;
 }
+
 
 
 

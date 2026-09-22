@@ -778,7 +778,7 @@ img,svg{ max-width:100%; display:block; }
   height: 100%;
   display: block;
 }
-.figc > .figc__lab{ pointer-events: none; }
+.figc > .figc__lab{ pointer-events: none; max-height: none; }
 
 /* ---------- Glass figure -------------------------------------------------
    Glassmorphism used for the one figure whose subject is genuinely about
