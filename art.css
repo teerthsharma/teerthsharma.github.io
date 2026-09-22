@@ -20,21 +20,6 @@
 
 @media (prefers-reduced-motion: no-preference) {
 
-  /* --- resolvent -------------------------------------------------------
-     The claim is that two notations are one operator. So the two halves
-     breathe in antiphase: as the mask settles the graph lifts, and back.
-     They are never both at rest, which is the point. */
-  @keyframes rv-mask { 0%,100% { opacity:1; transform:translateX(0); } 50% { opacity:.55; transform:translateX(-3px); } }
-  @keyframes rv-graph{ 0%,100% { opacity:.55; transform:translateX(3px); } 50% { opacity:1; transform:translateX(0); } }
-  /* Selecting by child position caught a label on the tangle card and made
-     a word fly. The same rule shape was here, so it goes too: motion is
-     applied to marks that are named, never to whatever happens to be the
-     first group in a file someone else may redraw. */
-  #p-resolvent svg rect{ animation: rv-mask 1.4s ease-in-out infinite; }
-  #p-resolvent svg circle{ animation: rv-graph 1.4s ease-in-out infinite; }
-  #p-resolvent svg,
-  #p-resolvent svg > g { transform-box: fill-box; transform-origin: center; }
-
   /* --- Epsilon-Hollow --------------------------------------------------
      OS state lives on the surface, so the surface turns. The longitude
      arcs scale horizontally through a full cycle, which reads as rotation
@@ -220,6 +205,7 @@
 #pr-topograph-432:hover .tg-coral-g .pop {
   animation-play-state: paused;
 }
+
 
 
 

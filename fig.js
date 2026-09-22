@@ -2475,95 +2475,547 @@
   }
 
   /* ==================================================================== */
-  /* smatrix — resolvent                                                  */
+  /* smatrix — resolvent                                                 */
   /* ==================================================================== */
-  /* Wheeler wrote the S-matrix in 1937 as the matrix connecting in-states to
-     out-states with no account of the path between them, and Heisenberg
-     carried it through the 1940s. This project reads one attention head that
-     way: (I - gP)^-1, the same closed form the Lippmann-Schwinger equation
-     gives the scattering operator, with the hop expansion as the Born series.
-     So the figure is that sentence.
-     An in-state on the left and an out-state on the right. Between them every
-     path the series sums, drawn by order: the direct hop, then the two hop
-     paths, the three hop paths and so on, each order fainter than the last
-     because each carries another factor of gamma. Over all of them one solid
-     arrow straight across, which is the S-matrix and which says nothing about
-     any of it. The orders arrive one after another, which is the series being
-     summed, and they fade rather than stop because the convergence law is
-     what makes the sum finite. */
-  function smatrix(g, vb, t) {
-    var IX = 58, OX = 412, MY = 286;
-    var ORDERS = 6, PER = 7;
-    var blue = token('--blue-500', '#2456dc');
-    var blue7 = token('--blue-700', '#163a9a');
-    var ink = token('--ink', '#1c1b19');
-    var hair = token('--hair2', '#cfcbc1');
+  function smatrix(g, vb, t, st) {
+    /* resolvent reads one causal attention head through a resolvent,
+       (I - gP)^-1 = I + gP + g^2 P^2 + ..., the closed form the
+       Lippmann-Schwinger equation gives the scattering operator. The hop
+       expansion is the Born series, and g times the spectral radius of P
+       staying under one is why it converges. Wheeler's S-matrix (1937) maps
+       in-states to out-states "with no account of the path between them".
 
-    g.clearRect(0, 0, vb[0], vb[1]);
-    var cyc = REDUCED ? 1 : (t % 9000) / 9000;
-    var front = IX - 60 + (OX - IX + 120) * ((t % 2800) / 2800);
+       So the figure builds the series as a solid, the way a video becomes a
+       block when every frame is stacked along time. The plane of each slice
+       is state space, a 40 by 40 lattice; the depth axis is hop order. Slice
+       k is g^k P^k x0, computed for real: x0 is all its mass on one site,
+       and P is a directed transition matrix, a drift that turns the mass
+       forward round the centre and a little inward on every hop, never back,
+       plus a small Gaussian spread. Every column of P sums to one, so mass is
+       conserved, rho(P) = 1, and g = 0.82 keeps the series convergent. The
+       plume that leaves x0 travels, shears and widens, and through the stack
+       it is a tapering helix: the whole history of the hops as one shape.
+       The lattice and P are made up for the picture; the project measures
+       nothing here, and the label layer says so.
 
-    for (var k = 1; k <= ORDERS; k++) {
-      /* each order enters in turn, and its weight is gamma^k */
-      var arrive = REDUCED ? 1 : ease((cyc * (ORDERS + 2) - k) / 1.4);
-      if (arrive <= 0.004) continue;
-      var weight = Math.pow(0.62, k - 1);
-      for (var p = 0; p < (k === 1 ? 1 : PER); p++) {
-        var s = Math.sin((k * 17.3 + p * 7.13)) * 43758.5453;
-        var u = s - Math.floor(s);
-        var spread = (p - (PER - 1) / 2) / ((PER - 1) / 2);
-        var amp = Math.min(86, 22 + k * 11) * spread * (0.65 + 0.35 * u);
-        /* Once every order has arrived the figure used to stand still until
-           the cycle came round, which measured under one percent of pixels
-           changing. Amplitude now flows from the in-state to the out-state
-           through every path at once: a front sweeps across and each segment
-           brightens as it passes. That is the sum being taken, all orders in
-           parallel, and it is what the single arrow above them hides. */
-        var base = 0.38 * weight * arrive + 0.05;
-        g.lineWidth = 1.3;
-        var px = IX, py = MY;
-        for (var h = 1; h <= k; h++) {
-          var f = h / k;
-          var x = IX + (OX - IX) * f;
-          var y = MY + Math.sin(f * Math.PI) * amp;
-          var dd = ((px + x) / 2 - front) / 44;
-          var boost = REDUCED ? 0 : Math.exp(-dd * dd);
-          g.strokeStyle = rgba(blue, Math.min(1, base * (1 + 1.8 * boost)));
-          g.beginPath(); g.moveTo(px, py); g.lineTo(x, y); g.stroke();
-          if (h < k) {
-            g.fillStyle = rgba(blue7, Math.min(1, 0.55 * weight * arrive * (1 + 1.2 * boost)));
-            g.beginPath(); g.arc(x, y, 2.6 + 1.4 * boost, 0, Math.PI * 2); g.fill();
+       Three walls carry three views of that one stack. The back wall is the
+       sum of every slice, the out-state (I - gP)^-1 x0, in one colour,
+       because a sum keeps where the mass went and loses in which order it
+       got there. The floor is each order's mass summed over y, laid out along
+       x and depth, and the far side wall is the same summed over x: the helix
+       casts a sine on one and a cosine on the other, as a video cube's xt
+       and yt planes would. Once a cycle the camera turns to look straight
+       down the depth axis. It is orthographic, so every slice then lands
+       exactly on the sum, the floor and side wall go edge on, and the path
+       between in and out cannot be seen anywhere. It holds, then turns away.
+
+       Motion. From t = 0 a scan plane runs through the orders at 220 ms
+       each; every slice develops as it passes, the floor and side wall fill
+       behind it, and the back wall crossfades through the partial sums, one
+       order behind. The camera turns onto the axis as the last terms land
+       and holds there for 2.2 s, the colour of the individual orders
+       draining so that only the sum is left. Then the loop: the camera rises
+       away on the other side, over the top, down the first side and back
+       onto the axis, once every 20 s, easing into and out of the hold with
+       zero velocity and acceleration. The scan keeps running every 10 s,
+       each order it passes flowing into the sum in its own colour.
+
+       Drawing. Each slice is a texture: the lattice is upsampled with a
+       cubic B-spline, normalised to its own peak so its shape reads, and
+       drawn with opacity falling with g^k. Hue runs blue, violet, coral with
+       k. The sum is on a log scale so its tail stays visible under the
+       identity term's spike at x0. Under an orthographic camera a slice is
+       an affine image of a unit square, one drawImage under g.transform, and
+       painter's order is fixed, far to near, because the camera never passes
+       behind the block. Textures are painted on first use.
+
+       Measured, in the preview harness:
+       - The glass tint of each plate once faded in step with the others.
+         Colour alpha is 8 bit, so all 23 plates crossed the same 1/255 level
+         on one frame and the whole square jumped (13 per pixel against a
+         median of 2.5). Each plate now fades over its own stretch. The
+         build's partial sums, the flow into the sum, the scan's hue and the
+         edge weights had smaller jumps of the same kind and are continuous.
+       - The first call cost 88 ms when every texture was painted up front;
+         painting on first use brings it to 36 ms.
+       - Worst frame is 126 fills, strokes and images; the darkest painted
+         pixel is the -700 blue core at luminance 0.054, over the 0.042 of
+         #3a3a3a. */
+    var TAU = Math.PI * 2;
+    var N = 40, K = 22, GAM = 0.82, TX = 128;
+    var D = 2.3, GAP = 0.36, Z0 = (D + GAP) / 2, ZS = -Z0;
+    var S = 104, CX = 235, CY = 250;
+    var A = 0.86, E = 0.46;                    /* orbit: yaw half-width, pitch at the top */
+    var C = 20000, SCAN = 10000, T0 = 500, DT = 220, HOLD = 0.055;
+    var SW = K * DT, TA = T0 + SW + 1700;      /* first alignment is centred at TA */
+
+    var M = smatrix.cache;
+    if (!M) {
+      M = smatrix.cache = {};
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      var C5 = [hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'), hex('--coral-500', '#d9376e')];
+      var C7 = [hex('--blue-700', '#163a9a'), hex('--violet-700', '#6b35c4'), hex('--coral-700', '#a0183f')];
+      var ramp = function (P, f) {
+        var x = Math.max(0, Math.min(1, f)) * 2, i = Math.min(1, Math.floor(x)), u = x - i;
+        return [P[i][0] + (P[i + 1][0] - P[i][0]) * u, P[i][1] + (P[i + 1][1] - P[i][1]) * u,
+                P[i][2] + (P[i + 1][2] - P[i][2]) * u];
+      };
+      var css = function (c, a) {
+        return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a + ')';
+      };
+      M.css = css;
+      M.hue5 = []; M.hue7 = [];
+      for (var k = 0; k <= K; k++) { M.hue5.push(ramp(C5, k / K)); M.hue7.push(ramp(C7, k / K)); }
+      M.vio5 = C5[1]; M.vio7 = C7[1];
+      M.muted = hex('--muted', '#5f5b53');
+      M.hair = hex('--hair2', '#cfcbc1');
+      M.white = hex('--raised', '#ffffff');
+
+      /* P: from each site the mass is carried forward round the centre and a
+         little inward, then spread by a Gaussian over its neighbours. Each
+         column sums to one, so mass is conserved and rho(P) = 1. */
+      var h = 2 / N, NN = N * N, W0 = TAU / K, SH = 0.8, DR = 0.013, SIG = 0.75;
+      var src = [], dst = [], wt = [];
+      for (var j = 0; j < N; j++) {
+        for (var i = 0; i < N; i++) {
+          var x = -1 + (i + 0.5) * h, y = 1 - (j + 0.5) * h;
+          var r = Math.sqrt(x * x + y * y), th = Math.atan2(y, x);
+          var dth = W0 * (1 + SH * (0.55 - r)), r2 = Math.max(0.05, r - DR);
+          var fi = (r2 * Math.cos(th + dth) + 1) / h - 0.5, fj = (1 - r2 * Math.sin(th + dth)) / h - 0.5;
+          var ii = Math.round(fi), jj = Math.round(fj), b0 = wt.length, tot = 0;
+          for (var dj = -3; dj <= 3; dj++) {
+            for (var di = -3; di <= 3; di++) {
+              var ci = ii + di, cj = jj + dj;
+              var w = Math.exp(-((ci - fi) * (ci - fi) + (cj - fj) * (cj - fj)) / (2 * SIG * SIG));
+              if (w < 1e-4) continue;
+              ci = Math.max(0, Math.min(N - 1, ci)); cj = Math.max(0, Math.min(N - 1, cj));
+              src.push(j * N + i); dst.push(cj * N + ci); wt.push(w); tot += w;
+            }
           }
-          px = x; py = y;
+          for (var q = b0; q < wt.length; q++) wt[q] /= tot;
         }
       }
+
+      /* cubic B-spline upsampling, lattice to texture, separable */
+      var bw = [], bi = [];
+      for (var p = 0; p < TX; p++) {
+        var qq = (p + 0.5) * N / TX - 0.5, fl = Math.floor(qq), u = qq - fl;
+        bi.push([0, 1, 2, 3].map(function (m) { return Math.max(0, Math.min(N - 1, fl - 1 + m)); }));
+        bw.push([(1 - u) * (1 - u) * (1 - u) / 6, (3 * u * u * u - 6 * u * u + 4) / 6,
+                 (-3 * u * u * u + 3 * u * u + 3 * u + 1) / 6, u * u * u / 6]);
+      }
+      var up = function (f) {
+        var tmp = new Float32Array(N * TX), out = new Float32Array(TX * TX), a, m, s;
+        for (a = 0; a < N; a++) {
+          for (p = 0; p < TX; p++) {
+            for (s = 0, m = 0; m < 4; m++) s += bw[p][m] * f[a * N + bi[p][m]];
+            tmp[a * TX + p] = s;
+          }
+        }
+        for (a = 0; a < TX; a++) {
+          for (p = 0; p < TX; p++) {
+            for (s = 0, m = 0; m < 4; m++) s += bw[p][m] * tmp[bi[p][m] * TX + a];
+            out[p * TX + a] = s;
+          }
+        }
+        return out;
+      };
+      /* a texture: per pixel a value v in 0..1 sets alpha and deepens the
+         colour from -500 toward -700 at the core, transparent where v is 0 */
+      var paint = function (F, v, c5, c7, alphaOf, deep) {
+        deep = deep || 0.55;
+        var cv = document.createElement('canvas');
+        cv.width = cv.height = TX;
+        var cx = cv.getContext('2d'), im = cx.createImageData(TX, TX), d = im.data;
+        for (var n = 0; n < TX * TX; n++) {
+          var vv = v(F[n]);
+          if (vv <= 0) continue;
+          var mix = deep * vv * vv;
+          d[4 * n] = c5[0] + (c7[0] - c5[0]) * mix;
+          d[4 * n + 1] = c5[1] + (c7[1] - c5[1]) * mix;
+          d[4 * n + 2] = c5[2] + (c7[2] - c5[2]) * mix;
+          d[4 * n + 3] = 255 * alphaOf(vv);
+        }
+        cx.putImageData(im, 0, 0);
+        return cv;
+      };
+
+      /* the series: slice k = g^k P^k x0, and the running sums */
+      var X0 = [0.68 * Math.cos(-0.35), 0.68 * Math.sin(-0.35)];
+      var xk = new Float64Array(NN), run = new Float64Array(NN);
+      var i0 = Math.round((X0[0] + 1) / h - 0.5), j0 = Math.round((1 - X0[1]) / h - 0.5);
+      xk[j0 * N + i0] = 1;
+      M.x0 = [-1 + (i0 + 0.5) * h, 1 - (j0 + 0.5) * h];
+      M.com = [];
+      var slices = [], sums = [], margX = [], margY = [];
+      for (k = 0; k <= K; k++) {
+        var gk = Math.pow(GAM, k), cxm = 0, cym = 0, mass = 0;
+        for (var sI = 0; sI < NN; sI++) {
+          var vS = xk[sI];
+          run[sI] += gk * vS;
+          mass += vS; cxm += vS * (-1 + ((sI % N) + 0.5) * h); cym += vS * (1 - (Math.floor(sI / N) + 0.5) * h);
+        }
+        M.com.push([cxm / mass, cym / mass]);
+        var mx = new Float64Array(N), my = new Float64Array(N);
+        for (sI = 0; sI < NN; sI++) { mx[sI % N] += xk[sI]; my[Math.floor(sI / N)] += xk[sI]; }
+        margX.push(mx); margY.push(my);
+        slices.push(xk); sums.push(Float64Array.from(run));
+        var nx = new Float64Array(NN);
+        for (q = 0; q < wt.length; q++) nx[dst[q]] += xk[src[q]] * wt[q];
+        xk = nx;
+      }
+      /* Textures are painted the first time a frame needs them, so arriving
+         costs the chain and the first slice, and the rest spread over the
+         build at one or two a frame. The sum is on a log scale over three
+         decades of its own peak (the peak is the identity term at x0). */
+      var full = up(sums[K]), spk = 0;
+      for (n = 0; n < full.length; n++) if (full[n] > spk) spk = full[n];
+      var logv = function (f) { var v = 1 + Math.log(Math.max(f, 1e-12) / spk) / Math.LN10 / 3; return v <= 0.02 ? 0 : (v - 0.02) / 0.98; };
+      var texs = [], parts = [];
+      M.tex = function (k) {
+        if (!texs[k]) {
+          var U = up(slices[k]), pk = 0;
+          for (var n = 0; n < U.length; n++) if (U[n] > pk) pk = U[n];
+          texs[k] = paint(U, function (f) { var v = f / pk; return v < 0.035 ? 0 : (v - 0.035) / 0.965; },
+                          M.hue5[k], M.hue7[k], function (v) { return Math.pow(v, 0.95); });
+        }
+        return texs[k];
+      };
+      M.part = function (k) {
+        if (!parts[k]) {
+          parts[k] = paint(k === K ? full : up(sums[k]), logv, M.vio5, M.vio7,
+                           function (v) { return Math.min(1, 1.25 * Math.pow(v, 1.15)); }, 0.85);
+        }
+        return parts[k];
+      };
+
+      /* the other two views of the block, as in a video cube's xt and yt
+         planes: each order's mass summed over y, laid along x on the floor,
+         and summed over x, laid along y on the side wall. Each order is
+         normalised to its own peak and fades with g^k, like its slice; the
+         texture runs continuously in k between the orders. */
+      var side = function (marg, alongK) {
+        var cv = document.createElement('canvas');
+        cv.width = cv.height = TX;
+        var cx = cv.getContext('2d'), im = cx.createImageData(TX, TX), d = im.data;
+        var U1 = [], pk1 = [];
+        for (var k3 = 0; k3 <= K; k3++) {
+          var row = new Float32Array(TX), pk3 = 0;
+          for (var p3 = 0; p3 < TX; p3++) {
+            for (var m3 = 0, s3 = 0; m3 < 4; m3++) s3 += bw[p3][m3] * marg[k3][bi[p3][m3]];
+            row[p3] = s3; if (s3 > pk3) pk3 = s3;
+          }
+          U1.push(row); pk1.push(pk3);
+        }
+        for (var a3 = 0; a3 < TX; a3++) {             /* a3 runs along k */
+          var kf = (a3 + 0.5) / TX * K, k0 = Math.min(K - 1, Math.floor(kf)), w1 = kf - k0;
+          var wk = (0.34 + 0.66 * Math.pow(GAM, kf)) * (1 - ease((kf - K + 2.2) / 2.2));
+          var c5 = M.hue5[k0].map(function (v, i) { return v + (M.hue5[k0 + 1][i] - v) * w1; });
+          var c7 = M.hue7[k0].map(function (v, i) { return v + (M.hue7[k0 + 1][i] - v) * w1; });
+          for (var b3 = 0; b3 < TX; b3++) {           /* b3 runs across the wall */
+            var v3 = (1 - w1) * U1[k0][b3] / pk1[k0] + w1 * U1[k0 + 1][b3] / pk1[k0 + 1];
+            v3 = v3 < 0.05 ? 0 : (v3 - 0.05) / 0.95;
+            if (v3 <= 0) continue;
+            var o3 = alongK ? 4 * (b3 * TX + a3) : 4 * (a3 * TX + b3), mix3 = 0.5 * v3 * v3;
+            d[o3] = c5[0] + (c7[0] - c5[0]) * mix3;
+            d[o3 + 1] = c5[1] + (c7[1] - c5[1]) * mix3;
+            d[o3 + 2] = c5[2] + (c7[2] - c5[2]) * mix3;
+            d[o3 + 3] = 255 * wk * Math.pow(v3, 1.1);
+          }
+        }
+        cx.putImageData(im, 0, 0);
+        return cv;
+      };
+      M.floorTex = side(margX, false);   /* rows: k from the front; columns: x */
+      M.sideTex = side(margY, true);     /* columns: k from the front; rows: y from the top */
     }
 
-    /* the S-matrix itself: one arrow, and it accounts for none of the above */
-    var lit = REDUCED ? 1 : ease(Math.min(1, cyc * 1.25));
-    g.strokeStyle = rgba(ink, 0.30 + 0.62 * lit);
-    g.lineWidth = 4.2; g.lineCap = 'round';
-    g.beginPath(); g.moveTo(IX + 20, MY); g.lineTo(OX - 26, MY); g.stroke();
-    g.beginPath();
-    g.moveTo(OX - 26, MY - 9); g.lineTo(OX - 10, MY); g.lineTo(OX - 26, MY + 9);
-    g.closePath(); g.fillStyle = rgba(ink, 0.30 + 0.62 * lit); g.fill();
+    /* --- time ----------------------------------------------------------- */
+    var RED = REDUCED;
+    var T = RED ? 60000 : t;
+    /* the camera loop: phi runs once round per cycle at a steady rate, is
+       held at 0 (looking straight down the depth axis) for 2 x HOLD of it,
+       and eases in and out of the hold over RAMP of the loop, so it arrives
+       and leaves with zero velocity and zero acceleration */
+    var phi, RAMP = 0.14;
+    var Fr = function (x) { return x * x * x * x * (2.5 + x * (x - 3)); };   /* integral of ease */
+    if (RED) phi = 4.75;
+    else {
+      var u = (T - TA) / C;
+      u -= Math.floor(u);
+      if (u < HOLD || u > 1 - HOLD) phi = 0;
+      else {
+        var s = (u - HOLD) / (1 - 2 * HOLD), I;
+        if (s < RAMP) I = RAMP * Fr(s / RAMP);
+        else if (s > 1 - RAMP) I = 1 - RAMP - RAMP * Fr((1 - s) / RAMP);
+        else I = s - RAMP / 2;
+        phi = TAU * I / (1 - RAMP);
+      }
+    }
+    var psi = A * Math.sin(phi), eps = E * Math.sin(phi / 2);
+    var ang = Math.min(Math.abs(phi), TAU - Math.abs(phi));
+    var hero = RED ? 0 : 1 - ease(ang / 0.5);            /* 1 when aligned */
 
-    /* the two states */
-    [[IX, blue7], [OX, blue7]].forEach(function (n) {
-      g.beginPath(); g.arc(n[0], MY, 17, 0, Math.PI * 2);
-      g.fillStyle = rgba(token('--raised', '#ffffff'), 1); g.fill();
-      g.strokeStyle = rgba(n[1], 1); g.lineWidth = 3; g.stroke();
-    });
+    /* scan: runs through the orders every SCAN ms, the first run builds */
+    var KW = K * (D + GAP) / D;                          /* the order at which the scan meets the sum */
+    var tau = T - T0, ks = -10, sweep = 0, arrive = 0;
+    if (!RED && tau >= 0) {
+      var tl = tau - Math.floor(tau / SCAN) * SCAN;
+      ks = tl / DT;
+      sweep = ease(tl / 400);
+      arrive = 1 - ease((ks - K) / (KW - K));             /* fades as it crosses the gap to the wall */
+    }
+    var built = RED ? K + 1 : tau / DT;                  /* orders developed in the first run */
 
-    /* the decaying terms, drawn as a strip so the convergence is a picture */
-    var BX = 128, BY = 402, BW = 214;
-    g.strokeStyle = rgba(hair, 1); g.lineWidth = 1.4;
-    g.beginPath(); g.moveTo(BX, BY + 26); g.lineTo(BX + BW, BY + 26); g.stroke();
-    for (var m = 0; m < ORDERS; m++) {
-      var h2 = 24 * Math.pow(0.62, m);
-      var a2 = REDUCED ? 1 : ease((cyc * (ORDERS + 2) - (m + 1)) / 1.4);
-      g.fillStyle = rgba(blue7, 0.30 + 0.62 * a2);
-      g.fillRect(BX + m * (BW / ORDERS), BY + 26 - h2, BW / ORDERS - 6, h2);
+    /* --- projection ----------------------------------------------------- */
+    var cp = Math.cos(psi), sp = Math.sin(psi), ce = Math.cos(eps), se = Math.sin(eps);
+    function P(x, y, z, o) {
+      var x1 = x * cp + z * sp, z1 = -x * sp + z * cp;
+      o[0] = CX + S * x1; o[1] = CY - S * (y * ce - z1 * se); o[2] = y * se + z1 * ce;
+      return o;
+    }
+    var O = [0, 0, 0], Ua = [0, 0, 0], Va = [0, 0, 0];
+    function frame(z) {                         /* the affine map of the unit square at depth z */
+      P(-1, 1, z, O); P(1, 1, z, Ua); P(-1, -1, z, Va);
+      return [Ua[0] - O[0], Ua[1] - O[1], Va[0] - O[0], Va[1] - O[1], O[0], O[1]];
+    }
+    function quad(m) {
+      g.beginPath();
+      g.moveTo(m[4], m[5]); g.lineTo(m[4] + m[0], m[5] + m[1]);
+      g.lineTo(m[4] + m[0] + m[2], m[5] + m[1] + m[3]); g.lineTo(m[4] + m[2], m[5] + m[3]);
+      g.closePath();
+    }
+    function zk(k) { return Z0 - D * k / K; }
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.lineJoin = 'round'; g.lineCap = 'round';
+    g.imageSmoothingEnabled = true;
+
+    /* --- the floor: a soft shadow under the block ------------------------- */
+    if (se > 0.03) {
+      var fy = -1.02, sh = Math.min(1, (se - 0.03) / 0.17);
+      P(-1.65, fy, Z0 + 0.35, O); P(1.65, fy, Z0 + 0.35, Ua); P(-1.65, fy, ZS - 0.35, Va);
+      g.save();
+      g.transform(Ua[0] - O[0], Ua[1] - O[1], Va[0] - O[0], Va[1] - O[1], O[0], O[1]);
+      var fg = g.createRadialGradient(0.5, 0.5, 0, 0.5, 0.5, 0.5);
+      fg.addColorStop(0, M.css(M.hair, 0.42 * sh));
+      fg.addColorStop(0.55, M.css(M.hair, 0.16 * sh));
+      fg.addColorStop(1, M.css(M.hair, 0));
+      g.fillStyle = fg;
+      g.fillRect(0, 0, 1, 1);
+      g.restore();
+    }
+
+    /* --- the block: its eight corners, back faces and back edges ---------- */
+    var BX = 1.0, cz = [Z0, ZS], cor = [];
+    for (var c = 0; c < 8; c++) {
+      cor.push(P(c & 1 ? BX : -BX, c & 2 ? BX : -BX, cz[c >> 2], [0, 0, 0]));
+    }
+    var FACES = [[0, 2, 6, 4, -1, 0, 0], [1, 3, 7, 5, 1, 0, 0], [0, 1, 5, 4, 0, -1, 0],
+                 [2, 3, 7, 6, 0, 1, 0], [4, 5, 7, 6, 0, 0, -1], [0, 1, 3, 2, 0, 0, 1]];
+    var EDGES = [[0, 1], [2, 3], [4, 5], [6, 7], [0, 2], [1, 3], [4, 6], [5, 7], [0, 4], [1, 5], [2, 6], [3, 7]];
+    var zc = P(0, 0, 0, [0, 0, 0])[2];
+    var faceDepth = function (f) { return P(f[4], f[5], f[6], [0, 0, 0])[2] - zc; };
+    /* an edge is in front when either face that holds it faces the camera */
+    var vis = {};
+    for (var fi2 = 0; fi2 < FACES.length; fi2++) {
+      var fd = faceDepth(FACES[fi2]);
+      for (var e = 0; e < 4; e++) {
+        var ea = FACES[fi2][e], eb = FACES[fi2][(e + 1) % 4], key = Math.min(ea, eb) * 8 + Math.max(ea, eb);
+        vis[key] = Math.max(vis[key] == null ? -9 : vis[key], fd);
+      }
+    }
+    var front = function (ed) { return vis[Math.min(ed[0], ed[1]) * 8 + Math.max(ed[0], ed[1])] > 1e-6; };
+    var edgeA = function (ed) {
+      var v = vis[Math.min(ed[0], ed[1]) * 8 + Math.max(ed[0], ed[1])];
+      return 0.26 + 0.36 * ease(v / 0.12);
+    };
+    for (fi2 = 0; fi2 < FACES.length - 1; fi2++) {
+      var F = FACES[fi2];
+      if (faceDepth(F) >= 0) continue;
+      g.fillStyle = M.css(M.hair, 0.11);
+      g.beginPath();
+      g.moveTo(cor[F[0]][0], cor[F[0]][1]);
+      for (e = 1; e < 4; e++) g.lineTo(cor[F[e]][0], cor[F[e]][1]);
+      g.closePath(); g.fill();
+    }
+    g.lineWidth = 1;
+    for (e = 0; e < 12; e++) {
+      if (front(EDGES[e])) continue;
+      g.strokeStyle = M.css(M.muted, edgeA(EDGES[e]));
+      g.beginPath(); g.moveTo(cor[EDGES[e][0]][0], cor[EDGES[e][0]][1]);
+      g.lineTo(cor[EDGES[e][1]][0], cor[EDGES[e][1]][1]); g.stroke();
+    }
+
+    /* --- the floor and the far side wall: the stack seen from below and from the side */
+    var ZD = Z0 - D;
+    /* during the build the walls fill order by order, just behind the scan */
+    var wf = RED ? 1 : Math.max(0, Math.min(1, (built + 0.2) / K));
+    if (se > 0.02 && wf > 0.004) {
+      var fa = Math.min(1, (se - 0.02) / 0.18) * 0.62;
+      P(-1, -1, Z0, O); P(1, -1, Z0, Ua); P(-1, -1, ZD, Va);
+      g.save();
+      g.transform(Ua[0] - O[0], Ua[1] - O[1], Va[0] - O[0], Va[1] - O[1], O[0], O[1]);
+      g.globalAlpha = fa;
+      g.drawImage(M.floorTex, 0, 0, TX, TX * wf, 0, 0, 1, wf);
+      g.restore();
+    }
+    if (Math.abs(sp) > 0.02 && wf > 0.004) {
+      var xw = sp > 0 ? 1 : -1;
+      P(xw, 1, Z0, O); P(xw, 1, ZD, Ua); P(xw, -1, Z0, Va);
+      g.save();
+      g.transform(Ua[0] - O[0], Ua[1] - O[1], Va[0] - O[0], Va[1] - O[1], O[0], O[1]);
+      g.globalAlpha = Math.min(1, (Math.abs(sp) - 0.02) / 0.18) * 0.55;
+      g.drawImage(M.sideTex, 0, 0, TX * wf, TX, 0, 0, wf, 1);
+      g.restore();
+    }
+    g.globalAlpha = 1;
+
+    /* --- the back wall: the sum, the out-state ----------------------------- */
+    var mS = frame(ZS);
+    g.fillStyle = M.css(M.white, 0.55);
+    quad(mS); g.fill();
+    g.save();
+    g.transform(mS[0], mS[1], mS[2], mS[3], mS[4], mS[5]);
+    var bw2 = built - 1;                                /* the wall lags the scan by one order */
+    var inBuild = !RED && bw2 < K;
+    if (inBuild) {
+      var kb = Math.max(0, Math.min(K - 1, Math.floor(bw2))), fr = ease(Math.max(0, Math.min(1, bw2 - kb)));
+      var a0 = bw2 < 0 ? ease(built) : 1;               /* the identity term arrives first */
+      if (built > 0) {
+        g.globalAlpha = a0 * (1 - fr);
+        g.drawImage(M.part(kb), 0, 0, 1, 1);
+        g.globalAlpha = a0 * fr;
+        g.drawImage(M.part(kb + 1), 0, 0, 1, 1);
+      }
+    } else {
+      var done = RED ? 1 : ease((bw2 - K) / 1.5);
+      g.globalAlpha = 1;
+      g.drawImage(M.part(K), 0, 0, 1, 1);
+      /* hero: the aligned view, the sum is everything that is left */
+      if (hero > 0.01) {
+        g.shadowColor = M.css(M.vio5, 0.9);
+        g.shadowBlur = 16 * hero;
+        g.globalAlpha = 0.55 * hero * done;
+        g.drawImage(M.part(K), 0, 0, 1, 1);
+        g.shadowBlur = 0;
+      }
+    }
+    /* each order the scan passes flows into the sum, in its own colour */
+    if (sweep > 0.01 && !inBuild) {
+      for (var kk = Math.max(0, Math.floor(ks - 2.8)); kk <= Math.min(K, Math.ceil(ks + 0.4)); kk++) {
+        var wdep = Math.max(0, 1 - Math.abs(ks - kk - 1.2) / 1.6);
+        if (wdep <= 0.01) continue;
+        g.globalAlpha = 0.5 * wdep * sweep * done * (0.45 + 0.55 * Math.pow(GAM, kk * 0.5));
+        g.drawImage(M.tex(kk), 0, 0, 1, 1);
+      }
+    }
+    g.restore();
+    g.globalAlpha = 1;
+    g.strokeStyle = M.css(M.vio7, 0.45);
+    g.lineWidth = 1.2;
+    quad(mS); g.stroke();
+
+    /* --- the slices, far to near, with the thread and the scan between ---- */
+    var pts = [];
+    for (var k2 = 0; k2 <= K; k2++) pts.push(P(M.com[k2][0], M.com[k2][1], zk(k2), [0, 0, 0]));
+    var zScan = Z0 - D * ks / K;
+    var scanDrawn = false;
+    var sheenX = 0.5 + 0.4 * Math.sin(psi * 1.4 + eps);
+    function drawScan() {
+      scanDrawn = true;
+      var sa = sweep * arrive;
+      if (sa <= 0.01 || zScan < ZS || zScan > Z0 + 0.02) return;
+      var m = frame(zScan), kf = Math.max(0, Math.min(K, ks)), k0 = Math.min(K - 1, Math.floor(kf)), w = kf - k0;
+      var hc = [0, 1, 2].map(function (i) { return M.hue5[k0][i] + (M.hue5[k0 + 1][i] - M.hue5[k0][i]) * w; });
+      g.fillStyle = M.css(hc, 0.07 * sa * (1 - hero));
+      quad(m); g.fill();
+      g.save();
+      g.shadowColor = M.css(hc, 0.8);
+      g.shadowBlur = 8;
+      g.strokeStyle = M.css(hc, 0.85 * sa);
+      g.lineWidth = 1.6;
+      quad(m); g.stroke();
+      g.restore();
+    }
+    for (k2 = K; k2 >= 0; k2--) {
+      var z = zk(k2);
+      if (!scanDrawn && zScan < z) drawScan();
+      /* how far this order has developed: the first scan builds them */
+      var dev = RED || k2 === 0 ? 1 : ease((built - k2 + 0.4) / 1.2);
+      if (dev <= 0.002) continue;
+      var gk2 = Math.pow(GAM, k2);
+      var near = RED ? 0 : sweep * Math.exp(-Math.pow((ks - k2) / 1.1, 2));
+      var flow = RED ? 0 : 0.1 * Math.sin(TAU * (T / 2600 - k2 / 8));
+      var al = Math.min(1, (0.42 + 0.58 * gk2) * (1 + 0.5 * near + flow)) * dev * (1 - 0.62 * hero);
+      /* the thread from this slice to the next one back */
+      if (k2 < K && built > k2 + 1) {
+        var th2 = ease(built - k2 - 1);
+        g.strokeStyle = M.css(M.hue7[k2], 0.5 * th2 * dev * (1 - 0.7 * hero));
+        g.lineWidth = 1.1;
+        g.beginPath(); g.moveTo(pts[k2 + 1][0], pts[k2 + 1][1]); g.lineTo(pts[k2][0], pts[k2][1]); g.stroke();
+      }
+      var m2 = frame(z);
+      /* the glass of the slide, faint, so the block has a body. Colour alpha
+         is 8 bit, so plates that fade in step all cross the same 1/255 level
+         on the same frame and the stack's tint jumps; each plate fades over
+         its own stretch of the approach instead. */
+      var h5 = M.hue5[k2];
+      var gl = Math.max(0, Math.min(1, (1 - hero) * 1.6 - 0.6 * k2 / K));
+      if (gl * dev > 0.001) {
+        g.fillStyle = M.css(h5, 0.018 * dev * gl);
+        quad(m2); g.fill();
+      }
+      g.save();
+      g.transform(m2[0], m2[1], m2[2], m2[3], m2[4], m2[5]);
+      g.globalAlpha = al;
+      g.drawImage(M.tex(k2), 0, 0, 1, 1);
+      g.restore();
+      g.globalAlpha = 1;
+      if (near > 0.02) {
+        g.strokeStyle = M.css(h5, 0.45 * near * dev);
+        g.lineWidth = 1;
+        quad(m2); g.stroke();
+      }
+      /* the bead: this order's centre of mass */
+      g.fillStyle = M.css(M.hue7[k2], (0.55 + 0.4 * near) * dev * (1 - 0.7 * hero));
+      g.beginPath(); g.arc(pts[k2][0], pts[k2][1], 1.3 + 1.5 * near, 0, TAU); g.fill();
+    }
+    if (!scanDrawn) drawScan();
+
+    /* --- the in-state: one site, on the front face -------------------------- */
+    P(M.x0[0], M.x0[1], Z0, O);
+    g.fillStyle = M.css(M.hue7[0], 1);
+    g.beginPath(); g.arc(O[0], O[1], 2.6, 0, TAU); g.fill();
+
+    /* --- front faces: a sheen; front edges ---------------------------------- */
+    for (fi2 = 0; fi2 < FACES.length; fi2++) {
+      F = FACES[fi2];
+      if (faceDepth(F) <= 0 || F[6] === 1) continue;
+      var c0 = cor[F[0]], c2 = cor[F[2]];
+      var lg = g.createLinearGradient(c0[0], c0[1], c2[0], c2[1]);
+      lg.addColorStop(0, M.css(M.white, 0));
+      lg.addColorStop(Math.max(0.05, Math.min(0.95, sheenX)), M.css(M.white, 0.16));
+      lg.addColorStop(1, M.css(M.white, 0));
+      g.fillStyle = lg;
+      g.beginPath();
+      g.moveTo(cor[F[0]][0], cor[F[0]][1]);
+      for (e = 1; e < 4; e++) g.lineTo(cor[F[e]][0], cor[F[e]][1]);
+      g.closePath(); g.fill();
+    }
+    g.lineWidth = 1.1;
+    for (e = 0; e < 12; e++) {
+      if (!front(EDGES[e])) continue;
+      g.strokeStyle = M.css(M.muted, edgeA(EDGES[e]));
+      g.beginPath(); g.moveTo(cor[EDGES[e][0]][0], cor[EDGES[e][0]][1]);
+      g.lineTo(cor[EDGES[e][1]][0], cor[EDGES[e][1]][1]); g.stroke();
     }
   }
 

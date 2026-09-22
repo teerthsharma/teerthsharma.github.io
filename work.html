@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=53">
-<link rel="stylesheet" href="motion.css?v=53">
-<link rel="stylesheet" href="art.css?v=53">
+<link rel="stylesheet" href="site.css?v=54">
+<link rel="stylesheet" href="motion.css?v=54">
+<link rel="stylesheet" href="art.css?v=54">
 
 <script type="application/ld+json">
 {
@@ -139,19 +139,16 @@
             <div class="figc" style="--figc-ar:470/540">
                 <canvas data-fig="smatrix" data-vb="470 540" aria-hidden="true"></canvas>
                 <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="rv-t rv-d">
-                  <title id="rv-t">Every path summed, and one arrow that mentions none of them</title>
-                  <desc id="rv-d">An in-state on the left and an out-state on the right. Between them the figure draws every path the hop expansion sums, order by order: the direct hop, then the two hop paths, then three, each order fainter than the last because each carries another factor of gamma. Laid over all of them is a single arrow, which is the S-matrix, and which gives no account of the path between them. The strip below is the weight of each order, and it shrinks geometrically, which is why the sum is finite when gamma times the spectral radius of P stays under one.</desc>
-                  <text x="235" y="34" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">every path between them, summed</text>
-                  <text x="235" y="58" text-anchor="middle" font-size="15" fill="var(--muted)">Wheeler, 1937: no account of the path between them</text>
-                  <text x="58" y="248" text-anchor="middle" font-size="15" font-weight="600" fill="var(--blue-700)">in</text>
-                  <text x="412" y="248" text-anchor="middle" font-size="15" font-weight="600" fill="var(--blue-700)">out</text>
-                  <text x="235" y="392" text-anchor="middle" font-size="15" fill="var(--muted)">each order weighs another factor of gamma</text>
-                  <text x="235" y="470" text-anchor="middle" font-size="17" font-weight="600" fill="var(--blue-700)">the sum is finite while the terms keep shrinking</text>
-                  <text x="235" y="494" text-anchor="middle" font-size="15" fill="var(--muted)">which is the convergence law the physics already had</text>
-                  <text x="235" y="526" text-anchor="middle" font-size="16" fill="var(--muted)">175 declarations in Lean 4, zero sorry</text>
+                  <title id="rv-t">The hop series built as a solid, and seen end on as its sum</title>
+                  <desc id="rv-d">An illustration of the reading resolvent makes, not a measurement: the project's own README says the reconciliation with the S-matrix adds no measurement of its own. The lattice and its transition matrix are made up for the picture, and the slices are computed from them exactly. The resolvent of one causal attention head, (I − γP)⁻¹, expands as I + γP + γ²P² and so on, one hop per term, and here each term is one translucent slice of a glass block. The plane of a slice is the state space of a small lattice and the depth of the block is hop order. The front slice is the in-state, all of its mass on one site. Each slice behind it is one more hop of a directed transition matrix that carries the mass forward round the centre and spreads it a little, weighted by one more factor of gamma, so the plume travels and widens and runs through the block as a tapering spiral: the whole path seen at once. Colour runs from blue through violet to coral as the order grows, and each slice is fainter than the one before, because the terms shrink while γ·ρ(P) &lt; 1. A thin thread joins each slice's centre of mass. The floor and the far side wall show the same stack from below and from the side, each order's mass summed across one axis, so the spiral casts a wave on each. The back wall is the sum of every slice, the out-state, in a single colour. A scan plane runs through the orders, the first time building them one by one, and each order it passes flows into the sum. Once a cycle the camera turns to look straight down the stack: every slice falls exactly onto the sum, the floor and the side wall turn edge on, and the path through the depth can no longer be seen. That is the S-matrix as Wheeler wrote it in 1937, in-states to out-states with no account of the path between them. Then the camera turns away and the path is back. The project proves in Lean 4, in 175 declarations with zero sorry, that softmax attention and Markov path composition are settings of this one operator.</desc>
+                  <text x="235" y="31" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">(I − γP)<tspan dy="-7" font-size="14">−1</tspan><tspan dy="7"> = I + γP + γ</tspan><tspan dy="-7" font-size="14">2</tspan><tspan dy="7">P</tspan><tspan dy="-7" font-size="14">2</tspan><tspan dy="7"> + …</tspan></text>
+                  <text x="235" y="55" text-anchor="middle" font-size="15" fill="var(--muted)">each slice is one more hop, shrinking while γ·ρ(P) &lt; 1</text>
+                  <text x="235" y="458" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">no account of the path between them</text>
+                  <text x="235" y="480" text-anchor="middle" font-size="15" fill="var(--muted)">Wheeler, 1937</text>
+                  <text x="235" y="516" text-anchor="middle" font-size="16" fill="var(--muted)">175 declarations in Lean 4, zero sorry</text>
                 </svg>
               </div>
-            <figcaption class="fig__cap">The mask and the graph, one operator drawn twice.</figcaption>
+            <figcaption class="fig__cap">Every hop of the series is one slice, so the path from in-state to out-state becomes a solid. Look straight down it and the slices land on their sum, with no account of the path between them.</figcaption>
           </figure>
         </div>
 </div>
@@ -597,7 +594,7 @@
 
 </main>
 
-<script src="fig.js?v=53" defer></script>
-<script src="site.js?v=53" defer></script>
+<script src="fig.js?v=54" defer></script>
+<script src="site.js?v=54" defer></script>
 </body>
 </html>
