@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=71">
-<link rel="stylesheet" href="motion.css?v=71">
-<link rel="stylesheet" href="art.css?v=71">
+<link rel="stylesheet" href="site.css?v=72">
+<link rel="stylesheet" href="motion.css?v=72">
+<link rel="stylesheet" href="art.css?v=72">
 
 <script type="application/ld+json">
 {
@@ -274,17 +274,20 @@
 <div class="proj__figure">
 <div class="proj__art">
           <figure class="fig">
-            <div class="figc" style="--figc-ar:470/540"><canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="cs-t cs-d">
-                  <title id="cs-t">Distinct entities focus on distinct answers, except the ones the model cannot reach, which collapse onto one</title>
-                  <desc id="cs-d">Distinct entities enter on the left, each a beam of light in its own colour, evenly spaced, and none of them is special going in. Every beam passes through the model and focuses on an answer on the right. Where the model reaches the fact, each beam focuses on an answer of its own, and each of those answers holds one colour. Where it cannot, beams of several different colours bend and focus on the same answer, piling up into one bright knot that holds a petal of every colour that landed on it. That collapse can be seen without knowing which entity is which, and it is measurable with no ground truth at all: caustic turns the partition into a certified lower bound on error rate, with five proved bounds and 0.995 AUROC.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">distinct entities stream through the model</text>
-                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">reached, each lands on its own answer</text>
-                  <text x="235" y="450" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">out of reach, they collapse onto one answer</text>
-                  <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">which gives a certified lower bound on error rate</text>
-                  <text x="235" y="510" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
-                  <text x="235" y="532" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
-                </svg></div>
-            <figcaption class="fig__cap">Distinct entities collapse onto one answer. That collapse is the hallucination.</figcaption>
+            <div class="figc" style="--figc-ar:470/540">
+                <canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-caustic-t p-caustic-d">
+                  <title id="p-caustic-t">The answer map as a sheet of light, folding where the model cannot reach the fact</title>
+                  <desc id="p-caustic-d">An illustration of what caustic measures. A model's answer map sends each entity to an answer, and the map is drawn as a sheet of light: each thread across it is one entity, and depth is the context, coherent at the front and incoherent at the back. At the front the sheet rises smoothly and every entity lands on an answer of its own. Further back it pleats and folds over itself, and distinct entities land on the same answer. Dropping the sheet onto the floor forgets which entity is which; the shadows of its threads crowd exactly where it folds, and that crowd is the caustic, the cusp where distinct preimages merge, found without knowing a single right answer. A plane sweeps the context and drops each entity onto its answer. Entities that land together form one class of the partition, and in a class of s entities at least s minus one are wrong whatever the truth is, so the drops certified wrong, drawn coral, number exactly n minus m. The fold drawn is the Whitney cusp standing in for a model's answer map, and the number of entities is illustrative. The detector reaches 0.995 AUROC, with five proved bounds and no ground truth used.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">a caustic is where a map folds</text>
+                  <text x="235" y="53" text-anchor="middle" font-size="15" fill="var(--muted)">and distinct entities merge onto one answer</text>
+                  <text x="235" y="452" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">found without the answer key</text>
+                  <text x="235" y="474" text-anchor="middle" font-size="15" fill="var(--muted)">at least n − m answers are provably wrong</text>
+                  <text x="235" y="512" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
+                  <text x="235" y="534" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
+                </svg>
+              </div>
+            <figcaption class="fig__cap">When the model cannot reach a fact its answer map folds, distinct entities merge onto one answer, and the fold shows without knowing which answer is right.</figcaption>
           </figure>
         </div>
 </div>
@@ -629,7 +632,7 @@
 
 </main>
 
-<script src="fig.js?v=71" defer></script>
-<script src="site.js?v=71" defer></script>
+<script src="fig.js?v=72" defer></script>
+<script src="site.js?v=72" defer></script>
 </body>
 </html>

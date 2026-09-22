@@ -79,226 +79,250 @@
   }
 
   /* ==================================================================== */
-  /* caustic                                                              */
+  /* caustic — caustic                                                   */
   /* ==================================================================== */
   function caustic(g, vb, t, st) {
-    /* A caustic is where distinct rays crowd onto one place, and that is the
-       claim the project makes about a model that cannot reach a fact. So every
-       entity here is a beam of rays in its own colour, and every beam focuses
-       on its answer. Where the fact is reached, each focuses on an answer of
-       its own. Where it is not, beams of different colours bend and focus on
-       the same answer, and the knot there is bright only because their rays
-       genuinely converge on it. Nobody draws the crowding. It arrives.
+    /* caustic. "A caustic is where a map folds and distinct preimages
+       merge." A model answers a question about an entity; the answer map f
+       sends entities to answers. When the model reaches the fact, f is one to
+       one: every entity lands on an answer of its own. When it cannot, f
+       folds, and distinct entities land on the same answer.
 
-       The answers are the partition, drawn as petals: one petal for each
-       entity that landed there. A reached answer has one. The knot has one
-       for every entity collapsed onto it, and it rings coral on every arrival,
-       several times as often as any single answer. Which entity is which is
-       never needed to see the difference, which is the point.
+       So the figure is the map itself, drawn as a sheet of light. Across the
+       sheet run the entities, one thread each; into depth runs the context,
+       from coherent at the front to incoherent at the back. The height of a
+       point on the sheet is which entity it is, and its place over the floor
+       is the answer it gets. This is the Whitney cusp, x = u^3 + v u: at the
+       front it rises smoothly and every entity has its own answer; past the
+       middle it pleats, three layers over one place, and the map folds.
 
-       Each ray is stroked on its own, because one path of many subpaths paints
-       their union once and the crowding never accumulates. Blending is plain
-       source-over: it converges on the stroke colour and never past it.
+       Forgetting which entity is which is dropping the sheet onto the floor.
+       The shadows of the threads pile up exactly where the sheet folds, and
+       the pile is the caustic, the cusp 27 x^2 = -4 v^3, bright only because
+       the shadows genuinely crowd there. It is found without knowing a single
+       right answer, which is the point of the project.
 
-       Measured, in the preview harness:
-       - A bead's whole tail vanished in one frame the moment it reached its
-         answer, because the build-front test still applied after the build:
-         the answer's ink dropped by 20 unit^2 in one frame. The test now
-         clamps the head to the answer column first, and every swell leaves
-         zero with zero slope. The largest single-frame ink jump left is a
-         bead crossing a tile, not anything appearing.
-       - --blue-700 and --green-500 are left out of the entity colours. At
-         full alpha they composited at luminance 58 and channel sum 171, at or
-         below #3a3a3a. Without them the darkest pixel is sum 229, luminance 73.
-       - Worst frame is 249 strokes and fills. */
-    var N = 18, R = 5, BW = 7;             /* entities, rays per entity, beam width */
-    var SX = 26, AX = 398;                 /* entities enter at SX, answers sit at AX */
-    var XA = 112, XB = 372;                /* the model: the only place a path may bend */
-    var Y0 = 96, Y1 = 404, KY = 250, GAP = 50;
-    var COLLAPSED = [1, 4, 6, 9, 12, 14, 17];
-    var RANK = [2, 5, 0, 3, 6, 1, 4];      /* the order they land in the knot */
-    var BUILD = 2600, V = 0.105, RIP = 1400;
-    var TT = (AX - SX) / V;                /* one bead's crossing, 3,543 ms */
-    var PAL = [['--blue-500', '#2456dc'], ['--amber-500', '#d96a06'], ['--violet-500', '#a66cf0'],
-               ['--mint-500', '#0b93ab'], ['--amber-700', '#9a4906'], ['--violet-700', '#6b35c4'],
-               ['--mint-700', '#0a6b7c']];
+       A plane sweeps the context. Where it cuts the sheet, each entity drops
+       a line to its answer on the floor. Answers that land together form one
+       class of the partition, and in a class of s entities at least s - 1
+       are wrong whatever the truth is, so exactly n - m of the drops turn
+       coral: the certified lower bound, with no answer key. At the front the
+       count is zero; through the fold it climbs.
 
-    function bend(x) { return ease((x - XA) / (XB - XA)); }
-    function yAt(b, x, o) { var s = bend(x); return b.y0 + (b.T - b.y0) * s + o * (1 - s); }
-    function hash(i, k) { var s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); }
-
-    var G = caustic.geo;
-    if (!G) {
-      G = caustic.geo = { xs: [], beams: [] };
-      for (var x = SX; x < AX; x += 6) G.xs.push(x);
-      G.xs.push(AX);
-      var ci = {}, up = [], dn = [], slot = {}, i, k;
-      for (k = 0; k < COLLAPSED.length; k++) ci[COLLAPSED[k]] = k;
-      for (i = 0; i < N; i++) {
-        if (i in ci) continue;
-        (Y0 + (Y1 - Y0) * i / (N - 1) < KY ? up : dn).push(i);
-      }
-      for (k = 0; k < up.length; k++) slot[up[k]] = Y0 + (KY - GAP - Y0) * k / (up.length - 1);
-      for (k = 0; k < dn.length; k++) slot[dn[k]] = KY + GAP + (Y1 - KY - GAP) * k / (dn.length - 1);
-      for (i = 0; i < N; i++) {
-        var col = i in ci;
-        var b = { y0: Y0 + (Y1 - Y0) * i / (N - 1), col: col, j: col ? ci[i] : -1, pal: i % PAL.length,
-                  D: col ? 200 + RANK[ci[i]] * 210 : 700 * hash(i, 1),
-                  P: 1500 + 700 * hash(i, 2), rays: [] };
-        b.T = col ? KY : slot[i];
-        b.phi = hash(i, 3) * b.P;
-        for (var r = 0; r < R; r++) {
-          var o = (r / (R - 1) - 0.5) * BW, ys = new Float32Array(G.xs.length);
-          for (var s = 0; s < G.xs.length; s++) ys[s] = yAt(b, G.xs[s], o);
-          b.rays.push(ys);
-        }
-        G.beams.push(b);
-      }
-    }
-
-    var T = REDUCED ? 9000 : t;
-    var cs = [];
-    for (var p = 0; p < PAL.length; p++) cs.push(token(PAL[p][0], PAL[p][1]));
-    var coral = token('--coral-500', '#d9376e');
+       The map is the cusp standing in for a model's answer map, and the
+       entity count and binning are illustrative, as the desc says. */
     var TAU = Math.PI * 2;
+    var S = 108, CX = 235, CY = 236;
+    var NE = 21, NSH = 150, NV = 48, NCL = 9;
+    var UA = 1.2, VA = 1.0;                        /* entity range, context range */
+    var HY = 0.72, FY = -1.02;                     /* sheet half-height, floor height */
+    var BIN = 0.02, SWP = 13000;                   /* answer resolution: the coherent front stays one to one */
 
-    g.clearRect(0, 0, vb[0], vb[1]);
+    var M = caustic.cache;
+    if (!M) {
+      var L = {};
+      var hex = function (name, fb) {
+        var h0 = (token(name, fb) || fb).trim().replace('#', '');
+        if (h0.length === 3) h0 = h0[0] + h0[0] + h0[1] + h0[1] + h0[2] + h0[2];
+        var nn = parseInt(h0, 16);
+        return [(nn >> 16) & 255, (nn >> 8) & 255, nn & 255];
+      };
+      var mix = function (a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
+      L.css = function (c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a + ')'; };
+      L.mix = mix;
+      /* an entity's colour is where it sits along the sheet: neighbours are
+         alike, and two colours landing on one answer are two entities */
+      var ramp = [hex('--mint-500', '#0b93ab'), hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'),
+                  hex('--coral-500', '#d9376e'), hex('--amber-500', '#d96a06')];
+      L.ent = [];
+      for (var i = 0; i < NE; i++) {
+        var f = i / (NE - 1) * (ramp.length - 1), fi = Math.min(ramp.length - 2, Math.floor(f));
+        L.ent.push(mix(ramp[fi], ramp[fi + 1], f - fi));
+      }
+      L.coral = hex('--coral-500', '#d9376e'); L.coral7 = hex('--coral-700', '#a0183f');
+      L.vio = hex('--violet-500', '#a66cf0'); L.vio7 = hex('--violet-700', '#6b35c4');
+      L.hair = hex('--hair2', '#cfcbc1'); L.muted = hex('--muted', '#5f5b53');
+      L.white = [255, 255, 255];
+      /* the fold locus projected to the floor: v = -3u^2, x = -2u^3 */
+      L.cusp = [];
+      for (var q = 0; q <= 60; q++) {
+        var uu = -Math.sqrt(VA / 3) + 2 * Math.sqrt(VA / 3) * q / 60, vv2 = -3 * uu * uu;
+        L.cusp.push([(uu * uu * uu + vv2 * uu) / (UA * UA * UA + vv2 * UA), vv2]);
+      }
+      caustic.cache = M = L;
+    }
+
+    var T = REDUCED ? 7400 : t;
+    var css = M.css;
+    var build = REDUCED ? 1 : ease(t / 1400);
+
+    /* camera: a slow drift round the sheet, always looking a little down */
+    var psi = 0.42 + 0.26 * Math.sin(T / 26000 * TAU), eps = 0.36 + 0.06 * Math.sin(T / 19000 * TAU + 1);
+    var cp = Math.cos(psi), sp = Math.sin(psi), ce = Math.cos(eps), se = Math.sin(eps);
+    function P(x, y, z, o) {
+      var x1 = x * cp + z * sp, z1 = -x * sp + z * cp;
+      o[0] = CX + S * x1; o[1] = CY - S * (y * ce - z1 * se); o[2] = y * se + z1 * ce;
+      return o;
+    }
+    /* the map: entity u, context v (front coherent, +VA), answer x. Each
+       context slice is scaled to the same width, UA^3 + v UA being where its
+       end lands; a monotone rescale per slice, so the fold and the partition
+       it makes are exactly those of the cusp */
+    function ans(u, v) { return (u * u * u + v * u) / (UA * UA * UA + v * UA); }
+    function zOf(v) { return v / VA; }                 /* depth: +1 front, -1 back */
+    var pa = [0, 0, 0], pb = [0, 0, 0];
+
     g.globalCompositeOperation = 'source-over';
-    g.lineCap = 'round';
+    g.globalAlpha = 1;
+    g.lineJoin = 'round'; g.lineCap = 'round';
 
-    var n, q, bm, front = [], land = [], pile = 0;
-    for (n = 0; n < N; n++) {
-      bm = G.beams[n];
-      front[n] = SX + (AX - SX) * ease((T - bm.D) / BUILD);
-      land[n] = ease((T - bm.D - 0.86 * BUILD) / 620);
-      if (bm.col) pile += land[n] / COLLAPSED.length;
-    }
+    /* --- the floor: the answer plane ---------------------------------------- */
+    P(-1.18, FY, 1.12, pa);
+    var fl = [P(-1.18, FY, 1.12, [0, 0, 0]), P(1.18, FY, 1.12, [0, 0, 0]),
+              P(1.18, FY, -1.12, [0, 0, 0]), P(-1.18, FY, -1.12, [0, 0, 0])];
+    var fg = g.createLinearGradient(fl[3][0], fl[3][1], fl[0][0], fl[0][1]);
+    fg.addColorStop(0, css(M.hair, 0.05 * build));
+    fg.addColorStop(1, css(M.hair, 0.26 * build));
+    g.fillStyle = fg;
+    g.beginPath(); g.moveTo(fl[0][0], fl[0][1]);
+    for (var c = 1; c < 4; c++) g.lineTo(fl[c][0], fl[c][1]);
+    g.closePath(); g.fill();
+    g.strokeStyle = css(M.hair, 0.55 * build); g.lineWidth = 1;
+    g.stroke();
 
-    /* one cached ray into the current path, cut at the build front */
-    function run(ys, fx) {
-      var xs = G.xs, last = 0;
-      while (last + 1 < xs.length && xs[last + 1] <= fx) last++;
-      g.moveTo(xs[0], ys[0]);
-      for (var m = 1; m <= last; m++) g.lineTo(xs[m], ys[m]);
-      if (last + 1 < xs.length) {
-        g.lineTo(fx, ys[last] + (ys[last + 1] - ys[last]) * (fx - xs[last]) / (xs[last + 1] - xs[last]));
-      }
-    }
-
-    /* the knot's halo sits behind everything that lands in it */
-    if (pile > 0.01) {
-      var br = REDUCED ? 1 : 0.84 + 0.16 * Math.sin(T / 5200 * TAU);
-      var hg = g.createRadialGradient(AX, KY, 0, AX, KY, 54);
-      hg.addColorStop(0, rgba(coral, 0.30 * pile * br));
-      hg.addColorStop(0.45, rgba(coral, 0.12 * pile * br));
-      hg.addColorStop(1, rgba(coral, 0));
-      g.fillStyle = hg;
-      g.beginPath(); g.arc(AX, KY, 54, 0, TAU); g.fill();
-    }
-
-    /* beams: reached first, collapsed on top so the collapse is never hidden */
-    g.lineWidth = 1.25;
-    for (var pass = 0; pass < 2; pass++) {
-      for (n = 0; n < N; n++) {
-        bm = G.beams[n];
-        if (bm.col !== (pass === 1) || front[n] <= SX + 0.5) continue;
-        g.strokeStyle = rgba(cs[bm.pal], 0.34);
-        for (q = 0; q < R; q++) {
-          g.beginPath(); run(bm.rays[q], front[n]); g.stroke();
-        }
-      }
-    }
-
-    /* beads of light travel each beam and are carried into its answer */
-    var rip = [], hit = [], TAIL = 30;
-    for (n = 0; n < N; n++) {
-      bm = G.beams[n];
-      var base = bm.D + 600 + bm.phi;
-      hit[n] = 0;
-      if (T < base) continue;
-      var c2 = cs[bm.pal];
-      for (var m = Math.floor((T - base) / bm.P); m >= 0; m--) {
-        var age = T - base - m * bm.P;
-        if (age > TT + RIP) break;
-        if (age >= TT) {
-          rip.push([bm, (age - TT) / RIP]);
-          /* (s e^(1-s))^2 leaves zero with zero slope, so a landing swells and never pops */
-          var a3 = (age - TT) / 200;
-          hit[n] = Math.max(hit[n], a3 * a3 * Math.exp(2 - 2 * a3));
-        }
-        var xh = SX + V * age;
-        if (xh - TAIL >= AX || Math.min(xh, AX) > front[n] + 1) continue;
-        var xa = Math.max(SX, xh - TAIL), xb = Math.min(AX, xh);
-        var pg = g.createLinearGradient(xh - TAIL, 0, xh, 0);
-        pg.addColorStop(0, rgba(c2, 0));
-        pg.addColorStop(1, rgba(c2, 0.95 * ease((xh - SX) / 14)));
-        g.strokeStyle = pg;
-        g.lineWidth = 3.4;
-        g.lineCap = 'butt';
-        g.beginPath();
-        for (q = 0; q <= 5; q++) {
-          var px = xa + (xb - xa) * q / 5;
-          g.lineTo(px, yAt(bm, px, 0));
-        }
-        g.stroke();
-        /* the head grows out of its entity and shrinks into its answer */
-        var hs = ease(Math.min(xh - SX, AX - xh) / 14);
-        if (hs > 0) {
-          var hy = yAt(bm, xh, 0);
-          g.fillStyle = rgba(c2, 0.18);
-          g.beginPath(); g.arc(xh, hy, 6.5 * hs, 0, TAU); g.fill();
-          g.fillStyle = rgba(c2, 1);
-          g.beginPath(); g.arc(xh, hy, 2.6 * hs, 0, TAU); g.fill();
-        }
-        g.lineCap = 'round';
-      }
-    }
-
-    /* Each arrival rings its answer in that answer's colour. A reached answer
-       holds one entity, so it rings in that entity's colour, once a cycle. The
-       knot is coral and rings for every entity it holds, so it rings several
-       times as often: the crowding shows, and nothing has to be labelled. */
-    for (q = 0; q < rip.length; q++) {
-      bm = rip[q][0];
-      var k2 = rip[q][1], out = 1 - (1 - k2) * (1 - k2) * (1 - k2);
-      g.strokeStyle = rgba(bm.col ? coral : cs[bm.pal], 0.55 * (1 - k2) * (1 - k2) * ease(k2 / 0.14));
-      g.lineWidth = bm.col ? 2.2 : 1.6;
+    /* shadows: many threads dropped onto the floor. Each is faint; where the
+       sheet folds they crowd, and the crowd is the caustic */
+    var k, j, u, v;
+    g.lineWidth = 0.9;
+    for (k = 0; k < NSH; k++) {
+      u = -UA + 2 * UA * (k + 0.5) / NSH;
+      g.strokeStyle = css(M.vio7, 0.05 * build);
       g.beginPath();
-      g.arc(AX, bm.T, bm.col ? 20 + 24 * out : 8 + 9 * out, 0, TAU);
+      for (j = 0; j <= NV; j++) {
+        v = VA - 2 * VA * j / NV;
+        P(ans(u, v), FY, zOf(v), pa);
+        if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+      }
+      g.stroke();
+    }
+    /* the caustic itself: the fold locus, burning */
+    var burn = REDUCED ? 1 : 0.8 + 0.2 * Math.sin(T / 3100 * TAU);
+    for (var pass = 0; pass < 2; pass++) {
+      g.strokeStyle = pass ? css(M.coral7, 0.85 * build) : css(M.coral, 0.18 * build * burn);
+      g.lineWidth = pass ? 1.4 : 6;
+      g.beginPath();
+      for (j = 0; j < M.cusp.length; j++) {
+        P(M.cusp[j][0], FY, zOf(M.cusp[j][1]), pa);
+        if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+      }
       g.stroke();
     }
 
-    /* Every answer is drawn as petals, one per entity that landed on it. A
-       reached answer has one petal. The knot has one for each entity the
-       model collapsed onto it, all round the same centre. */
-    var rot = REDUCED ? 0 : T / 18000 * TAU;
-    for (n = 0; n < N; n++) {
-      bm = G.beams[n];
-      if (land[n] <= 0) continue;
-      var c3 = cs[bm.pal], L = land[n] * (1 + 0.28 * (hit[n] || 0));
-      if (!bm.col) {
-        g.fillStyle = rgba(c3, 1);
-        g.beginPath(); g.arc(AX, bm.T, 5 * L, 0, TAU); g.fill();
-        continue;
-      }
-      var th = rot + bm.j * TAU / COLLAPSED.length;
-      g.fillStyle = rgba(c3, 0.74);
-      g.beginPath();
-      g.ellipse(AX + Math.cos(th) * 10 * L, KY + Math.sin(th) * 10 * L, 11.5 * L, 6 * L, th, 0, TAU);
-      g.fill();
+    /* --- the sweep: where the context plane is now -------------------------- */
+    var ph = REDUCED ? 0.72 : (T % SWP) / SWP;
+    var sw = ph < 0.5 ? ease(ph / 0.5) : 1 - ease((ph - 0.5) / 0.5);
+    var vs = VA - 2 * VA * (0.06 + 0.88 * sw);            /* front to back and back again */
+    var sa = REDUCED ? 1 : ease((T - 1400) / 900);
+
+    /* the answers at this context, binned; a class of s holds s - 1 certified wrong */
+    var xs = [], cls = {}, order = [];
+    for (i = 0; i < NE; i++) {
+      u = -UA + 2 * UA * i / (NE - 1);
+      xs.push(ans(u, vs));
+      var b = Math.round(xs[i] / BIN);
+      if (!cls[b]) { cls[b] = []; order.push(b); }
+      cls[b].push(i);
     }
-    if (pile > 0) {
-      g.fillStyle = rgba(coral, 1);
-      g.beginPath(); g.arc(AX, KY, 6 * Math.sqrt(pile), 0, TAU); g.fill();
+    var wrong = [];
+    for (i = 0; i < NE; i++) wrong.push(0);
+    for (j = 0; j < order.length; j++) {
+      var mem = cls[order[j]];
+      for (k = 1; k < mem.length; k++) wrong[mem[k]] = 1;   /* all but one in a class */
     }
 
-    /* the entities, each swelling a little as a bead leaves it */
-    for (n = 0; n < N; n++) {
-      bm = G.beams[n];
-      var since = T - bm.D - 600 - bm.phi + 240, sw = 0;
-      if (since >= 0 && !REDUCED) { since = (since % bm.P) / 240; sw = 1.1 * since * since * Math.exp(2 - 2 * since); }
-      g.fillStyle = rgba(cs[bm.pal], 1);
-      g.beginPath(); g.arc(SX - 4, bm.y0, 5.2 + sw, 0, TAU); g.fill();
+    /* the context plane, a pane of light across the sheet */
+    var zp = zOf(vs);
+    var pl = [P(-1.12, FY, zp, [0, 0, 0]), P(1.12, FY, zp, [0, 0, 0]), P(1.12, HY + 0.1, zp, [0, 0, 0]), P(-1.12, HY + 0.1, zp, [0, 0, 0])];
+    g.fillStyle = css(M.vio, 0.045 * sa);
+    g.beginPath(); g.moveTo(pl[0][0], pl[0][1]);
+    for (c = 1; c < 4; c++) g.lineTo(pl[c][0], pl[c][1]);
+    g.closePath(); g.fill();
+    g.strokeStyle = css(M.vio, 0.35 * sa); g.lineWidth = 1;
+    g.stroke();
+
+    /* --- the sheet: context lines across, entity threads along ------------- */
+    function sheetY(u2) { return u2 / UA * HY; }
+    for (j = 0; j < NCL; j++) {
+      v = VA - 2 * VA * j / (NCL - 1);
+      g.strokeStyle = css(M.vio7, 0.16 * build);
+      g.lineWidth = 0.8;
+      g.beginPath();
+      for (k = 0; k <= 40; k++) {
+        u = -UA + 2 * UA * k / 40;
+        P(ans(u, v), sheetY(u), zOf(v), pa);
+        if (k) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+      }
+      g.stroke();
+    }
+    for (i = 0; i < NE; i++) {
+      u = -UA + 2 * UA * i / (NE - 1);
+      var cc = M.ent[i];
+      for (var ly = 0; ly < 2; ly++) {
+        g.strokeStyle = ly ? css(cc, 0.9 * build) : css(cc, 0.14 * build);
+        g.lineWidth = ly ? 1.3 : 4.5;
+        g.beginPath();
+        for (j = 0; j <= NV; j++) {
+          v = VA - 2 * VA * j / NV;
+          P(ans(u, v), sheetY(u), zOf(v), pa);
+          if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+        }
+        g.stroke();
+      }
+    }
+    /* the crease: where the sheet turns over, u = +-sqrt(-v/3) */
+    for (var sgn = -1; sgn <= 1; sgn += 2) {
+      for (var p2 = 0; p2 < 2; p2++) {
+        g.strokeStyle = p2 ? css(M.white, 0.9 * build) : css(M.coral, 0.25 * build);
+        g.lineWidth = p2 ? 1.1 : 5;
+        g.beginPath();
+        for (j = 0; j <= 30; j++) {
+          v = -VA * j / 30;
+          u = sgn * Math.sqrt(-v / 3);
+          P(ans(u, v), sheetY(u), zOf(v), pa);
+          if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+        }
+        g.stroke();
+      }
+    }
+
+    /* --- the drops: each entity to its answer on the floor ----------------- */
+    if (sa > 0.01) {
+      for (i = 0; i < NE; i++) {
+        u = -UA + 2 * UA * i / (NE - 1);
+        var cw = wrong[i] ? M.coral : M.ent[i];
+        P(xs[i], sheetY(u), zp, pa); P(xs[i], FY, zp, pb);
+        g.strokeStyle = css(cw, (wrong[i] ? 0.7 : 0.45) * sa);
+        g.lineWidth = wrong[i] ? 1.3 : 0.9;
+        g.beginPath(); g.moveTo(pa[0], pa[1]); g.lineTo(pb[0], pb[1]); g.stroke();
+        /* the entity on the sheet */
+        g.fillStyle = css(M.ent[i], sa);
+        g.beginPath(); g.arc(pa[0], pa[1], 2.8, 0, TAU); g.fill();
+      }
+      /* the answers on the floor: one mark per class, a ring round each
+         class that holds more than one, as many coral as it certifies */
+      for (j = 0; j < order.length; j++) {
+        var mm = cls[order[j]], sx = 0;
+        for (k = 0; k < mm.length; k++) sx += xs[mm[k]];
+        P(sx / mm.length, FY, zp, pa);
+        var one = mm.length === 1;
+        g.fillStyle = css(one ? M.ent[mm[0]] : M.coral7, sa);
+        g.beginPath(); g.arc(pa[0], pa[1], one ? 3 : 3.4 + 0.9 * mm.length, 0, TAU); g.fill();
+        if (!one) {
+          g.strokeStyle = css(M.coral, 0.55 * sa);
+          g.lineWidth = 1.2;
+          g.beginPath(); g.arc(pa[0], pa[1], 7 + 1.6 * mm.length, 0, TAU); g.stroke();
+        }
+      }
     }
   }
 
