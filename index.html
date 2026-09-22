@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=55">
-<link rel="stylesheet" href="motion.css?v=55">
-<link rel="stylesheet" href="art.css?v=55">
+<link rel="stylesheet" href="site.css?v=56">
+<link rel="stylesheet" href="motion.css?v=56">
+<link rel="stylesheet" href="art.css?v=56">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -490,42 +490,22 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <svg viewBox="0 0 460 520" role="img" aria-labelledby="tf-t tf-d">
-                <title id="tf-t">Five facts arrive, the sixth never does</title>
-                <desc id="tf-d">The reachability facts each node holds, grouped by the node that holds them: node four holds three, node three holds two, node two holds one. Five are filled because the code learns them. The sixth, that three reaches one, is the only pale shape, because the set held for node three is copied once when the edge three to two is created and never revisited, so it never learns that two can reach one. Underneath, the chain four three two one is kept and the redundant edge four to one survives the prune, joined by a line to the one fact that would have removed it. Four control edges are emitted where the unique transitive reduction is three. The fix is 362 lines added and 26 removed across 4 files.</desc>
-
-                <text x="230" y="38" text-anchor="middle" font-size="21" font-weight="700" fill="var(--ink)">five facts arrive, the sixth never does</text>
-                <text x="230" y="64" text-anchor="middle" font-size="16" fill="var(--muted)">4 edges emitted where the reduction is 3</text>
-
-                <rect id="tf-c43" class="tf-fact" x="72.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="120.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 3</text>
-                <rect id="tf-c42" class="tf-fact" x="182.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="230.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 2</text>
-                <rect id="tf-c41" class="tf-fact" x="292.0" y="104.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="340.0" y="148.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">4 &#8594; 1</text>
-                <rect id="tf-c32" class="tf-fact" x="127.0" y="192.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="175.0" y="236.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">3 &#8594; 2</text>
-                <rect id="tf-c31" x="237.0" y="192.0" width="96.0" height="74.0" rx="14" fill="var(--ground2)" stroke="var(--coral-500)" stroke-width="2.5" stroke-dasharray="7 5"/>
-                <text x="285.0" y="236.0" text-anchor="middle" font-size="19" font-weight="700" fill="var(--coral-700)">3 &#8594; 1</text>
-                <rect id="tf-c21" class="tf-fact" x="182.0" y="280.0" width="96.0" height="74.0" rx="14" fill="var(--green-500)"/>
-                <text x="230.0" y="324.0" text-anchor="middle" font-size="19" font-weight="700" fill="#ffffff">2 &#8594; 1</text>
-
-                <path id="tf-link" class="draw" pathLength="1" d="M 339.0 229.0 Q 394.0 296.0 388.0 402.0" fill="none" stroke="var(--coral-500)" stroke-width="2" stroke-dasharray="4 5" opacity=".75"/>
-                <line class="draw" pathLength="1" x1="93.0" y1="428.0" x2="156.3" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
-                <line class="draw" pathLength="1" x1="198.3" y1="428.0" x2="261.7" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
-                <line class="draw" pathLength="1" x1="303.7" y1="428.0" x2="367.0" y2="428.0" stroke="var(--green-500)" stroke-width="4" stroke-linecap="round"/>
-                <path id="tf-redundant" class="draw" pathLength="1" d="M 72.0 408.0 Q 230.0 344.0 388.0 408.0" fill="none" stroke="var(--coral-500)" stroke-width="3.5" stroke-dasharray="9 6" stroke-linecap="round"/>
-                <circle cx="72.0" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="72.0" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c4</text>
-                <circle cx="177.3" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="177.3" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c3</text>
-                <circle cx="282.7" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="282.7" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c2</text>
-                <circle cx="388.0" cy="428.0" r="20" fill="var(--raised)" stroke="var(--ink)" stroke-width="2"/>
-                <text x="388.0" y="434.0" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c1</text>
-
-                <text x="230" y="492" text-anchor="middle" font-size="16" fill="var(--muted)">+362/-26 across 4 files</text>
-              </svg>
+      <div class="figc" style="--figc-ar:470/540">
+                <canvas data-fig="closure" data-vb="470 540" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="pr-tensorflow-124410-t pr-tensorflow-124410-d">
+                  <title id="pr-tensorflow-124410-t">Reachability copied once and never back-propagated, so a redundant control edge survived the prune</title>
+                  <desc id="pr-tensorflow-124410-d">Four collective ops, c4, c3, c2 and c1, sit in a row. Below the row hang the control edges the pass emits; above it, the reachability the pass holds is drawn as a triangle of crystal cells, where the cell for one node reaching another sits where the channels rising from those two nodes cross, and a cell lights when that fact is known. The figure replays the pass as it ran before the fix and then as it runs after it, on the same four nodes. Before, each edge is created in turn and its own fact rises into its cell, but all_paths copies what the target knew at the moment the edge was made and is never back-propagated, so the copies carry nothing and some cells stay empty. The one that matters, 3 reaches 1, sits empty under an amber rim; when the prune asks it, the answer is no, so the redundant edge 4 to 1 turns coral and is emitted: 4 control edges where the unique transitive reduction is 3. After the fix, facts are carried back from node to node up their channels, the fact that 3 reaches 1 arrives and its cell fills in amber, the prune asks again, the longer path 4 to 3 to 2 to 1 lights end to end, and the edge 4 to 1 comes apart, leaving a faint trace. The fix is 362 lines added and 26 removed across 4 files.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">all_paths copied once, never back-propagated</text>
+                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">so 3 never learns it reaches 1, and 4 &#8594; 1 survives</text>
+                  <text x="85" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c4</text>
+                  <text x="185" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c3</text>
+                  <text x="285" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c2</text>
+                  <text x="385" y="448" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">c1</text>
+                  <text x="235" y="478" text-anchor="middle" font-size="17" font-weight="600" fill="var(--blue-700)">fixed, 3 reaches 1 and the prune removes 4 &#8594; 1</text>
+                  <text x="235" y="502" text-anchor="middle" font-size="15" fill="var(--muted)">4 edges emitted where the reduction is 3</text>
+                  <text x="235" y="528" text-anchor="middle" font-size="15" fill="var(--muted)">+362/-26 across 4 files</text>
+                </svg>
+              </div>
         </div>
 </div>
 </article>
@@ -552,56 +532,18 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <svg viewBox="0 0 500 480" role="img" aria-labelledby="pr-topograph-432-t pr-topograph-432-d">
-  <title id="pr-topograph-432-t">A field of permissions contracting to only what is reachable</title>
-  <desc id="pr-topograph-432-d">A dashed outer boundary marks every RBAC rule the ClusterRole used to grant, cluster wide, on every install. A solid inner boundary marks what the gate now lets through. Coral dots fill the ring that got cut, pods list, nodes get, nodes list, daemonsets get, granted even when the install could never reach the Kubernetes API. Mint dots fill the small core that remains, gated by engine.name and provider.name. 145 lines changed across 4 files.</desc>
-
-  <text x="16" y="30" font-size="15" fill="var(--muted)">Before: every rule, granted cluster wide, on every install</text>
-
-  <circle class="tg-boundary" cx="250" cy="215" r="163" fill="none" stroke="var(--hair2)" stroke-width="2" stroke-dasharray="3 2"/>
-  <circle id="tg-gate" cx="250" cy="215" r="63" fill="var(--mint-100)" stroke="var(--mint-500)" stroke-width="2.5"/>
-
-  <g class="tg-coral-g" opacity=".55">
-    <circle class="pop" cx="348.2" cy="210.8" r="6" fill="var(--coral-500)" style="animation-delay:-0.95s"/>
-    <circle class="pop" cx="337.3" cy="246.9" r="6" fill="var(--coral-500)" style="animation-delay:-0.81s"/>
-    <circle class="pop" cx="340.7" cy="282.1" r="6" fill="var(--coral-500)" style="animation-delay:-1.35s"/>
-    <circle class="pop" cx="332.1" cy="305.9" r="6" fill="var(--coral-500)" style="animation-delay:-1.61s"/>
-    <circle class="pop" cx="298.5" cy="322.0" r="6" fill="var(--coral-500)" style="animation-delay:-1.47s"/>
-    <circle class="pop" cx="259.7" cy="308.7" r="6" fill="var(--coral-500)" style="animation-delay:-0.84s"/>
-    <circle class="pop" cx="207.9" cy="353.0" r="6" fill="var(--coral-500)" style="animation-delay:-2.19s"/>
-    <circle class="pop" cx="197.1" cy="303.6" r="6" fill="var(--coral-500)" style="animation-delay:-1.09s"/>
-    <circle class="pop" cx="124.0" cy="300.8" r="6" fill="var(--coral-500)" style="animation-delay:-2.42s"/>
-    <circle class="pop" cx="140.0" cy="248.5" r="6" fill="var(--coral-500)" style="animation-delay:-1.40s"/>
-    <circle class="pop" cx="159.4" cy="204.6" r="6" fill="var(--coral-500)" style="animation-delay:-0.76s"/>
-    <circle class="pop" cx="150.8" cy="173.0" r="6" fill="var(--coral-500)" style="animation-delay:-1.21s"/>
-    <circle class="pop" cx="167.8" cy="165.4" r="6" fill="var(--coral-500)" style="animation-delay:-0.89s"/>
-    <circle class="pop" cx="160.4" cy="102.9" r="6" fill="var(--coral-500)" style="animation-delay:-2.17s"/>
-    <circle class="pop" cx="201.4" cy="97.1"  r="6" fill="var(--coral-500)" style="animation-delay:-1.74s"/>
-    <circle class="pop" cx="253.8" cy="101.7" r="6" fill="var(--coral-500)" style="animation-delay:-1.36s"/>
-    <circle class="pop" cx="279.5" cy="127.6" r="6" fill="var(--coral-500)" style="animation-delay:-0.79s"/>
-    <circle class="pop" cx="300.9" cy="126.6" r="6" fill="var(--coral-500)" style="animation-delay:-1.05s"/>
-    <circle class="pop" cx="347.6" cy="150.3" r="6" fill="var(--coral-500)" style="animation-delay:-1.46s"/>
-    <circle class="pop" cx="369.7" cy="170.1" r="6" fill="var(--coral-500)" style="animation-delay:-1.75s"/>
-  </g>
-
-  <g class="tg-mint-g" fill="var(--mint-700)">
-    <circle class="pop" cx="279.4" cy="214.4" r="7"/>
-    <circle class="pop" cx="284.4" cy="243.3" r="7"/>
-    <circle class="pop" cx="270.2" cy="249.3" r="7"/>
-    <circle class="pop" cx="242.2" cy="265.7" r="7"/>
-    <circle class="pop" cx="229.1" cy="235.0" r="7"/>
-    <circle class="pop" cx="227.6" cy="217.1" r="7"/>
-    <circle class="pop" cx="204.7" cy="203.3" r="7"/>
-    <circle class="pop" cx="222.4" cy="190.9" r="7"/>
-    <circle class="pop" cx="236.1" cy="173.9" r="7"/>
-    <circle class="pop" cx="270.3" cy="180.8" r="7"/>
-    <circle class="pop" cx="277.3" cy="202.8" r="7"/>
-  </g>
-
-  <text x="16" y="416" font-size="14" fill="var(--muted)">Coral: pods, nodes get and list, daemonsets get, cut off.</text>
-  <text x="16" y="438" font-size="14" fill="var(--muted)">Mint: what <tspan class="mono">engine.name</tspan> and <tspan class="mono">provider.name</tspan> can still reach.</text>
-  <text x="16" y="464" font-size="15" fill="var(--ink)">145 lines changed across 4 files.</text>
-</svg>
+      <div class="figc" style="--figc-ar:470/520">
+                <canvas data-fig="iris" data-vb="470 520" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 520" role="img" aria-labelledby="pr-topograph-432-t pr-topograph-432-d">
+                  <title id="pr-topograph-432-t">An iris closing on cluster wide grants</title>
+                  <desc id="pr-topograph-432-d">An illustration of the change, not a count of rules. Rings of small coral lights fill a lens: every RBAC rule the ClusterRole used to grant, cluster wide, on every install, pods list, nodes get and list, daemonsets get. Nine iris blades, each turning on its own pin, close over the field. A grant dims the moment a blade edge passes over it and stays faintly visible on the blade, granted before and no longer. When the blades lock, the grants left in the opening turn mint: the small core that engine.name and provider.name can still reach. A pulse from the middle runs to the rim while the iris is open and stops at the edge of the opening once it is closed. 145 lines changed across 4 files.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">every rule, granted on every install</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--coral-700)">pods list, nodes get and list, daemonsets get</text>
+                  <text x="235" y="438" text-anchor="middle" font-size="17" font-weight="600" fill="var(--mint-700)">gated on <tspan class="mono">engine.name</tspan> and <tspan class="mono">provider.name</tspan></text>
+                  <text x="235" y="462" text-anchor="middle" font-size="15" fill="var(--muted)">and no longer granted cluster wide</text>
+                  <text x="235" y="492" text-anchor="middle" font-size="16" fill="var(--muted)">145 lines changed across 4 files</text>
+                </svg>
+              </div>
         </div>
 </div>
 </article>
@@ -833,7 +775,7 @@
     <p class="muted">I built this as plain HTML. No framework, no build step.</p>
   </div>
 </footer>
-<script src="fig.js?v=55" defer></script>
-<script src="site.js?v=55" defer></script>
+<script src="fig.js?v=56" defer></script>
+<script src="site.js?v=56" defer></script>
 </body>
 </html>

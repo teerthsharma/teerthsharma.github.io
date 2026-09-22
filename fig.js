@@ -5095,6 +5095,805 @@
     }
   }
 
+  /* ==================================================================== */
+  /* closure — tensorflow-124410                                         */
+  /* ==================================================================== */
+  function closure(g, vb, t, st) {
+    /* tensorflow #124410. CreateControlDependencies orders four CollectiveReduce
+       ops on one device, c4 c3 c2 c1, with control edges from the higher
+       instance key to the lower, then prunes every edge that another path
+       already implies. The prune reads all_paths, documented as full
+       reachability, but all_paths[src] only copied all_paths[dst] as it stood
+       when src -> dst was created and nothing ever propagated back. The edges
+       are created in the order 4 -> 3, 4 -> 1, 3 -> 2, 2 -> 1, so every copy is
+       of an empty set, 3 never learns it reaches 1, and 4 -> 1 survives: four
+       control edges where the unique transitive reduction is three.
+
+       The node row is the spine. Above it, the reachability relation drawn as
+       a triangular matrix turned on its corner: the cell for "a reaches b" sits
+       exactly where the channel rising right from node a meets the channel
+       rising left from node b, so no cell needs a label. Below it hang the
+       control edges the pass emits.
+
+       Nothing is scheduled by hand except the clock. When the figure is built,
+       the old pass is run on the real edge list, copy and all, and so is the
+       fix: reachability closed in one pass in ascending instance key, then an
+       edge kept only if no other successor of its source reaches its target.
+       The animation replays those two runs. In the old pass each edge grows,
+       and its fact rises up the two channels to its cell; the copies carry
+       nothing, so the cell for 3 reaches 1 stays dark under an amber rim, and
+       when the prune asks it, it answers no and 4 -> 1 turns coral and stays.
+       In the fix the pass sweeps c1 to c4, and back-propagation is light moving
+       up a node's channel from cell to cell: "reaches 1" climbs from 2 to 3,
+       the amber cell fills, the prune asks again, the path 4 -> 3 -> 2 -> 1
+       lights, and 4 -> 1 dissolves. Then it all resets and runs again.
+
+       Light is alpha and hue on the off-white page: mint and blue for what is
+       known and emitted, amber for the one fact that arrives late, coral for
+       the edge that should not exist. */
+    var TAU = Math.PI * 2;
+    var X = { 4: 85, 3: 185, 2: 285, 1: 385 }, NY = 296, ROW = 62, HW = 44, HH = 27;
+    var P = 16800;
+    var OLD = [700, 2000, 3500, 4800];          /* each old edge starts growing */
+    var GROWT = 650, RISE = 520;
+    var RIM = 6300, PROBE1 = 7100, KEEP = 7700, SWEEP = 9600, STEP = 700;
+    var PROBE2 = 12700, CUT = 13300, RESET = 15600, RESETD = 1100;
+
+    var M = closure.cache;
+    if (!M) {
+      M = closure.cache = {};
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      var mix = function (a, b, k) {
+        return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+      };
+      var css = function (c) { return 'rgb(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ')'; };
+      M.blue = token('--blue-500', '#2456dc'); M.blue7 = token('--blue-700', '#163a9a');
+      M.mint = token('--mint-500', '#0b93ab'); M.mint7 = token('--mint-700', '#0a6b7c');
+      M.amber = token('--amber-500', '#d96a06');
+      M.coral = token('--coral-500', '#d9376e');
+      M.hair = token('--hair2', '#cfcbc1'); M.raised = token('--raised', '#ffffff');
+      var WH = [255, 255, 255];
+      M.white = token('--raised', '#ffffff');
+      /* crystal facets: upper left, upper right, lower left, lower right */
+      var m5 = hex('--mint-500', '#0b93ab'), a5 = hex('--amber-500', '#d96a06'), a7 = hex('--amber-700', '#9a4906');
+      var bl = hex('--blue-500', '#2456dc'), h2 = hex('--hair2', '#cfcbc1');
+      M.gemMint = [css(mix(m5, WH, 0.55)), css(mix(m5, WH, 0.22)), css(m5), css(mix(m5, bl, 0.55))];
+      M.gemAmber = [css(mix(a5, WH, 0.52)), css(mix(a5, WH, 0.2)), css(a5), css(mix(a5, a7, 0.5))];
+      M.glass = [css(WH), css(mix(h2, WH, 0.72)), css(mix(h2, WH, 0.48)), css(mix(h2, WH, 0.2))];
+
+      /* the node sprite: a sphere lit from the upper left */
+      var cv = document.createElement('canvas'), SZ = 64;
+      cv.width = cv.height = SZ;
+      var x = cv.getContext('2d'), b5 = hex('--blue-500', '#2456dc'), b7 = hex('--blue-700', '#163a9a');
+      var gr = x.createRadialGradient(SZ * 0.36, SZ * 0.32, 0, SZ * 0.46, SZ * 0.44, SZ * 0.56);
+      gr.addColorStop(0, css(mix(b5, WH, 0.75)));
+      gr.addColorStop(0.32, css(mix(b5, WH, 0.18)));
+      gr.addColorStop(0.66, css(b5));
+      gr.addColorStop(1, css(mix(b5, b7, 0.55)));
+      x.fillStyle = gr;
+      x.beginPath(); x.arc(SZ / 2, SZ / 2, SZ / 2 - 0.5, 0, TAU); x.fill();
+      M.orb = cv;
+
+      /* --- run both passes on the real edge list ------------------------ */
+      var EDGES = [[4, 3], [4, 1], [3, 2], [2, 1]];   /* creation order */
+      var has = function (s, v) { return s.indexOf(v) >= 0; };
+      /* old: all_paths[src] gets dst, then a copy of all_paths[dst] as it is now */
+      var ap = { 4: [], 3: [], 2: [], 1: [] }, oldFacts = [];
+      EDGES.forEach(function (e, i) {
+        var s = e[0], d = e[1], add = [];
+        if (!has(ap[s], d)) { ap[s].push(d); add.push([s, d]); }
+        ap[d].forEach(function (v) { if (!has(ap[s], v)) { ap[s].push(v); add.push([s, v]); } });
+        oldFacts.push(add);
+      });
+      /* old prune: for n1, n2 among a node's successors, drop n2 if n1 reaches it */
+      var succ = { 4: [3, 1], 3: [2], 2: [1], 1: [] }, oldKept = {};
+      [4, 3, 2, 1].forEach(function (n) {
+        var L = succ[n].slice();
+        L.forEach(function (n1, j) {
+          if (n1 == null) return;
+          L.forEach(function (n2, k) { if (j !== k && n2 != null && has(ap[n1], n2)) L[k] = null; });
+        });
+        L.forEach(function (v) { if (v != null) oldKept[n + '>' + v] = true; });
+      });
+      /* fix: close reachability in ascending instance key; every fact that
+         arrives through a successor is recorded with the cell it came from */
+      var reach = { 1: [], 2: [], 3: [], 4: [] }, arrive = [];
+      [1, 2, 3, 4].forEach(function (k) {
+        succ[k].forEach(function (s) { if (!has(reach[k], s)) reach[k].push(s); });
+        succ[k].forEach(function (s) {
+          reach[s].forEach(function (v) {
+            if (!has(reach[k], v)) { reach[k].push(v); arrive.push({ k: k, v: v, from: s }); }
+          });
+        });
+      });
+      var newKept = {}, cutBy = {};
+      EDGES.forEach(function (e) {
+        var u = e[0], v = e[1], w0 = null;
+        succ[u].forEach(function (w) { if (w !== v && has(reach[w], v)) w0 = w; });
+        if (w0 == null) newKept[u + '>' + v] = true; else cutBy[u + '>' + v] = w0;
+      });
+      M.EDGES = EDGES; M.oldFacts = oldFacts; M.oldKept = oldKept; M.arrive = arrive;
+      M.newKept = newKept; M.cutBy = cutBy; M.oldAp = ap;
+      /* cells never lit by the old pass: the facts the prune could not see */
+      M.cells = [];
+      for (var a = 4; a >= 2; a--) for (var b = a - 1; b >= 1; b--) {
+        M.cells.push({ a: a, b: b, x: (X[a] + X[b]) / 2, y: NY - ROW * (a - b), old: has(ap[a], b) });
+      }
+      M.arcPts = {};
+      EDGES.forEach(function (e) {
+        var pts = [], cx = (X[e[0]] + X[e[1]]) / 2, rx = Math.abs(X[e[1]] - X[e[0]]) / 2, ry = 30 + 26 * (e[0] - e[1]);
+        for (var q = 0; q <= 48; q++) {
+          var u = q / 48;
+          pts.push([cx - rx * Math.cos(Math.PI * u), NY + ry * Math.sin(Math.PI * u)]);
+        }
+        M.arcPts[e[0] + '>' + e[1]] = pts;
+      });
+      st.sim = { old: ap, oldKept: Object.keys(oldKept), arrive: arrive, newKept: Object.keys(newKept), cut: cutBy };
+    }
+
+    var RED = REDUCED;
+    var T = RED ? 14600 : t;
+    var cyc = Math.floor(T / P), tau = T - cyc * P;
+    /* nodes, glass and channels are built once and stay; the passes repeat */
+    var build = RED ? 1 : ease(T / 900);
+    var reset = RED ? 1 : 1 - ease((tau - RESET) / RESETD);
+    var i, j, k, q, e, c, key, pts;
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* --- when is each fact known, and how brightly ------------------------ */
+    function cellOf(a, b) { for (var n = 0; n < M.cells.length; n++) if (M.cells[n].a === a && M.cells[n].b === b) return M.cells[n]; }
+    var lit = {}, glow = {};
+    M.cells.forEach(function (c) { lit[c.a + '>' + c.b] = 0; glow[c.a + '>' + c.b] = 0; });
+    /* old pass: a fact lands when its comets reach the cell */
+    M.oldFacts.forEach(function (add, n) {
+      var at = OLD[n] + GROWT + RISE;
+      add.forEach(function (f) {
+        var kk = f[0] + '>' + f[1];
+        lit[kk] = Math.max(lit[kk], ease((tau - at + 80) / 380));
+        glow[kk] = Math.max(glow[kk], bump((tau - at) / 900));
+      });
+    });
+    /* fix: arrivals travel from the cell they come from, one sweep step each */
+    var arrT = [];
+    M.arrive.forEach(function (ar) {
+      var at = SWEEP + STEP * (ar.k - 1) + 520;
+      arrT.push(at);
+      var kk = ar.k + '>' + ar.v;
+      lit[kk] = Math.max(lit[kk], ease((tau - at + 60) / 420));
+      glow[kk] = Math.max(glow[kk], bump((tau - at) / 1000));
+    });
+    function bump(k) { return k <= 0 ? 0 : 2.7 * k * Math.exp(1 - 7.4 * k) * 2.74; }
+
+    /* --- channels: the lattice the matrix is read by ---------------------- */
+    function chan(n, side, u, out) {           /* point u units along node n's channel */
+      var len = Math.hypot(50, ROW), dx = side * 50 / len, dy = -ROW / len;
+      out[0] = X[n] + dx * u; out[1] = NY + dy * u;
+      return out;
+    }
+    var CL = Math.hypot(50, ROW), SP = [0, 0];  /* one cell step along a channel */
+    g.globalAlpha = build;
+    for (var n = 4; n >= 1; n--) {
+      for (var side = -1; side <= 1; side += 2) {
+        var steps = side > 0 ? n - 1 : 4 - n;   /* right from n: cells (n, n-1..1); left: (n+1..4, n) */
+        if (steps <= 0) continue;
+        var p0 = chan(n, side, 16, [0, 0]), p1 = chan(n, side, CL * steps + 14, [0, 0]);
+        g.strokeStyle = rgba(M.blue, 0.05); g.lineWidth = 11;
+        g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
+        g.strokeStyle = rgba(M.blue, 0.16); g.lineWidth = 1.2;
+        g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]); g.stroke();
+      }
+    }
+    g.globalAlpha = 1;
+
+    /* Reachability flowing as light: every set cell is fed by a stream rising
+       from each of its two nodes. Streams pass behind the crystals below them,
+       and stop where the knowledge stops: before the fix the stream from c1
+       climbs to "2 reaches 1" and no further. */
+    if (!RED) {
+      M.cells.forEach(function (c) {
+        var L = lit[c.a + '>' + c.b] * reset;
+        if (L < 0.001) return;
+        var steps = c.a - c.b;
+        for (var sd = -1; sd <= 1; sd += 2) {
+          var n0 = sd > 0 ? c.a : c.b, len = CL * steps;
+          for (var m = 0; m < 3; m++) {
+            var u = ((T / 1700 + m / 3 + c.a * 0.17 + c.b * 0.29 + (sd > 0 ? 0 : 0.5)) % 1);
+            var d = 16 + (len - 16) * u, ma = L * Math.sin(Math.PI * u);
+            chan(n0, sd, d, SP);
+            g.fillStyle = rgba(c === cellOf(3, 1) ? M.amber : M.mint, 0.28 * ma);
+            g.beginPath(); g.arc(SP[0], SP[1], 4.2, 0, TAU); g.fill();
+            g.fillStyle = rgba(M.white, 0.9 * ma);
+            g.beginPath(); g.arc(SP[0], SP[1], 1.5, 0, TAU); g.fill();
+          }
+        }
+      });
+    }
+
+    /* the fixed pass is one sweep in ascending instance key, c1 to c4 */
+    var sweepK = RED ? -1 : (tau - SWEEP + 150) / (STEP * 3 + 300);
+    if (sweepK > 0 && sweepK < 1) {
+      var sx = X[1] + (X[4] - X[1]) * ease(sweepK), sa = Math.sin(Math.PI * sweepK);
+      g.save(); g.translate(sx, NY); g.scale(1, 0.34);
+      var sg2 = g.createRadialGradient(0, 0, 0, 0, 0, 70);
+      sg2.addColorStop(0, rgba(M.mint, 0.42 * sa));
+      sg2.addColorStop(1, rgba(M.mint, 0));
+      g.fillStyle = sg2;
+      g.beginPath(); g.arc(0, 0, 70, 0, TAU); g.fill();
+      g.restore();
+    }
+
+    /* --- cells: each fact is a crystal, lit from the upper left ------------ */
+    function rhomb(cx, cy, s) {
+      g.beginPath();
+      g.moveTo(cx, cy - HH * s); g.lineTo(cx + HW * s, cy); g.lineTo(cx, cy + HH * s); g.lineTo(cx - HW * s, cy);
+      g.closePath();
+    }
+    function facet(cx, cy, s, ax, ay, bx, by) {
+      g.beginPath(); g.moveTo(cx, cy); g.lineTo(cx + ax * HW * s, cy + ay * HH * s); g.lineTo(cx + bx * HW * s, cy + by * HH * s);
+      g.closePath(); g.fill();
+    }
+    /* base in the darkest facet colour, then the three lighter facets over it,
+       so the seams between facets show that colour and never the page */
+    function gem(cx, cy, s, F, a, glowCol) {
+      g.globalAlpha = a;
+      if (glowCol) { g.save(); g.shadowColor = rgba(glowCol, 0.6); g.shadowBlur = 18; }
+      rhomb(cx, cy, s); g.fillStyle = F[3]; g.fill();
+      if (glowCol) g.restore();
+      g.fillStyle = F[0]; facet(cx, cy, s, -1, 0, 0, -1);
+      g.fillStyle = F[1]; facet(cx, cy, s, 0, -1, 1, 0);
+      g.fillStyle = F[2]; facet(cx, cy, s, 0, 1, -1, 0);
+      g.strokeStyle = rgba(M.white, 0.75); g.lineWidth = 1.2;
+      g.beginPath(); g.moveTo(cx - HW * s + 3, cy - 1); g.lineTo(cx, cy - HH * s + 1.5); g.lineTo(cx + HW * s - 3, cy - 1); g.stroke();
+      g.globalAlpha = 1;
+    }
+    var missing = cellOf(3, 1);
+    var rimA = RED ? 0 : ease((tau - RIM) / 700) * (1 - ease((tau - (SWEEP + STEP * 2 + 520)) / 300));
+    var breathe = 0.78 + 0.22 * Math.sin(TAU * T / 2600);
+    /* the prune asks c3 whether it reaches c1, twice: before and after the fix */
+    var ask1 = bump((tau - PROBE1 - 520) / 1100), ask2 = bump((tau - PROBE2 - 520) / 1100);
+    M.cells.forEach(function (c) {
+      var kk = c.a + '>' + c.b, L = (RED ? 1 : lit[kk]) * reset, amberCell = c === missing;
+      gem(c.x, c.y, 1, M.glass, 0.95 * build, null);
+      rhomb(c.x, c.y, 1);
+      g.strokeStyle = rgba(M.hair, 0.8 * build); g.lineWidth = 1; g.stroke();
+      if (L > 0.0004) {
+        gem(c.x, c.y, 1, amberCell ? M.gemAmber : M.gemMint, L, amberCell ? M.amber : M.mint);
+        /* the set bit itself: a spark at the heart of the crystal */
+        var sp = g.createRadialGradient(c.x - 3, c.y - 3, 0, c.x - 3, c.y - 3, 13);
+        sp.addColorStop(0, rgba(M.white, 0.85 * L));
+        sp.addColorStop(1, rgba(M.white, 0));
+        g.fillStyle = sp;
+        g.beginPath(); g.arc(c.x - 3, c.y - 3, 13, 0, TAU); g.fill();
+      }
+      var fl = (RED ? 0 : glow[kk]) * reset;
+      if (kk === '3>1') fl = Math.max(fl, ask2 * lit[kk]);
+      if (fl > 0.01) {
+        rhomb(c.x, c.y, 1 + 0.18 * fl);
+        g.strokeStyle = rgba(amberCell ? M.amber : M.mint, 0.6 * Math.min(1, fl)); g.lineWidth = 2;
+        g.stroke();
+      }
+    });
+    /* the fact that never arrives: an amber rim on an empty cell */
+    if (rimA > 0.01) {
+      rhomb(missing.x, missing.y, 1);
+      g.strokeStyle = rgba(M.amber, Math.min(1, (0.7 * breathe + 0.5 * ask1) * rimA * reset)); g.lineWidth = 2.6;
+      g.stroke();
+    }
+
+    /* --- comets: facts rising up the channels, and moving along them -------- */
+    var CP = [0, 0];
+    function comet(x0, y0, x1, y1, k, col, rad) {
+      if (k <= 0 || k >= 1) return;
+      var s = ease(k), hx = x0 + (x1 - x0) * s, hy = y0 + (y1 - y0) * s;
+      var tl = Math.max(0, s - 0.35), tx = x0 + (x1 - x0) * tl, ty = y0 + (y1 - y0) * tl;
+      var a = Math.sin(Math.PI * Math.min(1, k * 1.25));
+      var lg = g.createLinearGradient(tx, ty, hx, hy);
+      lg.addColorStop(0, rgba(col, 0));
+      lg.addColorStop(1, rgba(col, 0.8 * a));
+      g.strokeStyle = lg; g.lineWidth = 3.4;
+      g.beginPath(); g.moveTo(tx, ty); g.lineTo(hx, hy); g.stroke();
+      g.fillStyle = rgba(col, 0.25 * a);
+      g.beginPath(); g.arc(hx, hy, rad * 2.2, 0, TAU); g.fill();
+      g.fillStyle = rgba(M.white, 0.9 * a);
+      g.beginPath(); g.arc(hx, hy, rad * 0.8, 0, TAU); g.fill();
+    }
+    if (!RED && reset > 0.5) {
+      /* old pass: each new fact rises from both of its nodes */
+      M.oldFacts.forEach(function (add, n) {
+        var k0 = (tau - OLD[n] - GROWT) / RISE;
+        add.forEach(function (f) {
+          var c = cellOf(f[0], f[1]), steps = f[0] - f[1];
+          chan(f[0], 1, 16, CP); comet(CP[0], CP[1], c.x, c.y, k0, M.mint, 2.6);
+          chan(f[1], -1, 16, CP); comet(CP[0], CP[1], c.x, c.y, k0, M.mint, 2.6);
+        });
+      });
+      /* both prunes ask c3 about c1: the question rises from c3 */
+      [PROBE1, PROBE2].forEach(function (p0, n) {
+        chan(3, 1, 16, CP);
+        comet(CP[0], CP[1], missing.x, missing.y, (tau - p0) / 520, n ? M.mint : M.amber, 2.4);
+      });
+      /* fix: facts move cell to cell up a node's channel, "reaches v" going back */
+      M.arrive.forEach(function (ar, n) {
+        var from = cellOf(ar.from, ar.v), to = cellOf(ar.k, ar.v);
+        comet(from.x, from.y, to.x, to.y, (tau - arrT[n] + 520) / 520, ar.v === 1 && ar.k === 3 ? M.amber : M.mint, 2.8);
+      });
+    }
+
+    /* --- edges hanging below the spine ------------------------------------- */
+    function path(pts, u0, u1) {
+      var n0 = Math.max(0, Math.floor(u0 * 48)), n1 = Math.min(48, Math.ceil(u1 * 48));
+      g.beginPath();
+      g.moveTo(pts[n0][0], pts[n0][1]);
+      for (var m = n0 + 1; m <= n1; m++) {
+        var f = Math.min(1, (u1 * 48 - (m - 1)));
+        g.lineTo(pts[m - 1][0] + (pts[m][0] - pts[m - 1][0]) * f, pts[m - 1][1] + (pts[m][1] - pts[m - 1][1]) * f);
+      }
+    }
+    function tube(pts, u1, col, a) {
+      path(pts, 0, u1);
+      g.strokeStyle = rgba(col, 0.13 * a); g.lineWidth = 10; g.stroke();
+      g.strokeStyle = rgba(col, 0.95 * a); g.lineWidth = 3.4; g.stroke();
+      g.save(); g.translate(0, -0.9);
+      path(pts, 0, u1);
+      g.strokeStyle = rgba(M.white, 0.45 * a); g.lineWidth = 1; g.stroke();
+      g.restore();
+    }
+    var chainPulse = RED ? -1 : (tau - CUT + 700) / 1500;
+    M.EDGES.forEach(function (ed, n) {
+      key = ed[0] + '>' + ed[1]; pts = M.arcPts[key];
+      var grow = RED ? 1 : ease((tau - OLD[n]) / GROWT);
+      if (grow <= 0.002) return;
+      var cutW = M.cutBy[key] != null;
+      var toCoral = cutW && !M.oldKept[key] ? 0 : cutW ? ease((tau - KEEP) / 600) : 0;
+      var gone = cutW ? (RED ? 1 : ease((tau - CUT) / 520)) : 0;
+      var a = reset * (1 - gone);
+      if (a > 0.01) {
+        if (toCoral < 0.99) tube(pts, grow, M.blue, a * (1 - toCoral));
+        if (toCoral > 0.01) tube(pts, grow, M.coral, a * toCoral);
+        /* the growing head */
+        if (grow < 1) {
+          var hi = Math.round(grow * 48);
+          g.fillStyle = rgba(M.white, 0.9);
+          g.beginPath(); g.arc(pts[hi][0], pts[hi][1], 3, 0, TAU); g.fill();
+          g.fillStyle = rgba(M.mint, 0.3);
+          g.beginPath(); g.arc(pts[hi][0], pts[hi][1], 7, 0, TAU); g.fill();
+        }
+      }
+      /* what is left of the pruned edge: a faint trace, so the removal stays visible */
+      if (gone > 0.01) {
+        path(pts, 0, 1);
+        g.strokeStyle = rgba(M.coral, 0.22 * gone * reset); g.lineWidth = 1.6; g.stroke();
+        /* and the edge itself comes apart into light that falls away */
+        var dk = RED ? 1 : (tau - CUT) / 1500;
+        if (dk > 0 && dk < 1) {
+          for (q = 2; q < 47; q += 2) {
+            var px = pts[q][0], py = pts[q][1], dr = 0.5 + 0.5 * Math.sin(q * 1.7);
+            var fall = 16 * dk * dk * (0.6 + 0.8 * dr);
+            g.fillStyle = rgba(M.coral, 0.7 * (1 - dk) * (1 - dk));
+            g.beginPath(); g.arc(px + (px - 235) * 0.04 * dk, py + fall, 2.2 * (1 - 0.6 * dk), 0, TAU); g.fill();
+          }
+        }
+      }
+      /* motes travel each emitted edge from source to target, the order it enforces */
+      if (!RED && grow >= 1 && a > 0.05) {
+        for (q = 0; q < 4; q++) {
+          var u = (T / 2400 + q / 4 + n * 0.13) % 1, m = Math.round(u * 48), ma = Math.sin(Math.PI * u) * a;
+          g.fillStyle = rgba(M.white, 0.85 * ma);
+          g.beginPath(); g.arc(pts[m][0], pts[m][1], 1.5, 0, TAU); g.fill();
+        }
+      }
+    });
+    /* the fix: the path 4 -> 3 -> 2 -> 1 lights end to end, which is why 4 -> 1 goes */
+    if (chainPulse > 0 && chainPulse < 1) {
+      var legs = ['4>3', '3>2', '2>1'];
+      for (i = 0; i < 3; i++) {
+        var lk = chainPulse * 3 - i;
+        if (lk <= -0.3 || lk >= 1.3) continue;
+        pts = M.arcPts[legs[i]];
+        var s0 = Math.max(0, lk - 0.3), s1 = Math.min(1, lk);
+        if (s1 <= s0) continue;
+        var pa = Math.sin(Math.PI * Math.min(1, chainPulse * 1.1));
+        path(pts, s0, s1);
+        g.strokeStyle = rgba(M.mint, 0.4 * pa); g.lineWidth = 13; g.stroke();
+        g.strokeStyle = rgba(M.white, 0.9 * pa); g.lineWidth = 2.8; g.stroke();
+      }
+    }
+
+    /* --- nodes -------------------------------------------------------------- */
+    var sweepAt = function (k) { return SWEEP + STEP * (k - 1); };
+    [4, 3, 2, 1].forEach(function (k) {
+      var cx = X[k], sw = RED ? 0 : bump((tau - sweepAt(k)) / 1200) * reset;
+      var hg = g.createRadialGradient(cx, NY, 0, cx, NY, 30);
+      hg.addColorStop(0, rgba(M.mint, (0.26 + 0.2 * sw) * build));
+      hg.addColorStop(1, rgba(M.mint, 0));
+      g.fillStyle = hg;
+      g.beginPath(); g.arc(cx, NY, 30, 0, TAU); g.fill();
+      var r = 15 * (0.4 + 0.6 * build);
+      g.drawImage(M.orb, cx - r, NY - r, 2 * r, 2 * r);
+      if (sw > 0.01) {
+        g.strokeStyle = rgba(M.mint7, 0.7 * Math.min(1, sw)); g.lineWidth = 2;
+        g.beginPath(); g.arc(cx, NY, 19 + 6 * Math.min(1, sw), 0, TAU); g.stroke();
+      }
+    });
+  }
+
+  /* ==================================================================== */
+  /* iris — topograph-432                                                */
+  /* ==================================================================== */
+  function iris(g, vb, t, st) {
+    /* The chart used to grant the same cluster wide rules on every install,
+       whatever engine and provider it was given. The fix gates each rule on
+       engine.name and provider.name, so what is granted shrinks to what the
+       install can actually reach. A camera iris is exactly that operation:
+       one field of view, and blades that close it down to a single opening.
+
+       The field is the grants, fifteen evenly spaced rings of small lights
+       over the whole disc, which is what cluster wide means; nothing marks
+       the ones that will survive. The iris is a real mechanism. Nine rigid
+       blades each turn on a pin under the bezel. A blade's working edge is an
+       arc of a circle of radius RHO, and because the blade is rigid, the
+       centre of that circle is a point of the blade that swings round the pin
+       as it turns. With the pin at RP from the middle and that centre at DP
+       from the pin, the centre sits at distance D, where
+       D^2 = RP^2 + DP^2 - 2 RP DP cos(psi), and the blade leaves an opening of
+       RHO - D. Turning every blade by psi sets the aperture, and the opening
+       is the intersection of the nine discs: a rounded nine sided shape that
+       turns as it closes, as a real iris does. It is never drawn; it is what
+       the blades leave.
+
+       A grant is lit when it is inside all nine discs. That is the same test
+       the blades are drawn from, so a grant dims at the moment an edge passes
+       over it and stays faintly visible on the blade: granted before, not
+       now. The blades lock between the fifth and sixth rings. The grants left
+       in the opening turn mint in a ripple from the middle: gated now,
+       granted because engine.name and provider.name reach them. A pulse of
+       reach leaves the middle every two seconds. While the iris is open it
+       runs to the rim; once it is closed the blades stop it at the edge of
+       the opening, with no special case, because the blades are simply over
+       it. Then the blades open again, the old chart, and the cycle repeats.
+
+       Blades overlap cyclically: each lies over the four ahead of it and
+       under the four behind, which no single painting order can produce. So
+       nothing is painted in order. A blade is visible exactly where it is
+       inside the edge discs of the four above it, so each blade is filled
+       once, clipped to those four discs, and the nine filled regions are
+       disjoint. Every boundary between two of them is a blade edge, and the
+       edge is stroked over it, which also hides the half covered pixel there.
+       Measured in the preview harness: cutting the disc into nine wedges with
+       one order each left a visible line on every cut, because at a partly
+       covered pixel each layer blends on its own and the lower blades leak
+       through; flattening each wedge offscreen fixed that but cost 18 ms a
+       frame at DPR 2. This way costs a small fraction of either. */
+    var TAU = Math.PI * 2, PI = Math.PI;
+    var CX = 235, CY = 238;
+    var NB = 9, RH = 150, RB = 164, RP = 157, RHO = 200, DP = 208, RR = 156;
+    var R_OPEN = 146, R_CORE = 52, RING = 9.5, NRING = 15, NCORE = 5;
+    var P = 10000, CLOSE0 = 1600, CLOSE1 = 4000, UNGATE = 7800, OPEN0 = 8000, OPEN1 = 9800;
+    var PULSE = 2000, P0 = 150, LIFE = 1500, SWEEP = 1600;
+    var A0 = -PI / 2, LIGHT = -2.36, HALF = PI / NB;
+
+    var M = iris.cache;
+    if (!M) {
+      M = iris.cache = {};
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      M.blue5 = hex('--blue-500', '#2456dc'); M.blue7 = hex('--blue-700', '#163a9a');
+      M.coral = hex('--coral-500', '#d9376e'); M.mint = hex('--mint-500', '#0b93ab');
+      M.mint7 = hex('--mint-700', '#0a6b7c'); M.white = hex('--raised', '#ffffff');
+      M.hair = hex('--hair2', '#cfcbc1'); M.muted = hex('--muted', '#5f5b53');
+      var k, j, X = [], Y = [], S = [], C = [], F = [];
+      for (k = 1; k <= NRING; k++) {
+        var R = k * RING, n = Math.round(TAU * R / 9.4);
+        for (j = 0; j < n; j++) {
+          var a = (j + (k % 2) * 0.5) / n * TAU + A0, h1 = Math.sin(k * 12.9898 + j * 78.233) * 43758.5453;
+          X.push(R * Math.cos(a)); Y.push(R * Math.sin(a)); S.push(R);
+          C.push(k <= NCORE ? 1 : 0); F.push(h1 - Math.floor(h1));
+        }
+      }
+      M.n = X.length;
+      M.x = new Float32Array(X); M.y = new Float32Array(Y); M.s = new Float32Array(S);
+      M.core = new Uint8Array(C); M.f = new Float32Array(F);
+      M.lit = []; M.ghost = [];
+      for (k = 0; k <= 10; k++) { M.lit.push([]); M.ghost.push([]); }
+    }
+
+    function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
+    function css(c, al) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + al + ')'; }
+    function wrap(a) { a = (a + PI) % TAU; if (a < 0) a += TAU; return a - PI; }
+    function clamp(k) { return k < 0 ? 0 : k > 1 ? 1 : k; }
+
+    /* --- time ------------------------------------------------------------ */
+    var T = REDUCED ? 6000 : t;
+    var u = T % P;
+    var r;
+    if (u < CLOSE0) r = R_OPEN;
+    else if (u < CLOSE1) r = R_OPEN + (R_CORE - R_OPEN) * ease((u - CLOSE0) / (CLOSE1 - CLOSE0));
+    else if (u < OPEN0) r = R_CORE;
+    else if (u < OPEN1) r = R_CORE + (R_OPEN - R_CORE) * ease((u - OPEN0) / (OPEN1 - OPEN0));
+    else r = R_OPEN;
+    /* 0 coral, ungated; 1 mint, gated. It ripples out from the middle as the
+       blades settle, and back in just before they open. */
+    function gateOn(uu, s) { return clamp((uu - CLOSE1 + 250 - s * 9) / 450); }
+    function gateAt(uu, s) {
+      if (uu < CLOSE1 - 250) return 0;
+      return ease(gateOn(uu, s)) * (1 - ease((uu - UNGATE - s * 5) / 520));
+    }
+    var G0 = gateAt(u, 0);
+
+    /* pulses of reach; the first one builds the field */
+    var pk = Math.floor((T - P0) / PULSE), pAge = T - P0 - pk * PULSE, pR = -1, pA = 0, pG = 0;
+    if (!REDUCED && T >= P0 && pAge < LIFE) {
+      var tau = pAge / LIFE;
+      pR = (RH + 6) * (1 - (1 - tau) * (1 - tau));
+      pA = Math.pow(1 - tau, 1.3) * ease(pAge / 160);
+      pG = gateAt((T - pAge) % P, 0);
+    }
+    var Rf = (REDUCED || T > P0 + LIFE) ? 1e9 : (T < P0 ? -20 : pR);
+
+    /* --- the blades' geometry, from the pin angle ------------------------ */
+    var D = RHO - r;
+    var psi = Math.acos(Math.max(-1, Math.min(1, (RP * RP + DP * DP - D * D) / (2 * RP * DP))));
+    var goff = Math.atan2(DP * Math.sin(psi), RP - DP * Math.cos(psi));
+    var ex = [], ey = [], be = [], i;
+    for (i = 0; i < NB; i++) {
+      var gi = A0 + i * TAU / NB + goff;
+      ex.push(D * Math.cos(gi)); ey.push(D * Math.sin(gi)); be.push(gi + PI);
+    }
+    var phh = Math.acos(Math.max(-1, Math.min(1, (RHO * RHO - RR * RR - D * D) / (2 * RR * D))));
+    var vr = Math.sqrt(RHO * RHO - D * D * Math.sin(HALF) * Math.sin(HALF)) - D * Math.cos(HALF);
+
+    g.clearRect(0, 0, vb[0], vb[1]);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.save();
+    g.translate(CX, CY);
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* --- the field ------------------------------------------------------- */
+    var build = Rf > 1e8 ? 1 : clamp((Rf + 10) / (RH + 16));
+    var wash = g.createRadialGradient(0, 0, 0, 0, 0, RH);
+    wash.addColorStop(0, css(M.coral, 0.10 * (1 - G0) * build));
+    wash.addColorStop(0.75, css(M.coral, 0.05 * (1 - G0) * build));
+    wash.addColorStop(1, css(M.coral, 0));
+    g.fillStyle = wash;
+    g.beginPath(); g.arc(0, 0, RH, 0, TAU); g.fill();
+    if (G0 > 0.01) {
+      var mg = g.createRadialGradient(0, 0, 0, 0, 0, r + 8);
+      mg.addColorStop(0, css(M.mint, 0.22 * G0));
+      mg.addColorStop(0.7, css(M.mint, 0.13 * G0));
+      mg.addColorStop(1, css(M.mint, 0.03 * G0));
+      g.fillStyle = mg;
+      g.beginPath(); g.arc(0, 0, r + 8, 0, TAU); g.fill();
+    }
+    if (pR > 0) {
+      var pc = mix(M.coral, M.mint, pG);
+      var pg = g.createRadialGradient(0, 0, Math.max(0, pR - 14), 0, 0, pR + 10);
+      pg.addColorStop(0, css(pc, 0));
+      pg.addColorStop(0.6, css(pc, 0.26 * pA));
+      pg.addColorStop(1, css(pc, 0));
+      g.fillStyle = pg;
+      g.beginPath(); g.arc(0, 0, pR + 10, 0, TAU); g.fill();
+    }
+
+    var lit = M.lit, gh = M.ghost, d, b;
+    for (b = 0; b <= 10; b++) { lit[b].length = 0; gh[b].length = 0; }
+    var coreList = [];
+    for (d = 0; d < M.n; d++) {
+      var s = M.s[d], x = M.x[d], y = M.y[d];
+      var vis = Rf > 1e8 ? 1 : ease((Rf - s + 4) / 16);
+      if (vis <= 0.004) continue;
+      var sd = 1e9;
+      if (s > r - 6) {
+        for (i = 0; i < NB; i++) {
+          var dx = x - ex[i], dy = y - ey[i], v = RHO - Math.sqrt(dx * dx + dy * dy);
+          if (v < sd) sd = v;
+        }
+      }
+      var tw = REDUCED ? 0.92 : 0.84 + 0.14 * Math.sin(T / 2600 * TAU + M.f[d] * TAU);
+      var boost = pR > 0 ? pA * Math.exp(-((s - pR) / 12) * ((s - pR) / 12)) : 0;
+      var al = vis * Math.min(1, tw + 0.45 * boost);
+      if (M.core[d]) { coreList.push(d, al); continue; }
+      if (sd > -3) lit[Math.round(al * 10)].push(d);
+      if (sd < 3) gh[Math.round(10 * vis * clamp((3 - sd) / 7))].push(d);
+    }
+    function dots(list, rad) {
+      g.beginPath();
+      for (var q = 0; q < list.length; q++) {
+        var e = list[q];
+        g.moveTo(M.x[e] + rad, M.y[e]);
+        g.arc(M.x[e], M.y[e], rad, 0, TAU);
+      }
+    }
+    for (b = 1; b <= 10; b++) {
+      if (!lit[b].length) continue;
+      g.fillStyle = css(M.coral, 0.13 * b / 10);
+      dots(lit[b], 4.6); g.fill();
+    }
+    for (b = 1; b <= 10; b++) {
+      if (!lit[b].length) continue;
+      g.fillStyle = css(M.coral, 0.95 * b / 10);
+      dots(lit[b], 2.05); g.fill();
+    }
+    /* the grants the gate keeps: coral until the blades lock, then mint. The
+       mint grows from each dot's centre over the coral, which leaves only once
+       it is covered, so the change never passes through a muddy mix */
+    for (var q = 0; q < coreList.length; q += 2) {
+      d = coreList[q];
+      var cs = M.s[d], gd = gateAt(u, cs), on = gateOn(u, cs), ca = coreList[q + 1];
+      var sw = (REDUCED || u < CLOSE1 - 250 || u > UNGATE) ? 0 : 0.5 * Math.sin(PI * on);
+      var hr = 4.8 * (1 + sw), cr = 2.15 * (1 + sw);
+      var co = 1 - ease((gd - 0.55) / 0.45);
+      if (co > 0.01) {
+        g.fillStyle = css(M.coral, 0.13 * ca * co);
+        g.beginPath(); g.arc(M.x[d], M.y[d], hr, 0, TAU); g.fill();
+        g.fillStyle = css(M.coral, 0.95 * ca * co);
+        g.beginPath(); g.arc(M.x[d], M.y[d], cr, 0, TAU); g.fill();
+      }
+      if (gd > 0.01) {
+        g.fillStyle = css(M.mint, 0.2 * ca * gd);
+        g.beginPath(); g.arc(M.x[d], M.y[d], hr * Math.sqrt(gd), 0, TAU); g.fill();
+        g.fillStyle = css(M.mint7, 0.95 * ca);
+        g.beginPath(); g.arc(M.x[d], M.y[d], cr * Math.sqrt(gd), 0, TAU); g.fill();
+      }
+    }
+    var hub = mix(M.coral, M.mint7, G0);
+    g.fillStyle = css(hub, 1);
+    g.beginPath(); g.arc(0, 0, 3.8, 0, TAU); g.fill();
+    g.strokeStyle = css(hub, 0.42); g.lineWidth = 1.5;
+    g.beginPath(); g.arc(0, 0, 7.5, 0, TAU); g.stroke();
+
+    /* --- the blades ------------------------------------------------------ */
+    /* the opening's outline: one arc of each blade's edge, corner to corner */
+    var vx = [], vy = [], apc = [];
+    for (i = 0; i < NB; i++) { vx.push(vr * Math.cos(be[i] + HALF)); vy.push(vr * Math.sin(be[i] + HALF)); }
+    for (i = 0; i < NB; i++) {
+      var pi0 = (i + NB - 1) % NB;
+      apc.push([be[i] + wrap(Math.atan2(vy[pi0] - ey[i], vx[pi0] - ex[i]) - be[i]),
+                be[i] + wrap(Math.atan2(vy[i] - ey[i], vx[i] - ex[i]) - be[i])]);
+    }
+    function apArc(i, f0, f1, c) {
+      var c0 = apc[i][0], c1 = apc[i][1];
+      (c || g).arc(ex[i], ey[i], RHO, c0 + (c1 - c0) * f0, c0 + (c1 - c0) * f1, false);
+    }
+    function apPath(c) { for (var i4 = 0; i4 < NB; i4++) apArc(i4, 0, 1, c); c.closePath(); }
+    var shut = 0.35 + 0.65 * (R_OPEN - r) / (R_OPEN - R_CORE);
+    var fills = [], ang = [];
+    for (i = 0; i < NB; i++) {
+      var I = 0.5 + 0.5 * Math.cos(be[i] - LIGHT);
+      var gr = g.createLinearGradient(r * Math.cos(be[i]), r * Math.sin(be[i]),
+                                      RR * Math.cos(be[i]), RR * Math.sin(be[i]));
+      gr.addColorStop(0, css(mix(M.blue5, M.white, 0.16 + 0.34 * I), 1));
+      gr.addColorStop(0.09, css(mix(M.blue5, M.white, 0.04 + 0.16 * I), 1));
+      gr.addColorStop(0.45, css(mix(M.blue5, M.blue7, 0.36 * (1 - I)), 1));
+      gr.addColorStop(1, css(mix(M.blue5, M.blue7, 0.5 + 0.34 * (1 - I)), 1));
+      fills.push(gr);
+      /* where the edge circle meets the drawing rim, measured round its centre */
+      var bx = RR * Math.cos(be[i] + phh), by = RR * Math.sin(be[i] + phh);
+      var ax = RR * Math.cos(be[i] - phh), ay = RR * Math.sin(be[i] - phh);
+      ang.push([be[i] + wrap(Math.atan2(by - ey[i], bx - ex[i]) - be[i]),
+                be[i] + wrap(Math.atan2(ay - ey[i], ax - ex[i]) - be[i])]);
+    }
+    /* A blade lies under exactly the four behind it. Where it is covered, it
+       is inside one of their edge discs' complements; where it is visible, it
+       is inside all four discs. So each blade is painted once, clipped to
+       those four discs, and the nine painted regions never overlap: no
+       painting order is needed, and every boundary between two regions is a
+       blade edge, which is stroked on top. */
+    function under(i) {
+      g.save();
+      for (var m = 1; m <= 4; m++) {
+        var k = (i - m + NB) % NB;
+        g.beginPath(); g.arc(ex[k], ey[k], RHO, 0, TAU); g.clip();
+      }
+    }
+    for (i = 0; i < NB; i++) {
+      under(i);
+      g.fillStyle = fills[i];
+      g.beginPath();
+      g.arc(0, 0, RR, be[i] - phh, be[i] + phh, false);
+      g.arc(ex[i], ey[i], RHO, ang[i][0], ang[i][1], true);
+      g.closePath(); g.fill();
+      g.restore();
+    }
+    /* each edge, with the shadow it throws on whatever lies under it,
+       including the grants in the opening */
+    for (i = 0; i < NB; i++) {
+      var e0 = ang[i][0] + 0.004, e1 = ang[i][1] - 0.004;
+      under(i);
+      g.strokeStyle = css(M.blue7, 0.1 * shut); g.lineWidth = 16;
+      g.beginPath(); g.arc(ex[i], ey[i], RHO, e0, e1, true); g.stroke();
+      g.strokeStyle = css(M.blue7, 0.13 * shut); g.lineWidth = 6;
+      g.stroke();
+      g.strokeStyle = css(M.blue7, 0.7); g.lineWidth = 1;
+      g.stroke();
+      g.strokeStyle = css(M.white, 0.55); g.lineWidth = 1.1;
+      g.beginPath(); g.arc(ex[i], ey[i], RHO + 1.5, e0, e1, true); g.stroke();
+      g.restore();
+    }
+
+
+    /* the grants the blades now cover, still visible on them, dimmed */
+    for (b = 1; b <= 10; b++) {
+      if (!gh[b].length) continue;
+      g.fillStyle = css(mix(M.coral, M.white, 0.4), 0.26 * b / 10);
+      dots(gh[b], 1.75); g.fill();
+    }
+
+    /* the opening itself: mint while gated, and one sweep of light round it
+       when the blades lock */
+    if (G0 > 0.01) {
+      g.strokeStyle = css(M.mint, 0.8 * G0); g.lineWidth = 1.8;
+      g.beginPath();
+      for (i = 0; i < NB; i++) apArc(i, 0, 1);
+      g.closePath(); g.stroke();
+    }
+    var sk = (u - CLOSE1) / SWEEP;
+    if (!REDUCED && sk > 0 && sk < 1) {
+      var th = -PI / 2 + TAU * ease(sk), env = Math.sin(PI * sk);
+      for (i = 0; i < NB; i++) {
+        for (var f = 0; f < 4; f++) {
+          var w = wrap(be[i] + (f + 0.5 - 2) / 4 * 2 * HALF - th);
+          var al2 = env * Math.exp(-(w / 0.7) * (w / 0.7));
+          if (al2 < 0.02) continue;
+          g.strokeStyle = css(M.mint, 0.35 * al2); g.lineWidth = 9;
+          g.beginPath(); apArc(i, f / 4, (f + 1) / 4); g.stroke();
+          g.strokeStyle = css(M.white, 0.95 * al2); g.lineWidth = 2.6;
+          g.beginPath(); apArc(i, f / 4, (f + 1) / 4); g.stroke();
+        }
+      }
+    }
+
+    /* --- the housing ----------------------------------------------------- */
+    var sh = g.createRadialGradient(0, 0, RH - 16, 0, 0, RH);
+    sh.addColorStop(0, css(M.blue7, 0));
+    sh.addColorStop(1, css(M.blue7, 0.26 * shut));
+    g.fillStyle = sh;
+    g.beginPath(); g.arc(0, 0, RH, 0, TAU); g.arc(0, 0, RH - 16, 0, TAU, true); g.fill();
+    var bz = g.createLinearGradient(-RB, -RB, RB, RB);
+    bz.addColorStop(0, css(M.white, 1));
+    bz.addColorStop(0.5, css(mix(M.hair, M.white, 0.45), 1));
+    bz.addColorStop(1, css(mix(M.hair, M.muted, 0.18), 1));
+    g.fillStyle = bz;
+    g.beginPath(); g.arc(0, 0, RB, 0, TAU); g.arc(0, 0, RH, 0, TAU, true); g.fill();
+    var lip = g.createLinearGradient(-RH, -RH, RH, RH);
+    lip.addColorStop(0, css(M.muted, 0.7));
+    lip.addColorStop(1, css(M.white, 0.9));
+    g.strokeStyle = lip; g.lineWidth = 1.6;
+    g.beginPath(); g.arc(0, 0, RH + 0.6, 0, TAU); g.stroke();
+    g.strokeStyle = css(M.muted, 0.35); g.lineWidth = 1;
+    g.beginPath(); g.arc(0, 0, RB - 0.5, 0, TAU); g.stroke();
+    /* the drive ring's graduations turn with the opening; the pins do not */
+    g.strokeStyle = css(M.muted, 0.42); g.lineWidth = 1;
+    g.beginPath();
+    for (var k2 = 0; k2 < 72; k2++) {
+      var ta = goff + k2 * TAU / 72, r0 = k2 % 8 === 0 ? RB - 7 : RB - 4.2;
+      g.moveTo(r0 * Math.cos(ta), r0 * Math.sin(ta));
+      g.lineTo((RB - 1.8) * Math.cos(ta), (RB - 1.8) * Math.sin(ta));
+    }
+    g.stroke();
+    for (i = 0; i < NB; i++) {
+      var pa = A0 + i * TAU / NB, px = RP * Math.cos(pa), py = RP * Math.sin(pa);
+      g.fillStyle = css(mix(M.hair, M.muted, 0.55), 1);
+      g.beginPath(); g.arc(px, py, 2.7, 0, TAU); g.fill();
+      g.fillStyle = css(M.white, 0.95);
+      g.beginPath(); g.arc(px - 0.8, py - 0.8, 1.05, 0, TAU); g.fill();
+    }
+    g.restore();
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
@@ -5105,7 +5904,9 @@
                  hull: hull,
                  arena: arena,
                  prune: prune,
-                 schedule: schedule };
+                 schedule: schedule,
+                 closure: closure,
+                 iris: iris };
 
   /* ------------------------------------------------------------------ */
   var live = [];
