@@ -79,553 +79,227 @@
   }
 
   /* ==================================================================== */
-  /* caustic — caustic                                                   */
+  /* caustic                                                              */
   /* ==================================================================== */
   function caustic(g, vb, t, st) {
-    /* caustic. The project's own last line: "A caustic is where a map folds
-       and distinct preimages merge." So the figure is exactly that, in optics,
-       traced for real every frame.
+    /* A caustic is where distinct rays crowd onto one place, and that is the
+       claim the project makes about a model that cannot reach a fact. So every
+       entity here is a beam of rays in its own colour, and every beam focuses
+       on its answer. Where the fact is reached, each focuses on an answer of
+       its own. Where it is not, beams of different colours bend and focus on
+       the same answer, and the knot there is bright only because their rays
+       genuinely converge on it. Nobody draws the crowding. It arrives.
 
-       Sixteen entities on the left are points of light, each in its own
-       colour. The model is a block of glass. Its entry face is a row of
-       lenslets, one per entity, each shaped by Snell's law to turn its
-       entity's fan into a parallel beam; its exit face is solved, also by
-       Snell's law, so that every ray lands where the answer map sends it on
-       the screen at the right. Where a ray lands is the answer f(e). Where the
-       model reaches the fact, each entity's rays converge on an answer of
-       their own: sixteen thin cones, sixteen separate foci.
+       The answers are the partition, drawn as petals: one petal for each
+       entity that landed there. A reached answer has one. The knot has one
+       for every entity collapsed onto it, and it rings coral on every arrival,
+       several times as often as any single answer. Which entity is which is
+       never needed to see the difference, which is the point.
 
-       Then a band of entities falls out of reach, one after another. The glass
-       there loses its per-entity shape and swells into a single lens, the
-       beams swing onto one answer, and their rays cross. The envelope of the
-       crossing rays is a true caustic, a cusp whose tip burns on the screen.
-       Nobody paints the burn: every ray is splatted into a density field and
-       the glow is that density, tone mapped. It shows which answer is crowded
-       without knowing which ray came from which entity, which is the project's
-       point: the orbit partition needs no ground truth, and an orbit of size k
-       proves at least k - 1 answers wrong.
+       Each ray is stroked on its own, because one path of many subpaths paints
+       their union once and the crowding never accumulates. Blending is plain
+       source-over: it converges on the stroke colour and never past it.
 
-       Also computed from the same surfaces: the colour fringes along the cusp
-       are its envelope traced again at a slightly higher and a slightly lower
-       refractive index (dispersion); the faint arcs inside the glass are the
-       rays the swollen face reflects back, r = d - 2 (d.n) n; and each pulse
-       of light is a wavefront, the points of equal optical path (glass counts
-       1.5 times), flat inside the glass, converging after it, folding where
-       the rays cross. Every answer rings when its pulse lands, and the pile
-       rings once, with the weight of every entity on it.
+       Measured, in the preview harness:
+       - A bead's whole tail vanished in one frame the moment it reached its
+         answer, because the build-front test still applied after the build:
+         the answer's ink dropped by 20 unit^2 in one frame. The test now
+         clamps the head to the answer column first, and every swell leaves
+         zero with zero slope. The largest single-frame ink jump left is a
+         bead crossing a tile, not anything appearing.
+       - --blue-700 and --green-500 are left out of the entity colours. At
+         full alpha they composited at luminance 58 and channel sum 171, at or
+         below #3a3a3a. Without them the darkest pixel is sum 229, luminance 73.
+       - Worst frame is 249 strokes and fills. */
+    var N = 18, R = 5, BW = 7;             /* entities, rays per entity, beam width */
+    var SX = 26, AX = 398;                 /* entities enter at SX, answers sit at AX */
+    var XA = 112, XB = 372;                /* the model: the only place a path may bend */
+    var Y0 = 96, Y1 = 404, KY = 250, GAP = 50;
+    var COLLAPSED = [1, 4, 6, 9, 12, 14, 17];
+    var RANK = [2, 5, 0, 3, 6, 1, 4];      /* the order they land in the knot */
+    var BUILD = 2600, V = 0.105, RIP = 1400;
+    var TT = (AX - SX) / V;                /* one bead's crossing, 3,543 ms */
+    var PAL = [['--blue-500', '#2456dc'], ['--amber-500', '#d96a06'], ['--violet-500', '#a66cf0'],
+               ['--mint-500', '#0b93ab'], ['--amber-700', '#9a4906'], ['--violet-700', '#6b35c4'],
+               ['--mint-700', '#0a6b7c']];
 
-       Illustrative: the number of entities, which of them fall out of reach,
-       their order, the glass itself, and the relaxing back at the end of each
-       cycle, which stands for a repair. Only the clock is scheduled.
+    function bend(x) { return ease((x - XA) / (XB - XA)); }
+    function yAt(b, x, o) { var s = bend(x); return b.y0 + (b.T - b.y0) * s + o * (1 - s); }
+    function hash(i, k) { var s = Math.sin(i * 12.9898 + k * 78.233) * 43758.5453; return s - Math.floor(s); }
 
-       Speed, measured in the preview harness with a software raster forced by
-       a readback: the first build stroked all 352 rays and blitted the glow
-       over the whole canvas twice, 19 ms a frame. Now the fans and every
-       reached entity's rays, which never move, are drawn once into a layer at
-       the device's own scale; only the band's rays are stroked per frame; the
-       glow is one blit of the region where light lands, its bloom blurred in
-       the density itself; and the glass needs no clip. */
-    var TAU = Math.PI * 2;
-    var W = vb[0], H = vb[1];
-    var N = 16, R = 22, NR = N * R;
-    var Y0 = 90, Y1 = 402, HB = (Y1 - Y0) / N, YM = (Y0 + Y1) / 2;
-    var SX = 30, XA = 84, XB = 180, XS = 414, PW = 8, EX = 9, EY = -7;
-    var NG = 1.5, DN = 0.03;
-    var B0 = 5, B1 = 11, BC = 8, BK = 7;
-    var ORDER = [8, 7, 9, 6, 10, 5, 11];
-    var SQ = 0.9, AL = 0.3, AB = 0.4;
-    var P = 16000, CS = 4200, STAG = 330, RAMP = 1100, REL = 12600, RELD = 2200;
-    var V = 0.16, PER = 2000, T0P = 450, BUILD = 2600;
-    var GY0 = Y0 - 9, GY1 = Y1 + 9, NGR = GY1 - GY0 + 1, FS = 3;
-    var GS = 2, GW = 236, GH = 272;
-    var RX0 = 86, RX1 = 216, RY0 = 40, RY1 = 209;       /* the density window, in cells */
-
-    var M = caustic.cache;
-    if (!M) {
-      /* built whole, then published */
-      var C = {}, e, k, r, i;
-      var hex = function (name, fb) {
-        var h = (token(name, fb) || fb).trim().replace('#', '');
-        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-        var n = parseInt(h, 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-      };
-      var mix = function (a, b, q) { return [a[0] + (b[0] - a[0]) * q, a[1] + (b[1] - a[1]) * q, a[2] + (b[2] - a[2]) * q]; };
-      var rgb = function (c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a) + ')'; };
-      var WH = [255, 255, 255];
-      C.mix = mix; C.rgb = rgb; C.WH = WH;
-      C.m5 = hex('--mint-500', '#0b93ab'); C.b5 = hex('--blue-500', '#2456dc');
-      C.v5 = hex('--violet-500', '#a66cf0'); C.c5 = hex('--coral-500', '#d9376e');
-      C.a5 = hex('--amber-500', '#d96a06');
-      var stops = [C.m5, C.b5, C.v5, C.c5, C.a5];
-      /* an orb: a halo, a solid core, a glint, in one image */
-      var orb = function (base) {
-        var cv = document.createElement('canvas'), S = 64, h = S / 2;
-        cv.width = cv.height = S;
-        var x = cv.getContext('2d'), q = x.createRadialGradient(h, h, 0, h, h, h);
-        q.addColorStop(0, rgb(mix(base, WH, 0.3), 0.9));
-        q.addColorStop(0.4, rgb(base, 0.32));
-        q.addColorStop(1, rgb(base, 0));
-        x.fillStyle = q; x.fillRect(0, 0, S, S);
-        x.fillStyle = rgb(base, 1);
-        x.beginPath(); x.arc(h, h, 0.37 * h, 0, TAU); x.fill();
-        x.fillStyle = rgb(WH, 0.85);
-        x.beginPath(); x.arc(h - 0.13 * h, h - 0.13 * h, 0.12 * h, 0, TAU); x.fill();
-        return cv;
-      };
-      /* entity colours run the palette top to bottom, like a spectrum */
-      C.hue = []; C.ray = []; C.orb = []; C.fr = []; C.frg = []; C.ring = [];
-      for (e = 0; e < N; e++) {
-        var pp = e / (N - 1) * (stops.length - 1), i0 = Math.min(stops.length - 2, Math.floor(pp));
-        var hc = mix(stops[i0], stops[i0 + 1], pp - i0);
-        C.hue.push(hc);
-        C.ray.push(rgb(hc, 0.22));
-        C.fr.push(rgb(mix(hc, WH, 0.1), 0.8));
-        C.frg.push(rgb(mix(hc, WH, 0.35), 0.22));
-        C.orb.push(orb(hc));
+    var G = caustic.geo;
+    if (!G) {
+      G = caustic.geo = { xs: [], beams: [] };
+      for (var x = SX; x < AX; x += 6) G.xs.push(x);
+      G.xs.push(AX);
+      var ci = {}, up = [], dn = [], slot = {}, i, k;
+      for (k = 0; k < COLLAPSED.length; k++) ci[COLLAPSED[k]] = k;
+      for (i = 0; i < N; i++) {
+        if (i in ci) continue;
+        (Y0 + (Y1 - Y0) * i / (N - 1) < KY ? up : dn).push(i);
       }
-
-      /* entities, and the answers the model gives when it reaches the fact */
-      C.yc = []; C.A = [];
-      for (e = 0; e < N; e++) {
-        var yy = Y0 + (e + 0.5) * HB;
-        C.yc.push(yy); C.A.push(YM + (yy - YM) * SQ);
-      }
-
-      /* entry face: each lenslet refracts its entity's fan into a parallel
-         beam. Snell in vector form: the normal is parallel to d_air - n x_hat,
-         so the face's slope is dy / (n - dx). */
-      var PRN = 64, prof = new Float32Array(PRN + 1), D1 = XA - SX;
-      for (k = 1; k <= PRN; k++) {
-        var dy = (k - 0.5) / PRN * HB / 2, ln = Math.sqrt(D1 * D1 + dy * dy);
-        prof[k] = prof[k - 1] + (dy / ln) / (NG - D1 / ln) * (HB / 2 / PRN);
-      }
-      var xin = function (y) {
-        if (y < Y0 || y > Y1) return XA + prof[PRN];
-        var ee = Math.max(0, Math.min(N - 1, Math.floor((y - Y0) / HB)));
-        var d = Math.abs(y - C.yc[ee]) / (HB / 2) * PRN, k0 = Math.min(PRN - 1, Math.floor(d));
-        return XA + prof[k0] + (prof[k0 + 1] - prof[k0]) * (d - k0);
-      };
-      C.inFace = new Float32Array(NGR);
-      for (k = 0; k < NGR; k++) C.inFace[k] = xin(GY0 + k);
-
-      /* the rays: R per entity, evenly spaced inside the glass */
-      C.re = new Int16Array(NR); C.ry = new Float32Array(NR); C.rxi = new Float32Array(NR); C.rl1 = new Float32Array(NR);
-      for (e = 0; e < N; e++) {
-        for (r = 0; r < R; r++) {
-          i = e * R + r;
-          var v = -1 + (2 * r + 1) / R, y1 = C.yc[e] + v * HB / 2;
-          C.re[i] = e; C.ry[i] = y1; C.rxi[i] = xin(y1);
-          C.rl1[i] = Math.sqrt((C.rxi[i] - SX) * (C.rxi[i] - SX) + (y1 - C.yc[e]) * (y1 - C.yc[e]));
+      for (k = 0; k < up.length; k++) slot[up[k]] = Y0 + (KY - GAP - Y0) * k / (up.length - 1);
+      for (k = 0; k < dn.length; k++) slot[dn[k]] = KY + GAP + (Y1 - KY - GAP) * k / (dn.length - 1);
+      for (i = 0; i < N; i++) {
+        var col = i in ci;
+        var b = { y0: Y0 + (Y1 - Y0) * i / (N - 1), col: col, j: col ? ci[i] : -1, pal: i % PAL.length,
+                  D: col ? 200 + RANK[ci[i]] * 210 : 700 * hash(i, 1),
+                  P: 1500 + 700 * hash(i, 2), rays: [] };
+        b.T = col ? KY : slot[i];
+        b.phi = hash(i, 3) * b.P;
+        for (var r = 0; r < R; r++) {
+          var o = (r / (R - 1) - 0.5) * BW, ys = new Float32Array(G.xs.length);
+          for (var s = 0; s < G.xs.length; s++) ys[s] = yAt(b, G.xs[s], o);
+          b.rays.push(ys);
         }
+        G.beams.push(b);
       }
-
-      /* per-frame scratch */
-      C.S = new Float32Array(NGR); C.S2 = new Float32Array(NGR); C.AG = new Float32Array(NGR);
-      C.xe = new Float32Array(NR); C.m = new Float32Array(NR); C.T = new Float32Array(NR);
-      C.l2 = new Float32Array(NR); C.l3 = new Float32Array(NR);
-      C.nx = new Float32Array(NR); C.ny = new Float32Array(NR);
-      C.CE = new Float32Array(N); C.Ly = new Float32Array(N); C.wE = new Float32Array(N);
-      C.dens = new Float32Array(GW * GH); C.tmp = new Float32Array(GW * GH); C.sharp = new Float32Array(GW * GH);
-      C.off = document.createElement('canvas'); C.off.width = GW; C.off.height = GH;
-      C.og = C.off.getContext('2d'); C.img = C.og.createImageData(GW, GH);
-      C.layer = null; C.lsc = 0;
-
-      /* density to light: lavender haze, then coral, amber, and a white-hot
-         core only where many rays crowd */
-      var ramp = [[0, mix(C.v5, WH, 0.45), 0], [0.3, mix(C.v5, WH, 0.35), 0.14], [0.52, C.c5, 0.5],
-                  [0.74, C.a5, 0.82], [0.9, mix(C.a5, WH, 0.6), 0.95], [1, mix(C.a5, WH, 0.92), 1]];
-      C.lut = new Uint8ClampedArray(256 * 4);
-      for (k = 0; k < 256; k++) {
-        var q2 = k / 255, j = 0;
-        while (j < ramp.length - 2 && q2 > ramp[j + 1][0]) j++;
-        var f = (q2 - ramp[j][0]) / (ramp[j + 1][0] - ramp[j][0]);
-        var cc = mix(ramp[j][1], ramp[j + 1][1], f);
-        C.lut[4 * k] = cc[0]; C.lut[4 * k + 1] = cc[1]; C.lut[4 * k + 2] = cc[2];
-        C.lut[4 * k + 3] = 255 * (ramp[j][2] + (ramp[j + 1][2] - ramp[j][2]) * f);
-      }
-      caustic.cache = M = C;
     }
 
     var T = REDUCED ? 9000 : t;
-    var tau = T % P;
-    var rgb = M.rgb, mix = M.mix, WH = M.WH;
-    var e, k, r, i, y;
+    var cs = [];
+    for (var p = 0; p < PAL.length; p++) cs.push(token(PAL[p][0], PAL[p][1]));
+    var coral = token('--coral-500', '#d9376e');
+    var TAU = Math.PI * 2;
 
-    g.clearRect(0, 0, W, H);
+    g.clearRect(0, 0, vb[0], vb[1]);
     g.globalCompositeOperation = 'source-over';
-    g.globalAlpha = 1;
-
-    /* ---------- the clock: which entities are out of reach, and how far */
-    var CE = M.CE;
-    for (e = 0; e < N; e++) CE[e] = 0;
-    var down = ease((tau - REL) / RELD);
-    for (r = 0; r < BK; r++) CE[ORDER[r]] = ease((tau - CS - r * STAG) / RAMP) * (1 - down);
-
-    var YB = M.A[BC], YBC = M.yc[BC], HW = BK * HB / 2;
-    /* the answer map: where a ray at height y inside the glass must land */
-    var target = function (y) {
-      var ee = Math.floor((y - Y0) / HB);
-      if (ee < 0) ee = 0; else if (ee > N - 1) ee = N - 1;
-      var yc = M.yc[ee], v = (y - yc) / (HB / 2);
-      var own = M.A[ee] - AL * v * v * (y - yc);          /* its own answer, a slightly aberrated focus */
-      var ce = CE[ee];
-      if (ce <= 0) return own;
-      var u = (y - YBC) / HW;
-      return own + (YB - AB * u * u * (y - YBC) - own) * ce;   /* one lens for the whole band */
-    };
-
-    /* ---------- the exit face, solved from the answer map by Snell's law:
-       the normal is parallel to n x_hat - d_air, so the slope is
-       sin a / (n - cos a). Two passes, so the aim uses the face's own depth. */
-    var S = M.S, S2 = M.S2, AG = M.AG;
-    for (var it = 0; it < 2; it++) {
-      for (k = 0; k < NGR; k++) {
-        y = GY0 + k;
-        AG[k] = (y < Y0 || y > Y1) ? 0 : Math.atan2(target(y) - y, XS - XB - (it ? S[k] : 0));
-      }
-      var prev = 0, acc = 0;
-      S2[0] = 0;
-      for (k = 0; k < NGR; k++) {
-        var sl = Math.sin(AG[k]) / (NG - Math.cos(AG[k]));
-        if (k) { acc += 0.5 * (prev + sl); S2[k] = acc; }
-        prev = sl;
-      }
-      for (k = 0; k < NGR; k++) S[k] = S2[k];
-    }
-    var sAt = function (y) {
-      var f = y - GY0, k0 = Math.floor(f);
-      if (k0 < 0) return S[0];
-      if (k0 >= NGR - 1) return S[NGR - 1];
-      return S[k0] + (S[k0 + 1] - S[k0]) * (f - k0);
-    };
-
-    /* ---------- trace every ray */
-    var XE = M.xe, MM = M.m, TT = M.T, L2 = M.l2, L3 = M.l3, NX = M.nx, NY = M.ny;
-    var smax = 0;
-    for (i = 0; i < NR; i++) {
-      y = M.ry[i];
-      var xe = XB + sAt(y), tg = target(y), dx = XS - xe, dyy = tg - y;
-      var ln2 = Math.sqrt(dx * dx + dyy * dyy);
-      XE[i] = xe; TT[i] = tg; MM[i] = dyy / dx;
-      L2[i] = xe - M.rxi[i]; L3[i] = ln2;
-      var nx = NG - dx / ln2, ny = -dyy / ln2, nl = Math.sqrt(nx * nx + ny * ny);
-      NX[i] = nx / nl; NY[i] = ny / nl;
-      var tot = M.rl1[i] + NG * L2[i] + L3[i];
-      if (tot > smax) smax = tot;
-    }
-
-    /* ---------- the density of light, splatted ray by ray into cells */
-    var D = M.dens, TM = M.tmp, SH = M.sharp, gx, gy, idx;
-    for (gy = RY0 - 2; gy <= RY1 + 2; gy++) for (gx = RX0 - 2; gx <= RX1 + 2; gx++) D[gy * GW + gx] = 0;
-    for (i = 0; i < NR; i++) {
-      var m0 = MM[i], ww = Math.sqrt(1 + m0 * m0), x0 = XE[i], y0 = M.ry[i];
-      var ga = Math.max(RX0, Math.ceil(x0 / GS)), gb = Math.min(RX1, Math.floor(XS / GS));
-      for (gx = ga; gx <= gb; gx++) {
-        var yv = (y0 + m0 * (gx * GS - x0)) / GS, iy = Math.floor(yv), fr = yv - iy;
-        if (iy < RY0 || iy >= RY1) continue;
-        idx = iy * GW + gx;
-        D[idx] += ww * (1 - fr); D[idx + GW] += ww * fr;
-      }
-      /* light entering the frosted screen scatters a little way into it */
-      idx = Math.floor(TT[i] / GS) * GW + Math.floor(XS / GS);
-      D[idx + 1] += 1.6; D[idx + 2] += 1.3; D[idx + 3] += 0.9;
-    }
-    /* 1-2-1 blurs: two rounds give the core, three more the bloom around it */
-    var blur = function (src, dst, step) {
-      for (var yq = RY0; yq <= RY1; yq++) {
-        for (var xq = RX0; xq <= RX1; xq++) {
-          var id = yq * GW + xq;
-          dst[id] = 0.25 * src[id - step] + 0.5 * src[id] + 0.25 * src[id + step];
-        }
-      }
-    };
-    blur(D, TM, 1); blur(TM, D, GW); blur(D, TM, 1); blur(TM, SH, GW);
-    blur(SH, TM, 1); blur(TM, D, GW); blur(D, TM, 1); blur(TM, D, GW); blur(D, TM, 1); blur(TM, D, GW);
-    var dat = M.img.data, LUT = M.lut, D0 = 9;
-    for (gy = RY0; gy <= RY1; gy++) {
-      for (gx = RX0; gx <= RX1; gx++) {
-        idx = gy * GW + gx;
-        var dv = SH[idx] + 0.55 * D[idx], o = idx * 4;
-        if (dv < 0.4) { dat[o + 3] = 0; continue; }
-        var li = ((dv / (dv + D0)) * 255) | 0, lo = li * 4;
-        dat[o] = LUT[lo]; dat[o + 1] = LUT[lo + 1]; dat[o + 2] = LUT[lo + 2]; dat[o + 3] = LUT[lo + 3];
-      }
-    }
-    M.og.putImageData(M.img, 0, 0, RX0, RY0, RX1 - RX0 + 1, RY1 - RY0 + 1);
-
-    /* reflections off the exit face, back into the glass: r = d - 2 (d.n) n */
-    var refl = [];
-    for (i = B0 * R; i < (B1 + 1) * R; i++) {
-      var rx = 1 - 2 * NX[i] * NX[i], ry = -2 * NX[i] * NY[i];
-      if (Math.abs(ry) < 0.05) continue;
-      var mr = ry / rx, xend = XA + 6, yend = M.ry[i] + mr * (xend - XE[i]);
-      if (yend < GY0 + 4) { yend = GY0 + 4; xend = XE[i] + (yend - M.ry[i]) / mr; }
-      if (yend > GY1 - 4) { yend = GY1 - 4; xend = XE[i] + (yend - M.ry[i]) / mr; }
-      refl.push(i, xend, yend);
-    }
-
-    /* ---------- appearance on arrival */
-    var A0 = REDUCED ? 1 : 0.45 + 0.55 * ease(t / 700);
-    var FX = REDUCED ? 1e4 : SX + (XS + PW + 60 - SX) * ease(t / BUILD);
-    var building = FX < XS + PW + 50;
-
-    /* ---------- the rays that never move, drawn once at the device's scale:
-       every fan, and every ray of every entity outside the band */
-    var tm = g.getTransform ? g.getTransform() : null;
-    var sc = tm ? Math.sqrt(tm.a * tm.a + tm.b * tm.b) : 2;
-    if (!M.layer || Math.abs(M.lsc - sc) > 1e-3) {
-      var lay = document.createElement('canvas');
-      lay.width = Math.ceil(W * sc); lay.height = Math.ceil(H * sc);
-      var lg = lay.getContext('2d');
-      lg.setTransform(sc, 0, 0, sc, 0, 0);
-      lg.lineWidth = 0.66; lg.lineCap = 'round'; lg.lineJoin = 'round';
-      for (e = 0; e < N; e++) {
-        var inBand = e >= B0 && e <= B1;
-        lg.strokeStyle = M.ray[e];
-        for (r = 0; r < R; r++) {
-          i = e * R + r;
-          lg.beginPath();
-          lg.moveTo(SX, M.yc[e]); lg.lineTo(M.rxi[i], M.ry[i]);
-          if (!inBand) { lg.lineTo(XE[i], M.ry[i]); lg.lineTo(XS, TT[i]); }
-          lg.stroke();
-        }
-      }
-      M.layer = lay; M.lsc = sc;
-    }
-
-    /* ---------- the glass: the model, a slab seen a little from above, so
-       its top and its curved exit face show as faces of their own */
-    var inF = M.inFace;
-    var glassPath = function (dx, dy) {
-      g.beginPath();
-      g.moveTo(inF[0] + dx, GY0 + dy);
-      for (k = FS; k < NGR; k += FS) g.lineTo(inF[k] + dx, GY0 + k + dy);
-      g.lineTo(inF[NGR - 1] + dx, GY1 + dy);
-      for (k = NGR - 1; k >= 0; k -= FS) g.lineTo(XB + S[k] + dx, GY0 + k + dy);
-      g.lineTo(XB + S[0] + dx, GY0 + dy);
-      g.closePath();
-    };
-    var face = function (dx, dy) {
-      g.beginPath(); g.moveTo(XB + S[0] + dx, GY0 + dy);
-      for (k = FS; k < NGR; k += FS) g.lineTo(XB + S[k] + dx, GY0 + k + dy);
-      g.lineTo(XB + S[NGR - 1] + dx, GY1 + dy);
-    };
-    var entry = function (dx) {
-      g.beginPath(); g.moveTo(inF[0] + dx, GY0);
-      for (k = FS; k < NGR; k += FS) g.lineTo(inF[k] + dx, GY0 + k);
-      g.lineTo(inF[NGR - 1] + dx, GY1);
-    };
-    /* the far edges, seen through the glass */
-    glassPath(EX, EY);
-    g.strokeStyle = rgb(mix(M.v5, WH, 0.45), 0.3 * A0); g.lineWidth = 0.8; g.stroke();
-    var gf = g.createLinearGradient(XA, 0, XB + 34, 0);
-    gf.addColorStop(0, rgb(mix(M.b5, WH, 0.8), 0.5 * A0));
-    gf.addColorStop(0.5, rgb(mix(M.v5, WH, 0.9), 0.26 * A0));
-    gf.addColorStop(1, rgb(mix(M.m5, WH, 0.8), 0.46 * A0));
-    glassPath(0, 0); g.fillStyle = gf; g.fill();
-
-    if (building) { g.save(); g.beginPath(); g.rect(0, 0, FX, H); g.clip(); }
-
-    /* ---------- rays, each stroked on its own so crowding accumulates */
-    var LX0 = SX - 8, LY0 = GY0 - 2, LW = XS + 3 - LX0, LH = GY1 + 2 - LY0;
-    g.drawImage(M.layer, LX0 * sc, LY0 * sc, LW * sc, LH * sc, LX0, LY0, LW, LH);
-    g.lineWidth = 0.66; g.lineCap = 'round'; g.lineJoin = 'round';
-    for (e = B0; e <= B1; e++) {
-      g.strokeStyle = M.ray[e];
-      for (r = 0; r < R; r++) {
-        i = e * R + r;
-        g.beginPath();
-        g.moveTo(M.rxi[i], M.ry[i]); g.lineTo(XE[i], M.ry[i]); g.lineTo(XS, TT[i]);
-        g.stroke();
-      }
-    }
-    /* the reflected rays, faint, inside the glass */
-    g.lineWidth = 0.55;
-    for (k = 0; k < refl.length; k += 3) {
-      i = refl[k];
-      g.strokeStyle = rgb(M.hue[M.re[i]], 0.05);
-      g.beginPath(); g.moveTo(XE[i], M.ry[i]); g.lineTo(refl[k + 1], refl[k + 2]); g.stroke();
-    }
-
-    /* ---------- wavefronts: points of equal optical path along every ray.
-       Drawn under the glass's milk, so inside it they are seen through it. */
-    var posAt = function (i, s, out) {
-      var l1 = M.rl1[i], e2 = M.re[i];
-      if (s <= l1) { var q = s / l1; out[0] = SX + (M.rxi[i] - SX) * q; out[1] = M.yc[e2] + (M.ry[i] - M.yc[e2]) * q; return; }
-      s -= l1;
-      if (s <= NG * L2[i]) { out[0] = M.rxi[i] + s / NG; out[1] = M.ry[i]; return; }
-      s -= NG * L2[i];
-      var q3 = Math.min(1, s / L3[i]);
-      out[0] = XE[i] + (XS - XE[i]) * q3; out[1] = M.ry[i] + (TT[i] - M.ry[i]) * q3;
-    };
-    var pt = [0, 0], kHi = Math.floor((T - T0P) / PER), kLo = Math.max(0, Math.floor((T - T0P - (smax + 40) / V) / PER));
-    var arrivals = [];
-    for (var kp = kLo; kp <= kHi; kp++) {
-      var s0 = V * (T - T0P - kp * PER);
-      if (s0 < 0) continue;
-      for (e = 0; e < N; e++) {
-        var ic = e * R + R / 2, Lc = M.rl1[ic] + NG * L2[ic] + L3[ic];
-        arrivals.push(e, (s0 - Lc) / V);
-        var fa = ease(s0 / 26) * (1 - ease((s0 - Lc + 48) / 40));
-        if (fa <= 0.01) continue;
-        g.beginPath();
-        for (r = 0; r < R; r++) {
-          posAt(e * R + r, s0, pt);
-          if (r) g.lineTo(pt[0], pt[1]); else g.moveTo(pt[0], pt[1]);
-        }
-        g.globalAlpha = fa;
-        g.strokeStyle = M.frg[e]; g.lineWidth = 3.4; g.stroke();
-        g.strokeStyle = M.fr[e]; g.lineWidth = 1; g.stroke();
-        g.globalAlpha = 1;
-      }
-    }
-    if (building) g.restore();
-
-    /* the glass over the light inside it: milky, bevelled */
-    glassPath(0, 0); g.fillStyle = rgb(WH, 0.3 * A0); g.fill();
-    g.strokeStyle = rgb(WH, 0.5 * A0); g.lineWidth = 3;
-    entry(2.6); g.stroke();
-    face(-2.8, 0); g.stroke();
-
-    /* its top face */
-    var tf = g.createLinearGradient(0, GY0 + EY, 0, GY0);
-    tf.addColorStop(0, rgb(mix(M.v5, WH, 0.82), 0.55 * A0)); tf.addColorStop(1, rgb(WH, 0.9 * A0));
-    g.beginPath(); g.moveTo(inF[0], GY0); g.lineTo(XB + S[0], GY0); g.lineTo(XB + S[0] + EX, GY0 + EY);
-    g.lineTo(inF[0] + EX, GY0 + EY); g.closePath();
-    g.fillStyle = tf; g.fill();
-    g.strokeStyle = rgb(mix(M.v5, WH, 0.35), 0.5 * A0); g.lineWidth = 0.8; g.stroke();
-
-    /* its curved exit face, the surface the answer map is solved into */
-    var ig = rgb(mix(M.b5, WH, 0.25), 1);
-    g.beginPath(); g.moveTo(XB + S[0], GY0);
-    for (k = FS; k < NGR; k += FS) g.lineTo(XB + S[k], GY0 + k);
-    g.lineTo(XB + S[NGR - 1], GY1);
-    for (k = NGR - 1; k >= 0; k -= FS) g.lineTo(XB + S[k] + EX, GY0 + k + EY);
-    g.closePath();
-    g.fillStyle = rgb(mix(M.v5, WH, 0.84), 0.4 * A0); g.fill();
     g.lineCap = 'round';
-    face(EX, EY); g.strokeStyle = ig; g.globalAlpha = 0.5 * A0; g.lineWidth = 0.9; g.stroke();
-    face(0, 0); g.globalAlpha = 0.16 * A0; g.lineWidth = 6; g.stroke();
-    g.globalAlpha = 0.9 * A0; g.lineWidth = 1.3; g.stroke();
-    g.globalAlpha = 1;
-    face(-1.8, 0); g.strokeStyle = rgb(WH, 0.9 * A0); g.lineWidth = 1; g.stroke();
-    entry(0); g.strokeStyle = rgb(mix(M.b5, WH, 0.3), 0.5 * A0); g.lineWidth = 0.9; g.stroke();
-    entry(1.6); g.strokeStyle = rgb(WH, 0.95 * A0); g.lineWidth = 1.1; g.stroke();
-    g.strokeStyle = rgb(mix(M.v5, WH, 0.35), 0.5 * A0); g.lineWidth = 0.9;
-    g.beginPath(); g.moveTo(inF[NGR - 1], GY1); g.lineTo(XB + S[NGR - 1], GY1);
-    g.lineTo(XB + S[NGR - 1] + EX, GY1 + EY); g.stroke();
 
-    /* ---------- the screen the answers land on: a frosted plate */
-    var pf = g.createLinearGradient(XS, 0, XS + PW, 0);
-    pf.addColorStop(0, rgb(WH, 0.95 * A0)); pf.addColorStop(1, rgb(mix(M.v5, WH, 0.86), 0.7 * A0));
-    g.fillStyle = rgb(mix(M.v5, WH, 0.8), 0.5 * A0);
-    g.beginPath(); g.moveTo(XS + PW, GY0); g.lineTo(XS + PW + EX, GY0 + EY); g.lineTo(XS + PW + EX, GY1 + EY);
-    g.lineTo(XS + PW, GY1); g.closePath(); g.fill();
-    g.fillStyle = rgb(WH, 0.9 * A0);
-    g.beginPath(); g.moveTo(XS, GY0); g.lineTo(XS + EX, GY0 + EY); g.lineTo(XS + PW + EX, GY0 + EY);
-    g.lineTo(XS + PW, GY0); g.closePath(); g.fill();
-    g.fillStyle = pf; g.fillRect(XS, GY0, PW, GY1 - GY0);
-    g.strokeStyle = rgb(mix(M.v5, WH, 0.4), 0.5 * A0); g.lineWidth = 0.8;
-    g.strokeRect(XS, GY0, PW, GY1 - GY0);
-    g.beginPath(); g.moveTo(XS, GY0); g.lineTo(XS + EX, GY0 + EY); g.lineTo(XS + PW + EX, GY0 + EY);
-    g.lineTo(XS + PW + EX, GY1 + EY); g.lineTo(XS + PW, GY1); g.stroke();
+    var n, q, bm, front = [], land = [], pile = 0;
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      front[n] = SX + (AX - SX) * ease((T - bm.D) / BUILD);
+      land[n] = ease((T - bm.D - 0.86 * BUILD) / 620);
+      if (bm.col) pile += land[n] / COLLAPSED.length;
+    }
 
-    if (building) { g.save(); g.beginPath(); g.rect(0, 0, FX, H); g.clip(); }
-
-    /* ---------- the burn: density as light, one blit of where light lands */
-    g.drawImage(M.off, RX0, RY0, RX1 - RX0 + 1, RY1 - RY0 + 1,
-                RX0 * GS, RY0 * GS, (RX1 - RX0 + 1) * GS, (RY1 - RY0 + 1) * GS);
-
-    /* ---------- dispersion: the band's caustic traced at three indices */
-    var disp = [[NG + DN, M.v5], [NG - DN, M.a5], [NG, WH]], fold = 0;
-    for (r = 0; r < BK; r++) fold += CE[ORDER[r]] / BK;
-    fold = ease((fold - 0.35) / 0.65);
-    for (var di = 0; di < 3 && fold > 0; di++) {
-      var eta = disp[di][0], mprev = 0;
-      g.beginPath();
-      var open = false, lx = 0, lyy = 0, strength = 0;
-      for (i = B0 * R; i < (B1 + 1) * R; i++) {
-        var cosi = NX[i], ct = Math.sqrt(Math.max(0, 1 - eta * eta * (1 - cosi * cosi)));
-        var tx = eta + (ct - eta * cosi) * NX[i], ty = (ct - eta * cosi) * NY[i], m2 = ty / tx;
-        if (i === B0 * R) { mprev = m2; continue; }
-        var m1 = mprev, j = i - 1;
-        mprev = m2;
-        if (m1 - m2 < 1e-4) { open = false; continue; }
-        var xc = (M.ry[i] - M.ry[j] + m1 * XE[j] - m2 * XE[i]) / (m1 - m2);
-        if (xc < Math.max(XE[j], XE[i]) + 6 || xc > XS) { open = false; continue; }
-        var yc2 = M.ry[j] + m1 * (xc - XE[j]);
-        if (open && Math.abs(xc - lx) + Math.abs(yc2 - lyy) < 14) g.lineTo(xc, yc2);
-        else g.moveTo(xc, yc2);
-        open = true; lx = xc; lyy = yc2; strength++;
-      }
-      if (strength < 3) continue;
-      var sa2 = Math.min(1, (strength - 3) / 40) * fold;
-      if (di < 2) {
-        g.strokeStyle = rgb(disp[di][1], 0.55 * sa2); g.lineWidth = 1.1; g.stroke();
-      } else {
-        g.strokeStyle = rgb(mix(M.a5, WH, 0.5), 0.35 * sa2); g.lineWidth = 3; g.stroke();
-        g.strokeStyle = rgb(WH, 0.9 * sa2); g.lineWidth = 0.9; g.stroke();
+    /* one cached ray into the current path, cut at the build front */
+    function run(ys, fx) {
+      var xs = G.xs, last = 0;
+      while (last + 1 < xs.length && xs[last + 1] <= fx) last++;
+      g.moveTo(xs[0], ys[0]);
+      for (var m = 1; m <= last; m++) g.lineTo(xs[m], ys[m]);
+      if (last + 1 < xs.length) {
+        g.lineTo(fx, ys[last] + (ys[last + 1] - ys[last]) * (fx - xs[last]) / (xs[last + 1] - xs[last]));
       }
     }
-    if (building) g.restore();
 
-    /* ---------- the answers: where each entity's chief ray lands */
-    var Ly = M.Ly, wE = M.wE, K = 0;
-    for (e = 0; e < N; e++) {
-      Ly[e] = M.A[e] + (YB - M.A[e]) * CE[e];
-      wE[e] = 0;
-    }
-    for (r = 0; r < BK; r++) {
-      e = ORDER[r];
-      wE[e] = ease(1 - Math.abs(Ly[e] - YB) / 12);
-      K += wE[e];
-    }
-    var Q = Math.max(0, Math.min(1, (K - 1) / (BK - 1)));
-    var landed = REDUCED ? 1 : ease((t - 1900) / 700);
-
-    /* arrivals ring their answer; the pile rings once for all it holds */
-    var pileRing = -1;
-    for (k = 0; k < arrivals.length; k += 2) {
-      var ag = arrivals[k + 1];
-      if (ag < 0 || ag > 1300) continue;
-      e = arrivals[k];
-      var kk = ag / 1300, out = 1 - (1 - kk) * (1 - kk) * (1 - kk), al = (1 - kk) * (1 - kk) * ease(kk / 0.12);
-      if (wE[e] > 0.5 && K > 1.5) { pileRing = kk; continue; }
-      g.strokeStyle = rgb(M.hue[e], 0.5 * al * landed); g.lineWidth = 1.2;
-      g.beginPath(); g.arc(XS, Ly[e], 3 + 7 * out, 0, TAU); g.stroke();
-    }
-    if (pileRing >= 0) {
-      var po = 1 - (1 - pileRing) * (1 - pileRing) * (1 - pileRing), pa = (1 - pileRing) * (1 - pileRing) * ease(pileRing / 0.12);
-      g.strokeStyle = rgb(M.c5, 0.6 * pa * Q); g.lineWidth = 1.2 + 1.4 * Q;
-      g.beginPath(); g.arc(XS, YB, 8 + (12 + 16 * Q) * po, 0, TAU); g.stroke();
+    /* the knot's halo sits behind everything that lands in it */
+    if (pile > 0.01) {
+      var br = REDUCED ? 1 : 0.84 + 0.16 * Math.sin(T / 5200 * TAU);
+      var hg = g.createRadialGradient(AX, KY, 0, AX, KY, 54);
+      hg.addColorStop(0, rgba(coral, 0.30 * pile * br));
+      hg.addColorStop(0.45, rgba(coral, 0.12 * pile * br));
+      hg.addColorStop(1, rgba(coral, 0));
+      g.fillStyle = hg;
+      g.beginPath(); g.arc(AX, KY, 54, 0, TAU); g.fill();
     }
 
-    var rr = 8.5 * ease(Math.min(1, K - 1)), rot = REDUCED ? 0.4 : T / 9000 * TAU;
-    if (landed > 0) {
-      g.globalAlpha = landed;
-      for (e = 0; e < N; e++) {
-        var bx = XS, by = Ly[e];
-        if (wE[e] > 0) {
-          var th = rot + ORDER.indexOf(e) * TAU / BK;
-          bx = XS + rr * Math.cos(th) * wE[e];
-          by = Ly[e] + (YB + rr * Math.sin(th) - Ly[e]) * wE[e];
+    /* beams: reached first, collapsed on top so the collapse is never hidden */
+    g.lineWidth = 1.25;
+    for (var pass = 0; pass < 2; pass++) {
+      for (n = 0; n < N; n++) {
+        bm = G.beams[n];
+        if (bm.col !== (pass === 1) || front[n] <= SX + 0.5) continue;
+        g.strokeStyle = rgba(cs[bm.pal], 0.34);
+        for (q = 0; q < R; q++) {
+          g.beginPath(); run(bm.rays[q], front[n]); g.stroke();
         }
-        g.drawImage(M.orb[e], bx - 6, by - 6, 12, 12);
       }
-      g.globalAlpha = 1;
     }
 
-    /* ---------- the entities: points of light, swelling as each pulse leaves */
-    var sw = 0;
-    if (!REDUCED && T > T0P) {
-      var ph = ((T - T0P) % PER) / 320;
-      sw = ph * ph * Math.exp(2 - 2 * ph);
+    /* beads of light travel each beam and are carried into its answer */
+    var rip = [], hit = [], TAIL = 30;
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      var base = bm.D + 600 + bm.phi;
+      hit[n] = 0;
+      if (T < base) continue;
+      var c2 = cs[bm.pal];
+      for (var m = Math.floor((T - base) / bm.P); m >= 0; m--) {
+        var age = T - base - m * bm.P;
+        if (age > TT + RIP) break;
+        if (age >= TT) {
+          rip.push([bm, (age - TT) / RIP]);
+          /* (s e^(1-s))^2 leaves zero with zero slope, so a landing swells and never pops */
+          var a3 = (age - TT) / 200;
+          hit[n] = Math.max(hit[n], a3 * a3 * Math.exp(2 - 2 * a3));
+        }
+        var xh = SX + V * age;
+        if (xh - TAIL >= AX || Math.min(xh, AX) > front[n] + 1) continue;
+        var xa = Math.max(SX, xh - TAIL), xb = Math.min(AX, xh);
+        var pg = g.createLinearGradient(xh - TAIL, 0, xh, 0);
+        pg.addColorStop(0, rgba(c2, 0));
+        pg.addColorStop(1, rgba(c2, 0.95 * ease((xh - SX) / 14)));
+        g.strokeStyle = pg;
+        g.lineWidth = 3.4;
+        g.lineCap = 'butt';
+        g.beginPath();
+        for (q = 0; q <= 5; q++) {
+          var px = xa + (xb - xa) * q / 5;
+          g.lineTo(px, yAt(bm, px, 0));
+        }
+        g.stroke();
+        /* the head grows out of its entity and shrinks into its answer */
+        var hs = ease(Math.min(xh - SX, AX - xh) / 14);
+        if (hs > 0) {
+          var hy = yAt(bm, xh, 0);
+          g.fillStyle = rgba(c2, 0.18);
+          g.beginPath(); g.arc(xh, hy, 6.5 * hs, 0, TAU); g.fill();
+          g.fillStyle = rgba(c2, 1);
+          g.beginPath(); g.arc(xh, hy, 2.6 * hs, 0, TAU); g.fill();
+        }
+        g.lineCap = 'round';
+      }
     }
-    var gr2 = 7.5 + 2.2 * sw;
-    g.globalAlpha = A0;
-    for (e = 0; e < N; e++) g.drawImage(M.orb[e], SX - gr2, M.yc[e] - gr2, 2 * gr2, 2 * gr2);
-    g.globalAlpha = 1;
+
+    /* Each arrival rings its answer in that answer's colour. A reached answer
+       holds one entity, so it rings in that entity's colour, once a cycle. The
+       knot is coral and rings for every entity it holds, so it rings several
+       times as often: the crowding shows, and nothing has to be labelled. */
+    for (q = 0; q < rip.length; q++) {
+      bm = rip[q][0];
+      var k2 = rip[q][1], out = 1 - (1 - k2) * (1 - k2) * (1 - k2);
+      g.strokeStyle = rgba(bm.col ? coral : cs[bm.pal], 0.55 * (1 - k2) * (1 - k2) * ease(k2 / 0.14));
+      g.lineWidth = bm.col ? 2.2 : 1.6;
+      g.beginPath();
+      g.arc(AX, bm.T, bm.col ? 20 + 24 * out : 8 + 9 * out, 0, TAU);
+      g.stroke();
+    }
+
+    /* Every answer is drawn as petals, one per entity that landed on it. A
+       reached answer has one petal. The knot has one for each entity the
+       model collapsed onto it, all round the same centre. */
+    var rot = REDUCED ? 0 : T / 18000 * TAU;
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      if (land[n] <= 0) continue;
+      var c3 = cs[bm.pal], L = land[n] * (1 + 0.28 * (hit[n] || 0));
+      if (!bm.col) {
+        g.fillStyle = rgba(c3, 1);
+        g.beginPath(); g.arc(AX, bm.T, 5 * L, 0, TAU); g.fill();
+        continue;
+      }
+      var th = rot + bm.j * TAU / COLLAPSED.length;
+      g.fillStyle = rgba(c3, 0.74);
+      g.beginPath();
+      g.ellipse(AX + Math.cos(th) * 10 * L, KY + Math.sin(th) * 10 * L, 11.5 * L, 6 * L, th, 0, TAU);
+      g.fill();
+    }
+    if (pile > 0) {
+      g.fillStyle = rgba(coral, 1);
+      g.beginPath(); g.arc(AX, KY, 6 * Math.sqrt(pile), 0, TAU); g.fill();
+    }
+
+    /* the entities, each swelling a little as a bead leaves it */
+    for (n = 0; n < N; n++) {
+      bm = G.beams[n];
+      var since = T - bm.D - 600 - bm.phi + 240, sw = 0;
+      if (since >= 0 && !REDUCED) { since = (since % bm.P) / 240; sw = 1.1 * since * since * Math.exp(2 - 2 * since); }
+      g.fillStyle = rgba(cs[bm.pal], 1);
+      g.beginPath(); g.arc(SX - 4, bm.y0, 5.2 + sw, 0, TAU); g.fill();
+    }
   }
 
   /* ==================================================================== */

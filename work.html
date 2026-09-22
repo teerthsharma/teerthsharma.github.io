@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=70">
-<link rel="stylesheet" href="motion.css?v=70">
-<link rel="stylesheet" href="art.css?v=70">
+<link rel="stylesheet" href="site.css?v=71">
+<link rel="stylesheet" href="motion.css?v=71">
+<link rel="stylesheet" href="art.css?v=71">
 
 <script type="application/ld+json">
 {
@@ -274,20 +274,17 @@
 <div class="proj__figure">
 <div class="proj__art">
           <figure class="fig">
-            <div class="figc" style="--figc-ar:470/540">
-                <canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-caustic-t p-caustic-d">
-                  <title id="p-caustic-t">Distinct entities focus on answers of their own, except the ones the model cannot reach, whose rays fold onto one</title>
-                  <desc id="p-caustic-d">An illustration, with its optics computed for real inside the figure. Distinct entities stand in a column on the left, each a point of light in its own colour, evenly spaced, and none of them special going in. Their rays pass through a block of glass that stands for the model, and land on a screen on the right, so where a ray lands is the answer the model gives. Both faces of the glass are solved with Snell's law. Where the model reaches the fact, each entity's rays converge on an answer of its own, one thin cone and one focus per entity. Then a band of entities falls out of reach, one after another: the glass there loses its per-entity shape and swells into a single lens, their beams swing onto one answer, and their rays cross. The envelope of the crossing rays is a caustic, a cusp whose tip burns on that one answer, with colour fringes where it is traced again at a slightly higher and lower refractive index. The brightness is not painted: every ray is added into a density of light, and the burn is that density. It shows which answer is crowded without knowing which entity is which, and that is the project's point. The collapse of distinct entities onto one answer is measurable with no ground truth at all, and caustic turns it into a certified lower bound on error rate, with five proved bounds and 0.995 AUROC. Pulses of light cross the figure as wavefronts, flat inside the glass and converging after it, and each answer rings as its light lands, the crowded one with the weight of every entity on it. The faint arcs inside the glass are light the swollen face reflects back. The number of entities, which of them fall out of reach, the shape of the glass, and the glass relaxing back at the end of each cycle are illustrative.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">distinct entities, each a beam of light</text>
-                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">reached, each one focuses on its own answer</text>
-                  <text x="235" y="450" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">out of reach, their rays fold onto one answer</text>
+            <div class="figc" style="--figc-ar:470/540"><canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas><svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="cs-t cs-d">
+                  <title id="cs-t">Distinct entities focus on distinct answers, except the ones the model cannot reach, which collapse onto one</title>
+                  <desc id="cs-d">Distinct entities enter on the left, each a beam of light in its own colour, evenly spaced, and none of them is special going in. Every beam passes through the model and focuses on an answer on the right. Where the model reaches the fact, each beam focuses on an answer of its own, and each of those answers holds one colour. Where it cannot, beams of several different colours bend and focus on the same answer, piling up into one bright knot that holds a petal of every colour that landed on it. That collapse can be seen without knowing which entity is which, and it is measurable with no ground truth at all: caustic turns the partition into a certified lower bound on error rate, with five proved bounds and 0.995 AUROC.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">distinct entities stream through the model</text>
+                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">reached, each lands on its own answer</text>
+                  <text x="235" y="450" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">out of reach, they collapse onto one answer</text>
                   <text x="235" y="472" text-anchor="middle" font-size="15" fill="var(--muted)">which gives a certified lower bound on error rate</text>
                   <text x="235" y="510" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
                   <text x="235" y="532" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
-                </svg>
-              </div>
-            <figcaption class="fig__cap">When a model cannot reach a fact, distinct entities fold onto one answer, and the crowding shows without knowing which answer is right.</figcaption>
+                </svg></div>
+            <figcaption class="fig__cap">Distinct entities collapse onto one answer. That collapse is the hallucination.</figcaption>
           </figure>
         </div>
 </div>
@@ -632,7 +629,7 @@
 
 </main>
 
-<script src="fig.js?v=70" defer></script>
-<script src="site.js?v=70" defer></script>
+<script src="fig.js?v=71" defer></script>
+<script src="site.js?v=71" defer></script>
 </body>
 </html>
