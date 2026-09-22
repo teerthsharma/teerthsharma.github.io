@@ -848,3 +848,350 @@ img,svg{ max-width:100%; display:block; }
   clip-path: none;
   transition: none;
 }
+
+/* ===================================================================
+   apple.py — work.html as product tiles
+   Appended once by apple.py. Everything here is keyed to classes that
+   only work.html carries after the transform (.psub, .pshow, .pt, .pgal,
+   .hero--product), so index.html is untouched by it.
+
+   The page is built the way apple.com builds a product row: every project
+   is a large rounded tile, name huge, a one line tagline, a blue pill and
+   a text link, and the figure standing in the middle as the product shot.
+   The four biggest projects get a full width tile each; the other seven
+   share a snap gallery with the next tile peeking at the edge.
+
+   Rules held here, because each one has been broken before:
+     - Colour is the site tokens and nothing else. Tiles alternate
+       --ground2 and --raised. The only literal is white pill text.
+     - Words do not move. No text here is transformed or animated, the
+       work.html hero keeps its words still, and the tile never lifts on
+       hover. The only animated thing is the progress fill inside the
+       active gallery dot, which is a shape.
+     - Nothing inside .proj__art is sized or clipped on its own. The tile
+       sets the width of .proj__figure and the figure keeps its own
+       aspect ratio below that, so canvas and label layer stay locked.
+   =================================================================== */
+
+/* Sticky needs a page that is not itself a scroll container. overflow-x:
+   hidden on html and body turns body into one, which is why the site nav
+   never actually stuck. clip clips the same overflow without that. */
+html:has(.psub), html:has(.psub) body{ overflow-x:clip; }
+
+/* ---------- Hero: centred, product-page scale ---------- */
+.hero--product{ padding:clamp(56px, 9vw, 120px) 0 clamp(40px, 6vw, 72px); text-align:center; }
+.hero--product .hero__h1{
+  font-size:clamp(40px, 6.6vw, 84px); line-height:1.04; letter-spacing:-0.035em;
+  max-width:13em; margin:0 auto; text-wrap:balance;
+  animation:none; /* motion.css raises this line on load; here words stay put */
+}
+.hero--product .hero__sub{
+  margin:24px auto 0; max-width:36em;
+  font-size:clamp(18px, 1.9vw, 23px); line-height:1.5; text-wrap:pretty;
+  animation:none;
+}
+
+/* ---------- Product strip: sticky under the site nav ---------- */
+.psub{
+  position:sticky; top:56px; z-index:49;
+  background-color:var(--ground);
+  border-bottom:1px solid var(--hair);
+}
+@supports (background: color-mix(in srgb, red 50%, transparent)){
+  .psub{
+    background:color-mix(in srgb, var(--ground) 78%, transparent);
+    -webkit-backdrop-filter:saturate(1.8) blur(20px);
+    backdrop-filter:saturate(1.8) blur(20px);
+  }
+}
+.psub__scroll{ overflow-x:auto; scrollbar-width:none; overscroll-behavior-x:contain; }
+.psub__scroll::-webkit-scrollbar{ display:none; }
+.psub__list{
+  display:flex; align-items:center;
+  width:max-content; margin:0 auto; padding:0 12px;
+}
+.psub__link{
+  display:block; padding:14px 12px;
+  font-size:14px; font-weight:500; line-height:20px; white-space:nowrap;
+  color:var(--ink);
+}
+.psub__link:hover{ color:var(--blue-700); }
+.psub__sep{ width:1px; height:18px; margin:0 10px; background:var(--hair2); }
+
+/* ---------- The showroom ---------- */
+.pshow{ padding:0 0 clamp(64px, 9vw, 120px); background:var(--ground); }
+.pshow__heroes{
+  max-width:1280px; margin:0 auto; padding:0 clamp(16px, 2.5vw, 32px);
+  display:grid; gap:24px;
+}
+
+/* ---------- A tile ----------------------------------------------------
+   .proj.pt outranks every earlier .proj rule (the editorial two column
+   row at 900px and up, the stacked card below it, the hover lift). */
+.proj.pt{
+  display:flex; flex-direction:column; align-items:stretch; gap:0;
+  min-width:0; margin:0;
+  padding:clamp(28px, 4.6vw, 60px) clamp(16px, 4.6vw, 64px) clamp(28px, 4.2vw, 52px);
+  border:1px solid transparent; border-radius:30px;
+  background:var(--ground2);
+  box-shadow:none; transform:none; transition:none;
+  scroll-margin-top:124px;
+}
+.proj.pt:hover{ transform:none; box-shadow:none; }
+.pshow__heroes > .pt:nth-child(even),
+.pgal__track > .pt:nth-child(even){
+  background:var(--raised); border-color:var(--hair); box-shadow:var(--e1);
+}
+.pshow__heroes > .pt:nth-child(even):hover,
+.pgal__track > .pt:nth-child(even):hover{ box-shadow:var(--e1); }
+
+/* head: name and tagline left, the two calls to action right; they wrap
+   under the tagline as soon as the row runs out of room. */
+.pt__head{
+  display:flex; flex-wrap:wrap; align-items:flex-start; justify-content:space-between;
+  gap:20px 40px;
+}
+.pt__titles{ flex:1 1 440px; min-width:0; }
+.pt .proj__name{
+  font-size:clamp(44px, 6vw, 80px); line-height:1.02; letter-spacing:-0.035em;
+  font-weight:700; color:var(--ink);
+}
+/* a name too long for the line at full size is set smaller, not broken */
+.pt--long .proj__name{ font-size:clamp(34px, 4.6vw, 62px); }
+.pt__tagline{
+  margin-top:10px;
+  font-size:clamp(21px, 2.3vw, 28px); line-height:1.25; letter-spacing:-0.01em;
+  color:var(--ink);
+}
+.pt__ctas{
+  display:flex; flex-wrap:wrap; align-items:center; gap:12px 24px;
+  padding-top:clamp(0px, 1.2vw, 14px);
+}
+.pt__cta{
+  display:inline-flex; align-items:center; min-height:44px;
+  padding:10px 22px; border-radius:999px;
+  background:var(--blue-500); color:#fff;
+  font-size:17px; font-weight:500; line-height:1.2; white-space:nowrap;
+  transition:background-color 160ms var(--hover-ease);
+}
+.pt__cta:hover{ background:var(--blue-700); }
+.pt__more{
+  display:inline-flex; align-items:center; gap:4px; min-height:44px;
+  font-size:17px; font-weight:500; line-height:1.2; white-space:nowrap;
+  color:var(--blue-700);
+}
+.pt__more:hover{ text-decoration:underline; }
+.pt__chev{ font-size:1.2em; line-height:1; }
+
+/* the product shot: width only, so the figure keeps its own shape */
+.pt .proj__figure{
+  display:block; width:min(100%, 560px); min-width:0;
+  margin:clamp(28px, 4vw, 52px) auto 0;
+}
+.pt .proj__art{ width:100%; margin:0; }
+/* An inline SVG figure was capped at 260px tall below 900px, which shrank
+   the whole drawing inside a tile built to show it big. Canvas figures
+   already had this cap lifted on their label layer. */
+.pt .fig > svg{ max-height:none; }
+
+/* body: the claim, the spec strip, the tags */
+.pt__body{
+  margin-top:clamp(28px, 4vw, 48px);
+  padding-top:clamp(24px, 3vw, 36px);
+  border-top:1px solid var(--hair);
+  display:grid; gap:24px 56px; align-content:start;
+}
+.pt .proj__claim{
+  margin:0; max-width:52ch;
+  font-size:clamp(18px, 1.6vw, 21px); line-height:1.55; color:var(--muted);
+}
+.pt .proj__tags{ margin:0; }
+.pt .proj__nums{
+  margin:0; align-self:start; align-content:start;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(128px, 1fr)); gap:22px 20px;
+  font-family:var(--font-sans); font-size:15px; color:var(--muted);
+}
+.pt .spec{
+  display:flex; flex-direction:column; gap:6px; min-width:0;
+  padding-left:14px; border-left:1px solid var(--hair2);
+}
+.pt .spec__n{
+  font-size:clamp(34px, 3.4vw, 46px); line-height:1; font-weight:700;
+  letter-spacing:-0.03em; font-variant-numeric:tabular-nums; color:var(--ink);
+}
+/* four specs read as a 2 x 2 block rather than three and an orphan */
+.pt .proj__nums:has(> .spec:nth-child(4)){ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+.pt .spec__l{ font-size:15px; line-height:1.35; color:var(--muted); }
+.pt .spec--t{ font-size:clamp(18px, 1.7vw, 22px); font-weight:600; line-height:1.25; letter-spacing:-0.01em; color:var(--ink); overflow-wrap:anywhere; }
+@media (min-width:900px){
+  .pt__body{ grid-template-columns:minmax(0, 1.15fr) minmax(0, 1fr); }
+  .pt .proj__claim{ grid-column:1; grid-row:1; }
+  .pt .proj__tags{ grid-column:1; grid-row:2; }
+  .pt .proj__nums{ grid-column:2; grid-row:1 / span 2; }
+}
+
+/* ---------- Gallery: the seven smaller projects -----------------------
+   A scroll-snap row, full bleed. Each tile is 88% of the row, centred,
+   so the neighbour shows at the edge. cqw is the row's own width, which
+   keeps the padding and the tile width in one unit. */
+.pgal{ container-type:inline-size; margin-top:clamp(56px, 8vw, 104px); }
+.pgal__track{
+  --pgal-w:min(88cqw, 1120px);
+  position:relative;
+  display:flex; gap:clamp(12px, 1.6cqw, 22px);
+  overflow-x:auto; overscroll-behavior-x:contain;
+  scroll-snap-type:x mandatory;
+  scrollbar-width:none;
+  padding:6px calc((100cqw - var(--pgal-w)) / 2) 10px;
+}
+.pgal__track::-webkit-scrollbar{ display:none; }
+.pgal__track > .pt{
+  flex:0 0 var(--pgal-w);
+  scroll-snap-align:center; scroll-snap-stop:always;
+}
+.pgal .pt .proj__name{ font-size:clamp(40px, 4.8vw, 64px); }
+.pgal .pt__tagline{ font-size:clamp(20px, 2vw, 26px); }
+/* Slides share the tallest one's height; the spare room goes around the
+   figure, so every slide ends on its spec strip at the same line. */
+.pgal .pt__head{ margin-bottom:clamp(28px, 4vw, 52px); }
+.pgal .pt .proj__figure{ width:min(100%, 460px); margin:auto; }
+
+/* A slide whose figure is outside the visible row is parked: its art is
+   taken to zero size so fig.js stops painting it and restarts its clock,
+   and the figure builds in front of the reader when the slide arrives
+   instead of having played out of sight. Only ever set on art that is off
+   screen, never transitioned, and never on the slide in view. */
+.pgal .pt.is-parked .proj__art{ transform:scale(0); }
+
+.pgal__ctrl{
+  display:flex; justify-content:center; align-items:center; gap:12px;
+  margin-top:18px; padding:0 16px;
+}
+.pgal__dots{
+  display:flex; align-items:center;
+  height:52px; padding:0 14px; border-radius:999px;
+  background:var(--hair);
+}
+.pgal__dot{
+  position:relative; flex:none;
+  display:flex; align-items:center; justify-content:center;
+  width:24px; height:44px;
+  transition:width 300ms var(--hover-ease);
+}
+.pgal__dot::before{
+  content:""; width:8px; height:8px; border-radius:999px;
+  background:var(--muted); opacity:.42;
+  transition:width 300ms var(--hover-ease), opacity 300ms var(--hover-ease);
+}
+.pgal__dot:hover::before{ opacity:.7; }
+.pgal__dot[aria-current="true"]{ width:60px; }
+.pgal__dot[aria-current="true"]::before{ width:48px; opacity:.28; }
+.pgal__fill{
+  display:none; position:absolute; left:6px; top:50%;
+  width:48px; height:8px; margin-top:-4px; border-radius:999px;
+  background:var(--muted);
+}
+.pgal__dot[aria-current="true"] .pgal__fill{ display:block; }
+@keyframes pgal-fill{ from{ width:8px; } to{ width:48px; } }
+.pgal.is-auto .pgal__dot[aria-current="true"] .pgal__fill{
+  animation:pgal-fill 7s linear both;
+}
+.pgal.is-auto.is-held .pgal__dot[aria-current="true"] .pgal__fill{ animation-play-state:paused; }
+
+.pgal__btn{
+  flex:none; display:flex; align-items:center; justify-content:center;
+  width:52px; height:52px; border-radius:50%;
+  background:var(--hair); color:var(--muted); cursor:pointer;
+  transition:background-color 160ms var(--hover-ease);
+}
+.pgal__btn:hover{ background:var(--hair2); }
+.pgal__btn:disabled{ opacity:.4; cursor:default; }
+.pgal__btn:disabled:hover{ background:var(--hair); }
+.pgal__btn[hidden]{ display:none; }
+.pgal__btn svg{ width:20px; height:20px; }
+.pgal__play .pgal__i-play{ display:none; }
+.pgal__play.is-paused .pgal__i-play{ display:block; }
+.pgal__play.is-paused .pgal__i-pause{ display:none; }
+
+@media (prefers-reduced-motion: reduce){
+  .pgal__fill{ animation:none !important; }
+  .pgal__dot, .pgal__dot::before, .pt__cta, .pgal__btn{ transition:none; }
+}
+
+/* ---------- Narrow screens ---------- */
+@media (max-width:640px){
+  .pgal__prev, .pgal__next{ display:none; }
+  .pshow__heroes{ gap:16px; }
+  .proj.pt{ border-radius:26px; }
+  .pt__ctas{ gap:8px 20px; }
+}
+/* phones: every pixel of width goes to the figure, whose labels scale with it */
+@media (max-width:480px){
+  .proj.pt{ padding-left:14px; padding-right:14px; }
+  .pgal__track{ --pgal-w:90cqw; gap:8px; }
+  .pt__ctas{ gap:8px 16px; }
+  .pt__cta{ padding:10px 18px; }
+  .pt__cta, .pt__more{ font-size:16px; }
+}
+/* A gallery slide stacked name, figure and claim, which made it 1,100px
+   tall: taller than a laptop or an iPad in landscape, so the dots that
+   drive it sat off screen. From 900px the figure stands left as the product
+   shot and everything written about it stands right, centred against it,
+   and the figure is capped by the viewport height so the slide and its
+   dots fit on the screen it is read on. */
+@media (min-width:900px){
+  .pgal .proj.pt{
+    display:grid; align-items:start;
+    grid-template-columns:auto minmax(0, 1fr);
+    grid-template-rows:1fr auto auto 1fr;
+    column-gap:clamp(32px, 4cqw, 64px);
+  }
+  .pgal .pt .proj__figure{
+    grid-column:1; grid-row:1 / 5; align-self:center; margin:0;
+    width:min(440px, 42cqw, calc((100svh - 260px) * 0.85));
+  }
+  .pgal .pt__head{ grid-column:2; grid-row:2; margin-bottom:28px; }
+  .pgal .pt__titles{ flex-basis:100%; }
+  .pgal .pt__body{
+    grid-column:2; grid-row:3;
+    margin-top:0; padding-top:24px;
+    grid-template-columns:minmax(0, 1fr);
+  }
+  .pgal .pt .proj__claim,
+  .pgal .pt .proj__tags,
+  .pgal .pt .proj__nums{ grid-column:auto; grid-row:auto; }
+}
+/* ---------- Smoother edges ------------------------------------------------
+   Seen on an iPad beside apple.com, the page read too sharp. Hard one pixel
+   rules were drawing every edge: under the site nav, under the product strip,
+   round every white tile, and across each tile above its claim. Apple draws
+   none of those. The two bars now read as one frosted layer that fades into
+   the page through a soft shadow, the tiles lose their outlines for larger
+   corners and a wide faint shadow, and the divider inside a tile fades out
+   at both ends instead of stopping square. */
+html:has(.psub) .nav{ border-bottom-color:transparent; }
+.psub{
+  border-bottom-color:transparent;
+  box-shadow:0 18px 30px -26px color-mix(in srgb, var(--ink) 30%, transparent);
+}
+.proj.pt{ border-radius:38px; border-color:transparent; }
+.pshow__heroes > .pt:nth-child(even),
+.pgal__track > .pt:nth-child(even),
+.pshow__heroes > .pt:nth-child(even):hover,
+.pgal__track > .pt:nth-child(even):hover{
+  border-color:transparent;
+  box-shadow:0 1px 3px color-mix(in srgb, var(--ink) 5%, transparent),
+             0 30px 70px -40px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.pt__body{
+  border-top-color:transparent;
+  background:linear-gradient(90deg, transparent, var(--hair2) 18%, var(--hair2) 82%, transparent) top / 100% 1px no-repeat;
+}
+.pt .spec{
+  border-left:0;
+  background:linear-gradient(180deg, transparent, var(--hair2) 25%, var(--hair2) 75%, transparent) left / 1px 100% no-repeat;
+}
+.pgal__dots, .pgal__btn{ background:color-mix(in srgb, var(--hair) 80%, transparent); }
+@media (max-width:640px){ .proj.pt{ border-radius:30px; } }
+@media (min-width:900px){ .pgal .pt__body{ background:none; } }
+/* ===================== end apple.py ===================== */

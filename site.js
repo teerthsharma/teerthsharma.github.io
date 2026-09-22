@@ -872,3 +872,153 @@
     boot();
   }
 })();
+
+/* ===================================================================
+   apple.py — work.html product gallery and product strip
+   Appended once by apple.py. No-op on any page without a .pgal, so
+   index.html is unaffected.
+
+   The seven smaller projects sit in a scroll-snap row. Snapping, swiping
+   and the peek are CSS; this only keeps the dots in step, parks figures
+   that are out of view, and runs the autoplay.
+
+   Autoplay advances one slide every 7s and only while nobody is using the
+   gallery: it holds on mouse hover, on keyboard focus inside a slide,
+   while the gallery is less than half on screen, and while the tab is
+   hidden. Any swipe, wheel, dot, arrow or strip jump ends it for good,
+   the pause button toggles it, it stops after the last slide, and under
+   prefers-reduced-motion it never starts and the button is not shown.
+   The timer is the CSS fill in the active dot: when that animation ends
+   the next slide comes in, so pausing the fill pauses the gallery.
+   =================================================================== */
+(function () {
+  'use strict';
+
+  var gal = document.querySelector('.pgal');
+  if (!gal) return;
+  var track = gal.querySelector('.pgal__track');
+  var slides = Array.prototype.filter.call(track.children, function (el) { return el.classList.contains('pt'); });
+  var dots = Array.prototype.slice.call(gal.querySelectorAll('.pgal__dot'));
+  var prev = gal.querySelector('.pgal__prev');
+  var next = gal.querySelector('.pgal__next');
+  var play = gal.querySelector('.pgal__play');
+  if (!slides.length) return;
+
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var cur = -1;
+  var holds = {};
+
+  function centreOf(i) {
+    var s = slides[i];
+    return s.offsetLeft + s.offsetWidth / 2 - track.clientWidth / 2;
+  }
+
+  function go(i, smooth) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    track.scrollTo({ left: centreOf(i), behavior: smooth && !reduce ? 'smooth' : 'auto' });
+  }
+
+  /* Dots follow whichever slide is nearest the centre; figures are parked
+     unless some of their box is inside the row (plus a small lead, so a
+     figure is already drawing as it crosses the edge). */
+  function sync() {
+    var mid = track.scrollLeft + track.clientWidth / 2;
+    var best = 0, bestD = Infinity;
+    var box = track.getBoundingClientRect();
+    slides.forEach(function (s, i) {
+      var d = Math.abs(s.offsetLeft + s.offsetWidth / 2 - mid);
+      if (d < bestD) { bestD = d; best = i; }
+      var f = s.querySelector('.proj__figure');
+      var r = (f || s).getBoundingClientRect();
+      var seen = r.right > box.left - 48 && r.left < box.right + 48;
+      if (s.classList.contains('is-parked') === seen) s.classList.toggle('is-parked', !seen);
+    });
+    if (best === cur) return;
+    cur = best;
+    dots.forEach(function (d, k) { d.setAttribute('aria-current', k === cur ? 'true' : 'false'); });
+    if (prev) prev.disabled = cur === 0;
+    if (next) next.disabled = cur === slides.length - 1;
+  }
+
+  function setAuto(on) {
+    on = !!on && !reduce;
+    gal.classList.toggle('is-auto', on);
+    if (!play) return;
+    play.classList.toggle('is-paused', !on);
+    play.setAttribute('aria-label', on ? 'Pause automatic advance' : 'Play automatic advance');
+  }
+
+  function hold(key, on) {
+    holds[key] = on;
+    gal.classList.toggle('is-held', Object.keys(holds).some(function (k) { return holds[k]; }));
+  }
+
+  function inView() {
+    var r = gal.getBoundingClientRect(), vh = window.innerHeight || 800;
+    var seen = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+    hold('view', seen < 0.5 * Math.min(r.height, vh));
+  }
+
+  function takeOver() { setAuto(false); }
+
+  track.addEventListener('scroll', sync, { passive: true });
+  window.addEventListener('resize', function () { sync(); inView(); }, { passive: true });
+  window.addEventListener('scroll', inView, { passive: true });
+  document.addEventListener('visibilitychange', function () { hold('tab', document.hidden); });
+
+  track.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') hold('hover', true); });
+  track.addEventListener('pointerleave', function () { hold('hover', false); });
+  track.addEventListener('focusin', function () { hold('focus', true); });
+  track.addEventListener('focusout', function (e) { if (!track.contains(e.relatedTarget)) hold('focus', false); });
+  track.addEventListener('touchstart', takeOver, { passive: true });
+  track.addEventListener('pointerdown', takeOver);
+  track.addEventListener('wheel', function (e) { if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) takeOver(); }, { passive: true });
+
+  dots.forEach(function (d, i) {
+    d.addEventListener('click', function (e) { e.preventDefault(); takeOver(); go(i, true); });
+  });
+  if (prev) { prev.hidden = false; prev.addEventListener('click', function () { takeOver(); go(cur - 1, true); }); }
+  if (next) { next.hidden = false; next.addEventListener('click', function () { takeOver(); go(cur + 1, true); }); }
+  if (play && !reduce) {
+    play.hidden = false;
+    play.addEventListener('click', function () {
+      var on = !gal.classList.contains('is-auto');
+      if (on && cur === slides.length - 1) go(0, true);
+      setAuto(on);
+    });
+  }
+
+  gal.addEventListener('animationend', function (e) {
+    if (e.animationName !== 'pgal-fill' || !gal.classList.contains('is-auto')) return;
+    if (cur >= slides.length - 1) { setAuto(false); return; }
+    go(cur + 1, true);
+  });
+
+  /* The product strip, and any link or address naming a slide, lands on
+     that slide centred in the row rather than wherever the page scroll
+     happened to leave it. */
+  function slideIndex(id) {
+    for (var i = 0; i < slides.length; i++) if (slides[i].id === id) return i;
+    return -1;
+  }
+  function show(i) {
+    takeOver();
+    slides[i].scrollIntoView({ block: 'start', inline: 'center' });
+    go(i, false);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest && e.target.closest('a[href^="#"]');
+    if (!a || gal.contains(a)) return;
+    var i = slideIndex(a.getAttribute('href').slice(1));
+    if (i < 0) return;
+    e.preventDefault();
+    show(i);
+    if (history.replaceState) history.replaceState(null, '', '#' + slides[i].id);
+  });
+
+  sync();
+  inView();
+  var start = slideIndex(location.hash.slice(1));
+  if (start >= 0) show(start);
+  else setAuto(true);
+})();

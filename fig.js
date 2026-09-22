@@ -1518,539 +1518,578 @@
   /* collapse — epsilon-hollow                                           */
   /* ==================================================================== */
   function collapse(g, vb, t, st) {
-    /* Epsilon-Hollow keeps the kernel's state as points on a sphere, and it
-       evicts by elementary collapse. This figure runs that policy for real.
+    /* Epsilon-Hollow. OS state is topology on S2: memory, files and the
+       scheduler live as points on the unit sphere, and the kernel's day job
+       is machine learning. So the figure is a hollow world: the sphere is a
+       shell of light, a real triangulation with nothing filled in, so the far
+       wall and the bare metal burning at the centre are seen straight through
+       it. Its points are coloured by territory (memory blue, files violet,
+       scheduler mint), its film shimmers like a bubble's, and a ring of token
+       traffic orbits it.
 
-       The sphere is lit per pixel once (Lambert with a wrapped terminator, a
-       Blinn-Phong highlight and a Fresnel rim) and cached, because a uniform
-       sphere looks identical however it turns: its outline and shading never
-       change, which is the claim. What turns is the state on it. Every point is
-       memory, a file or scheduler state (blue, violet, mint). Each population
-       starts evenly spread and flows round the sphere as one body about its
-       own axis, so the three streams cross and every point leaves a wake. Any
-       two points closer than a fixed scale epsilon are joined, which weaves
-       the Rips complex at that scale, recomputed from the live positions
-       every frame; it is the net that wraps the surface.
+       Eviction is what the card says: a point folds onto its neighbour. It
+       is an honest edge contraction. The pair is the shortest edge whose ends
+       share exactly two neighbours, so the result is still a sphere, and no
+       face may turn inside out; the more crowded end slides onto the other
+       and the two triangles between them fold flat, drawn coral, the only
+       filled shapes in the figure. A hundred of them turn a fine crystal into
+       a coarse gem that is a sphere at every step. A band of light then sweeps
+       it pole to pole, and the ring feeds it back: each point returns out of
+       the neighbour it folded into, in the reverse order.
 
-       Under memory pressure the kernel evicts, and the victim is chosen by the
-       rule a collapse needs: the globally shortest edge, and of its two ends
-       the more redundant one (its next nearest neighbour is nearer). That
-       point turns coral, the triangles it shares with its neighbour shade in
-       and flatten, the rest of its star swings across, and it slides along the
-       geodesic onto the neighbour and is gone. The measured covering radius at
-       the lowest population stays under 0.32 rad against epsilon 0.44, so the
-       net never tears. Once a cycle a ring sweeps the surface and lights every
-       edge it crosses, showing the thinned net still wrapped round the whole
-       sphere; then new state is allocated, each to the widest gap of the
-       thinnest population, and the population refills. Front and back are
-       sorted by depth, the back shows faintly through the glassy sphere, and
-       every bead is foreshortened and lit by the sphere's own light.
+       Inside it hangs Epsilon: a second, finer hollow sphere, the receptacle
+       of the context teleport, turning the other way round the bare metal.
+       A file's payload is a small cloud of points on the surface. To move it
+       the kernel does not walk it along the sphere; it gathers, dives through
+       the hollow on a thread of light, passes the receptacle as the governor
+       grants its one-shot permit, and comes up whole on the far side. Every
+       jump takes the same time however far it goes: the payload is not
+       copied, only its place is rewired.
 
-       Cycle: allocation sweeps in over 0.15 to 2.5 s; from 3.6 s a 20 s cycle
-       of 8 s pressure (300 points to 204), 3.2 s held low with the sweep, 4.8 s
-       refill and 4 s steady. A fold takes 1.42 s; the sphere turns once in 56
-       s. The allocations and evictions are decided by a fixed-step simulation
-       kept in st and advanced to t, so a frame depends only on t, whatever the
-       frame rate; positions are then read analytically at t itself. */
+       Only the clock is scheduled; the mesh, the victims and their order are
+       computed when the figure is first drawn. The territories and the ring
+       are illustrative. */
     var TAU = Math.PI * 2;
-    var CX = 235, CY = 250, R = 160, ATM = 9;
-    var N_HI = 300, N_LO = 204, EPS = 0.44, CE = Math.cos(EPS), CF = Math.cos(EPS * 0.7);
-    var DT = 50, B0 = 150, B1 = 2500;                 /* sim step; first allocations */
-    var C0 = 3600, CYC = 20000;                       /* pressure cycle */
-    var PRE = 380, SLIDE = 1040, FOLD = PRE + SLIDE, SWELL = 700, GROW = 560, MAXC = 20;
-    var SPIN = 56000, K = 5, DTR = 440;               /* one turn; wake samples */
-    var TILT = 0.42, ROLL = -0.36;
-    var LX = -0.52, LY = 0.62, LZ = 0.59;             /* light, view space */
-    var ll = Math.hypot(LX, LY, LZ); LX /= ll; LY /= ll; LZ /= ll;
+    var CX = 235, CY = 252, R = 154, TILT = 0.36, ROLL = -0.17;
+    var D = 720, PS = 1500;
 
-    var KC = [token('--blue-500', '#2456dc'), token('--violet-500', '#a66cf0'), token('--mint-500', '#0b93ab')];
-    var coral = token('--coral-500', '#d9376e'), blue7 = token('--blue-700', '#163a9a');
-    var white = token('--raised', '#ffffff');
+    var M = collapse.cache;
+    if (!M) {
+      /* built whole, then published */
+      var C = {};
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      var mix = function (a, b, k) {
+        return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+      };
+      var rgb = function (c, a) {
+        return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a) + ')';
+      };
+      var WH = [255, 255, 255];
+      C.mix = mix; C.rgb = rgb; C.WH = WH;
+      C.b5 = hex('--blue-500', '#2456dc'); C.b7 = hex('--blue-700', '#163a9a');
+      C.v5 = hex('--violet-500', '#a66cf0'); C.m5 = hex('--mint-500', '#0b93ab');
+      C.c5 = hex('--coral-500', '#d9376e'); C.a5 = hex('--amber-500', '#d96a06');
+      C.terrCol = [C.b5, C.v5, C.m5];
 
-    function hex3(h) {
-      h = (h || '#000').trim().replace('#', '');
-      if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-      var n = parseInt(h, 16);
-      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-    }
-    function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
-    function hexOf(c) { return '#' + ((1 << 24) | (Math.round(c[0]) << 16) | (Math.round(c[1]) << 8) | Math.round(c[2])).toString(16).slice(1); }
-    /* an edge takes the colour of the two populations it joins */
-    var PC = collapse.pc;
-    if (!PC) {
-      var k5 = [hex3(KC[0]), hex3(KC[1]), hex3(KC[2])];
-      PC = collapse.pc = [KC[0], KC[1], KC[2], hexOf(mix(k5[0], k5[1], 0.5)), hexOf(mix(k5[0], k5[2], 0.5)), hexOf(mix(k5[1], k5[2], 0.5))];
-    }
-    var PAIR = [[0, 3, 4], [3, 1, 5], [4, 5, 2]];
+      var norm = function (p) {
+        var l = Math.sqrt(p[0] * p[0] + p[1] * p[1] + p[2] * p[2]);
+        return [p[0] / l, p[1] / l, p[2] / l];
+      };
+      var sub = function (a, b) { return [a[0] - b[0], a[1] - b[1], a[2] - b[2]]; };
+      var cross = function (a, b) {
+        return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+      };
+      var dot = function (a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; };
+      C.norm = norm; C.cross = cross; C.sub = sub;
 
-    /* ---- the sphere, lit once -------------------------------------------- */
-    var IMG = collapse.img;
-    if (!IMG) {
-      var SS = 2.5, RR = R + ATM, NPX = Math.round(2 * RR * SS), rp = R * SS;
-      IMG = collapse.img = document.createElement('canvas');
-      IMG.width = IMG.height = NPX;
-      var ic = IMG.getContext('2d'), id = ic.createImageData(NPX, NPX), px = id.data;
-      var W3 = hex3(white), B5 = hex3(KC[0]), V5 = hex3(KC[1]), M5 = hex3(KC[2]);
-      var LIT = mix(W3, B5, 0.09), SHD = mix(mix(W3, B5, 0.40), V5, 0.14), RIM = mix(W3, M5, 0.34);
-      var HX = LX, HY = LY, HZ = LZ + 1, hl = Math.hypot(HX, HY, HZ); HX /= hl; HY /= hl; HZ /= hl;
-      for (var yy = 0; yy < NPX; yy++) {
-        for (var xx = 0; xx < NPX; xx++) {
-          var nx = (xx + 0.5 - NPX / 2) / rp, ny = -(yy + 0.5 - NPX / 2) / rp, d2 = nx * nx + ny * ny;
-          var o = (yy * NPX + xx) * 4, d = Math.sqrt(d2), col, al;
-          if (d <= 1 + 1 / rp) {
-            var nz = Math.sqrt(Math.max(0, 1 - d2));
-            var lam = nx * LX + ny * LY + nz * LZ;
-            var dif = Math.max(0, (lam + 0.38) / 1.38);
-            var nh = Math.max(0, nx * HX + ny * HY + nz * HZ);
-            var spc = Math.min(1, Math.pow(nh, 24) * 0.55 + Math.pow(nh, 300) * 0.9);
-            var fr = Math.pow(1 - nz, 2.6);
-            col = mix(SHD, LIT, Math.pow(dif, 0.85));
-            col = mix(col, RIM, fr * 0.45);
-            col = mix(col, W3, spc);
-            al = (0.86 + 0.12 * fr) * Math.max(0, Math.min(1, (1 - d) * rp + 0.5));
-          } else {
-            var q = (d - 1) / (ATM / R);
-            if (q >= 1) continue;
-            col = mix(W3, B5, 0.55);
-            al = 0.20 * (1 - q) * (1 - q);
+      /* the sphere: an icosahedron subdivided twice, 162 points, 320 faces */
+      var gr = (1 + Math.sqrt(5)) / 2;
+      var V = [[-1, gr, 0], [1, gr, 0], [-1, -gr, 0], [1, -gr, 0], [0, -1, gr], [0, 1, gr],
+               [0, -1, -gr], [0, 1, -gr], [gr, 0, -1], [gr, 0, 1], [-gr, 0, -1], [-gr, 0, 1]].map(norm);
+      var F = [[0, 11, 5], [0, 5, 1], [0, 1, 7], [0, 7, 10], [0, 10, 11], [1, 5, 9], [5, 11, 4],
+               [11, 10, 2], [10, 7, 6], [7, 1, 8], [3, 9, 4], [3, 4, 2], [3, 2, 6], [3, 6, 8],
+               [3, 8, 9], [4, 9, 5], [2, 4, 11], [6, 2, 10], [8, 6, 7], [9, 8, 1]];
+      var s, f, i, j;
+      for (s = 0; s < 2; s++) {
+        var mid = {}, NF = [];
+        var mp = function (a, b) {
+          var key = a < b ? a + '_' + b : b + '_' + a;
+          if (mid[key] == null) {
+            mid[key] = V.length;
+            V.push(norm([(V[a][0] + V[b][0]) / 2, (V[a][1] + V[b][1]) / 2, (V[a][2] + V[b][2]) / 2]));
           }
-          px[o] = col[0]; px[o + 1] = col[1]; px[o + 2] = col[2]; px[o + 3] = Math.round(al * 255);
+          return mid[key];
+        };
+        for (f = 0; f < F.length; f++) {
+          var fa = F[f][0], fb = F[f][1], fc = F[f][2];
+          var ab = mp(fa, fb), bc = mp(fb, fc), ca = mp(fc, fa);
+          NF.push([fa, ab, ca], [fb, bc, ab], [fc, ca, bc], [ab, bc, ca]);
         }
+        F = NF;
       }
-      ic.putImageData(id, 0, 0);
-    }
+      var outward = function (a, b, c) {
+        var n = cross(sub(V[b], V[a]), sub(V[c], V[a]));
+        return dot(n, [V[a][0] + V[b][0] + V[c][0], V[a][1] + V[b][1] + V[c][1], V[a][2] + V[b][2] + V[c][2]]);
+      };
+      for (f = 0; f < F.length; f++) if (outward(F[f][0], F[f][1], F[f][2]) < 0) F[f] = [F[f][0], F[f][2], F[f][1]];
+      C.V = V; C.F = F;
 
-    /* ---- the state, simulated in fixed steps ------------------------------ */
-    function rng(S) {                       /* mulberry32 */
-      var a = (S.seed = (S.seed + 0x6D2B79F5) | 0);
-      a = Math.imul(a ^ (a >>> 15), a | 1);
-      a ^= a + Math.imul(a ^ (a >>> 7), a | 61);
-      return ((a ^ (a >>> 14)) >>> 0) / 4294967296;
-    }
-    /* Each population flows as one body about its own axis, so it stays
-       evenly spread while the three streams cross one another. A point is
-       stored in its population's frame and carried by that rotation. */
-    var FLOW = [[0.28, 0.22, 0.93, 0.070], [0.80, -0.42, 0.43, -0.056], [-0.52, 0.74, 0.42, 0.084]];
-    function rot(kk, tau, m) {
-      var f = FLOW[kk], al = Math.hypot(f[0], f[1], f[2]), ax = f[0] / al, ay = f[1] / al, az = f[2] / al;
-      var th = f[3] * tau / 1000, c = Math.cos(th), s = Math.sin(th), C1 = 1 - c;
-      m[0] = c + ax * ax * C1;      m[1] = ax * ay * C1 - az * s; m[2] = ax * az * C1 + ay * s;
-      m[3] = ay * ax * C1 + az * s; m[4] = c + ay * ay * C1;      m[5] = ay * az * C1 - ax * s;
-      m[6] = az * ax * C1 - ay * s; m[7] = az * ay * C1 + ax * s; m[8] = c + az * az * C1;
-      return m;
-    }
-    var RM = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    function drift(S, P, x, y, z, tau) {    /* place P at (x, y, z) at time tau */
-      rot(P.k, tau, RM);                    /* the inverse of a rotation is its transpose */
-      P.x = RM[0] * x + RM[3] * y + RM[6] * z;
-      P.y = RM[1] * x + RM[4] * y + RM[7] * z;
-      P.z = RM[2] * x + RM[5] * y + RM[8] * z;
-    }
-    /* body-frame position at time tau, including a fold in progress */
-    /* the last rotation asked for, per population: a frame asks for the
-       same few thousands of times */
-    var MP = [[], [], []], MT = [NaN, NaN, NaN];
-    function rotc(kk, tau) {
-      if (MT[kk] !== tau) { rot(kk, tau, MP[kk]); MT[kk] = tau; }
-      return MP[kk];
-    }
-    function pos(P, tau, out) {
-      var m = rotc(P.k, tau);
-      var x = m[0] * P.x + m[1] * P.y + m[2] * P.z, y = m[3] * P.x + m[4] * P.y + m[5] * P.z,
-          z = m[6] * P.x + m[7] * P.y + m[8] * P.z;
-      if (tau > P.tc + PRE) {
-        var e = ease((tau - P.tc - PRE) / SLIDE), U = P.u, mu = rotc(U.k, tau);
-        x += (mu[0] * U.x + mu[1] * U.y + mu[2] * U.z - x) * e;
-        y += (mu[3] * U.x + mu[4] * U.y + mu[5] * U.z - y) * e;
-        z += (mu[6] * U.x + mu[7] * U.y + mu[8] * U.z - z) * e;
-        var n = Math.hypot(x, y, z) || 1; x /= n; y /= n; z /= n;
-      }
-      out[0] = x; out[1] = y; out[2] = z;
-      return out;
-    }
-    function target(tau) {
-      if (tau < C0) return N_HI;
-      var f = ((tau - C0) % CYC) / CYC;
-      if (f < 0.40) return N_HI + (N_LO - N_HI) * f / 0.40;
-      if (f < 0.56) return N_LO;
-      if (f < 0.80) return N_LO + (N_HI - N_LO) * (f - 0.56) / 0.24;
-      return N_HI;
-    }
-    function init() {
-      var S = { seed: 0x5eed1e55, t: 0, pts: [] };
-      var GA = Math.PI * (3 - Math.sqrt(5)), NP = N_HI / 3;
-      /* each population starts as its own evenly spread set, turned so the
-         three do not sit on one another */
-      for (var i = 0; i < N_HI; i++) {
-        var kk = i % 3, ii = (i / 3) | 0;
-        var z0 = 1 - 2 * (ii + 0.5) / NP, r = Math.sqrt(1 - z0 * z0), a = ii * GA + kk * 2.1;
-        var x0 = r * Math.cos(a), y0 = r * Math.sin(a), tl = 0.9 * kk, ct0 = Math.cos(tl), st0 = Math.sin(tl);
-        var x = x0 + (rng(S) - 0.5) * 0.06, y = y0 * ct0 - z0 * st0 + (rng(S) - 0.5) * 0.06,
-            z = y0 * st0 + z0 * ct0 + (rng(S) - 0.5) * 0.06;
-        var n = Math.hypot(x, y, z);
-        var P = { k: kk, tb: 0, tc: Infinity, u: null, lock: 0, sw: -1e9 };
-        /* allocated north to south, so the planet fills from the top down */
-        P.tb = B0 + (B1 - B0) * (1 - (z / n + 1) / 2) * 0.9 + 0.1 * (B1 - B0) * rng(S);
-        drift(S, P, x / n, y / n, z / n, P.tb);
-        S.pts.push(P);
-      }
-      return S;
-    }
-    var TMP = [0, 0, 0], TMP2 = [0, 0, 0];
-    function step(S, tau) {
-      var pts = S.pts, i, j, P;
-      for (i = 0; i < pts.length; i++) {
-        P = pts[i];
-        if (P.tc + FOLD <= tau) { P.u.lock--; pts.splice(i--, 1); }
-      }
-      var live = 0, folding = 0, per = [0, 0, 0];
-      for (i = 0; i < pts.length; i++) {
-        P = pts[i];
-        if (P.tc < Infinity && P.tb <= tau) folding++; else { live++; per[P.k]++; }
-      }
-      var T = Math.round(target(tau));
-      /* allocate: new state goes to the thinnest population, in the widest
-         gap that population has, and never on top of anything */
-      for (var nb = 0; nb < 2 && live < T; nb++, live++) {
-        var kq = per[0] <= per[1] && per[0] <= per[2] ? 0 : per[1] <= per[2] ? 1 : 2;
-        per[kq]++;
-        var best = null, bd = -9;
-        for (var tr = 0; tr < 16; tr++) {
-          var z = 2 * rng(S) - 1, a = TAU * rng(S), r = Math.sqrt(1 - z * z);
-          var x = r * Math.cos(a), y = r * Math.sin(a), own = 9, any = 9;
-          for (j = 0; j < pts.length; j++) {
-            if (pts[j].tb > tau) continue;
-            pos(pts[j], tau, TMP);
-            var dd = 1 - (TMP[0] * x + TMP[1] * y + TMP[2] * z);
-            if (dd < any) any = dd;
-            if (pts[j].k === kq && dd < own) own = dd;
+      /* three territories, with ragged coasts */
+      var seeds = [norm([0.25, 0.85, 0.45]), norm([-0.85, -0.15, 0.5]), norm([0.55, -0.55, -0.65])];
+      C.terr = V.map(function (p) {
+        var best = 0, bv = -9;
+        for (var q = 0; q < 3; q++) {
+          var d = dot(p, seeds[q]) + 0.14 * Math.sin(7 * p[0] + 3 * p[2] + 2 * q) * Math.cos(5 * p[1] - q);
+          if (d > bv) { bv = d; best = q; }
+        }
+        return best;
+      });
+
+      /* the evictions, computed: shortest valid edge, crowded end folds */
+      var cur = F.map(function (x) { return x.slice(); });
+      var ev = [];
+      var len = function (a, b) { var d = sub(V[a], V[b]); return Math.sqrt(dot(d, d)); };
+      for (var n = 0; n < 100; n++) {
+        var N = [];
+        for (i = 0; i < V.length; i++) N.push([]);
+        var link = function (a, b) {
+          if (N[a].indexOf(b) < 0) N[a].push(b);
+          if (N[b].indexOf(a) < 0) N[b].push(a);
+        };
+        for (f = 0; f < cur.length; f++) { link(cur[f][0], cur[f][1]); link(cur[f][1], cur[f][2]); link(cur[f][2], cur[f][0]); }
+        var E = [];
+        for (i = 0; i < V.length; i++) for (j = 0; j < N[i].length; j++) if (i < N[i][j]) E.push([i, N[i][j], len(i, N[i][j])]);
+        E.sort(function (x, y) { return x[2] - y[2]; });
+        var crowd = function (x) {
+          var sm = 0;
+          for (var q = 0; q < N[x].length; q++) sm += len(x, N[x][q]);
+          return sm / N[x].length;
+        };
+        var pick = null;
+        for (var e = 0; e < E.length && !pick; e++) {
+          var a = E[e][0], b = E[e][1];
+          if (N[a].length < 4 || N[b].length < 4) continue;
+          var common = 0;
+          for (j = 0; j < N[a].length; j++) if (N[b].indexOf(N[a][j]) >= 0) common++;
+          if (common !== 2) continue;                  /* the link condition: still a sphere */
+          var v = crowd(a) < crowd(b) ? a : b, u = v === a ? b : a, ok = true;
+          for (f = 0; f < cur.length && ok; f++) {
+            var cf = cur[f];
+            if (cf.indexOf(v) < 0 || cf.indexOf(u) >= 0) continue;
+            var r3 = cf.map(function (x) { return x === v ? u : x; });
+            if (outward(r3[0], r3[1], r3[2]) < 1e-4) ok = false;   /* no face turns inside out */
           }
-          var sc = own + (any < 0.004 ? -1 : 0);
-          if (sc > bd) { bd = sc; best = [x, y, z]; }
+          if (ok) pick = { u: u, v: v };
         }
-        var Q = { k: kq, tb: tau, tc: Infinity, u: null, lock: 0, sw: -1e9 };
-        drift(S, Q, best[0], best[1], best[2], tau);
-        pts.push(Q);
+        if (!pick) break;
+        var nu = pick.u, nv = pick.v;
+        cur = cur.filter(function (x) { return !(x.indexOf(nv) >= 0 && x.indexOf(nu) >= 0); })
+                 .map(function (x) { return x.map(function (y) { return y === nv ? nu : y; }); });
+        ev.push(pick);
       }
-      /* evict: fold the older end of the shortest edge onto the other */
-      if (live > T && folding < MAXC) {
-        var el = [];
-        for (i = 0; i < pts.length; i++) {
-          P = pts[i];
-          if (P.tc === Infinity && tau - P.tb >= GROW) { pos(P, tau, TMP); el.push([P, TMP[0], TMP[1], TMP[2]]); }
-        }
-        var bi = -1, bj = -1, bdot = -2;
-        for (i = 0; i < el.length; i++) {
-          for (j = i + 1; j < el.length; j++) {
-            if (el[i][0].lock && el[j][0].lock) continue;
-            var dt = el[i][1] * el[j][1] + el[i][2] * el[j][2] + el[i][3] * el[j][3];
-            if (dt > bdot) { bdot = dt; bi = i; bj = j; }
-          }
-        }
-        if (bi >= 0) {
-          /* of the two ends, the one to go is the more redundant: the one
-             whose next nearest neighbour is nearer, so its removal opens the
-             smallest gap */
-          var second = function (m) {
-            var bs = -2;
-            for (var q = 0; q < el.length; q++) {
-              if (q === bi || q === bj) continue;
-              var dq = el[m][1] * el[q][1] + el[m][2] * el[q][2] + el[m][3] * el[q][3];
-              if (dq > bs) bs = dq;
-            }
-            return bs;
-          };
-          var A = el[bi][0], B = el[bj][0], V, U;
-          if (A.lock) { V = B; U = A; } else if (B.lock) { V = A; U = B; }
-          else if (second(bi) >= second(bj)) { V = A; U = B; } else { V = B; U = A; }
-          V.tc = tau; V.u = U; U.lock++;
-          U.sw = Math.max(U.sw, tau + FOLD);
-        }
+
+      /* the clock: one fold every 90 ms. Folds overlap; a point that folds
+         onto one that is itself folding follows it, see below */
+      var last = PS;
+      for (i = 0; i < ev.length; i++) { ev[i].s = PS + i * 90; last = ev[i].s; }
+      C.HOLD = last + D + 300;
+      C.RS = C.HOLD + 2600;
+      for (i = 0; i < ev.length; i++) ev[i].r = C.RS + (last - ev[i].s);
+      C.P = C.RS + (last - PS) + D + 900;
+      C.ev = ev;
+
+      /* the ring: token traffic in two bands */
+      var ring = [], rs = 7;
+      var rnd = function () { rs = (rs * 16807) % 2147483647; return (rs - 1) / 2147483646; };
+      for (i = 0; i < 240; i++) {
+        var band = rnd() < 0.55;
+        var rr = band ? 1.2 + 0.11 * rnd() : 1.34 + 0.13 * rnd();
+        ring.push({ r: rr, ph: rnd() * TAU, w: 0.00017 * Math.pow(1.2 / rr, 1.5),
+                    c: rnd() < 0.45 ? 0 : rnd() < 0.55 ? 1 : 2, sz: 1.1 + 1.3 * rnd(), y: (rnd() - 0.5) * 0.02 });
       }
+      C.ring = ring;
+      var dotSpr = function (base) {
+        var cv = document.createElement('canvas'), S = 24;
+        cv.width = cv.height = S;
+        var x = cv.getContext('2d');
+        var q = x.createRadialGradient(S / 2, S / 2, 0, S / 2, S / 2, S / 2);
+        q.addColorStop(0, rgb(mix(base, WH, 0.6), 1));
+        q.addColorStop(0.35, rgb(base, 0.55));
+        q.addColorStop(1, rgb(base, 0));
+        x.fillStyle = q; x.fillRect(0, 0, S, S);
+        return cv;
+      };
+      C.spr = [dotSpr(C.b5), dotSpr(C.v5), dotSpr(C.m5)];
+      C.sprC = dotSpr(C.c5); C.sprW = dotSpr(mix(C.b5, WH, 0.7));
+      collapse.cache = M = C;
     }
 
-    var T = REDUCED ? C0 + 0.30 * CYC : t;
-    /* a repaint at a negative time (fig.js repaints at 0 on resize) is drawn
-       from a throwaway state, so the running one is not thrown away */
-    var S = st.eh;
-    if (!S || T < S.t - 1) { S = init(); if (T >= 0) st.eh = S; }
-    while (S.t + DT <= T) { S.t += DT; step(S, S.t); }
+    var P = M.P, HOLD = M.HOLD, RS = M.RS;
+    var tc = REDUCED ? HOLD + 1300 : t % P;
+    var yaw = REDUCED ? 0.8 : t * TAU / 70000;
+    var A = REDUCED ? 1 : ease(t / 1500);
+    var rgb = M.rgb, mix = M.mix, WH = M.WH;
+    var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+    var seg = function (a, d) { return clamp((tc - a) / d); };
 
-    /* ---- view ------------------------------------------------------------- */
-    var phi = TAU * (REDUCED ? 0.18 : T / SPIN);
-    var cp = Math.cos(phi), sp = Math.sin(phi), ct = Math.cos(TILT), stt = Math.sin(TILT);
+    var cyw = Math.cos(yaw), syw = Math.sin(yaw), ct = Math.cos(TILT), stl = Math.sin(TILT);
     var cr = Math.cos(ROLL), sr = Math.sin(ROLL);
-    function view(b, out) {
-      var x1 = b[0] * cp - b[1] * sp, y1 = b[0] * sp + b[1] * cp;
-      var X = x1, Y = b[2], Z = y1;
-      var Y2 = Y * ct - Z * stt, Z2 = Y * stt + Z * ct;
-      out[0] = X * cr - Y2 * sr; out[1] = X * sr + Y2 * cr; out[2] = Z2;
+    var view = function (p, spin) {
+      var x = p[0], y = p[1], z = p[2];
+      if (spin) { var x1 = cyw * x + syw * z; z = -syw * x + cyw * z; x = x1; }
+      var y2 = ct * y - stl * z, z2 = stl * y + ct * z;
+      return [cr * x - sr * y2, sr * x + cr * y2, z2];
+    };
+    var sx = function (v) { return CX + R * v[0]; };
+    var sy = function (v) { return CY - R * v[1]; };
+    var spr = function (im, x, y, r, a) {
+      if (a <= 0.004) return;
+      g.globalAlpha = a > 1 ? 1 : a;
+      g.drawImage(im, x - r, y - r, 2 * r, 2 * r);
+      g.globalAlpha = 1;
+    };
+
+
+
+    /* the colours of a thin film: a loop through the palette that never mixes
+       across the wheel (amber never meets mint or blue), so it stays clean */
+    if (!M.iri) {
+      var stops = [M.m5, M.b5, M.v5, M.c5, M.a5, M.c5, M.v5, M.b5], iri = [];
+      for (var qb = 0; qb < 16; qb++) {
+        var pos = qb / 16 * stops.length, si = Math.floor(pos);
+        iri.push(rgb(mix(stops[si], stops[(si + 1) % stops.length], pos - si)));
+      }
+      M.iri = iri; M.stops = stops;
+    }
+
+    /* view with any spin: the planet turns one way, the sphere inside it the other */
+    var viewAt = function (p, yw) {
+      var cy2 = Math.cos(yw), sy2 = Math.sin(yw);
+      var x = cy2 * p[0] + sy2 * p[2], z = -sy2 * p[0] + cy2 * p[2], y = p[1];
+      var y2 = ct * y - stl * z, z2 = stl * y + ct * z;
+      return [cr * x - sr * y2, sr * x + cr * y2, z2];
+    };
+
+    /* The mesh at any moment: which points have folded away and where the
+       moving ones are. Latest fold first, so a point folding onto one that
+       is itself on the move heads for where that one is now. */
+    var V = M.V, nV = V.length, ev = M.ev, i, e;
+    var stateAt = function (tq) {
+      var to = [], body = [], moving = [], k, c;
+      for (k = 0; k < nV; k++) { to.push(-1); body.push(V[k]); moving.push(-1); }
+      var find = function (x) { while (to[x] >= 0) x = to[x]; return x; };
+      for (k = ev.length - 1; k >= 0; k--) {
+        var q = ev[k];
+        if (tq < q.s) c = 0;
+        else if (tq < q.s + D) c = ease((tq - q.s) / D);
+        else if (tq < q.r) c = 1;
+        else if (tq < q.r + D) c = 1 - ease((tq - q.r) / D);
+        else c = 0;
+        if (c >= 1) to[q.v] = q.u;
+        else if (c > 0) {
+          var pv = V[q.v], pu = body[find(q.u)];
+          body[q.v] = M.norm([pv[0] + (pu[0] - pv[0]) * c, pv[1] + (pu[1] - pv[1]) * c, pv[2] + (pu[2] - pv[2]) * c]);
+          moving[q.v] = find(q.u);
+        }
+      }
+      return { to: to, body: body, moving: moving, find: find };
+    };
+    var edgesOf = function (S) {
+      var seen = {}, out = [], FF = M.F;
+      for (var f = 0; f < FF.length; f++) {
+        var a = S.find(FF[f][0]), b = S.find(FF[f][1]), d = S.find(FF[f][2]);
+        if (a === b || b === d || a === d) continue;
+        var pr = [a, b, b, d, d, a];
+        for (var q = 0; q < 6; q += 2) {
+          var x = pr[q], y = pr[q + 1], key = x < y ? x * 1000 + y : y * 1000 + x;
+          if (seen[key]) continue;
+          seen[key] = 1; out.push(x, y);
+        }
+      }
       return out;
-    }
+    };
 
-    /* every visible point, now and down its wake */
-    var pts = S.pts, n = 0, V = [];
-    for (var i = 0; i < pts.length; i++) {
-      var P = pts[i];
-      if (T < P.tb || T >= P.tc + FOLD) continue;
-      var b = pos(P, T, [0, 0, 0]), v = view(b, [0, 0, 0]);
-      var e = { P: P, b: b, x: CX + R * v[0], y: CY - R * v[1], vx: v[0], vy: v[1], z: v[2],
-                gr: ease((T - P.tb) / GROW), f: P.tc < Infinity ? (T - P.tc) / FOLD : -1, wk: [] };
-      for (var k = 1; k <= K; k++) {
-        var tk = T - k * DTR;
-        if (tk < P.tb) break;
-        view(pos(P, tk, TMP), TMP2);
-        e.wk.push(CX + R * TMP2[0], CY - R * TMP2[1], TMP2[2]);
+    /* a hollow shell of light: every edge of the mesh, the near side bright
+       and the far side seen faintly through it, each edge tinted by where it
+       sits on the film, drifting with time. Returns the projected points and
+       a painter for each half, so things inside can be drawn between them. */
+    var NB = 16;
+    var shell = function (S, scale, yw, drift) {
+      var E = edgesOf(S), Wv = [], k;
+      for (k = 0; k < nV; k++) Wv.push(viewAt(S.body[k], yw));
+      var bf = [], bb = [];
+      for (k = 0; k < NB; k++) { bf.push([]); bb.push([]); }
+      for (k = 0; k < E.length; k += 2) {
+        var p = Wv[E[k]], q = Wv[E[k + 1]];
+        var mz = (p[2] + q[2]) / 2;
+        var h = Math.atan2(p[1] + q[1], p[0] + q[0]) / TAU + 0.3 * mz + drift;
+        h -= Math.floor(h);
+        (mz > 0 ? bf : bb)[Math.floor(h * NB) % NB].push(p, q);
       }
-      P._e = e;
-      V.push(e); n++;
-    }
-
-    /* the Rips edges at scale epsilon, from the live positions */
-    var NBK = 5, eF = [];
-    for (k = 0; k < 6 * NBK; k++) { eF.push([]); }
-    var stars = [];
-    for (i = 0; i < n; i++) if (V[i].f >= 0) { V[i].nb = []; stars.push(V[i]); }
-    for (i = 0; i < n; i++) {
-      var a = V[i];
-      for (var j = i + 1; j < n; j++) {
-        var c = V[j], dt = a.b[0] * c.b[0] + a.b[1] * c.b[1] + a.b[2] * c.b[2];
-        if (dt < CE) continue;
-        if (a.nb) a.nb.push(c);
-        if (c.nb) c.nb.push(a);
-        var w = dt >= CF ? 1 : ease((dt - CE) / (CF - CE));
-        w *= Math.min(a.gr, c.gr);
-        if (w < 0.03) continue;
-        var zm = (a.z + c.z) / 2;
-        if (zm < 0) continue;              /* hidden by the glass */
-        var bk = Math.min(NBK - 1, Math.floor(w * (0.35 + 0.65 * Math.min(1, zm * 1.6)) * NBK));
-        eF[PAIR[a.P.k][c.P.k] * NBK + bk].push(a.x, a.y, c.x, c.y);
-      }
-    }
-
-    function lines(arr) {
-      g.beginPath();
-      for (var q = 0; q < arr.length; q += 4) { g.moveTo(arr[q], arr[q + 1]); g.lineTo(arr[q + 2], arr[q + 3]); }
-      g.stroke();
-    }
-    function wakes(list, al, wd) {
-      /* each wake segment is its own subpath in one of K alpha steps; butt
-         caps, so segments meet end to end and never bead where they join */
-      g.lineCap = 'butt';
-      for (var kk = 0; kk < K; kk++) {
-        g.lineWidth = wd * (1 - 0.5 * kk / K);
-        for (var kc = 0; kc < 3; kc++) {
-          g.strokeStyle = rgba(KC[kc], al * (1 - kk / K) * Math.min(1, 0.45 + kk * 0.4));
+      var X = function (v) { return CX + R * scale * v[0]; };
+      var Y = function (v) { return CY - R * scale * v[1]; };
+      var run = function (B, a, w) {
+        if (a <= 0.004) return;
+        g.lineWidth = w; g.globalAlpha = a > 1 ? 1 : a; g.lineCap = 'round';
+        for (var bk = 0; bk < NB; bk++) {
+          var L = B[bk];
+          if (!L.length) continue;
+          g.strokeStyle = M.iri[bk];
           g.beginPath();
-          for (var q = 0; q < list.length; q++) {
-            var E = list[q];
-            if (E.P.k !== kc || E.wk.length < 3 * (kk + 1)) continue;
-            var x0 = kk === 0 ? E.x : E.wk[3 * kk - 3], y0 = kk === 0 ? E.y : E.wk[3 * kk - 2];
-            g.moveTo(x0, y0); g.lineTo(E.wk[3 * kk], E.wk[3 * kk + 1]);
-          }
+          for (var j = 0; j < L.length; j += 2) { g.moveTo(X(L[j]), Y(L[j])); g.lineTo(X(L[j + 1]), Y(L[j + 1])); }
+          g.stroke();
+        }
+        g.globalAlpha = 1;
+      };
+      return {
+        W: Wv,
+        back: function (a, w) { run(bb, a, w); },
+        front: function (a, w, glow) { if (glow) run(bf, a * 0.16, w * 4.5); run(bf, a, w); }
+      };
+    };
+
+    var now = stateAt(tc);
+    var drift = REDUCED ? 0.2 : t / 11000;
+    var RA = REDUCED ? 1 : 0.35 + 0.65 * A;
+    var pulse = 0.5 + 0.5 * Math.sin((REDUCED ? 0 : t) / 3200 * TAU);
+    var RIN = 0.4, yawIn = -1.7 * yaw + 0.6;
+
+    /* ---------- the teleports: Epsilon moving a payload across the sphere
+       through the hollow, not along it. A payload is a small cloud of points
+       on the surface; it gathers, dives through the void, passes through the
+       receptacle at the centre as the governor grants its one-shot permit,
+       and comes up on the far side whole, where it unfolds. Every jump takes
+       the same time however far it goes. */
+    var TT = 2100, TD = 1900;
+    var hsh = function (m, k) { var x = Math.sin(m * 127.1 + k * 311.7) * 43758.5453; return x - Math.floor(x); };
+    if (!M.nearMemo) M.nearMemo = {};
+    var near = function (vi, count) {
+      if (M.nearMemo[vi]) return M.nearMemo[vi];
+      var c = V[vi], best = [], k, d, dx, dy, dz;
+      for (k = 0; k < nV; k++) {
+        dx = V[k][0] - c[0]; dy = V[k][1] - c[1]; dz = V[k][2] - c[2]; d = dx * dx + dy * dy + dz * dz;
+        best.push([d, k]);
+      }
+      best.sort(function (p, q) { return p[0] - q[0]; });
+      var out = [];
+      for (k = 0; k < count; k++) out.push(best[k][1]);
+      M.nearMemo[vi] = out;
+      return out;
+    };
+    var trips = [];
+    {
+      var mNow = Math.floor((REDUCED ? tc : t) / TT);
+      for (var mm = mNow - 1; mm <= mNow; mm++) {
+        if (mm < 1) continue;
+        var u0 = ((REDUCED ? tc : t) - mm * TT) / TD;
+        if (u0 < 0 || u0 >= 1) continue;
+        var sv = Math.floor(hsh(mm, 1) * nV), s0 = now.body[now.find(sv)];
+        var dv = Math.floor(hsh(mm, 2) * nV), d0 = now.body[now.find(dv)];
+        if (s0[0] * d0[0] + s0[1] * d0[1] + s0[2] * d0[2] > 0.2) d0 = [-s0[0], -s0[1], -s0[2]];
+        trips.push({ u: u0, s: s0, d: d0, ns: near(now.find(sv), 7), nd: near(now.find(dv), 7), c: M.terr[now.find(sv)] });
+      }
+    }
+    /* where the payload is: gathering, diving, or unfolding */
+    var tripAt = function (tr) {
+      var u = tr.u, pts = [], k, cl, sp;
+      if (u < 0.2) {                                   /* gather on the surface */
+        cl = ease(u / 0.2);
+        for (k = 0; k < 7; k++) {
+          sp = V[tr.ns[k]];
+          pts.push([sp[0] + (tr.s[0] - sp[0]) * cl, sp[1] + (tr.s[1] - sp[1]) * cl, sp[2] + (tr.s[2] - sp[2]) * cl]);
+        }
+        return { pts: pts, head: null, glow: cl };
+      }
+      if (u < 0.8) {                                   /* through the hollow, by the centre */
+        var w = ease((u - 0.2) / 0.6), a2 = (1 - w) * (1 - w), c2 = w * w;
+        var hd = [a2 * tr.s[0] + c2 * tr.d[0], a2 * tr.s[1] + c2 * tr.d[1], a2 * tr.s[2] + c2 * tr.d[2]];
+        return { pts: null, head: hd, w: w };
+      }
+      cl = 1 - ease((u - 0.8) / 0.2);                  /* unfold on the far side */
+      for (k = 0; k < 7; k++) {
+        sp = V[tr.nd[k]];
+        pts.push([sp[0] + (tr.d[0] - sp[0]) * cl, sp[1] + (tr.d[1] - sp[1]) * cl, sp[2] + (tr.d[2] - sp[2]) * cl]);
+      }
+      return { pts: pts, head: null, glow: cl, land: 1 - cl };
+    };
+
+    /* ---------- the air, and the ring's far half */
+    var at = g.createRadialGradient(CX, CY, R * 0.9, CX, CY, R * 1.12);
+    at.addColorStop(0, rgb(M.v5, 0)); at.addColorStop(0.45, rgb(M.b5, 0.1 * A)); at.addColorStop(1, rgb(M.b5, 0));
+    g.fillStyle = at;
+    g.beginPath(); g.arc(CX, CY, R * 1.12, 0, TAU); g.fill();
+
+    var ringLane = function (rr, farSide, alpha) {
+      g.strokeStyle = rgb(mix(M.b5, WH, 0.35), alpha); g.lineWidth = 1;
+      g.beginPath();
+      var open = false;
+      for (var k = 0; k <= 96; k++) {
+        var th = k / 96 * TAU, p = view([rr * Math.cos(th), 0, rr * Math.sin(th)], false);
+        if ((p[2] < 0) === farSide) {
+          if (!open) { g.moveTo(sx(p), sy(p)); open = true; } else g.lineTo(sx(p), sy(p));
+        } else open = false;
+      }
+      g.stroke();
+    };
+    var ringDots = function (farSide) {
+      var rg = M.ring;
+      for (var k = 0; k < rg.length; k++) {
+        var q = rg[k], th = q.ph + q.w * (REDUCED ? 20000 : t);
+        var p = view([q.r * Math.cos(th), q.y, q.r * Math.sin(th)], false);
+        if ((p[2] < 0) !== farSide) continue;
+        spr(M.spr[q.c], sx(p), sy(p), q.sz * 2.2, (farSide ? 0.4 : 0.9) * RA);
+      }
+    };
+    ringLane(1.25, true, 0.14 * RA); ringLane(1.405, true, 0.1 * RA);
+    ringDots(true);
+
+    /* ---------- the far wall of the planet */
+    var outer = shell(now, 1, yaw, drift);
+    outer.back(0.3 * A, 0.8);
+
+    /* ---------- Epsilon inside Epsilon: the receptacle at the centre, a
+       finer hollow sphere turning the other way, the bare metal inside it */
+    var core = g.createRadialGradient(CX, CY, 0, CX, CY, R * RIN * 1.05);
+    core.addColorStop(0, rgb(mix(M.a5, WH, 0.5), (0.7 + 0.15 * pulse) * RA));
+    core.addColorStop(0.3, rgb(M.a5, 0.25 * RA));
+    core.addColorStop(1, rgb(M.a5, 0));
+    g.fillStyle = core;
+    g.beginPath(); g.arc(CX, CY, R * RIN * 1.05, 0, TAU); g.fill();
+    spr(M.sprW, CX, CY, 6 + 2 * pulse, RA);
+    var granted = 0;
+    for (i = 0; i < trips.length; i++) {
+      var tw = (trips[i].u - 0.2) / 0.6;
+      if (tw > 0.3 && tw < 0.75) granted = Math.max(granted, Math.sin(Math.PI * (tw - 0.3) / 0.45));
+    }
+    var inner = shell(stateAt(0), RIN, yawIn, drift + 0.5);
+    inner.back((0.35 + 0.25 * granted) * A, 0.7);
+    inner.front((0.75 + 0.25 * granted) * A, 1.05, true);
+    g.strokeStyle = rgb(mix(M.v5, WH, 0.2), (0.35 + 0.6 * granted) * A); g.lineWidth = 1 + 2.5 * granted;
+    g.beginPath(); g.arc(CX, CY, R * RIN * (1.02 + 0.1 * granted), 0, TAU); g.stroke();
+
+    /* ---------- payloads in flight, inside the hollow: the whole jump is
+       drawn as a thread of light from the cell it leaves, past the
+       receptacle, to the cell it lands in, and the payload rides it */
+    var P3 = function (p) { var v = view(p, true); return [sx(v), sy(v), v[2]]; };
+    var bez = function (tr, w) {
+      var a3 = (1 - w) * (1 - w), c3 = w * w;
+      return [a3 * tr.s[0] + c3 * tr.d[0], a3 * tr.s[1] + c3 * tr.d[1], a3 * tr.s[2] + c3 * tr.d[2]];
+    };
+    for (i = 0; i < trips.length; i++) {
+      var tr = trips[i], col = tr.c, ccol = M.terrCol[col];
+      var thread = Math.min(1, tr.u / 0.2) * (tr.u > 0.8 ? 1 - (tr.u - 0.8) / 0.2 : 1);
+      if (thread > 0.01) {
+        var pts3 = [];
+        for (var q3 = 0; q3 <= 40; q3++) pts3.push(P3(bez(tr, q3 / 40)));
+        for (var pass3 = 0; pass3 < 2; pass3++) {
+          g.strokeStyle = rgb(pass3 ? mix(ccol, WH, 0.3) : ccol, (pass3 ? 0.75 : 0.16) * thread);
+          g.lineWidth = pass3 ? 1.6 : 8; g.lineCap = 'round';
+          g.beginPath(); g.moveTo(pts3[0][0], pts3[0][1]);
+          for (q3 = 1; q3 <= 40; q3++) g.lineTo(pts3[q3][0], pts3[q3][1]);
           g.stroke();
         }
       }
+      var st2 = tripAt(tr);
+      if (st2.head) {
+        for (var tq = 8; tq >= 1; tq--) {              /* its wake */
+          var tp = P3(bez(tr, Math.max(0, st2.w - tq * 0.03)));
+          spr(M.spr[col], tp[0], tp[1], 9 - 0.7 * tq, 0.8 * (1 - tq / 9));
+        }
+        var hp = P3(st2.head);
+        spr(M.spr[col], hp[0], hp[1], 24, 1);
+        spr(M.sprW, hp[0], hp[1], 8, 1);
+      }
+    }
+
+    /* ---------- the near wall */
+    outer.front(0.92 * A, 1.35, true);
+    var W = outer.W;
+
+    /* the only filled shapes on the planet: triangles folding flat right now */
+    var FF = M.F;
+    for (var f = 0; f < FF.length; f++) {
+      var a = now.find(FF[f][0]), b = now.find(FF[f][1]), d = now.find(FF[f][2]);
+      if (a === b || b === d || a === d) continue;
+      var mv = now.moving;
+      var fold = (mv[a] >= 0 && (mv[a] === b || mv[a] === d)) || (mv[b] >= 0 && (mv[b] === a || mv[b] === d)) ||
+                 (mv[d] >= 0 && (mv[d] === a || mv[d] === b));
+      if (!fold) continue;
+      var zf = (W[a][2] + W[b][2] + W[d][2]) / 3;
+      g.beginPath();
+      g.moveTo(sx(W[a]), sy(W[a])); g.lineTo(sx(W[b]), sy(W[b])); g.lineTo(sx(W[d]), sy(W[d])); g.closePath();
+      g.fillStyle = rgb(M.c5, zf > 0 ? 0.7 : 0.25);
+      g.fill();
+    }
+
+    /* the film: brightest at the rim, as a bubble is, its colours swirling */
+    if (g.createConicGradient) {
+      var cg = g.createConicGradient((REDUCED ? 0 : t) * 0.00011, CX, CY);
+      var cs = M.stops;
+      for (var k3 = 0; k3 <= cs.length; k3++) cg.addColorStop(k3 / cs.length, rgb(cs[k3 % cs.length], 1));
+      var rims = [[1.5, 0.34], [5, 0.2], [10, 0.1], [17, 0.05]];
+      for (var k4 = 0; k4 < rims.length; k4++) {
+        g.strokeStyle = cg; g.lineWidth = rims[k4][0] < 3 ? 1.6 : 5;
+        g.globalAlpha = rims[k4][1] * A;
+        g.beginPath(); g.arc(CX, CY, R - rims[k4][0], 0, TAU); g.stroke();
+      }
+      g.globalAlpha = 1;
+    } else {
+      g.strokeStyle = rgb(M.v5, 0.3 * A); g.lineWidth = 1.6;
+      g.beginPath(); g.arc(CX, CY, R - 1.5, 0, TAU); g.stroke();
+    }
+    g.strokeStyle = rgb(WH, 0.85 * A); g.lineWidth = 1.2;
+    g.beginPath(); g.arc(CX, CY, R - 3, Math.PI * 0.98, Math.PI * 1.55); g.stroke();
+
+    /* the points of state */
+    for (i = 0; i < nV; i++) {
+      if (now.to[i] >= 0) continue;
+      var zz = W[i][2], mvg = now.moving[i] >= 0;
+      spr(M.spr[M.terr[i]], sx(W[i]), sy(W[i]), mvg ? 7 : zz > 0 ? 3.6 : 2.4, (mvg ? 1 : zz > 0 ? 0.9 : 0.35) * A);
+    }
+
+    /* payloads on the surface: gathering to leave, or unfolding on arrival */
+    for (i = 0; i < trips.length; i++) {
+      var s3 = tripAt(trips[i]);
+      if (!s3.pts) continue;
+      for (var k5 = 0; k5 < s3.pts.length; k5++) {
+        var pp3 = P3(s3.pts[k5]);
+        spr(M.spr[trips[i].c], pp3[0], pp3[1], 6 + 6 * s3.glow, (pp3[2] > 0 ? 1 : 0.45));
+        spr(M.sprW, pp3[0], pp3[1], 2.5 + 2 * s3.glow, (pp3[2] > 0 ? 1 : 0.4));
+      }
+      if (s3.land) {                                    /* a ripple where it lands */
+        var lp = P3(trips[i].d), lr = 6 + 26 * s3.land;
+        g.strokeStyle = rgb(M.terrCol[trips[i].c], 0.6 * (1 - s3.land) * (lp[2] > 0 ? 1 : 0.4)); g.lineWidth = 1.4;
+        g.beginPath(); g.arc(lp[0], lp[1], lr, 0, TAU); g.stroke();
+      }
+    }
+
+    /* the hero: after the thinning, a band of light sweeps pole to pole */
+    var sk = seg(HOLD + 300, 2000);
+    if (sk > 0 && sk < 1) {
+      var scanH = 1.05 - 2.1 * ease(sk), rr2 = Math.sqrt(Math.max(0, 1 - scanH * scanH)), sa = Math.sin(Math.PI * sk);
       g.lineCap = 'round';
-    }
-    function bead(x, y, vx, vy, z, r) {
-      var rot = Math.atan2(-vy, vx), rx = r * Math.max(0.28, z);
-      g.moveTo(x + rx * Math.cos(rot), y + rx * Math.sin(rot));
-      g.ellipse(x, y, rx, r, rot, 0, TAU);
-    }
-
-    g.clearRect(0, 0, vb[0], vb[1]);
-    g.globalCompositeOperation = 'source-over';
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    var front = [], back = [];
-    for (i = 0; i < n; i++) (V[i].z >= 0 ? front : back).push(V[i]);
-    front.sort(function (p, q) { return p.z - q.z; });
-
-    /* ---- the far side, seen through the glass: only its beads, since its
-       edges and wakes cost more to raster than the glass lets through ---- */
-    for (var kc = 0; kc < 3; kc++) {
-      g.fillStyle = rgba(KC[kc], 0.75);
-      g.beginPath();
-      for (i = 0; i < back.length; i++) {
-        var E = back[i];
-        if (E.P.k !== kc) continue;
-        var rb = 2.4 * E.gr * (E.f >= 0 ? 1 - 0.4 * ease(E.f) : 1);
-        if (rb > 0.05) { g.moveTo(E.x + rb, E.y); g.arc(E.x, E.y, rb, 0, TAU); }
-      }
-      g.fill();
-    }
-
-    /* ---- the sphere: the same pixels on every frame ---------------------- */
-    g.globalAlpha = REDUCED ? 1 : 0.35 + 0.65 * ease(T / 900);
-    g.drawImage(IMG, CX - R - ATM, CY - R - ATM, 2 * (R + ATM), 2 * (R + ATM));
-    g.globalAlpha = 1;
-    g.strokeStyle = rgba(blue7, 0.34); g.lineWidth = 1.3;
-    g.beginPath(); g.arc(CX, CY, R, 0, TAU); g.stroke();
-
-    /* ---- the near side --------------------------------------------------- */
-    /* butt caps: an edge ends under a bead, and a round cap on a thousand
-       segments is two thousand arcs to raster for nothing */
-    g.lineCap = 'butt';
-    for (k = 0; k < 6 * NBK; k++) {
-      var kb = k % NBK;
-      g.strokeStyle = rgba(PC[(k / NBK) | 0], 0.06 + 0.40 * (kb + 0.5) / NBK);
-      g.lineWidth = 0.75 + 0.55 * kb / NBK;
-      lines(eF[k]);
-    }
-    g.lineCap = 'round';
-
-    /* the cycle's one sweep: a ring crosses the whole surface and lights
-       every edge it passes, and finds the thinned net closed everywhere */
-    var ph = T < C0 ? -1 : ((T - C0) % CYC) / CYC;
-    var hs = REDUCED ? -1 : (ph - 0.42) / 0.14;
-    if (hs > 0 && hs < 1) {
-      var DX = 0.14, DY = 0.90, DZ = 0.42, dl = Math.hypot(DX, DY, DZ); DX /= dl; DY /= dl; DZ /= dl;
-      var cc = 0.93 - 1.86 * ease(hs), rho = Math.sqrt(Math.max(0, 1 - cc * cc));
-      var fade = ease(Math.min(hs, 1 - hs) / 0.2);
-      /* edges near the ring's plane */
-      g.strokeStyle = rgba(KC[0], 0.8 * fade); g.lineWidth = 1.8;
-      g.beginPath();
-      for (k = 0; k < 6 * NBK; k++) {
-        var arr = eF[k];
-        for (var q = 0; q < arr.length; q += 4) {
-          var mx = ((arr[q] + arr[q + 2]) / 2 - CX) / R, my = -((arr[q + 1] + arr[q + 3]) / 2 - CY) / R;
-          var mz = Math.sqrt(Math.max(0, 1 - mx * mx - my * my));
-          if (Math.abs(mx * DX + my * DY + mz * DZ - cc) < 0.05) { g.moveTo(arr[q], arr[q + 1]); g.lineTo(arr[q + 2], arr[q + 3]); }
-        }
-      }
-      g.stroke();
-      /* the ring itself: a circle of the sphere, split at the limb */
-      var e1x = -DY, e1y = DX, e1z = 0, e1l = Math.hypot(e1x, e1y); e1x /= e1l; e1y /= e1l;
-      var e2x = DY * e1z - DZ * e1y, e2y = DZ * e1x - DX * e1z, e2z = DX * e1y - DY * e1x;
-      for (var side = 0; side < 2; side++) {
+      for (var pass = 0; pass < 2; pass++) {
+        g.strokeStyle = pass ? rgb(WH, 0.95 * sa) : rgb(M.v5, 0.3 * sa);
+        g.lineWidth = pass ? 1.6 : 8;
         g.beginPath();
-        var pen = false;
-        for (q = 0; q <= 96; q++) {
-          var th = q / 96 * TAU, ca = Math.cos(th), sa = Math.sin(th);
-          var rx = cc * DX + rho * (e1x * ca + e2x * sa), ry = cc * DY + rho * (e1y * ca + e2y * sa),
-              rz = cc * DZ + rho * (e1z * ca + e2z * sa);
-          if ((rz >= 0) !== (side === 0)) { pen = false; continue; }
-          var sx = CX + R * rx, sy = CY - R * ry;
-          if (pen) g.lineTo(sx, sy); else { g.moveTo(sx, sy); pen = true; }
+        var open2 = false;
+        for (var k2 = 0; k2 <= 72; k2++) {
+          var th2 = k2 / 72 * TAU, p2 = view([rr2 * Math.cos(th2), scanH, rr2 * Math.sin(th2)], true);
+          if (p2[2] > 0) { if (!open2) { g.moveTo(sx(p2), sy(p2)); open2 = true; } else g.lineTo(sx(p2), sy(p2)); }
+          else open2 = false;
         }
-        if (side === 0) {
-          g.strokeStyle = rgba(KC[0], 0.13 * fade); g.lineWidth = 14; g.stroke();
-          g.strokeStyle = rgba(KC[0], 0.9 * fade); g.lineWidth = 2.6; g.stroke();
-        } else {
-          g.strokeStyle = rgba(KC[0], 0.22 * fade); g.lineWidth = 1.4; g.stroke();
-        }
+        g.stroke();
       }
     }
 
-    wakes(front, 0.55, 1.8);
-
-    /* the folds: the star of each evicted point shades in and closes onto
-       the survivor as the point slides along the edge between them */
-    for (i = 0; i < stars.length; i++) {
-      var Sv = stars[i];
-      if (Sv.z < 0) continue;
-      var fb = Math.sin(Math.PI * Math.min(1, Sv.f * 1.06));
-      var nbv = Sv.nb, Ue = Sv.P.u._e, ux = Ue.x, uy = Ue.y;
-      /* the triangles on the folding edge are the ones that flatten to
-         nothing: every neighbour the point shares with its survivor */
-      g.fillStyle = rgba(coral, 0.32 * fb);
-      g.beginPath();
-      for (var p1 = 0; p1 < nbv.length; p1++) {
-        var A1 = nbv[p1];
-        if (A1 === Ue || A1.b[0] * Ue.b[0] + A1.b[1] * Ue.b[1] + A1.b[2] * Ue.b[2] < CE) continue;
-        g.moveTo(Sv.x, Sv.y); g.lineTo(A1.x, A1.y); g.lineTo(ux, uy); g.closePath();
+    /* each evicted point leaves as a spark; each returning one arrives from the ring */
+    for (i = 0; i < ev.length; i++) {
+      e = ev[i];
+      var kx = seg(e.s + D, 900);
+      if (kx > 0 && kx < 1) {
+        var pu2 = V[e.u], up = 1 + 0.3 * ease(kx);
+        var ps = view([pu2[0] * up, pu2[1] * up, pu2[2] * up], true);
+        spr(M.sprC, sx(ps), sy(ps), 4.5, (ps[2] > 0 ? 0.9 : 0.35) * (1 - kx));
       }
-      g.fill();
-      /* the rest of its star swings across onto the survivor */
-      g.strokeStyle = rgba(coral, 0.55 * fb); g.lineWidth = 1.1;
-      g.beginPath();
-      for (p1 = 0; p1 < nbv.length; p1++) { g.moveTo(Sv.x, Sv.y); g.lineTo(nbv[p1].x, nbv[p1].y); }
-      g.stroke();
-      g.strokeStyle = rgba(coral, 0.95 * fb); g.lineWidth = 3;
-      g.beginPath(); g.moveTo(Sv.x, Sv.y); g.lineTo(ux, uy); g.stroke();
-      var pre = Math.min(1, (T - Sv.P.tc) / PRE);
-      g.strokeStyle = rgba(coral, 0.7 * (1 - ease(Sv.f)));
-      g.lineWidth = 1.6;
-      g.beginPath(); g.arc(Sv.x, Sv.y, 5 + 9 * ease(pre), 0, TAU); g.stroke();
-      g.fillStyle = rgba(coral, 0.16 * fb);
-      g.beginPath(); g.arc(Sv.x, Sv.y, 10, 0, TAU); g.fill();
-    }
-
-    /* arrivals ring out in their own colour; survivors swell as they absorb */
-    for (i = 0; i < front.length; i++) {
-      E = front[i];
-      var ab = (T - E.P.tb) / 900;
-      if (ab > 0 && ab < 1 && !REDUCED) {
-        g.strokeStyle = rgba(KC[E.P.k], 0.55 * (1 - ab) * (1 - ab));
-        g.lineWidth = 1.4;
-        g.beginPath(); g.arc(E.x, E.y, 3 + 11 * (1 - (1 - ab) * (1 - ab)), 0, TAU); g.stroke();
-      }
-      var sw = (T - E.P.sw) / SWELL;
-      if (sw > 0 && sw < 1) {
-        g.strokeStyle = rgba(coral, 0.6 * (1 - sw) * (1 - sw));
-        g.lineWidth = 2;
-        g.beginPath(); g.arc(E.x, E.y, 4 + 13 * (1 - (1 - sw) * (1 - sw)), 0, TAU); g.stroke();
+      var kr = seg(e.r - 650, 650);
+      if (kr > 0 && kr < 1) {
+        var th3 = i * 2.39996 + (REDUCED ? 0 : t) * 0.00017;
+        var from = [1.3 * Math.cos(th3), 0, 1.3 * Math.sin(th3)];
+        var tgt = V[e.u], ke = ease(kr), lift = 0.25 * Math.sin(Math.PI * ke);
+        var pp = [from[0] + (tgt[0] - from[0]) * ke, from[1] + (tgt[1] - from[1]) * ke + lift, from[2] + (tgt[2] - from[2]) * ke];
+        var pw = view(pp, ke > 0.5);
+        spr(M.spr[M.terr[e.v]], sx(pw), sy(pw), 5, pw[2] > 0 ? 1 : 0.4);
       }
     }
 
-    /* beads, far to near, foreshortened toward the limb and lit */
-    function rad(E) {
-      var s2 = (T - E.P.sw) / SWELL, swl = s2 > 0 && s2 < 1 ? 1.2 * s2 * Math.exp(1 - 3 * s2) : 0;
-      return (3.4 + 1.8 * E.z) * E.gr * (1 + swl) * (E.f >= 0 ? 1 - 0.35 * ease(E.f) : 1);
-    }
-    function glint(E, rr) {
-      var lit = E.vx * LX + E.vy * LY + E.z * LZ;
-      if (lit < 0.15) return;
-      var rh = rr * 0.42 * Math.min(1, lit * 1.4), hx = E.x - 0.34 * rr, hy = E.y - 0.4 * rr;
-      g.moveTo(hx + rh, hy); g.arc(hx, hy, rh, 0, TAU);
-    }
-    var NZ = 4;
-    for (var zb = 0; zb < NZ; zb++) {
-      var z0 = zb / NZ, z1 = zb === NZ - 1 ? 2 : (zb + 1) / NZ;
-      for (kc = 0; kc < 3; kc++) {
-        /* a soft halo, so each bead reads as a light on the glass */
-        g.fillStyle = rgba(KC[kc], 0.15);
-        g.beginPath();
-        for (i = 0; i < front.length; i++) {
-          E = front[i];
-          if (E.z < z0 || E.z >= z1 || E.P.k !== kc || E.f >= 0) continue;
-          var rh2 = rad(E) * 2.3;
-          if (rh2 > 0.1) bead(E.x, E.y, E.vx, E.vy, E.z, rh2);
-        }
-        g.fill();
-        g.fillStyle = rgba(KC[kc], 0.7 + 0.3 * Math.min(1, z1));
-        g.beginPath();
-        for (i = 0; i < front.length; i++) {
-          E = front[i];
-          if (E.z < z0 || E.z >= z1 || E.P.k !== kc || E.f >= 0) continue;
-          var rr = rad(E);
-          if (rr > 0.05) bead(E.x, E.y, E.vx, E.vy, E.z, rr);
-        }
-        g.fill();
-      }
-      /* the highlight each bead catches from the sphere's light */
-      g.fillStyle = rgba(white, 0.85);
-      g.beginPath();
-      for (i = 0; i < front.length; i++) {
-        E = front[i];
-        if (E.z >= z0 && E.z < z1 && E.f < 0) glint(E, rad(E));
-      }
-      g.fill();
-    }
-    /* the evicted, turning coral as they fold: few, so drawn one by one */
-    for (i = 0; i < stars.length; i++) {
-      E = stars[i];
-      if (E.z < 0) continue;
-      var fk = ease(Math.min(1, (T - E.P.tc) / PRE)), r3 = rad(E);
-      if (fk < 1) {
-        g.fillStyle = rgba(KC[E.P.k], 1 - fk);
-        g.beginPath(); bead(E.x, E.y, E.vx, E.vy, E.z, r3); g.fill();
-      }
-      g.fillStyle = rgba(coral, fk);
-      g.beginPath(); bead(E.x, E.y, E.vx, E.vy, E.z, r3); g.fill();
-      g.fillStyle = rgba(white, 0.8);
-      g.beginPath(); glint(E, r3); g.fill();
-    }
+    /* the near half of the ring passes in front */
+    ringLane(1.25, false, 0.22 * RA); ringLane(1.405, false, 0.16 * RA);
+    ringDots(false);
   }
 
   /* ==================================================================== */
