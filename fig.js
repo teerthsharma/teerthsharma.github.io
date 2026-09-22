@@ -7783,520 +7783,378 @@
   /* aether — aether-lang                                                */
   /* ==================================================================== */
   function aether(g, vb, t, st) {
-    /* Aether-Lang ends a loop when the shape of its state stops changing, and
-       measures that shape with persistent homology. This figure runs one
-       such loop and computes the homology of every pass for real.
-
-       The state is a cloud of sixty points, and each pass of the loop moves
-       it: an open blob, then a crescent, then a ring that closes late, then
-       earlier, then settles. After each pass the runtime measures the shape.
-       Balls grow round every point. The figure computes, on a grid, the
-       distance from every place in the plane to the nearest state point, so
-       the union of balls at scale r is exactly where that distance is below
-       r. Its contours at eight scales are the waves of lines. Every contour
-       carries the same number of pulses at the same fraction of its length,
-       turning at one angular rate, so the pulses on all the nested contours
-       line up into waves circulating round the shape. When the balls seal a
-       ring round empty space a loop is born, and the space it encloses swells
-       with light until the balls fill it: the circle is made, and in the
-       early passes broken again.
-
-       Under the cloud the barcode is drawn as the scale sweeps. H0 comes from
-       single linkage: a blue tick at half the distance at which two pieces
-       join. H1 comes from the same distance grid by duality: a hole in the
-       union of balls is a region farther than r from every point, so a
-       union-find over grid cells in decreasing distance gives each hole its
-       birth (the scale at which it is cut off from the outside) and its death
-       (the scale at which the balls reach its deepest cell). Lanes hold the
-       five longest loops, longest first, so the loop that matters is always
-       the top lane. The previous pass's barcode lies underneath in grey and
-       every difference is marked amber. A pip per pass records the verdict,
-       amber if the barcode changed and mint if it came back identical. The
-       first identical pass exits: the loop's light turns mint and the waves
-       quicken, then a widening wedge cuts the ring open where it closed last
-       while the points pour back into the blob, and the next run starts.
-
-       Measured on this state: the main loop is born at scale 16.4, then 14.9,
-       12.2 and 6.2 over passes 3 to 6; pass 2 makes a loop at 20.7 that fills
-       at 34.7, inside the window of 36. Cycle, 22.6 s: eight passes of 2.3 s
-       (0.7 s move, 1.1 s grow, 0.5 s compare), 2.8 s exit, 1.4 s break and
-       reset. A state's distance grid, barcode and contours (as Path2D) are
-       computed once, on first use, and cached on the function. */
+    /* Aether-Lang: a loop whose exit test is the shape of its state.
+       The program state is a cloud of 30 points. Each pass of the loop moves
+       it, then the runtime measures it: a Vietoris-Rips filtration grows a
+       scale r and joins every pair of points closer than r, drawn here as
+       crisp lines appearing between the points (coloured by length). When
+       the lines close a ring round empty space an H1 class is born: that
+       ring is lit in violet, the circle made. When three lines finally span
+       the hole, the triangle that kills the class is drawn and the ring
+       dims, the circle broken. The barcode (every H0 and H1 bar) is computed
+       once from the real distances by union-find and boundary-matrix
+       reduction over Z2; the ring drawn is a real cycle through the edge
+       that created the longest bar (shortest path plus that edge).
+       Passes are layers stacked in depth, oldest at the back; each keeps its
+       ring and the skeleton at the scale the ring closed, and thin threads
+       follow every point from pass to pass. The loop exits on the first pass
+       whose barcode equals the previous one exactly: the last pass slides
+       every point one slot along the ring, so the state moved but the point
+       set, and so every bar, is identical. The two layers lock together, the
+       camera swings end-on so every pass's ring nests round the same centre,
+       then the final ring breaks open and the next run begins.
+       The cloud and its passes are illustrative; the topology is computed. */
     var TAU = Math.PI * 2;
-    var N = 60, RHO = 90, RMAX = 36, NL = 8;
-    var SX = 235, SY = 198;                            /* stage centre */
-    var HS = 140, HG = 2, G = HS * 2 / HG + 1;        /* distance grid */
-    var MOVE = 700, SWEEP = 1100, HOLD = 500, PD = MOVE + SWEEP + HOLD;
-    var NP = 8, EXIT = 2800, RESET = 1400, RUN = NP * PD + EXIT + RESET;
-    var LAM = [0, 0.3, 0.52, 0.7, 0.84, 0.94, 1];
-    var BX = 64, BW = 374, RUGY = 350, LY0 = 368, LDY = 11, PIPY = 432;
-    var NH1 = 5;
+    var N = 30, NP = 7;
+    var PASS = 2600, MOVE = 700, FILT = 1600;
+    var LOCK = 1300, GLOW = 1400, BREAK = 1700, FADE = 900;
+    var L = NP * PASS + LOCK + GLOW + BREAK + FADE;
+    var DZ = 0.5, FOC = 6, S = 146, GROW = 0.07, NB = 7;
 
-    var M = aether.M;
+    var M = aether.cache;
     if (!M) {
-      M = aether.M = { inf: [] };
-      var seed = 0x2a3e7;
-      var rnd = function () {
-        var a = (seed = (seed + 0x6D2B79F5) | 0);
-        a = Math.imul(a ^ (a >>> 15), a | 1);
-        a ^= a + Math.imul(a ^ (a >>> 7), a | 61);
-        return ((a ^ (a >>> 14)) >>> 0) / 4294967296;
-      };
-      var TG = M.tg = 2.45;                            /* where the ring closes last */
-      M.th = []; M.rh = []; M.a0 = []; M.r0 = []; M.dl = []; M.gp = [];
-      for (var i = 0; i < N; i++) {
-        var th = TAU * i / N + (rnd() - 0.5) * 0.5 * TAU / N;
-        var ad = Math.abs(((th - TG) % TAU + TAU + Math.PI) % TAU - Math.PI);
-        var gp = Math.max(0, 1 - ad / 1.35);
-        M.th.push(th);
-        M.rh.push(RHO * (1 + 0.06 * Math.sin(2 * th + 0.7) + 0.05 * (rnd() - 0.5)));
-        var a0 = TAU * rnd();
-        M.a0.push(a0);
-        M.r0.push(45 * Math.sqrt(rnd()));
-        M.dl.push(((th - a0) % TAU + TAU + Math.PI) % TAU - Math.PI);
-        M.gp.push(gp * gp * (3 - 2 * gp));
-      }
-      /* each point's own progress lags where the ring closes last */
-      /* wob: a pass's own wobble, none on the blob or the settled ring */
-      M.at = function (i, lam, wob, out) {
-        var lag = 0.5 * M.gp[i], l = Math.max(0, Math.min(1, (lam - lag) / (1 - lag)));
-        var a = M.a0[i] + M.dl[i] * l, r = M.r0[i] + (M.rh[i] - M.r0[i]) * l;
-        if (wob) r += RHO * 0.16 * (1 - lam) * Math.sin(3 * a + 1.7 * wob);
-        out[0] = r * Math.cos(a); out[1] = r * Math.sin(a);
-        return out;
-      };
-      M.S = [];
-      var q = [0, 0];
-      for (var k = 0; k < LAM.length; k++) {
-        var S = new Float32Array(2 * N);
-        for (i = 0; i < N; i++) { M.at(i, LAM[k], k < LAM.length - 1 ? k : 0, q); S[2 * i] = q[0]; S[2 * i + 1] = q[1]; }
-        M.S.push(S);
-      }
-      var hex = function (h) {
-        h = (h || '#000').trim().replace('#', '');
+      var C = {};
+      var hex3 = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
         if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
         var n = parseInt(h, 16);
         return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
       };
-      M.v5 = token('--violet-500', '#a66cf0'); M.v7 = token('--violet-700', '#6b35c4');
-      M.b5 = token('--blue-500', '#2456dc'); M.m5 = token('--mint-500', '#0b93ab');
-      M.m7 = token('--mint-700', '#0a6b7c'); M.a5 = token('--amber-500', '#d96a06');
-      M.hair = token('--hair2', '#cfcbc1'); M.white = token('--raised', '#ffffff');
-      /* contour colour by scale: violet-700 near the state, out through
-         violet-500 to blue-500 */
-      var RAMP = [hex(M.v7), hex(M.v5), hex(M.b5)];
-      M.lc = [];
-      for (var j = 0; j < NL; j++) {
-        var f = 2 * j / (NL - 1), i0 = Math.min(1, Math.floor(f)), fr0 = f - i0, cA = RAMP[i0], cB = RAMP[i0 + 1];
-        M.lc.push('#' + ((1 << 24) | (Math.round(cA[0] + (cB[0] - cA[0]) * fr0) << 16) |
-          (Math.round(cA[1] + (cB[1] - cA[1]) * fr0) << 8) | Math.round(cA[2] + (cB[2] - cA[2]) * fr0)).toString(16).slice(1));
+      var RAMP = [hex3('--mint-500', '#0b93ab'), hex3('--blue-500', '#2456dc'),
+                  hex3('--violet-500', '#a66cf0'), hex3('--coral-500', '#d9376e')];
+      C.bcol = [];
+      for (var b0 = 0; b0 < NB; b0++) {
+        var kk = b0 / (NB - 1) * 3, ii = Math.min(2, Math.floor(kk)), ff = kk - ii;
+        C.bcol.push([0, 1, 2].map(function (q) {
+          return Math.round(RAMP[ii][q] + (RAMP[ii + 1][q] - RAMP[ii][q]) * ff);
+        }));
       }
-    }
+      C.rgb = function (c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a.toFixed(3) + ')'; };
+      C.v7 = hex3('--violet-700', '#6b35c4');
+      C.v5 = hex3('--violet-500', '#a66cf0');
+      C.b7 = hex3('--blue-700', '#163a9a');
+      C.b5 = hex3('--blue-500', '#2456dc');
+      C.c5 = hex3('--coral-500', '#d9376e');
+      C.m7 = hex3('--mint-700', '#0a6b7c');
 
-    /* ---- the shape of one state: distance grid, barcode, contours -------- */
-    function info(k) {
-      if (M.inf[k]) return M.inf[k];
-      var P = M.S[k], I = { h0: [], h1: [], lv: [] }, i, j, n = G * G;
-      var f = new Float32Array(n);
-      for (j = 0; j < G; j++) {
-        for (i = 0; i < G; i++) {
-          var x = -HS + i * HG, y = -HS + j * HG, best = 1e9;
-          for (var p = 0; p < N; p++) {
-            var dx = P[2 * p] - x, dy = P[2 * p + 1] - y, d2 = dx * dx + dy * dy;
-            if (d2 < best) best = d2;
-          }
-          f[j * G + i] = Math.sqrt(best);
-        }
-      }
-      /* H0: single linkage, a join at half the distance */
-      var pr = [], par = new Int32Array(N);
-      for (i = 0; i < N; i++) {
-        par[i] = i;
-        for (j = i + 1; j < N; j++) pr.push([Math.hypot(P[2 * i] - P[2 * j], P[2 * i + 1] - P[2 * j + 1]) / 2, i, j]);
-      }
-      pr.sort(function (a, b) { return a[0] - b[0]; });
-      var fd = function (a) { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
-      for (i = 0; i < pr.length; i++) {
-        var ra = fd(pr[i][1]), rb = fd(pr[i][2]);
-        if (ra !== rb) { par[ra] = rb; I.h0.push(pr[i][0]); }
-      }
-      I.h0.sort(function (a, b) { return b - a; });
-      /* H1 by duality: cells in decreasing distance, the border joined to
-         the outside; a region cut off from the outside is a hole */
-      var ord = new Uint32Array(n);
-      for (i = 0; i < n; i++) ord[i] = i;
-      ord.sort(function (a, b) { return f[b] - f[a]; });
-      var up = new Int32Array(n + 1).fill(-1), top = new Float32Array(n + 1), am = new Int32Array(n + 1), OUT = n;
-      up[OUT] = OUT; top[OUT] = Infinity; am[OUT] = -1;
-      var fr = function (a) { while (up[a] !== a) { up[a] = up[up[a]]; a = up[a]; } return a; };
-      var bars = [];
-      var join = function (a, b, fc) {
-        a = fr(a); b = fr(b);
-        if (a === b) return;
-        var old = top[a] >= top[b] ? a : b, yng = old === a ? b : a;
-        if (top[yng] - fc > 0.8 && fc < RMAX) {
-          var c = am[yng];
-          bars.push({ b: fc, d: top[yng], x: -HS + (c % G) * HG, y: -HS + ((c / G) | 0) * HG });
-        }
-        up[yng] = old;
+      /* seeded generator, so every visitor sees the same run */
+      var seed = 20260923;
+      var rnd = function () {
+        seed = (seed + 0x6D2B79F5) | 0;
+        var q = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        q = (q + Math.imul(q ^ (q >>> 7), 61 | q)) ^ q;
+        return ((q ^ (q >>> 14)) >>> 0) / 4294967296;
       };
-      for (var o = 0; o < n; o++) {
-        var v = ord[o], vi = v % G, vj = (v / G) | 0, fv = f[v];
-        up[v] = v; top[v] = fv; am[v] = v;
-        if (vi === 0 || vj === 0 || vi === G - 1 || vj === G - 1) join(v, OUT, fv);
-        if (vi > 0 && up[v - 1] >= 0) join(v, v - 1, fv);
-        if (vi < G - 1 && up[v + 1] >= 0) join(v, v + 1, fv);
-        if (vj > 0 && up[v - G] >= 0) join(v, v - G, fv);
-        if (vj < G - 1 && up[v + G] >= 0) join(v, v + G, fv);
+      var PH0 = -Math.PI / 2;
+      var wrapPi = function (a) { return a - TAU * Math.round(a / TAU); };
+      /* pass states in polar form: th (unwrapped, for travel) and exact x, y */
+      var SPAN = [0, 0.55, 0.8, 1, 1], RAD = [0, 0.7, 0.85, 0.93, 0.98],
+          NR = [0, 0.34, 0.24, 0.17, 0.08], NT = [0, 0.22, 0.12, 0.07, 0.03];
+      C.P = [];
+      var p, i, j, k;
+      for (k = 0; k < NP; k++) {
+        var th = new Float64Array(N), rr = new Float64Array(N);
+        var X = new Float64Array(N), Y = new Float64Array(N);
+        if (k === 0) {
+          var an = [];
+          for (i = 0; i < N; i++) an.push(rnd() * TAU);
+          an.sort(function (a, b) { return a - b; });
+          for (i = 0; i < N; i++) { th[i] = an[i] + PH0; rr[i] = 0.52 * Math.sqrt(0.08 + 0.92 * rnd()); }
+        } else if (k < 5) {
+          for (i = 0; i < N; i++) {
+            th[i] = PH0 + (1 - SPAN[k]) * Math.PI + SPAN[k] * TAU * i / N + NT[k] * (rnd() - 0.5);
+            rr[i] = RAD[k] + NR[k] * (rnd() - 0.5);
+          }
+        } else {
+          for (i = 0; i < N; i++) { th[i] = PH0 + TAU * (i + k - 5) / N; rr[i] = 1; }
+        }
+        for (i = 0; i < N; i++) {
+          if (k > 0) th[i] = C.P[k - 1].th[i] + (k === 6 ? TAU / N : wrapPi(th[i] - C.P[k - 1].th[i]));
+          /* exact coordinates from the slot index, so pass 6 is pass 5's set */
+          var ang = k >= 5 ? PH0 + TAU * ((i + k - 5) % N) / N : th[i];
+          X[i] = rr[i] * Math.cos(ang); Y[i] = rr[i] * Math.sin(ang);
+        }
+        C.P.push({ th: th, r: rr, x: X, y: Y });
       }
-      bars.sort(function (a, b) { return (Math.min(b.d, RMAX) - b.b) - (Math.min(a.d, RMAX) - a.b); });
-      /* longest first, so the loop that matters is always the top lane and
-         each lane is compared with the same lane of the pass before */
-      I.h1 = bars.slice(0, NH1);
-      I.big = I.h1.some(function (b) { return b.d > RMAX; });
-      /* contours: marching squares, chained into closed loops, turned so
-         every loop runs the same way round */
-      for (var lv = 0; lv < NL; lv++) {
-        var L = RMAX * (lv + 1) / NL, nb = new Int32Array(4 * n).fill(-1), loops = [];
-        var link = function (a, b) {
-          if (nb[2 * a] < 0) nb[2 * a] = b; else nb[2 * a + 1] = b;
-          if (nb[2 * b] < 0) nb[2 * b] = a; else nb[2 * b + 1] = a;
-        };
-        for (j = 0; j < G - 1; j++) {
-          for (i = 0; i < G - 1; i++) {
-            var id = j * G + i;
-            var cd = (f[id] < L ? 1 : 0) | (f[id + 1] < L ? 2 : 0) | (f[id + G + 1] < L ? 4 : 0) | (f[id + G] < L ? 8 : 0);
-            if (cd === 0 || cd === 15) continue;
-            var eT = 2 * id, eR = 2 * (id + 1) + 1, eB = 2 * (id + G), eL = 2 * id + 1;
-            var mid = (f[id] + f[id + 1] + f[id + G + 1] + f[id + G]) / 4 < L;
-            switch (cd) {
-              case 1: case 14: link(eL, eT); break;
-              case 2: case 13: link(eT, eR); break;
-              case 3: case 12: link(eL, eR); break;
-              case 4: case 11: link(eR, eB); break;
-              case 6: case 9: link(eT, eB); break;
-              case 7: case 8: link(eL, eB); break;
-              case 5: if (mid) { link(eT, eR); link(eL, eB); } else { link(eL, eT); link(eR, eB); } break;
-              case 10: if (mid) { link(eL, eT); link(eR, eB); } else { link(eT, eR); link(eL, eB); } break;
-            }
+
+      /* persistent homology of one pass: H0 by union-find, H1 by reducing
+         the triangle boundary matrix over Z2 */
+      var symdiff = function (a, b) {
+        var o = [], x = 0, y = 0;
+        while (x < a.length || y < b.length) {
+          if (y >= b.length || (x < a.length && a[x] > b[y])) o.push(a[x++]);
+          else if (x >= a.length || b[y] > a[x]) o.push(b[y++]);
+          else { x++; y++; }
+        }
+        return o;
+      };
+      for (k = 0; k < NP; k++) {
+        p = C.P[k];
+        var E = [];
+        for (i = 0; i < N; i++) for (j = i + 1; j < N; j++)
+          E.push({ i: i, j: j, l: Math.hypot(p.x[i] - p.x[j], p.y[i] - p.y[j]) });
+        E.sort(function (a, b) { return a.l - b.l; });
+        var eid = new Int32Array(N * N);
+        for (i = 0; i < E.length; i++) { eid[E[i].i * N + E[i].j] = i; eid[E[i].j * N + E[i].i] = i; }
+        var par = [];
+        for (i = 0; i < N; i++) par.push(i);
+        var find = function (a) { while (par[a] !== a) { par[a] = par[par[a]]; a = par[a]; } return a; };
+        var bars0 = [];
+        for (i = 0; i < E.length; i++) {
+          var ra = find(E[i].i), rb = find(E[i].j);
+          if (ra !== rb) { par[ra] = rb; bars0.push(E[i].l); }
+        }
+        var T = [];
+        for (i = 0; i < N; i++) for (j = i + 1; j < N; j++) for (var m = j + 1; m < N; m++) {
+          var c3 = [eid[i * N + j], eid[i * N + m], eid[j * N + m]].sort(function (a, b) { return b - a; });
+          T.push({ c: c3, v: [i, j, m] });
+        }
+        T.sort(function (a, b) { return a.c[0] - b.c[0] || a.c[1] - b.c[1] || a.c[2] - b.c[2]; });
+        var piv = new Array(E.length), dtri = new Array(E.length);
+        for (i = 0; i < T.length; i++) {
+          var col = T[i].c;
+          while (col.length && piv[col[0]]) col = symdiff(col, piv[col[0]]);
+          if (col.length) { piv[col[0]] = col; dtri[col[0]] = T[i]; }
+        }
+        var bars1 = [], best = null;
+        for (i = 0; i < E.length; i++) {
+          if (!piv[i]) continue;
+          var bb = E[i].l, dd = E[dtri[i].c[0]].l;
+          if (dd === bb) continue;
+          bars1.push([bb, dd]);
+          if (!best || dd - bb > best.d - best.b) best = { e: i, b: bb, d: dd, tri: dtri[i].v };
+        }
+        bars1.sort(function (a, b) { return a[0] - b[0] || a[1] - b[1]; });
+        /* a real cycle for the longest bar: shortest path between the ends of
+           its birth edge through edges that already exist, closed by it */
+        var src = E[best.e].i, dst = E[best.e].j, dist = [], prev = [], done = [];
+        for (i = 0; i < N; i++) { dist.push(1e9); prev.push(-1); done.push(false); }
+        dist[src] = 0;
+        for (var it = 0; it < N; it++) {
+          var u = -1;
+          for (i = 0; i < N; i++) if (!done[i] && (u < 0 || dist[i] < dist[u])) u = i;
+          if (u < 0 || dist[u] >= 1e9) break;
+          done[u] = true;
+          for (i = 0; i < N; i++) {
+            if (i === u || eid[u * N + i] >= best.e) continue;
+            var nd = dist[u] + E[eid[u * N + i]].l;
+            if (nd < dist[i]) { dist[i] = nd; prev[i] = u; }
           }
         }
-        var seen = new Uint8Array(2 * n);
-        var ept = function (e, out) {
-          var nd = e >> 1, ni = nd % G, nj = (nd / G) | 0, f0 = f[nd], f1, s;
-          if (e & 1) { f1 = f[nd + G]; s = (L - f0) / (f1 - f0); out[0] = -HS + ni * HG; out[1] = -HS + (nj + s) * HG; }
-          else { f1 = f[nd + 1]; s = (L - f0) / (f1 - f0); out[0] = -HS + (ni + s) * HG; out[1] = -HS + nj * HG; }
-        };
-        var e0, pt = [0, 0];
-        for (e0 = 0; e0 < 2 * n; e0++) {
-          if (seen[e0] || nb[2 * e0] < 0) continue;
-          var xs = [], prev = -1, cur = e0;
-          while (cur >= 0 && !seen[cur]) {
-            seen[cur] = 1; ept(cur, pt); xs.push(pt[0], pt[1]);
-            var nx = nb[2 * cur] !== prev ? nb[2 * cur] : nb[2 * cur + 1];
-            prev = cur; cur = nx;
-          }
-          if (xs.length < 8) continue;
-          var ar = 0, len = 0;
-          for (i = 0; i < xs.length; i += 2) {
-            var i2 = (i + 2) % xs.length;
-            ar += xs[i] * xs[i2 + 1] - xs[i2] * xs[i + 1];
-            len += Math.hypot(xs[i2] - xs[i], xs[i2 + 1] - xs[i + 1]);
-          }
-          if (ar < 0) {
-            for (i = 0; i < xs.length / 2; i += 2) {
-              var jj = xs.length - 2 - i, tx = xs[i], ty = xs[i + 1];
-              xs[i] = xs[jj]; xs[i + 1] = xs[jj + 1]; xs[jj] = tx; xs[jj + 1] = ty;
-            }
-          }
-          /* every loop starts where it crosses the stage's rightward axis,
-             so pulses at the same fraction of each loop line up in angle */
-          var st0 = 0, bestA = 9;
-          for (i = 0; i < xs.length; i += 2) {
-            var an = Math.abs(Math.atan2(xs[i + 1], xs[i]));
-            if (an < bestA) { bestA = an; st0 = i; }
-          }
-          var path = new Path2D();
-          path.moveTo(xs[st0], xs[st0 + 1]);
-          for (i = 2; i < xs.length; i += 2) {
-            var ii = (st0 + i) % xs.length;
-            path.lineTo(xs[ii], xs[ii + 1]);
-          }
-          path.closePath();
-          loops.push({ p: path, len: len });
-        }
-        I.lv.push(loops);
+        var cyc = [];
+        for (var v = dst; v >= 0; v = prev[v]) cyc.push(v);
+        cyc.reverse();
+        var bk = [];
+        for (i = 0; i < NB; i++) bk.push([]);
+        for (i = 0; i < E.length; i++) bk[Math.min(NB - 1, Math.floor(E[i].l / 2 * NB))].push(E[i]);
+        p.E = E; p.bk = bk; p.bars0 = bars0; p.bars1 = bars1; p.best = best; p.cyc = cyc;
+        p.rmax = Math.max(0.6, best.d * 1.05 + 0.04);
       }
-      M.inf[k] = I;
-      return I;
-    }
-    function same(A, B) {
-      if (A.h0.length !== B.h0.length || A.h1.length !== B.h1.length) return false;
-      for (var i = 0; i < A.h0.length; i++) if (A.h0[i] !== B.h0[i]) return false;
-      for (i = 0; i < A.h1.length; i++) if (A.h1[i].b !== B.h1[i].b || A.h1[i].d !== B.h1[i].d) return false;
-      return true;
-    }
-
-    /* ---- where in the run are we ----------------------------------------- */
-    var T = REDUCED ? 7 * PD + PD - 60 : t;
-    var first = T < RUN, tau = T % RUN;
-    var k = -1, u = 0, ex = -1, rs = -1;
-    if (tau < NP * PD) { k = Math.floor(tau / PD); u = tau - k * PD; }
-    else if (tau < NP * PD + EXIT) { k = NP - 1; u = PD; ex = (tau - NP * PD) / EXIT; }
-    else { k = NP - 1; u = PD; rs = (tau - NP * PD - EXIT) / RESET; }
-    var cs = Math.min(k, LAM.length - 1), ps = k > 0 ? Math.min(k - 1, LAM.length - 1) : -1;
-    var CI = info(cs), PI = ps >= 0 ? info(ps) : null;
-    var mv = ease(u / MOVE);
-    var s = rs >= 0 ? 0 : u < MOVE ? 0 : RMAX * ease((u - MOVE) / SWEEP);
-    var ball = rs >= 0 ? RMAX * (1 - ease(rs / 0.3)) : u < MOVE ? (k > 0 ? RMAX * (1 - ease(u / 350)) : 0) : s;
-    var cmp = u > MOVE + SWEEP ? ease((u - MOVE - SWEEP) / 260) : 0;
-    var fadeAll = rs >= 0 ? 1 - ease(rs / 0.45) : 1;
-    var grow = first && k === 0 ? 0.35 + 0.65 * ease(u / MOVE) : 1;
-    var hero = ex >= 0 ? ease(ex / 0.25) : rs >= 0 ? 1 - ease(rs / 0.3) : 0;
-    var isSame = PI ? same(CI, PI) : false;
-
-    /* current point positions */
-    var X = new Float32Array(2 * N), q2 = [0, 0], i, j, lv;
-    var A = M.S[cs], B = ps >= 0 ? M.S[ps] : M.S[0];
-    for (i = 0; i < N; i++) {
-      var x, y;
-      if (rs >= 0) {
-        var l0 = 1 - ease((rs - 0.4 * (1 - M.gp[i])) / 0.6);
-        M.at(i, l0, 0, q2); x = q2[0]; y = q2[1];
-      } else if (k > 0 && u < MOVE) {
-        x = B[2 * i] + (A[2 * i] - B[2 * i]) * mv; y = B[2 * i + 1] + (A[2 * i + 1] - B[2 * i + 1]) * mv;
-      } else { x = A[2 * i]; y = A[2 * i + 1]; }
-      X[2 * i] = x; X[2 * i + 1] = y;
+      /* the exit test: first pass whose whole barcode equals the one before */
+      var same = function (a, b) {
+        if (a.bars0.length !== b.bars0.length || a.bars1.length !== b.bars1.length) return false;
+        for (var q = 0; q < a.bars0.length; q++) if (a.bars0[q] !== b.bars0[q]) return false;
+        for (q = 0; q < a.bars1.length; q++) if (a.bars1[q][0] !== b.bars1[q][0] || a.bars1[q][1] !== b.bars1[q][1]) return false;
+        return true;
+      };
+      C.exit = NP - 1;
+      for (k = 1; k < NP; k++) if (same(C.P[k], C.P[k - 1])) { C.exit = k; break; }
+      C.sx = new Float64Array(N * (NP + 1)); C.sy = new Float64Array(N * (NP + 1));
+      aether.cache = M = C;
     }
 
-    g.clearRect(0, 0, vb[0], vb[1]);
-    g.globalCompositeOperation = 'source-over';
-    g.lineCap = 'round'; g.lineJoin = 'round';
-    /* turns of the wave pattern: one pulse passes any angle every 2.5 s,
-       twice as often while the settled loop glows at the exit */
-    var XT = EXIT / 12500 / Math.PI, runs = Math.floor(T / RUN);
-    var turn = REDUCED ? 0.03 : T / 12500 + XT * (2 * runs + (ex >= 0 ? 1 - Math.cos(Math.PI * ex) : rs >= 0 ? 2 : 0));
-
-    /* ---- the stage ------------------------------------------------------- */
-    g.save();
-    g.translate(SX, SY);
-
-    /* holes: while the balls hold a ring round empty space, it lights */
-    var hs = rs >= 0 ? RMAX : s, hk = rs >= 0 ? 1 - ease(rs / 0.25) : 1;
-    if ((u >= MOVE || rs >= 0) && hk > 0.01) {
-      for (i = 0; i < CI.h1.length; i++) {
-        var hb = CI.h1[i];
-        if (hs < hb.b || hs >= hb.d) continue;
-        /* the moment the balls seal a ring round empty space, it swells */
-        var xs0 = (hs - hb.b) / (RMAX * 0.1), sw0 = xs0 * Math.exp(1 - xs0);
-        var on = ease(xs0 / 0.6) * hk * (1 + 0.8 * sw0), hr = (hb.d - hs) * 0.95;
-        for (var hc = 0; hc < 2; hc++) {
-          var wgt = hc ? hero : 1 - hero;
-          if (wgt < 0.01) continue;
-          var hcol = hc ? M.m5 : M.v5;
-          var hg = g.createRadialGradient(hb.x, hb.y, 0, hb.x, hb.y, hr);
-          hg.addColorStop(0, rgba(hcol, (0.34 + 0.12 * hero) * on * wgt));
-          hg.addColorStop(0.7, rgba(hcol, (0.13 + 0.06 * hero) * on * wgt));
-          hg.addColorStop(1, rgba(hcol, 0));
-          g.fillStyle = hg;
-          g.beginPath(); g.arc(hb.x, hb.y, hr, 0, TAU); g.fill();
-        }
-      }
-    }
-
-    /* the balls at the current scale, one union */
-    if (ball > 0.3) {
-      g.fillStyle = rgba(M.v5, 0.10 * fadeAll);
-      g.beginPath();
-      for (i = 0; i < N; i++) { g.moveTo(X[2 * i] + ball, X[2 * i + 1]); g.arc(X[2 * i], X[2 * i + 1], ball, 0, TAU); }
-      g.fill();
-    }
-
-    /* when the loop exits, the ring breaks open where it closed last: the
-       contours are cut away by a wedge that widens as the points leave */
-    if (rs >= 0) {
-      var half = rs < 0.4 ? 3.4 * rs : 1.36 + (Math.PI - 1.36) * ease((rs - 0.4) / 0.3);
-      g.save();
-      g.beginPath(); g.moveTo(0, 0);
-      g.arc(0, 0, 2 * HS, M.tg + half, M.tg - half + TAU);
-      g.closePath(); g.clip();
-    }
-    /* the waves of lines: every contour level, with pulses running round */
-    /* Every loop carries the same number of pulses at the same fraction of
-       its length, and turns at the same angular rate, so the pulses on all
-       the nested contours line up into waves circulating round the shape. */
-    function wave(loops, col, al, lw, pulse, base) {
-      for (var m = 0; m < loops.length; m++) {
-        var Lp = loops[m];
-        g.setLineDash([]);
-        g.strokeStyle = rgba(col, base * al); g.lineWidth = lw;
-        g.stroke(Lp.p);
-        if (!pulse || al < 0.05) continue;
-        var np = Lp.len > 160 ? 5 : 1, per = Lp.len / np;
-        var off = -per * (turn * np % 1);
-        g.setLineDash([per * 0.34, per * 0.66]);
-        g.lineDashOffset = off + per * 0.17;
-        g.strokeStyle = rgba(col, 0.18 * al); g.lineWidth = lw + 5;
-        g.stroke(Lp.p);
-        g.setLineDash([per * 0.13, per * 0.87]);
-        g.lineDashOffset = off + per * 0.065;
-        g.strokeStyle = rgba(col, al); g.lineWidth = lw + 1;
-        g.stroke(Lp.p);
-      }
-      g.setLineDash([]);
-    }
-    for (lv = 0; lv < NL; lv++) {
-      var Lv = RMAX * (lv + 1) / NL, col = M.lc[lv], bs = 0.58 - 0.3 * lv / (NL - 1);
-      if (rs >= 0) { wave(CI.lv[lv], col, 1 - ease(rs / 0.7), 1.2, true, bs); continue; }
-      if (u < MOVE) {
-        /* the last pass's shape fades to a ghost while the state moves */
-        if (PI) wave(PI.lv[lv], col, 1 - 0.65 * mv, 1.2, true, bs);
-        continue;
-      }
-      var lit = ease((s - Lv) / (RMAX * 0.12) + 1);
-      if (lit < 1 && PI) wave(PI.lv[lv], col, 0.35 * (1 - lit), 1.2, false, bs);
-      if (lit > 0) wave(CI.lv[lv], col, lit, 1.2 + 0.9 * hero, true, bs);
-    }
-
-    if (rs >= 0) g.restore();
-
-    /* the state itself */
-    var pr0 = 3.1 * grow;
-    g.fillStyle = rgba(M.b5, 0.95);
-    g.beginPath();
-    for (i = 0; i < N; i++) { g.moveTo(X[2 * i] + pr0, X[2 * i + 1]); g.arc(X[2 * i], X[2 * i + 1], pr0, 0, TAU); }
-    g.fill();
-    g.fillStyle = rgba(M.white, 0.85);
-    g.beginPath();
-    for (i = 0; i < N; i++) {
-      var gx = X[2 * i] - 0.9 * grow, gy = X[2 * i + 1] - 1.0 * grow;
-      g.moveTo(gx + 1.2 * grow, gy); g.arc(gx, gy, 1.2 * grow, 0, TAU);
-    }
-    g.fill();
-    g.restore();
-
-    /* ---- the barcode, under the stage ----------------------------------- */
-    function bx(r) { return BX + BW * Math.min(r, RMAX) / RMAX; }
-    function lane(m) { return LY0 + LDY * m; }
-    var bf = fadeAll, live = u >= MOVE || rs >= 0 || ex >= 0;
-    /* H0: a tick where two pieces join, lit as the scale sweeps past it */
-    function rug(I, upto, col, al) {
-      if (al < 0.01) return;
-      g.strokeStyle = rgba(col, al); g.lineWidth = 1.4;
-      g.beginPath();
-      for (var m = 0; m < I.h0.length; m++) {
-        if (I.h0[m] > upto) continue;
-        var x0 = bx(I.h0[m]);
-        g.moveTo(x0, RUGY - 6); g.lineTo(x0, RUGY + 6);
-      }
-      g.stroke();
-    }
-    /* H1: one filament per loop, from the scale that seals it to the scale
-       that fills it; a loop still open at the edge fades off the end */
-    function bars(I, upto, col, al, ghost) {
-      if (al < 0.01) return;
-      for (var m = 0; m < Math.min(NH1, I.h1.length); m++) {
-        var b = I.h1[m];
-        if (upto <= b.b) continue;
-        var e = Math.min(b.d, upto, RMAX), y0 = lane(m), x0 = bx(b.b), x1 = bx(e);
-        var open = !ghost && b.d > RMAX && upto >= RMAX;
-        if (!ghost) {
-          g.strokeStyle = rgba(col, 0.16 * al); g.lineWidth = 10;
-          g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y0); g.stroke();
-        }
-        g.strokeStyle = rgba(col, al); g.lineWidth = 4.5;
-        g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y0); g.stroke();
-        if (open) {
-          var lg = g.createLinearGradient(x1, 0, x1 + 16, 0);
-          lg.addColorStop(0, rgba(col, al)); lg.addColorStop(1, rgba(col, 0));
-          g.strokeStyle = lg; g.lineCap = 'butt';
-          g.beginPath(); g.moveTo(x1, y0); g.lineTo(x1 + 16, y0); g.stroke();
-          g.lineCap = 'round';
-        }
-      }
-    }
-    /* the axis the scale runs along */
-    g.strokeStyle = rgba(M.hair, 0.9); g.lineWidth = 1;
-    g.beginPath(); g.moveTo(bx(0), RUGY); g.lineTo(bx(RMAX), RUGY); g.stroke();
-    if (!live) {
-      if (PI) {
-        rug(PI, RMAX, M.hair, bf); bars(PI, RMAX, M.hair, bf, true);
-        rug(PI, RMAX, M.b5, 0.85 * (1 - mv) * bf); bars(PI, RMAX, M.v5, (1 - mv) * bf, false);
-      }
+    /* --- time ----------------------------------------------------------- */
+    var tt = REDUCED ? NP * PASS + LOCK + 500 : t % L;
+    var k0, mv = 1, rNow, fp = 1, post = -1, lock = 0, hero = 0, brk = 0, fade = 0;
+    if (tt < NP * PASS) {
+      k0 = Math.floor(tt / PASS);
+      var u0 = tt - k0 * PASS;
+      mv = k0 > 0 ? ease(u0 / MOVE) : 1;
+      fp = Math.max(0, Math.min(1, (u0 - MOVE) / FILT));
     } else {
-      if (PI && rs < 0 && ex < 0) { rug(PI, RMAX, M.hair, bf); bars(PI, RMAX, M.hair, bf, true); }
-      var upto = rs >= 0 || ex >= 0 ? RMAX : s;
-      rug(CI, upto, M.b5, 0.85 * bf);
-      bars(CI, upto, M.v5, bf, false);
-      /* the comparison: amber wherever this pass differs from the last */
-      if (cmp > 0 && PI && rs < 0 && ex < 0 && !isSame) {
-        g.strokeStyle = rgba(M.a5, 0.95 * cmp); g.lineWidth = 2.2;
-        g.beginPath();
-        var nh = Math.min(NH1, Math.max(CI.h1.length, PI.h1.length));
-        for (i = 0; i < nh; i++) {
-          var c = CI.h1[i], p = PI.h1[i], y3 = lane(i);
-          if (!c || !p) {
-            var o3 = c || p;
-            g.moveTo(bx(o3.b), y3); g.lineTo(bx(Math.min(o3.d, RMAX)), y3);
-            continue;
-          }
-          var ce = Math.min(c.d, RMAX), pe = Math.min(p.d, RMAX);
-          if (Math.abs(c.b - p.b) > 0.3) { g.moveTo(bx(Math.min(c.b, p.b)), y3); g.lineTo(bx(Math.max(c.b, p.b)), y3); }
-          if (Math.abs(ce - pe) > 0.3) { g.moveTo(bx(Math.min(ce, pe)), y3); g.lineTo(bx(Math.max(ce, pe)), y3); }
+      k0 = NP - 1;
+      post = tt - NP * PASS;
+      lock = ease(post / LOCK);
+      hero = post < LOCK + GLOW ? lock : 1 - ease((post - LOCK - GLOW) / (BREAK + FADE));
+      brk = ease((post - LOCK - GLOW) / BREAK);
+      fade = ease((post - LOCK - GLOW - BREAK) / FADE);
+    }
+    if (REDUCED) hero = 0;
+    var cur = M.P[k0];
+    rNow = cur.rmax * Math.pow(ease(fp), 1.25);
+
+    /* --- camera: oblique down the stack, end-on at the hero ---------------- */
+    var sway = REDUCED ? 0 : 0.09 * Math.sin(TAU * t / 15000) * (1 - hero);
+    var yaw = 0.55 * (1 - hero) + sway, pit = 0.4 * (1 - hero);
+    var cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pit), sp = Math.sin(pit);
+    var CX = 180 + 55 * hero, CY = 280 - 36 * hero;
+    var SX = M.sx, SY = M.sy;
+    var proj = function (x, y, z, o) {
+      var x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+      var y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+      var q = FOC / (FOC + z2);
+      SX[o] = CX + S * x1 * q; SY[o] = CY + S * y2 * q;
+      return q;
+    };
+
+    /* layer depths: the current pass at the front, older ones pushed back */
+    var zs = [], s = k0 - 1 + mv;
+    for (var j0 = 0; j0 <= k0; j0++) zs.push(j0 === k0 ? 0 : Math.max(0, (s - j0 - lock) * DZ));
+    for (j0 = 0; j0 <= k0; j0++) {
+      var P0 = M.P[j0];
+      for (var i0 = 0; i0 < N; i0++) {
+        var x0 = P0.x[i0], y0 = P0.y[i0];
+        if (j0 === k0 && mv < 1) {
+          var Pp = M.P[j0 - 1], rr0 = Pp.r[i0] + (P0.r[i0] - Pp.r[i0]) * mv,
+              a0 = Pp.th[i0] + (P0.th[i0] - Pp.th[i0]) * mv;
+          x0 = rr0 * Math.cos(a0); y0 = rr0 * Math.sin(a0);
         }
-        g.stroke();
-        g.strokeStyle = rgba(M.a5, 0.8 * cmp); g.lineWidth = 1.4;
+        proj(x0, y0, zs[j0], j0 * N + i0);
+      }
+    }
+    var ga = 1 - fade;
+    var line = function (a, b) { g.moveTo(SX[a], SY[a]); g.lineTo(SX[b], SY[b]); };
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* threads: every point followed from pass to pass */
+    if (k0 > 0) {
+      g.beginPath();
+      for (i0 = 0; i0 < N; i0++) {
+        g.moveTo(SX[i0], SY[i0]);
+        for (j0 = 1; j0 <= k0; j0++) g.lineTo(SX[j0 * N + i0], SY[j0 * N + i0]);
+      }
+      g.lineWidth = 0.6; g.strokeStyle = M.rgb(M.b5, 0.16 * ga * (k0 > 1 ? 1 : mv)); g.stroke();
+    }
+
+    var ring = function (j, o, a, w, col, f0, f1) {
+      /* the cycle of pass j as a polyline, drawn between arclength fractions */
+      var cyc = M.P[j].cyc, n = cyc.length;
+      if (f1 <= f0) return;
+      var i1 = Math.floor(f0 * n), i2 = Math.ceil(f1 * n);
+      g.beginPath();
+      for (var q = i1; q <= i2; q++) {
+        var fq = Math.max(f0, Math.min(f1, q / n)) * n, qa = Math.min(n - 1, Math.floor(fq)), qf = fq - qa;
+        var A = o + cyc[qa % n], B = o + cyc[(qa + 1) % n];
+        var X1 = SX[A] + (SX[B] - SX[A]) * qf, Y1 = SY[A] + (SY[B] - SY[A]) * qf;
+        if (q === i1) g.moveTo(X1, Y1); else g.lineTo(X1, Y1);
+      }
+      g.lineWidth = w; g.strokeStyle = M.rgb(col, a); g.stroke();
+    };
+    var edges = function (j, o, r, aS, aL, wS, wL, grow) {
+      var bk = M.P[j].bk;
+      for (var b = 0; b < NB; b++) {
+        var list = bk[b], any = false;
         g.beginPath();
-        for (i = 0; i < CI.h0.length; i++) {
-          if (Math.abs(CI.h0[i] - PI.h0[i]) > 0.3) { var xa = bx(CI.h0[i]); g.moveTo(xa, RUGY + 7); g.lineTo(xa, RUGY + 10); }
+        for (var q = 0; q < list.length; q++) {
+          var e = list[q];
+          if (e.l > r) break;
+          var f = grow ? Math.min(1, (r - e.l) / GROW) : 1, A = o + e.i, B = o + e.j;
+          any = true;
+          if (f >= 1) { line(A, B); continue; }
+          var h = f * 0.5;
+          g.moveTo(SX[A], SY[A]); g.lineTo(SX[A] + (SX[B] - SX[A]) * h, SY[A] + (SY[B] - SY[A]) * h);
+          g.moveTo(SX[B], SY[B]); g.lineTo(SX[B] + (SX[A] - SX[B]) * h, SY[B] + (SY[A] - SY[B]) * h);
         }
+        if (!any) continue;
+        var kb = b / (NB - 1);
+        g.lineWidth = wS + (wL - wS) * kb;
+        g.strokeStyle = M.rgb(M.bcol[b], aS + (aL - aS) * kb);
         g.stroke();
       }
-      /* the same barcode twice: mint, and the loop exits */
-      var mint = (cmp > 0 && isSame && rs < 0 ? cmp : 0) + (ex >= 0 ? 1 : 0) + (rs >= 0 ? 1 - ease(rs / 0.4) : 0);
-      mint = Math.min(1, mint);
-      if (mint > 0.01) {
-        for (var pass2 = 0; pass2 < 2; pass2++) {
-          g.strokeStyle = rgba(M.m5, pass2 ? 0.95 * mint : 0.2 * mint * (0.6 + 0.4 * hero));
-          g.lineWidth = pass2 ? 1.8 : 14;
+    };
+    var dots = function (o, a, rad, col) {
+      g.beginPath();
+      for (var q = 0; q < N; q++) { g.moveTo(SX[o + q] + rad, SY[o + q]); g.arc(SX[o + q], SY[o + q], rad, 0, TAU); }
+      g.fillStyle = M.rgb(col, a); g.fill();
+    };
+
+    /* older passes, back to front: skeleton at the scale their ring closed,
+       their ring, their points; the one just left fades its full filtration */
+    for (j0 = 0; j0 < k0; j0++) {
+      var Pj = M.P[j0], o0 = j0 * N, dep = zs[j0] / DZ;
+      var da = Math.max(0.3, 1 - 0.13 * dep) * ga;
+      if (post >= 0 && j0 === k0 - 1) da *= 1 - brk;
+      /* lj: 0 while the layer is still dressed as the current pass, 1 once it
+         has settled into the stack, so leaving the front never pops */
+      var lj = j0 === k0 - 1 ? mv : 1;
+      if (lj < 1) edges(j0, o0, Pj.rmax, 0.78 * (1 - lj) * da, 0.2 * (1 - lj) * da, 1.05, 0.55, true);
+      if (lj > 0) edges(j0, o0, Pj.best.b, 0.24 * lj * da, 0.15 * lj * da, 0.8, 0.8, false);
+      var tj = Pj.best.tri;
+      g.beginPath(); line(o0 + tj[0], o0 + tj[1]); line(o0 + tj[1], o0 + tj[2]); line(o0 + tj[2], o0 + tj[0]);
+      g.lineWidth = 1.5 - 0.7 * lj; g.strokeStyle = M.rgb(M.c5, (0.85 + (0.3 * (1 - hero) - 0.85) * lj) * da); g.stroke();
+      ring(j0, o0, (0.57 + 0.05 * lj) * da, 1.9 - 0.6 * lj, M.v7, 0, 1);
+      if (lj > 0) dots(o0, 0.55 * lj * da, 1.5, M.b7);
+    }
+
+    /* the current pass: its filtration grows, its ring is made and filled */
+    var oc = k0 * N, best = cur.best;
+    if (fp > 0 || post >= 0) {
+      /* at the lock the filtration steps back so the two rings read clean */
+      var calm = 1 - 0.75 * lock;
+      edges(k0, oc, rNow, 0.78 * ga * calm, 0.2 * ga * calm, 1.05, 0.55, true);
+      var made = Math.max(0, Math.min(1, (rNow - best.b) / 0.3));
+      var dead = Math.max(0, Math.min(1, (rNow - best.d) / GROW));
+      if (dead > 0) {
+        var tv = best.tri, h3 = ease(dead);
+        g.beginPath();
+        for (var e3 = 0; e3 < 3; e3++) {
+          var A3 = oc + tv[e3], B3 = oc + tv[(e3 + 1) % 3];
+          g.moveTo(SX[A3], SY[A3]);
+          g.lineTo(SX[A3] + (SX[B3] - SX[A3]) * h3, SY[A3] + (SY[B3] - SY[A3]) * h3);
+        }
+        g.lineWidth = 1.5; g.strokeStyle = M.rgb(M.c5, 0.85 * ga * calm); g.stroke();
+      }
+      if (made > 0) {
+        var mk = ease(made), locked = post >= 0 ? lock : 0;
+        var ra = (1 - 0.4 * dead * (1 - locked)) * ga;
+        var f0 = post >= 0 ? 0.5 * brk : 0.5 - 0.5 * mk, f1 = 1 - f0;
+        /* made: the violet ring sweeps out from the edge that closed it */
+        /* draw from the closing edge outward: fractions measured from it */
+        g.beginPath();
+        var cyc = cur.cyc, n = cyc.length, first = true;
+        for (var q = 0; q <= 2 * n; q++) {
+          var fr = q / (2 * n);
+          if (fr < f0 || fr > f1) continue;
+          var pos = (fr * n + n * 0.5) % n, qa = Math.floor(pos), qf = pos - qa;
+          var A = oc + cyc[qa % n], B = oc + cyc[(qa + 1) % n];
+          var X1 = SX[A] + (SX[B] - SX[A]) * qf, Y1 = SY[A] + (SY[B] - SY[A]) * qf;
+          if (first) { g.moveTo(X1, Y1); first = false; } else g.lineTo(X1, Y1);
+        }
+        g.lineWidth = 1.9 + 0.8 * locked; g.strokeStyle = M.rgb(M.v7, 0.95 * ra); g.stroke();
+        if (locked > 0) {
+          /* the locked ring's glow: two wider, fainter strokes of the same path */
+          g.lineWidth = 7; g.strokeStyle = M.rgb(M.v5, 0.1 * locked * ra); g.stroke();
+          g.lineWidth = 4.2; g.strokeStyle = M.rgb(M.v5, 0.16 * locked * ra); g.stroke();
+        }
+        /* waves of light travelling round the ring */
+        var WB = 4, wv = REDUCED ? 0.2 : (t / 2200) % 1;
+        /* the waves settle over the last half second of every pass but the last */
+        var wamp = post < 0 && k0 < NP - 1 ? 1 - ease((tt - k0 * PASS - (PASS - 500)) / 500) : 1;
+        for (var wb = 1; wb <= WB; wb++) {
           g.beginPath();
-          for (i = 0; i < Math.min(NH1, CI.h1.length); i++) {
-            var b3 = CI.h1[i]; g.moveTo(bx(b3.b), lane(i)); g.lineTo(bx(Math.min(b3.d, RMAX)), lane(i));
+          var anyw = false;
+          for (q = 0; q < n; q++) {
+            var fm = (q + 0.5) / n, fe = (fm + 0.5) % 1;
+            if (fe < f0 || fe > f1) continue;
+            var d1 = Math.abs(((fm - wv) % 0.5 + 0.5) % 0.5 - 0.25) / 0.25;
+            var lv = Math.floor(Math.pow(d1, 3) * WB + 0.5);
+            if (lv !== wb) continue;
+            anyw = true; line(oc + cyc[q], oc + cyc[(q + 1) % n]);
           }
+          if (!anyw) continue;
+          g.lineWidth = 1.9 + 0.5 * wb + 0.8 * locked;
+          g.strokeStyle = M.rgb(M.v5, (0.14 * wb) * ra * mk * wamp);
           g.stroke();
         }
       }
     }
-    /* the scale the balls have reached, swept across the barcode */
-    var cur = u >= MOVE && rs < 0 && ex < 0 ? Math.min(1, (u - MOVE) / 150) * (1 - cmp) : 0;
-    if (cur > 0.01) {
-      var cx = bx(s);
-      g.strokeStyle = rgba(M.v7, 0.14 * cur); g.lineWidth = 7;
-      g.beginPath(); g.moveTo(cx, RUGY - 10); g.lineTo(cx, lane(NH1 - 1) + 7); g.stroke();
-      g.strokeStyle = rgba(M.v7, 0.8 * cur); g.lineWidth = 1.4;
-      g.beginPath(); g.moveTo(cx, RUGY - 10); g.lineTo(cx, lane(NH1 - 1) + 7); g.stroke();
-    }
+    dots(oc, 0.9 * ga, 1.9, M.b7);
 
-    /* ---- one pip per pass: amber if its shape changed, mint if not ------- */
-    for (j = 0; j < NP; j++) {
-      var px = 235 + (j - (NP - 1) / 2) * 20;
-      var dn = REDUCED || ex >= 0 || rs >= 0 ? 1 : j < k ? 1 : j === k ? cmp : 0;
-      var ok = j > 0 && same(info(Math.min(j, LAM.length - 1)), info(Math.min(j - 1, LAM.length - 1)));
-      g.strokeStyle = M.hair; g.lineWidth = 1.3;
-      g.beginPath(); g.arc(px, PIPY, 4.5, 0, TAU); g.stroke();
-      if (j === k && ex < 0 && rs < 0 && !REDUCED) {
-        g.strokeStyle = rgba(M.v5, 0.85); g.lineWidth = 2;
-        g.beginPath(); g.arc(px, PIPY, 4.5, -Math.PI / 2, -Math.PI / 2 + TAU * Math.min(1, u / (MOVE + SWEEP))); g.stroke();
-      }
-      if (dn > 0.01) {
-        var pc = j === 0 ? M.v5 : ok ? M.m5 : M.a5;
-        g.fillStyle = rgba(pc, dn * fadeAll);
-        g.beginPath(); g.arc(px, PIPY, 4.5, 0, TAU); g.fill();
-        if (ok && (ex >= 0 || rs >= 0)) {
-          g.fillStyle = rgba(M.m5, 0.2 * hero);
-          g.beginPath(); g.arc(px, PIPY, 10, 0, TAU); g.fill();
-        }
-      }
+    /* the next run's cloud arrives while this one fades */
+    if (fade > 0) {
+      var P0n = M.P[0];
+      for (i0 = 0; i0 < N; i0++) proj(P0n.x[i0], P0n.y[i0], 0, NP * N + i0);
+      dots(NP * N, 0.9 * fade, 1.9, M.b7);
     }
   }
 

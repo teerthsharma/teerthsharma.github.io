@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=66">
-<link rel="stylesheet" href="motion.css?v=66">
-<link rel="stylesheet" href="art.css?v=66">
+<link rel="stylesheet" href="site.css?v=67">
+<link rel="stylesheet" href="motion.css?v=67">
+<link rel="stylesheet" href="art.css?v=67">
 
 <script type="application/ld+json">
 {
@@ -234,11 +234,11 @@
                 <canvas data-fig="aether" data-vb="470 540" aria-hidden="true"></canvas>
                 <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-aether-lang-t p-aether-lang-d">
                   <title id="p-aether-lang-t">The loop ends when its shape stops changing</title>
-                  <desc id="p-aether-lang-d">An illustration of an Aether-Lang loop whose exit condition is its shape, with the shape computed live. The program's state is a cloud of points, and each pass of the loop moves it. After every pass the runtime measures the state with persistent homology: balls grow around every point, the lines of equal distance spread out from the points in waves with pulses running round them, and whenever the balls close a ring around empty space a loop is born and that space lights up until the balls fill it. Under the cloud the barcode of the pass is drawn as the balls grow: a blue tick at each scale where two pieces join, and a violet bar for each loop, from the scale that closes it to the scale that fills it, with the previous pass's barcode in grey underneath and every difference marked in amber. Early passes move and their barcodes keep changing: the cloud is an open blob, then a crescent, then a ring that closes late and then early. A row of marks keeps one per pass, amber when its barcode changed. When a pass records exactly the barcode of the pass before, it is marked in mint and the loop exits: nothing counted the passes and no tolerance was set. The settled loop glows, then the ring breaks open and the next run begins. The runtime compiles no_std to bare metal.</desc>
+                  <desc id="p-aether-lang-d">An illustration of an Aether-Lang loop whose exit condition is its shape, with the shape computed live. The program's state is a cloud of points, and each pass of the loop moves it. After every pass the runtime measures the state with persistent homology: a scale grows and a line is drawn between every two points closer than it, coloured by length, until a ring of lines closes round empty space. That ring, a real cycle, lights up in violet, and waves of light travel round it; when three lines at last span the hole, the triangle that fills it is drawn and the ring dims. The passes are layers stacked in depth, the oldest at the back, each keeping its ring, with threads following every point from pass to pass: a blob with only brief small loops, then a crescent, then an arc whose ring closes only across its gap, then rings that close earlier and fill later. The last pass slides every point one place along the ring, so the state still moves, but the point set and its barcode come back exactly as before, and the loop exits: nothing counted the passes and no tolerance was set. The two layers lock together, the view turns end-on so every pass's ring nests round one centre, and then the ring breaks open and the next run begins. The cloud and its passes are illustrative; the lines, the rings, the filling triangles and the barcode comparison are computed from the real distances. The runtime compiles no_std to bare metal.</desc>
                   <text x="235" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">persistent homology as a language primitive</text>
                   <text x="235" y="50" text-anchor="middle" font-size="15" fill="var(--muted)">no counter, no tolerance, no epoch budget</text>
                   <text x="235" y="468" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">the loop stops when its shape stops changing</text>
-                  <text x="235" y="491" text-anchor="middle" font-size="15" fill="var(--muted)">early passes move, settled ones do not</text>
+                  <text x="235" y="491" text-anchor="middle" font-size="15" fill="var(--muted)">the last pass still moves, but its shape does not</text>
                   <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">runtime compiles <tspan class="mono">no_std</tspan> to bare metal</text>
                 </svg>
               </div>
@@ -629,7 +629,7 @@
 
 </main>
 
-<script src="fig.js?v=66" defer></script>
-<script src="site.js?v=66" defer></script>
+<script src="fig.js?v=67" defer></script>
+<script src="site.js?v=67" defer></script>
 </body>
 </html>
