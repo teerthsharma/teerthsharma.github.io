@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=63">
-<link rel="stylesheet" href="motion.css?v=63">
-<link rel="stylesheet" href="art.css?v=63">
+<link rel="stylesheet" href="site.css?v=64">
+<link rel="stylesheet" href="motion.css?v=64">
+<link rel="stylesheet" href="art.css?v=64">
 
 <script type="application/ld+json">
 {
@@ -142,17 +142,18 @@
           <figure class="fig">
             <div class="figc" style="--figc-ar:470/540">
                 <canvas data-fig="smatrix" data-vb="470 540" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="rv-t rv-d">
-                  <title id="rv-t">The hop series built as a solid, and seen end on as its sum</title>
-                  <desc id="rv-d">An illustration of the reading resolvent makes, not a measurement: the project's own README says the reconciliation with the S-matrix adds no measurement of its own. The lattice and its transition matrix are made up for the picture, and the slices are computed from them exactly. The resolvent of one causal attention head, (I − γP)⁻¹, expands as I + γP + γ²P² and so on, one hop per term, and here each term is one translucent slice of a glass block. The plane of a slice is the state space of a small lattice and the depth of the block is hop order. The front slice is the in-state, all of its mass on one site. Each slice behind it is one more hop of a directed transition matrix that carries the mass forward round the centre and spreads it a little, weighted by one more factor of gamma, so the plume travels and widens and runs through the block as a tapering spiral: the whole path seen at once. Colour runs from blue through violet to coral as the order grows, and each slice is fainter than the one before, because the terms shrink while γ·ρ(P) &lt; 1. A thin thread joins each slice's centre of mass. The floor and the far side wall show the same stack from below and from the side, each order's mass summed across one axis, so the spiral casts a wave on each. The back wall is the sum of every slice, the out-state, in a single colour. A scan plane runs through the orders, the first time building them one by one, and each order it passes flows into the sum. Once a cycle the camera turns to look straight down the stack: every slice falls exactly onto the sum, the floor and the side wall turn edge on, and the path through the depth can no longer be seen. That is the S-matrix as Wheeler wrote it in 1937, in-states to out-states with no account of the path between them. Then the camera turns away and the path is back. The project proves in Lean 4, in 175 declarations with zero sorry, that softmax attention and Markov path composition are settings of this one operator.</desc>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-resolvent-t p-resolvent-d">
+                  <title id="p-resolvent-t">The hop series built as a solid of complex slices, and seen end on as their sum</title>
+                  <desc id="p-resolvent-d">An illustration of the reading resolvent makes, not a measurement: the project's own README says the reconciliation with the S-matrix adds no measurement of its own. The lattice, its transition matrix and the phases are made up for the picture, and the slices are computed from them exactly. The resolvent of one causal attention head, (I − γP)⁻¹, expands as I + γP + γ²P² and so on, one hop per term, and here each term is one translucent slice of a glass block: the plane of a slice is the state space of a small lattice and the depth of the block is hop order. The front slice is the in-state, all of its mass on one site. Each slice behind it is one more hop of a directed transition matrix that carries the mass forward round the centre and spreads it a little, so the plume travels and widens and runs through the block as a tapering spiral. The project's gate is a product along the path of a magnitude and a complex phase, e to the i theta, so every hop here both shrinks the term and turns its phase, and each slice is a complex field. That phase is the figure's fourth dimension, drawn as domain colour: opacity is the size of the value, hue is its phase, folded so that mint is the in-state's phase, amber is half a turn from it, and blue, violet and coral lie between. The phase turns with every hop, so the hue changes from slice to slice down the stack, and it turns a little faster on one side of the lattice than the other. The project's docs note that on a plain chain of positions this phase can be removed by a change of gauge, and that the axis only matters on a graph with a genuine cycle; this lattice has cycles, since the mass goes round its centre, so routes of different length reach the same site with different phases. A solid tube joins each slice's centre in its own phase colour. For the first few orders a hypercube of that order's dimension turns in its own dimensions over its slice, a segment, a square, a cube, a tesseract and on up to a six-dimensional cube, one at a time shown at full size as the camera goes round, because the paths of k hops form a k-dimensional space and the slice is its shadow on the last hop; the cubes picture that space, not the paths' weights. The floor and the far side wall show the same stack summed across one axis of the plane. The back wall is the complex sum of every slice, the out-state, so it is an interference pattern: where the orders that reach a site disagree in phase the sum there is darker, where they agree it is brighter. A scan plane runs through the orders, building them one by one the first time, and each order it passes flows into the sum. Once a cycle the camera turns to look straight down the stack: every cube flattens onto its shadow, every slice falls onto the sum, and the path through the depth can no longer be seen. That is the S-matrix as Wheeler wrote it in 1937, in-states to out-states with no account of the path between them. Then the camera turns away and the path is back. The project proves in Lean 4, in 175 declarations with zero sorry, that softmax attention and Markov path composition are settings of this one operator.</desc>
                   <text x="235" y="31" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">(I − γP)<tspan dy="-7" font-size="14">−1</tspan><tspan dy="7"> = I + γP + γ</tspan><tspan dy="-7" font-size="14">2</tspan><tspan dy="7">P</tspan><tspan dy="-7" font-size="14">2</tspan><tspan dy="7"> + …</tspan></text>
-                  <text x="235" y="55" text-anchor="middle" font-size="15" fill="var(--muted)">each slice is one more hop, shrinking while γ·ρ(P) &lt; 1</text>
-                  <text x="235" y="458" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">no account of the path between them</text>
-                  <text x="235" y="480" text-anchor="middle" font-size="15" fill="var(--muted)">Wheeler, 1937</text>
-                  <text x="235" y="516" text-anchor="middle" font-size="16" fill="var(--muted)">175 declarations in Lean 4, zero sorry</text>
+                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">each slice is one more hop, shrinking while γ·ρ(P) &lt; 1</text>
+                  <text x="235" y="452" text-anchor="middle" font-size="15" fill="var(--muted)">order k is the shadow of a k-dimensional path space</text>
+                  <text x="235" y="476" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">no account of the path between them</text>
+                  <text x="235" y="497" text-anchor="middle" font-size="15" fill="var(--muted)">Wheeler, 1937</text>
+                  <text x="235" y="526" text-anchor="middle" font-size="16" fill="var(--muted)">175 declarations in Lean 4, zero sorry</text>
                 </svg>
               </div>
-            <figcaption class="fig__cap">Every hop of the series is one slice, so the path from in-state to out-state becomes a solid. Look straight down it and the slices land on their sum, with no account of the path between them.</figcaption>
+            <figcaption class="fig__cap">Every hop of the series is one slice, a complex field whose hue is its phase and the shadow of a path space with one dimension per hop. Look straight down the stack and the slices land on their sum, an interference pattern, with no account of the path between them.</figcaption>
           </figure>
         </div>
 </div>
@@ -629,7 +630,7 @@
 
 </main>
 
-<script src="fig.js?v=63" defer></script>
-<script src="site.js?v=63" defer></script>
+<script src="fig.js?v=64" defer></script>
+<script src="site.js?v=64" defer></script>
 </body>
 </html>

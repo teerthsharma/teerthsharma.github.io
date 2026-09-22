@@ -4124,111 +4124,121 @@
   function smatrix(g, vb, t, st) {
     /* resolvent reads one causal attention head through a resolvent,
        (I - gP)^-1 = I + gP + g^2 P^2 + ..., the closed form the
-       Lippmann-Schwinger equation gives the scattering operator. The hop
-       expansion is the Born series, and g times the spectral radius of P
-       staying under one is why it converges. Wheeler's S-matrix (1937) maps
-       in-states to out-states "with no account of the path between them".
+       Lippmann-Schwinger equation gives the scattering operator. Wheeler's
+       S-matrix (1937) maps in-states to out-states "with no account of the
+       path between them".
 
-       So the figure builds the series as a solid, the way a video becomes a
-       block when every frame is stacked along time. The plane of each slice
-       is state space, a 40 by 40 lattice; the depth axis is hop order. Slice
-       k is g^k P^k x0, computed for real: x0 is all its mass on one site,
-       and P is a directed transition matrix, a drift that turns the mass
-       forward round the centre and a little inward on every hop, never back,
-       plus a small Gaussian spread. Every column of P sums to one, so mass is
-       conserved, rho(P) = 1, and g = 0.82 keeps the series convergent. The
-       plume that leaves x0 travels, shears and widens, and through the stack
-       it is a tapering helix: the whole history of the hops as one shape.
-       The lattice and P are made up for the picture; the project measures
-       nothing here, and the label layer says so.
+       The figure builds that series as a solid, the way a video becomes a
+       block when its frames are stacked along time: the plane of each slice
+       is the state space of a 40 by 40 lattice and the depth is hop order.
 
-       Three walls carry three views of that one stack. The back wall is the
-       sum of every slice, the out-state (I - gP)^-1 x0, in one colour,
-       because a sum keeps where the mass went and loses in which order it
-       got there. The floor is each order's mass summed over y, laid out along
-       x and depth, and the far side wall is the same summed over x: the helix
-       casts a sine on one and a cosine on the other, as a video cube's xt
-       and yt planes would. Once a cycle the camera turns to look straight
-       down the depth axis. It is orthographic, so every slice then lands
-       exactly on the sum, the floor and side wall go edge on, and the path
-       between in and out cannot be seen anywhere. It holds, then turns away.
+       The fourth dimension is the phase. The project's gate is
+       G_ij = prod m_k e^(i theta_k): every hop passes a gate that scales by
+       a magnitude and turns by a phase. So here every hop multiplies by
+       g = 0.82 and by e^(i theta) at the site it enters, and slice k,
+       g^k (DP)^k x0, is a complex field. Each slice is drawn in domain
+       colour: opacity is the modulus, hue is the phase. On a path the phase
+       could be gauged away (the project's docs say so of every bed they
+       show); on this lattice the mass circles the centre, the graph has
+       genuine cycles, and routes of different length reach the same site
+       with different phase. The back wall is their complex sum, the
+       out-state, so it is an interference pattern: where the orders that
+       land on a site disagree in phase, the sum there is darker than the
+       orders were; where they agree, it is brighter.
 
-       Motion. From t = 0 a scan plane runs through the orders at 220 ms
-       each; every slice develops as it passes, the floor and side wall fill
-       behind it, and the back wall crossfades through the partial sums, one
-       order behind. The camera turns onto the axis as the last terms land
-       and holds there for 2.2 s, the colour of the individual orders
-       draining so that only the sum is left. Then the loop: the camera rises
-       away on the other side, over the top, down the first side and back
-       onto the axis, once every 20 s, easing into and out of the hold with
-       zero velocity and acceleration. The scan keeps running every 10 s,
-       each order it passes flowing into the sum in its own colour.
+       theta = 2 pi / 5 + 0.6 sin(angle round the centre): the phase turns
+       about a fifth of a turn per hop, a little faster on one side of the
+       lattice than the other. P is a directed transition matrix, a drift
+       forward round the centre and slightly inward plus a Gaussian spread;
+       every column sums to one, so rho(P) = 1 and g = 0.82 converges. The
+       lattice, P and theta are made up for the picture; the slices are
+       computed from them exactly, and the label layer says so.
 
-       Drawing. Each slice is a texture: the lattice is upsampled with a
-       cubic B-spline, normalised to its own peak so its shape reads, and
-       drawn with opacity falling with g^k. Hue runs blue, violet, coral with
-       k. The sum is on a log scale so its tail stays visible under the
-       identity term's spike at x0. Under an orthographic camera a slice is
-       an affine image of a unit square, one drawImage under g.transform, and
-       painter's order is fixed, far to near, because the camera never passes
-       behind the block. Textures are painted on first use.
+       Path space. The order-k term sums over every path of k hops, and a
+       path of k hops is a point in k copies of the state space, so each
+       slice is the shadow of a k-dimensional object. For orders 1 to 6 a
+       hypercube of that dimension (a segment, a square, a cube, a tesseract,
+       a 5-cube, a 6-cube) turns in its own k dimensions over its slice,
+       projected by perspective one dimension at a time, and its shadow along
+       the depth axis lies on the slice. When the camera looks down the
+       stack, every cube flattens onto its shadow and every slice onto the
+       sum.
 
-       Measured, in the preview harness:
-       - The glass tint of each plate once faded in step with the others.
-         Colour alpha is 8 bit, so all 23 plates crossed the same 1/255 level
-         on one frame and the whole square jumped (13 per pixel against a
-         median of 2.5). Each plate now fades over its own stretch. The
-         build's partial sums, the flow into the sum, the scan's hue and the
-         edge weights had smaller jumps of the same kind and are continuous.
-       - The first call cost 88 ms when every texture was painted up front;
-         painting on first use brings it to 36 ms.
-       - Worst frame is 126 fills, strokes and images; the darkest painted
-         pixel is the -700 blue core at luminance 0.054, over the 0.042 of
-         #3a3a3a. */
+       Hue wheel. The palette has no yellow, so a full hue circle through it
+       would pass through mud between amber and mint. The wheel is folded:
+       mint at phase 0, blue, violet, coral, amber at half a turn, and back
+       the same way. Hue shows how far the phase has turned from the
+       in-state's; the tube through the stack joins the orders in the order
+       they come, so which way it turns is read along the tube.
+
+       Motion, as before: a scan plane develops the orders at 220 ms each
+       from t = 0, the walls fill behind it and the back wall runs through
+       the partial sums, which here brighten and darken as each order lands
+       in or out of phase. The camera orbits once every 20 s and holds on
+       the axis for 2.2 s. The cubes turn continuously, slowest plane 23 s.
+
+       Drawing. Textures are painted on first use from B-spline upsampled
+       real and imaginary parts, so the phase is interpolated as a complex
+       number, never as an angle. A slice is one drawImage under an affine
+       transform; the cubes are one path per layer. */
     var TAU = Math.PI * 2;
     var N = 40, K = 22, GAM = 0.82, TX = 128;
+    var OM0 = TAU / 5, OM1 = 0.6;              /* the gate's phase per hop */
+    var NC = 6;                                /* orders drawn with their path-space cube */
     var D = 2.3, GAP = 0.36, Z0 = (D + GAP) / 2, ZS = -Z0;
-    var S = 104, CX = 235, CY = 250;
+    var S = 102, CX = 235, CY = 247;
     var A = 0.86, E = 0.46;                    /* orbit: yaw half-width, pitch at the top */
     var C = 20000, SCAN = 10000, T0 = 500, DT = 220, HOLD = 0.055;
     var SW = K * DT, TA = T0 + SW + 1700;      /* first alignment is centred at TA */
 
     var M = smatrix.cache;
     if (!M) {
-      M = smatrix.cache = {};
+      /* built into a local object, published only when complete */
+      var L = {};
       var hex = function (name, fb) {
-        var h = (token(name, fb) || fb).trim().replace('#', '');
-        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-        var n = parseInt(h, 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+        var h0 = (token(name, fb) || fb).trim().replace('#', '');
+        if (h0.length === 3) h0 = h0[0] + h0[0] + h0[1] + h0[1] + h0[2] + h0[2];
+        var nn = parseInt(h0, 16);
+        return [(nn >> 16) & 255, (nn >> 8) & 255, nn & 255];
       };
-      var C5 = [hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'), hex('--coral-500', '#d9376e')];
-      var C7 = [hex('--blue-700', '#163a9a'), hex('--violet-700', '#6b35c4'), hex('--coral-700', '#a0183f')];
-      var ramp = function (P, f) {
-        var x = Math.max(0, Math.min(1, f)) * 2, i = Math.min(1, Math.floor(x)), u = x - i;
-        return [P[i][0] + (P[i + 1][0] - P[i][0]) * u, P[i][1] + (P[i + 1][1] - P[i][1]) * u,
-                P[i][2] + (P[i + 1][2] - P[i][2]) * u];
+      var W5 = [hex('--mint-500', '#0b93ab'), hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'),
+                hex('--coral-500', '#d9376e'), hex('--amber-500', '#d96a06')];
+      var W7 = [hex('--mint-700', '#0a6b7c'), hex('--blue-700', '#163a9a'), hex('--violet-700', '#6b35c4'),
+                hex('--coral-700', '#a0183f'), hex('--amber-700', '#9a4906')];
+      var wrap = function (p) { return p - TAU * Math.round(p / TAU); };
+      /* the folded wheel: |phase| from 0 to pi runs mint, blue, violet, coral, amber */
+      var wheelInto = function (ph, W, o) {
+        var u = Math.abs(wrap(ph)) / Math.PI * 4, i = Math.min(3, Math.floor(u)), f = u - i;
+        o[0] = W[i][0] + (W[i + 1][0] - W[i][0]) * f;
+        o[1] = W[i][1] + (W[i + 1][1] - W[i][1]) * f;
+        o[2] = W[i][2] + (W[i + 1][2] - W[i][2]) * f;
+        return o;
       };
       var css = function (c, a) {
         return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a + ')';
       };
-      M.css = css;
-      M.hue5 = []; M.hue7 = [];
-      for (var k = 0; k <= K; k++) { M.hue5.push(ramp(C5, k / K)); M.hue7.push(ramp(C7, k / K)); }
-      M.vio5 = C5[1]; M.vio7 = C7[1];
-      M.muted = hex('--muted', '#5f5b53');
-      M.hair = hex('--hair2', '#cfcbc1');
-      M.white = hex('--raised', '#ffffff');
+      L.css = css;
+      L.wrap = wrap;
+      L.wheel5 = function (ph) { return wheelInto(ph, W5, [0, 0, 0]); };
+      L.wheel7 = function (ph) { return wheelInto(ph, W7, [0, 0, 0]); };
+      L.vio5 = W5[2]; L.mint7 = W7[0];
+      L.muted = hex('--muted', '#5f5b53');
+      L.hair = hex('--hair2', '#cfcbc1');
+      L.white = hex('--raised', '#ffffff');
 
       /* P: from each site the mass is carried forward round the centre and a
          little inward, then spread by a Gaussian over its neighbours. Each
          column sums to one, so mass is conserved and rho(P) = 1. */
       var h = 2 / N, NN = N * N, W0 = TAU / K, SH = 0.8, DR = 0.013, SIG = 0.75;
-      var src = [], dst = [], wt = [];
-      for (var j = 0; j < N; j++) {
-        for (var i = 0; i < N; i++) {
+      var src = [], dst = [], wt = [], cth = new Float64Array(NN), sth = new Float64Array(NN);
+      var i, j, q, k, n, p;
+      for (j = 0; j < N; j++) {
+        for (i = 0; i < N; i++) {
           var x = -1 + (i + 0.5) * h, y = 1 - (j + 0.5) * h;
           var r = Math.sqrt(x * x + y * y), th = Math.atan2(y, x);
+          /* the gate on entering this site: a turn of the phase */
+          var gph = OM0 + OM1 * Math.sin(th);
+          cth[j * N + i] = Math.cos(gph); sth[j * N + i] = Math.sin(gph);
           var dth = W0 * (1 + SH * (0.55 - r)), r2 = Math.max(0.05, r - DR);
           var fi = (r2 * Math.cos(th + dth) + 1) / h - 0.5, fj = (1 - r2 * Math.sin(th + dth)) / h - 0.5;
           var ii = Math.round(fi), jj = Math.round(fj), b0 = wt.length, tot = 0;
@@ -4241,130 +4251,204 @@
               src.push(j * N + i); dst.push(cj * N + ci); wt.push(w); tot += w;
             }
           }
-          for (var q = b0; q < wt.length; q++) wt[q] /= tot;
+          for (q = b0; q < wt.length; q++) wt[q] /= tot;
         }
       }
 
       /* cubic B-spline upsampling, lattice to texture, separable */
       var bw = [], bi = [];
-      for (var p = 0; p < TX; p++) {
-        var qq = (p + 0.5) * N / TX - 0.5, fl = Math.floor(qq), u = qq - fl;
+      for (p = 0; p < TX; p++) {
+        var qq = (p + 0.5) * N / TX - 0.5, fl = Math.floor(qq), uu = qq - fl;
         bi.push([0, 1, 2, 3].map(function (m) { return Math.max(0, Math.min(N - 1, fl - 1 + m)); }));
-        bw.push([(1 - u) * (1 - u) * (1 - u) / 6, (3 * u * u * u - 6 * u * u + 4) / 6,
-                 (-3 * u * u * u + 3 * u * u + 3 * u + 1) / 6, u * u * u / 6]);
+        bw.push([(1 - uu) * (1 - uu) * (1 - uu) / 6, (3 * uu * uu * uu - 6 * uu * uu + 4) / 6,
+                 (-3 * uu * uu * uu + 3 * uu * uu + 3 * uu + 1) / 6, uu * uu * uu / 6]);
       }
       var up = function (f) {
-        var tmp = new Float32Array(N * TX), out = new Float32Array(TX * TX), a, m, s;
+        var tmp = new Float32Array(N * TX), out = new Float32Array(TX * TX), a, m, s, pp;
         for (a = 0; a < N; a++) {
-          for (p = 0; p < TX; p++) {
-            for (s = 0, m = 0; m < 4; m++) s += bw[p][m] * f[a * N + bi[p][m]];
-            tmp[a * TX + p] = s;
+          for (pp = 0; pp < TX; pp++) {
+            for (s = 0, m = 0; m < 4; m++) s += bw[pp][m] * f[a * N + bi[pp][m]];
+            tmp[a * TX + pp] = s;
           }
         }
         for (a = 0; a < TX; a++) {
-          for (p = 0; p < TX; p++) {
-            for (s = 0, m = 0; m < 4; m++) s += bw[p][m] * tmp[bi[p][m] * TX + a];
-            out[p * TX + a] = s;
+          for (pp = 0; pp < TX; pp++) {
+            for (s = 0, m = 0; m < 4; m++) s += bw[pp][m] * tmp[bi[pp][m] * TX + a];
+            out[pp * TX + a] = s;
           }
         }
         return out;
       };
-      /* a texture: per pixel a value v in 0..1 sets alpha and deepens the
-         colour from -500 toward -700 at the core, transparent where v is 0 */
-      var paint = function (F, v, c5, c7, alphaOf, deep) {
-        deep = deep || 0.55;
+      var up1 = function (f) {
+        var out = new Float32Array(TX), m, s, pp;
+        for (pp = 0; pp < TX; pp++) {
+          for (s = 0, m = 0; m < 4; m++) s += bw[pp][m] * f[bi[pp][m]];
+          out[pp] = s;
+        }
+        return out;
+      };
+      /* a domain-coloured texture: v(modulus) in 0..1 sets alpha and deepens
+         the colour from -500 toward -700; the phase picks the hue */
+      var c5 = [0, 0, 0], c7 = [0, 0, 0];
+      var paint = function (Ur, Ui, v, alphaOf, deep) {
         var cv = document.createElement('canvas');
         cv.width = cv.height = TX;
         var cx = cv.getContext('2d'), im = cx.createImageData(TX, TX), d = im.data;
-        for (var n = 0; n < TX * TX; n++) {
-          var vv = v(F[n]);
+        for (var nn = 0; nn < TX * TX; nn++) {
+          var vv = v(Math.sqrt(Ur[nn] * Ur[nn] + Ui[nn] * Ui[nn]));
           if (vv <= 0) continue;
-          var mix = deep * vv * vv;
-          d[4 * n] = c5[0] + (c7[0] - c5[0]) * mix;
-          d[4 * n + 1] = c5[1] + (c7[1] - c5[1]) * mix;
-          d[4 * n + 2] = c5[2] + (c7[2] - c5[2]) * mix;
-          d[4 * n + 3] = 255 * alphaOf(vv);
+          var ph = Math.atan2(Ui[nn], Ur[nn]), mix = deep * vv * vv;
+          wheelInto(ph, W5, c5); wheelInto(ph, W7, c7);
+          d[4 * nn] = c5[0] + (c7[0] - c5[0]) * mix;
+          d[4 * nn + 1] = c5[1] + (c7[1] - c5[1]) * mix;
+          d[4 * nn + 2] = c5[2] + (c7[2] - c5[2]) * mix;
+          d[4 * nn + 3] = 255 * alphaOf(vv);
         }
         cx.putImageData(im, 0, 0);
         return cv;
       };
 
-      /* the series: slice k = g^k P^k x0, and the running sums */
+      /* the series: slice k = (DP)^k x0 (the g^k is the slice's opacity), and
+         the running sums of g^k (DP)^k x0, complex throughout */
       var X0 = [0.68 * Math.cos(-0.35), 0.68 * Math.sin(-0.35)];
-      var xk = new Float64Array(NN), run = new Float64Array(NN);
+      var xr = new Float64Array(NN), xi = new Float64Array(NN);
+      var runR = new Float64Array(NN), runI = new Float64Array(NN);
       var i0 = Math.round((X0[0] + 1) / h - 0.5), j0 = Math.round((1 - X0[1]) / h - 0.5);
-      xk[j0 * N + i0] = 1;
-      M.x0 = [-1 + (i0 + 0.5) * h, 1 - (j0 + 0.5) * h];
-      M.com = [];
-      var slices = [], sums = [], margX = [], margY = [];
+      xr[j0 * N + i0] = 1;
+      L.x0 = [-1 + (i0 + 0.5) * h, 1 - (j0 + 0.5) * h];
+      L.com = []; L.ph = []; L.pc5 = []; L.pc7 = [];
+      var slR = [], slI = [], sumR = [], sumI = [], mxR = [], mxI = [], myR = [], myI = [];
       for (k = 0; k <= K; k++) {
-        var gk = Math.pow(GAM, k), cxm = 0, cym = 0, mass = 0;
-        for (var sI = 0; sI < NN; sI++) {
-          var vS = xk[sI];
-          run[sI] += gk * vS;
-          mass += vS; cxm += vS * (-1 + ((sI % N) + 0.5) * h); cym += vS * (1 - (Math.floor(sI / N) + 0.5) * h);
+        var gk = Math.pow(GAM, k), cxm = 0, cym = 0, mass = 0, best = 0, bestAt = 0;
+        var mr = new Float64Array(N), mi = new Float64Array(N), yr = new Float64Array(N), yi = new Float64Array(N);
+        for (n = 0; n < NN; n++) {
+          runR[n] += gk * xr[n]; runI[n] += gk * xi[n];
+          var md = Math.sqrt(xr[n] * xr[n] + xi[n] * xi[n]);
+          mass += md; cxm += md * (-1 + ((n % N) + 0.5) * h); cym += md * (1 - (Math.floor(n / N) + 0.5) * h);
+          if (md > best) { best = md; bestAt = n; }
+          mr[n % N] += xr[n]; mi[n % N] += xi[n];
+          yr[Math.floor(n / N)] += xr[n]; yi[Math.floor(n / N)] += xi[n];
         }
-        M.com.push([cxm / mass, cym / mass]);
-        var mx = new Float64Array(N), my = new Float64Array(N);
-        for (sI = 0; sI < NN; sI++) { mx[sI % N] += xk[sI]; my[Math.floor(sI / N)] += xk[sI]; }
-        margX.push(mx); margY.push(my);
-        slices.push(xk); sums.push(Float64Array.from(run));
-        var nx = new Float64Array(NN);
-        for (q = 0; q < wt.length; q++) nx[dst[q]] += xk[src[q]] * wt[q];
-        xk = nx;
+        L.com.push([cxm / mass, cym / mass]);
+        L.ph.push(Math.atan2(xi[bestAt], xr[bestAt]));
+        L.pc5.push(L.wheel5(L.ph[k])); L.pc7.push(L.wheel7(L.ph[k]));
+        mxR.push(mr); mxI.push(mi); myR.push(yr); myI.push(yi);
+        slR.push(xr); slI.push(xi);
+        sumR.push(Float64Array.from(runR)); sumI.push(Float64Array.from(runI));
+        var nr = new Float64Array(NN), nx = new Float64Array(NN);
+        for (q = 0; q < wt.length; q++) { nr[dst[q]] += xr[src[q]] * wt[q]; nx[dst[q]] += xi[src[q]] * wt[q]; }
+        var gr2 = new Float64Array(NN), gi2 = new Float64Array(NN);
+        for (n = 0; n < NN; n++) {        /* the gate: turn by theta at the site entered */
+          gr2[n] = nr[n] * cth[n] - nx[n] * sth[n];
+          gi2[n] = nr[n] * sth[n] + nx[n] * cth[n];
+        }
+        xr = gr2; xi = gi2;
       }
-      /* Textures are painted the first time a frame needs them, so arriving
-         costs the chain and the first slice, and the rest spread over the
-         build at one or two a frame. The sum is on a log scale over three
-         decades of its own peak (the peak is the identity term at x0). */
-      var full = up(sums[K]), spk = 0, n;
-      for (n = 0; n < full.length; n++) if (full[n] > spk) spk = full[n];
+      /* The sum is on a log scale over three decades of its own peak (the
+         identity term at x0), so the interference in its tail reads. */
+      var fullR = up(sumR[K]), fullI = up(sumI[K]), spk = 0;
+      for (n = 0; n < fullR.length; n++) spk = Math.max(spk, Math.sqrt(fullR[n] * fullR[n] + fullI[n] * fullI[n]));
       var logv = function (f) { var v = 1 + Math.log(Math.max(f, 1e-12) / spk) / Math.LN10 / 3; return v <= 0.02 ? 0 : (v - 0.02) / 0.98; };
-      var texs = [], parts = [];
-      M.tex = function (k) {
-        if (!texs[k]) {
-          var U = up(slices[k]), pk = 0;
-          for (var n = 0; n < U.length; n++) if (U[n] > pk) pk = U[n];
-          texs[k] = paint(U, function (f) { var v = f / pk; return v < 0.035 ? 0 : (v - 0.035) / 0.965; },
-                          M.hue5[k], M.hue7[k], function (v) { return Math.pow(v, 0.95); });
+      /* Crisp lines: the level sets of a slice's modulus, by marching
+         squares on the upsampled field (every second texel), each segment
+         coloured by the phase where it lies, one Path2D per level and phase
+         bin, in the unit square the texture is drawn into. */
+      var SEG = [null, [3, 0], [0, 1], [3, 1], [1, 2], [3, 0, 1, 2], [0, 2], [3, 2], [2, 3], [0, 2],
+                 [0, 1, 2, 3], [1, 2], [3, 1], [0, 1], [3, 0], null];
+      var contour = function (Ur, Ui, val, levels, deepAt) {
+        var ST = 2, G = TX / ST, V = new Float32Array(G * G), out = [], a, b, li, n1;
+        for (a = 0; a < G; a++) {
+          for (b = 0; b < G; b++) {
+            n1 = a * ST * TX + b * ST;
+            V[a * G + b] = val(Math.sqrt(Ur[n1] * Ur[n1] + Ui[n1] * Ui[n1]));
+          }
         }
-        return texs[k];
+        var ex = [0, 0, 0, 0], ey = [0, 0, 0, 0];
+        for (li = 0; li < levels.length; li++) {
+          var lv = levels[li], bins = {};
+          for (a = 0; a < G - 1; a++) {
+            for (b = 0; b < G - 1; b++) {
+              var v00 = V[a * G + b], v01 = V[a * G + b + 1], v10 = V[(a + 1) * G + b], v11 = V[(a + 1) * G + b + 1];
+              var cs = (v00 > lv ? 1 : 0) | (v01 > lv ? 2 : 0) | (v11 > lv ? 4 : 0) | (v10 > lv ? 8 : 0);
+              var sg = SEG[cs];
+              if (!sg) continue;
+              ex[0] = b + (lv - v00) / (v01 - v00); ey[0] = a;
+              ex[1] = b + 1; ey[1] = a + (lv - v01) / (v11 - v01);
+              ex[2] = b + (lv - v10) / (v11 - v10); ey[2] = a + 1;
+              ex[3] = b; ey[3] = a + (lv - v00) / (v10 - v00);
+              n1 = (a * ST + 1) * TX + b * ST + 1;
+              var bn = Math.round(Math.abs(wrap(Math.atan2(Ui[n1], Ur[n1]))) / Math.PI * 8);
+              var pth = bins[bn];
+              if (!pth) pth = bins[bn] = new Path2D();
+              for (var sq = 0; sq < sg.length; sq += 2) {
+                pth.moveTo((ex[sg[sq]] * ST + 0.5) / TX, (ey[sg[sq]] * ST + 0.5) / TX);
+                pth.lineTo((ex[sg[sq + 1]] * ST + 0.5) / TX, (ey[sg[sq + 1]] * ST + 0.5) / TX);
+              }
+            }
+          }
+          for (var bk in bins) {
+            var ph1 = +bk / 8 * Math.PI;
+            out.push({ p: bins[bk], lev: li, c: li >= deepAt ? L.wheel7(ph1) : L.wheel5(ph1) });
+          }
+        }
+        return out;
       };
-      M.part = function (k) {
-        if (!parts[k]) {
-          parts[k] = paint(k === K ? full : up(sums[k]), logv, M.vio5, M.vio7,
-                           function (v) { return Math.min(1, 1.25 * Math.pow(v, 1.15)); }, 0.85);
+      L.cont = []; L.sumC = null;
+
+      /* Textures are painted the first time a frame needs them. While time
+         runs on continuously a frame paints at most one (L.budget), so no
+         frame pays for two; a texture that waits a frame is first needed at
+         an opacity of about zero, so the wait cannot be seen. */
+      var texs = [], parts = [];
+      L.budget = 99; L.lastT = -1e9;
+      L.tex = function (kk) {
+        if (!texs[kk]) {
+          if (L.budget <= 0) return null;
+          L.budget--;
+          var Ur = up(slR[kk]), Ui = up(slI[kk]), pk = 0;
+          for (var nn = 0; nn < Ur.length; nn++) pk = Math.max(pk, Math.sqrt(Ur[nn] * Ur[nn] + Ui[nn] * Ui[nn]));
+          texs[kk] = paint(Ur, Ui, function (f) { var v = f / pk; return v < 0.035 ? 0 : (v - 0.035) / 0.965; },
+                           function (v) { return Math.pow(v, 0.9); }, 0.55);
+          L.cont[kk] = contour(Ur, Ui, function (f) { return f / pk; }, [0.16, 0.4, 0.7], 2);
         }
-        return parts[k];
+        return texs[kk];
+      };
+      L.part = function (kk) {
+        if (!parts[kk]) {
+          if (L.budget <= 0) return null;
+          L.budget--;
+          parts[kk] = paint(kk === K ? fullR : up(sumR[kk]), kk === K ? fullI : up(sumI[kk]), logv,
+                            function (v) { return Math.min(1, 1.2 * Math.pow(v, 1.1)); }, 0.7);
+          if (kk === K) L.sumC = contour(fullR, fullI, logv, [0.3, 0.5, 0.68, 0.84], 3);
+        }
+        return parts[kk];
       };
 
-      /* the other two views of the block, as in a video cube's xt and yt
-         planes: each order's mass summed over y, laid along x on the floor,
-         and summed over x, laid along y on the side wall. Each order is
-         normalised to its own peak and fades with g^k, like its slice; the
-         texture runs continuously in k between the orders. */
-      var side = function (marg, alongK) {
+      /* the other two views of the block: each order summed over y, laid
+         along x on the floor, and summed over x, laid along y on the side
+         wall, as complex numbers. Each order is normalised to its own peak
+         and fades with g^k; between orders the modulus and the phase are
+         interpolated, so no order that does not exist is invented. */
+      var side = function (mR, mI, alongK) {
         var cv = document.createElement('canvas');
         cv.width = cv.height = TX;
         var cx = cv.getContext('2d'), im = cx.createImageData(TX, TX), d = im.data;
-        var U1 = [], pk1 = [];
+        var UR = [], UI = [], pk1 = [];
         for (var k3 = 0; k3 <= K; k3++) {
-          var row = new Float32Array(TX), pk3 = 0;
-          for (var p3 = 0; p3 < TX; p3++) {
-            for (var m3 = 0, s3 = 0; m3 < 4; m3++) s3 += bw[p3][m3] * marg[k3][bi[p3][m3]];
-            row[p3] = s3; if (s3 > pk3) pk3 = s3;
-          }
-          U1.push(row); pk1.push(pk3);
+          var ur = up1(mR[k3]), ui = up1(mI[k3]), pk3 = 0;
+          for (var p3 = 0; p3 < TX; p3++) pk3 = Math.max(pk3, Math.sqrt(ur[p3] * ur[p3] + ui[p3] * ui[p3]));
+          UR.push(ur); UI.push(ui); pk1.push(pk3);
         }
         for (var a3 = 0; a3 < TX; a3++) {             /* a3 runs along k */
           var kf = (a3 + 0.5) / TX * K, k0 = Math.min(K - 1, Math.floor(kf)), w1 = kf - k0;
           var wk = (0.34 + 0.66 * Math.pow(GAM, kf)) * (1 - ease((kf - K + 2.2) / 2.2));
-          var c5 = M.hue5[k0].map(function (v, i) { return v + (M.hue5[k0 + 1][i] - v) * w1; });
-          var c7 = M.hue7[k0].map(function (v, i) { return v + (M.hue7[k0 + 1][i] - v) * w1; });
           for (var b3 = 0; b3 < TX; b3++) {           /* b3 runs across the wall */
-            var v3 = (1 - w1) * U1[k0][b3] / pk1[k0] + w1 * U1[k0 + 1][b3] / pk1[k0 + 1];
+            var ra = UR[k0][b3], ia = UI[k0][b3], rb = UR[k0 + 1][b3], ib = UI[k0 + 1][b3];
+            var v3 = (1 - w1) * Math.sqrt(ra * ra + ia * ia) / pk1[k0] + w1 * Math.sqrt(rb * rb + ib * ib) / pk1[k0 + 1];
             v3 = v3 < 0.05 ? 0 : (v3 - 0.05) / 0.95;
             if (v3 <= 0) continue;
+            var pa = Math.atan2(ia, ra), ph3 = pa + w1 * wrap(Math.atan2(ib, rb) - pa);
+            wheelInto(ph3, W5, c5); wheelInto(ph3, W7, c7);
             var o3 = alongK ? 4 * (b3 * TX + a3) : 4 * (a3 * TX + b3), mix3 = 0.5 * v3 * v3;
             d[o3] = c5[0] + (c7[0] - c5[0]) * mix3;
             d[o3 + 1] = c5[1] + (c7[1] - c5[1]) * mix3;
@@ -4375,12 +4459,33 @@
         cx.putImageData(im, 0, 0);
         return cv;
       };
-      M.floorTex = side(margX, false);   /* rows: k from the front; columns: x */
-      M.sideTex = side(margY, true);     /* columns: k from the front; rows: y from the top */
+      L.floorTex = side(mxR, mxI, false);   /* rows: k from the front; columns: x */
+      L.sideTex = side(myR, myI, true);     /* columns: k from the front; rows: y from the top */
+
+      /* path space: the d-cube for d = 1..NC, vertices at +-1/sqrt(d) so its
+         circumradius is 1, embedded in max(d, 3) dimensions so a segment
+         and a square can turn in space; edges join vertices one bit apart */
+      L.cube = [];
+      var PL = [[0, 1], [0, 2], [1, 2], [0, 3], [1, 3], [2, 4], [3, 5], [4, 5], [1, 4], [2, 5], [0, 5], [3, 4]];
+      for (var dd = 1; dd <= NC; dd++) {
+        var nd = Math.max(dd, 3), nv = 1 << dd, vs = [], es = [], pls = [];
+        for (var vi = 0; vi < nv; vi++) {
+          var vv = new Float64Array(nd);
+          for (var ax = 0; ax < dd; ax++) vv[ax] = (vi >> ax & 1 ? 1 : -1) / Math.sqrt(dd);
+          vs.push(vv);
+          for (ax = 0; ax < dd; ax++) if (!(vi >> ax & 1)) es.push(vi, vi | (1 << ax));
+        }
+        for (q = 0; q < PL.length; q++) if (PL[q][0] < nd && PL[q][1] < nd) pls.push(PL[q]);
+        L.cube.push({ d: dd, nd: nd, v: vs, e: es, pl: pls, w: new Float64Array(nd),
+                      px: new Float64Array(nv), py: new Float64Array(nv), pz: new Float64Array(nv) });
+      }
+      M = smatrix.cache = L;
     }
 
     /* --- time ----------------------------------------------------------- */
     var RED = REDUCED;
+    M.budget = !RED && t > M.lastT && t - M.lastT < 250 ? 1 : 99;
+    M.lastT = t;
     var T = RED ? 60000 : t;
     /* the camera loop: phi runs once round per cycle at a steady rate, is
        held at 0 (looking straight down the depth axis) for 2 x HOLD of it,
@@ -4435,6 +4540,20 @@
       g.closePath();
     }
     function zk(k) { return Z0 - D * k / K; }
+    /* contour lines, stroked inside a slice's own affine frame: widths are
+       in the unit square, so a line drawn on a plate foreshortens with it */
+    var LWU = 1 / (2 * S);
+    function strokeC(list, alpha, wscale) {
+      if (!list || alpha <= 0.004) return;
+      g.lineCap = 'butt';
+      for (var ci = 0; ci < list.length; ci++) {
+        var it = list[ci];
+        g.strokeStyle = M.css(it.c, Math.min(1, alpha * (0.42 + 0.26 * it.lev)));
+        g.lineWidth = (0.75 + 0.3 * it.lev) * wscale * LWU;
+        g.stroke(it.p);
+      }
+      g.lineCap = 'round';
+    }
 
     g.clearRect(0, 0, vb[0], vb[1]);
     g.globalCompositeOperation = 'source-over';
@@ -4469,9 +4588,10 @@
     var faceDepth = function (f) { return P(f[4], f[5], f[6], [0, 0, 0])[2] - zc; };
     /* an edge is in front when either face that holds it faces the camera */
     var vis = {};
-    for (var fi2 = 0; fi2 < FACES.length; fi2++) {
+    var fi2, e, F;
+    for (fi2 = 0; fi2 < FACES.length; fi2++) {
       var fd = faceDepth(FACES[fi2]);
-      for (var e = 0; e < 4; e++) {
+      for (e = 0; e < 4; e++) {
         var ea = FACES[fi2][e], eb = FACES[fi2][(e + 1) % 4], key = Math.min(ea, eb) * 8 + Math.max(ea, eb);
         vis[key] = Math.max(vis[key] == null ? -9 : vis[key], fd);
       }
@@ -4482,7 +4602,7 @@
       return 0.26 + 0.36 * ease(v / 0.12);
     };
     for (fi2 = 0; fi2 < FACES.length - 1; fi2++) {
-      var F = FACES[fi2];
+      F = FACES[fi2];
       if (faceDepth(F) >= 0) continue;
       g.fillStyle = M.css(M.hair, 0.11);
       g.beginPath();
@@ -4522,33 +4642,38 @@
     }
     g.globalAlpha = 1;
 
-    /* --- the back wall: the sum, the out-state ----------------------------- */
+    /* --- the back wall: the complex sum, the out-state ---------------------- */
     var mS = frame(ZS);
-    g.fillStyle = M.css(M.white, 0.55);
+    g.fillStyle = M.css(M.hair, 0.12);
     quad(mS); g.fill();
     g.save();
     g.transform(mS[0], mS[1], mS[2], mS[3], mS[4], mS[5]);
     var bw2 = built - 1;                                /* the wall lags the scan by one order */
     var inBuild = !RED && bw2 < K;
+    var done = 0;
     if (inBuild) {
       var kb = Math.max(0, Math.min(K - 1, Math.floor(bw2))), fr = ease(Math.max(0, Math.min(1, bw2 - kb)));
       var a0 = bw2 < 0 ? ease(built) : 1;               /* the identity term arrives first */
       if (built > 0) {
+        var pA = M.part(kb), pB = M.part(kb + 1);
         g.globalAlpha = a0 * (1 - fr);
-        g.drawImage(M.part(kb), 0, 0, 1, 1);
+        if (pA) g.drawImage(pA, 0, 0, 1, 1);
         g.globalAlpha = a0 * fr;
-        g.drawImage(M.part(kb + 1), 0, 0, 1, 1);
+        if (pB) g.drawImage(pB, 0, 0, 1, 1);
       }
     } else {
-      var done = RED ? 1 : ease((bw2 - K) / 1.5);
+      done = RED ? 1 : ease((bw2 - K) / 1.5);
+      var pK = M.part(K);
+      g.globalAlpha = 0.5 + 0.4 * hero;
+      if (pK) g.drawImage(pK, 0, 0, 1, 1);
       g.globalAlpha = 1;
-      g.drawImage(M.part(K), 0, 0, 1, 1);
+      strokeC(M.sumC, done * (0.8 + 0.2 * hero), 1 + 0.3 * hero);
       /* hero: the aligned view, the sum is everything that is left */
-      if (hero > 0.01) {
+      if (hero > 0.01 && pK) {
         g.shadowColor = M.css(M.vio5, 0.9);
-        g.shadowBlur = 16 * hero;
-        g.globalAlpha = 0.55 * hero * done;
-        g.drawImage(M.part(K), 0, 0, 1, 1);
+        g.shadowBlur = 14 * hero;
+        g.globalAlpha = 0.5 * hero * done;
+        g.drawImage(pK, 0, 0, 1, 1);
         g.shadowBlur = 0;
       }
     }
@@ -4557,28 +4682,107 @@
       for (var kk = Math.max(0, Math.floor(ks - 2.8)); kk <= Math.min(K, Math.ceil(ks + 0.4)); kk++) {
         var wdep = Math.max(0, 1 - Math.abs(ks - kk - 1.2) / 1.6);
         if (wdep <= 0.01) continue;
-        g.globalAlpha = 0.5 * wdep * sweep * done * (0.45 + 0.55 * Math.pow(GAM, kk * 0.5));
-        g.drawImage(M.tex(kk), 0, 0, 1, 1);
+        var tf = M.tex(kk);
+        if (!tf) continue;
+        g.globalAlpha = 0.45 * wdep * sweep * done * (0.45 + 0.55 * Math.pow(GAM, kk * 0.5));
+        g.drawImage(tf, 0, 0, 1, 1);
       }
     }
     g.restore();
     g.globalAlpha = 1;
-    g.strokeStyle = M.css(M.vio7, 0.45);
+    g.strokeStyle = M.css(M.pc7[0], 0.4);
     g.lineWidth = 1.2;
     quad(mS); g.stroke();
 
-    /* --- the slices, far to near, with the thread and the scan between ---- */
+    /* --- path space: turn each d-cube in its own d dimensions and project it
+       to three by perspective, one dimension at a time ------------------------ */
+    var CUBE0 = 0.055, CUBE1 = 0.01, PD = 2.4;
+    /* one cube at a time is featured, full size: the featured dimension
+       climbs from 1 to 6 through each orbit and fades out before the
+       camera reaches the axis, so its wrap from 6 back to 1 is never seen */
+    var fdim = 4, fenv = 1;
+    if (!RED) {
+      var u2 = (T - TA) / C;
+      u2 -= Math.floor(u2);
+      fdim = 1 + 5 * Math.max(0, Math.min(1, (u2 - 0.1) / 0.72));
+      fenv = ease((u2 - 0.06) / 0.1) * (1 - ease((u2 - 0.86) / 0.08)) * ease((T - 2500) / 1500);
+    }
+    var flat = RED ? 0 : hero;                            /* the cube flattens onto its shadow */
+    for (var cq = 0; cq < NC; cq++) {
+      var cb = M.cube[cq], nd2 = cb.nd, wv = cb.w;
+      for (var vk = 0; vk < cb.v.length; vk++) {
+        var v0 = cb.v[vk];
+        for (var a1 = 0; a1 < nd2; a1++) wv[a1] = v0[a1];
+        for (var pl = 0; pl < cb.pl.length; pl++) {
+          var pa1 = cb.pl[pl][0], pb1 = cb.pl[pl][1];
+          var an = (RED ? 0.7 + 0.4 * pl : T / (23000 - 1500 * pl) * TAU) + 0.5 * cq;
+          var cA = Math.cos(an), sA = Math.sin(an), wa = wv[pa1], wb = wv[pb1];
+          wv[pa1] = cA * wa - sA * wb; wv[pb1] = sA * wa + cA * wb;
+        }
+        var fk = 1;
+        for (var dd2 = nd2 - 1; dd2 >= 3; dd2--) fk *= PD / (PD - wv[dd2] * fk);
+        cb.px[vk] = wv[0] * fk; cb.py[vk] = wv[1] * fk; cb.pz[vk] = wv[2] * fk;
+      }
+    }
+    function drawCube(cq2, k3, dev3) {
+      var cb2 = M.cube[cq2], ft = fenv * ease(1 - Math.abs(fdim - cb2.d));
+      var sz2 = (CUBE0 + CUBE1 * cb2.d + ft * (0.26 + 0.045 * cb2.d)) * (0.35 + 0.65 * dev3);
+      var cxk = M.com[k3][0], cyk = M.com[k3][1], zz = zk(k3), es = cb2.e, m, a, b;
+      var fade = dev3 * (1 - 0.75 * hero) * (0.3 + 0.7 * ft);
+      if (fade <= 0.004) return;
+      var Pa = [0, 0, 0], Pb = [0, 0, 0];
+      /* the shadow: the cube projected along the depth axis onto its slice */
+      g.strokeStyle = M.css(M.pc7[k3], 0.26 * fade);
+      g.lineWidth = 0.8;
+      g.beginPath();
+      for (m = 0; m < es.length; m += 2) {
+        a = es[m]; b = es[m + 1];
+        P(cxk + sz2 * cb2.px[a], cyk + sz2 * cb2.py[a], zz, Pa);
+        P(cxk + sz2 * cb2.px[b], cyk + sz2 * cb2.py[b], zz, Pb);
+        g.moveTo(Pa[0], Pa[1]); g.lineTo(Pb[0], Pb[1]);
+      }
+      g.stroke();
+      /* the cube, its back edges then its front edges */
+      var zs = sz2 * (1 - flat);
+      for (var layer = 0; layer < 3; layer++) {
+        /* layer 0 far edges, 1 a soft glow under the near edges of the
+           featured cube, 2 the near edges */
+        if (layer === 1 && ft < 0.05) continue;
+        g.strokeStyle = layer === 1 ? M.css(M.pc5[k3], 0.16 * fade * ft)
+                                    : M.css(layer ? M.pc7[k3] : M.pc5[k3], (layer ? 0.9 : 0.5) * fade);
+        g.lineWidth = layer === 1 ? 5 : layer ? 1.25 + 0.6 * ft : 0.9;
+        g.beginPath();
+        for (m = 0; m < es.length; m += 2) {
+          a = es[m]; b = es[m + 1];
+          if ((cb2.pz[a] + cb2.pz[b] > 0) !== (layer >= 1)) continue;
+          P(cxk + sz2 * cb2.px[a], cyk + sz2 * cb2.py[a], zz + zs * cb2.pz[a], Pa);
+          P(cxk + sz2 * cb2.px[b], cyk + sz2 * cb2.py[b], zz + zs * cb2.pz[b], Pb);
+          g.moveTo(Pa[0], Pa[1]); g.lineTo(Pb[0], Pb[1]);
+        }
+        g.stroke();
+      }
+      /* its vertices */
+      var vr = 2.1 - 0.15 * cb2.d;
+      g.fillStyle = M.css(M.pc7[k3], 0.85 * fade);
+      g.beginPath();
+      for (m = 0; m < cb2.px.length; m++) {
+        P(cxk + sz2 * cb2.px[m], cyk + sz2 * cb2.py[m], zz + zs * cb2.pz[m], Pa);
+        g.moveTo(Pa[0] + vr, Pa[1]); g.arc(Pa[0], Pa[1], vr, 0, TAU);
+      }
+      g.fill();
+    }
+
+    /* --- the slices, far to near, with the tube and the scan between ------- */
     var pts = [];
     for (var k2 = 0; k2 <= K; k2++) pts.push(P(M.com[k2][0], M.com[k2][1], zk(k2), [0, 0, 0]));
     var zScan = Z0 - D * ks / K;
     var scanDrawn = false;
-    var sheenX = 0.5 + 0.4 * Math.sin(psi * 1.4 + eps);
     function drawScan() {
       scanDrawn = true;
       var sa = sweep * arrive;
       if (sa <= 0.01 || zScan < ZS || zScan > Z0 + 0.02) return;
       var m = frame(zScan), kf = Math.max(0, Math.min(K, ks)), k0 = Math.min(K - 1, Math.floor(kf)), w = kf - k0;
-      var hc = [0, 1, 2].map(function (i) { return M.hue5[k0][i] + (M.hue5[k0 + 1][i] - M.hue5[k0][i]) * w; });
+      var hc = [0, 1, 2].map(function (ix) { return M.pc5[k0][ix] + (M.pc5[k0 + 1][ix] - M.pc5[k0][ix]) * w; });
       g.fillStyle = M.css(hc, 0.07 * sa * (1 - hero));
       quad(m); g.fill();
       g.save();
@@ -4598,29 +4802,40 @@
       var gk2 = Math.pow(GAM, k2);
       var near = RED ? 0 : sweep * Math.exp(-Math.pow((ks - k2) / 1.1, 2));
       var flow = RED ? 0 : 0.1 * Math.sin(TAU * (T / 2600 - k2 / 8));
-      var al = Math.min(1, (0.42 + 0.58 * gk2) * (1 + 0.5 * near + flow)) * dev * (1 - 0.62 * hero);
-      /* the thread from this slice to the next one back */
+      var al = Math.min(1, (0.42 + 0.58 * gk2) * (1 + 0.5 * near + flow)) * dev * (1 - 0.8 * hero);
+      /* the tube from this order's centre to the next one back, in this
+         order's phase colour; butt caps, so segments meet end to end and a
+         translucent tube never beads at the joins */
       if (k2 < K && built > k2 + 1) {
-        var th2 = ease(built - k2 - 1);
-        g.strokeStyle = M.css(M.hue7[k2], 0.5 * th2 * dev * (1 - 0.7 * hero));
-        g.lineWidth = 1.1;
+        var th2 = ease(built - k2 - 1) * dev * (1 - 0.96 * hero);
+        var pc = M.pc5[k2], tw = 3.4 - 2.2 * k2 / K;
+        g.lineCap = 'butt';
+        g.strokeStyle = M.css(pc, 0.95 * th2);
+        g.lineWidth = tw;
         g.beginPath(); g.moveTo(pts[k2 + 1][0], pts[k2 + 1][1]); g.lineTo(pts[k2][0], pts[k2][1]); g.stroke();
+        g.strokeStyle = M.css([243 + (pc[0] - 243) * 0.35, 241 + (pc[1] - 241) * 0.35, 235 + (pc[2] - 235) * 0.35], 0.6 * th2);
+        g.lineWidth = tw * 0.3;
+        g.beginPath(); g.moveTo(pts[k2 + 1][0], pts[k2 + 1][1] - tw * 0.18); g.lineTo(pts[k2][0], pts[k2][1] - tw * 0.18); g.stroke();
+        g.lineCap = 'round';
       }
       var m2 = frame(z);
       /* the glass of the slide, faint, so the block has a body. Colour alpha
          is 8 bit, so plates that fade in step all cross the same 1/255 level
          on the same frame and the stack's tint jumps; each plate fades over
          its own stretch of the approach instead. */
-      var h5 = M.hue5[k2];
+      var h5 = M.pc5[k2];
       var gl = Math.max(0, Math.min(1, (1 - hero) * 1.6 - 0.6 * k2 / K));
       if (gl * dev > 0.001) {
-        g.fillStyle = M.css(h5, 0.018 * dev * gl);
+        g.fillStyle = M.css(h5, 0.02 * dev * gl);
         quad(m2); g.fill();
       }
       g.save();
       g.transform(m2[0], m2[1], m2[2], m2[3], m2[4], m2[5]);
-      g.globalAlpha = al;
-      g.drawImage(M.tex(k2), 0, 0, 1, 1);
+      var tk = M.tex(k2);
+      g.globalAlpha = al * 0.3;
+      if (tk) g.drawImage(tk, 0, 0, 1, 1);
+      g.globalAlpha = 1;
+      if (tk) strokeC(M.cont[k2], Math.min(1, al * 1.2), 1 + 0.5 * near);
       g.restore();
       g.globalAlpha = 1;
       if (near > 0.02) {
@@ -4628,32 +4843,20 @@
         g.lineWidth = 1;
         quad(m2); g.stroke();
       }
-      /* the bead: this order's centre of mass */
-      g.fillStyle = M.css(M.hue7[k2], (0.55 + 0.4 * near) * dev * (1 - 0.7 * hero));
-      g.beginPath(); g.arc(pts[k2][0], pts[k2][1], 1.3 + 1.5 * near, 0, TAU); g.fill();
     }
     if (!scanDrawn) drawScan();
+    /* the path-space cubes ride with their slices but draw over the stack,
+       so the rings of nearer orders never cut through their edges */
+    for (k2 = NC; k2 >= 1; k2--) {
+      drawCube(k2 - 1, k2, RED || k2 === 0 ? 1 : ease((built - k2 + 0.4) / 1.2));
+    }
 
     /* --- the in-state: one site, on the front face -------------------------- */
     P(M.x0[0], M.x0[1], Z0, O);
-    g.fillStyle = M.css(M.hue7[0], 1);
-    g.beginPath(); g.arc(O[0], O[1], 2.6, 0, TAU); g.fill();
+    g.fillStyle = M.css(M.mint7, 1);
+    g.beginPath(); g.arc(O[0], O[1], 2.8, 0, TAU); g.fill();
 
-    /* --- front faces: a sheen; front edges ---------------------------------- */
-    for (fi2 = 0; fi2 < FACES.length; fi2++) {
-      F = FACES[fi2];
-      if (faceDepth(F) <= 0 || F[6] === 1) continue;
-      var c0 = cor[F[0]], c2 = cor[F[2]];
-      var lg = g.createLinearGradient(c0[0], c0[1], c2[0], c2[1]);
-      lg.addColorStop(0, M.css(M.white, 0));
-      lg.addColorStop(Math.max(0.05, Math.min(0.95, sheenX)), M.css(M.white, 0.16));
-      lg.addColorStop(1, M.css(M.white, 0));
-      g.fillStyle = lg;
-      g.beginPath();
-      g.moveTo(cor[F[0]][0], cor[F[0]][1]);
-      for (e = 1; e < 4; e++) g.lineTo(cor[F[e]][0], cor[F[e]][1]);
-      g.closePath(); g.fill();
-    }
+    /* --- front edges ------------------------------------------------------- */
     g.lineWidth = 1.1;
     for (e = 0; e < 12; e++) {
       if (!front(EDGES[e])) continue;
