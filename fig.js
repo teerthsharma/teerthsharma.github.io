@@ -7186,374 +7186,6 @@
   }
 
   /* ==================================================================== */
-  /* iris — topograph-432                                                */
-  /* ==================================================================== */
-  function iris(g, vb, t, st) {
-    /* The chart used to grant the same cluster wide rules on every install,
-       whatever engine and provider it was given. The fix gates each rule on
-       engine.name and provider.name, so what is granted shrinks to what the
-       install can actually reach. A camera iris is exactly that operation:
-       one field of view, and blades that close it down to a single opening.
-
-       The field is the grants, fifteen evenly spaced rings of small lights
-       over the whole disc, which is what cluster wide means; nothing marks
-       the ones that will survive. The iris is a real mechanism. Nine rigid
-       blades each turn on a pin under the bezel. A blade's working edge is an
-       arc of a circle of radius RHO, and because the blade is rigid, the
-       centre of that circle is a point of the blade that swings round the pin
-       as it turns. With the pin at RP from the middle and that centre at DP
-       from the pin, the centre sits at distance D, where
-       D^2 = RP^2 + DP^2 - 2 RP DP cos(psi), and the blade leaves an opening of
-       RHO - D. Turning every blade by psi sets the aperture, and the opening
-       is the intersection of the nine discs: a rounded nine sided shape that
-       turns as it closes, as a real iris does. It is never drawn; it is what
-       the blades leave.
-
-       A grant is lit when it is inside all nine discs. That is the same test
-       the blades are drawn from, so a grant dims at the moment an edge passes
-       over it and stays faintly visible on the blade: granted before, not
-       now. The blades lock between the fifth and sixth rings. The grants left
-       in the opening turn mint in a ripple from the middle: gated now,
-       granted because engine.name and provider.name reach them. A pulse of
-       reach leaves the middle every two seconds. While the iris is open it
-       runs to the rim; once it is closed the blades stop it at the edge of
-       the opening, with no special case, because the blades are simply over
-       it. Then the blades open again, the old chart, and the cycle repeats.
-
-       Blades overlap cyclically: each lies over the four ahead of it and
-       under the four behind, which no single painting order can produce. So
-       nothing is painted in order. A blade is visible exactly where it is
-       inside the edge discs of the four above it, so each blade is filled
-       once, clipped to those four discs, and the nine filled regions are
-       disjoint. Every boundary between two of them is a blade edge, and the
-       edge is stroked over it, which also hides the half covered pixel there.
-       Measured in the preview harness: cutting the disc into nine wedges with
-       one order each left a visible line on every cut, because at a partly
-       covered pixel each layer blends on its own and the lower blades leak
-       through; flattening each wedge offscreen fixed that but cost 18 ms a
-       frame at DPR 2. This way costs a small fraction of either. */
-    var TAU = Math.PI * 2, PI = Math.PI;
-    var CX = 235, CY = 238;
-    var NB = 9, RH = 150, RB = 164, RP = 157, RHO = 200, DP = 208, RR = 156;
-    var R_OPEN = 146, R_CORE = 52, RING = 9.5, NRING = 15, NCORE = 5;
-    var P = 10000, CLOSE0 = 1600, CLOSE1 = 4000, UNGATE = 7800, OPEN0 = 8000, OPEN1 = 9800;
-    var PULSE = 2000, P0 = 150, LIFE = 1500, SWEEP = 1600;
-    var A0 = -PI / 2, LIGHT = -2.36, HALF = PI / NB;
-
-    var M = iris.cache;
-    if (!M) {
-      M = iris.cache = {};
-      var hex = function (name, fb) {
-        var h = (token(name, fb) || fb).trim().replace('#', '');
-        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
-        var n = parseInt(h, 16);
-        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
-      };
-      M.blue5 = hex('--blue-500', '#2456dc'); M.blue7 = hex('--blue-700', '#163a9a');
-      M.coral = hex('--coral-500', '#d9376e'); M.mint = hex('--mint-500', '#0b93ab');
-      M.mint7 = hex('--mint-700', '#0a6b7c'); M.white = hex('--raised', '#ffffff');
-      M.hair = hex('--hair2', '#cfcbc1'); M.muted = hex('--muted', '#5f5b53');
-      var k, j, X = [], Y = [], S = [], C = [], F = [];
-      for (k = 1; k <= NRING; k++) {
-        var R = k * RING, n = Math.round(TAU * R / 9.4);
-        for (j = 0; j < n; j++) {
-          var a = (j + (k % 2) * 0.5) / n * TAU + A0, h1 = Math.sin(k * 12.9898 + j * 78.233) * 43758.5453;
-          X.push(R * Math.cos(a)); Y.push(R * Math.sin(a)); S.push(R);
-          C.push(k <= NCORE ? 1 : 0); F.push(h1 - Math.floor(h1));
-        }
-      }
-      M.n = X.length;
-      M.x = new Float32Array(X); M.y = new Float32Array(Y); M.s = new Float32Array(S);
-      M.core = new Uint8Array(C); M.f = new Float32Array(F);
-      M.lit = []; M.ghost = [];
-      for (k = 0; k <= 10; k++) { M.lit.push([]); M.ghost.push([]); }
-    }
-
-    function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
-    function css(c, al) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + al + ')'; }
-    function wrap(a) { a = (a + PI) % TAU; if (a < 0) a += TAU; return a - PI; }
-    function clamp(k) { return k < 0 ? 0 : k > 1 ? 1 : k; }
-
-    /* --- time ------------------------------------------------------------ */
-    var T = REDUCED ? 6000 : t;
-    var u = T % P;
-    var r;
-    if (u < CLOSE0) r = R_OPEN;
-    else if (u < CLOSE1) r = R_OPEN + (R_CORE - R_OPEN) * ease((u - CLOSE0) / (CLOSE1 - CLOSE0));
-    else if (u < OPEN0) r = R_CORE;
-    else if (u < OPEN1) r = R_CORE + (R_OPEN - R_CORE) * ease((u - OPEN0) / (OPEN1 - OPEN0));
-    else r = R_OPEN;
-    /* 0 coral, ungated; 1 mint, gated. It ripples out from the middle as the
-       blades settle, and back in just before they open. */
-    function gateOn(uu, s) { return clamp((uu - CLOSE1 + 250 - s * 9) / 450); }
-    function gateAt(uu, s) {
-      if (uu < CLOSE1 - 250) return 0;
-      return ease(gateOn(uu, s)) * (1 - ease((uu - UNGATE - s * 5) / 520));
-    }
-    var G0 = gateAt(u, 0);
-
-    /* pulses of reach; the first one builds the field */
-    var pk = Math.floor((T - P0) / PULSE), pAge = T - P0 - pk * PULSE, pR = -1, pA = 0, pG = 0;
-    if (!REDUCED && T >= P0 && pAge < LIFE) {
-      var tau = pAge / LIFE;
-      pR = (RH + 6) * (1 - (1 - tau) * (1 - tau));
-      pA = Math.pow(1 - tau, 1.3) * ease(pAge / 160);
-      pG = gateAt((T - pAge) % P, 0);
-    }
-    var Rf = (REDUCED || T > P0 + LIFE) ? 1e9 : (T < P0 ? -20 : pR);
-
-    /* --- the blades' geometry, from the pin angle ------------------------ */
-    var D = RHO - r;
-    var psi = Math.acos(Math.max(-1, Math.min(1, (RP * RP + DP * DP - D * D) / (2 * RP * DP))));
-    var goff = Math.atan2(DP * Math.sin(psi), RP - DP * Math.cos(psi));
-    var ex = [], ey = [], be = [], i;
-    for (i = 0; i < NB; i++) {
-      var gi = A0 + i * TAU / NB + goff;
-      ex.push(D * Math.cos(gi)); ey.push(D * Math.sin(gi)); be.push(gi + PI);
-    }
-    var phh = Math.acos(Math.max(-1, Math.min(1, (RHO * RHO - RR * RR - D * D) / (2 * RR * D))));
-    var vr = Math.sqrt(RHO * RHO - D * D * Math.sin(HALF) * Math.sin(HALF)) - D * Math.cos(HALF);
-
-    g.clearRect(0, 0, vb[0], vb[1]);
-    g.globalCompositeOperation = 'source-over';
-    g.globalAlpha = 1;
-    g.save();
-    g.translate(CX, CY);
-    g.lineCap = 'round'; g.lineJoin = 'round';
-
-    /* --- the field ------------------------------------------------------- */
-    var build = Rf > 1e8 ? 1 : clamp((Rf + 10) / (RH + 16));
-    var wash = g.createRadialGradient(0, 0, 0, 0, 0, RH);
-    wash.addColorStop(0, css(M.coral, 0.10 * (1 - G0) * build));
-    wash.addColorStop(0.75, css(M.coral, 0.05 * (1 - G0) * build));
-    wash.addColorStop(1, css(M.coral, 0));
-    g.fillStyle = wash;
-    g.beginPath(); g.arc(0, 0, RH, 0, TAU); g.fill();
-    if (G0 > 0.01) {
-      var mg = g.createRadialGradient(0, 0, 0, 0, 0, r + 8);
-      mg.addColorStop(0, css(M.mint, 0.22 * G0));
-      mg.addColorStop(0.7, css(M.mint, 0.13 * G0));
-      mg.addColorStop(1, css(M.mint, 0.03 * G0));
-      g.fillStyle = mg;
-      g.beginPath(); g.arc(0, 0, r + 8, 0, TAU); g.fill();
-    }
-    if (pR > 0) {
-      var pc = mix(M.coral, M.mint, pG);
-      var pg = g.createRadialGradient(0, 0, Math.max(0, pR - 14), 0, 0, pR + 10);
-      pg.addColorStop(0, css(pc, 0));
-      pg.addColorStop(0.6, css(pc, 0.26 * pA));
-      pg.addColorStop(1, css(pc, 0));
-      g.fillStyle = pg;
-      g.beginPath(); g.arc(0, 0, pR + 10, 0, TAU); g.fill();
-    }
-
-    var lit = M.lit, gh = M.ghost, d, b;
-    for (b = 0; b <= 10; b++) { lit[b].length = 0; gh[b].length = 0; }
-    var coreList = [];
-    for (d = 0; d < M.n; d++) {
-      var s = M.s[d], x = M.x[d], y = M.y[d];
-      var vis = Rf > 1e8 ? 1 : ease((Rf - s + 4) / 16);
-      if (vis <= 0.004) continue;
-      var sd = 1e9;
-      if (s > r - 6) {
-        for (i = 0; i < NB; i++) {
-          var dx = x - ex[i], dy = y - ey[i], v = RHO - Math.sqrt(dx * dx + dy * dy);
-          if (v < sd) sd = v;
-        }
-      }
-      var tw = REDUCED ? 0.92 : 0.84 + 0.14 * Math.sin(T / 2600 * TAU + M.f[d] * TAU);
-      var boost = pR > 0 ? pA * Math.exp(-((s - pR) / 12) * ((s - pR) / 12)) : 0;
-      var al = vis * Math.min(1, tw + 0.45 * boost);
-      if (M.core[d]) { coreList.push(d, al); continue; }
-      if (sd > -3) lit[Math.round(al * 10)].push(d);
-      if (sd < 3) gh[Math.round(10 * vis * clamp((3 - sd) / 7))].push(d);
-    }
-    function dots(list, rad) {
-      g.beginPath();
-      for (var q = 0; q < list.length; q++) {
-        var e = list[q];
-        g.moveTo(M.x[e] + rad, M.y[e]);
-        g.arc(M.x[e], M.y[e], rad, 0, TAU);
-      }
-    }
-    for (b = 1; b <= 10; b++) {
-      if (!lit[b].length) continue;
-      g.fillStyle = css(M.coral, 0.13 * b / 10);
-      dots(lit[b], 4.6); g.fill();
-    }
-    for (b = 1; b <= 10; b++) {
-      if (!lit[b].length) continue;
-      g.fillStyle = css(M.coral, 0.95 * b / 10);
-      dots(lit[b], 2.05); g.fill();
-    }
-    /* the grants the gate keeps: coral until the blades lock, then mint. The
-       mint grows from each dot's centre over the coral, which leaves only once
-       it is covered, so the change never passes through a muddy mix */
-    for (var q = 0; q < coreList.length; q += 2) {
-      d = coreList[q];
-      var cs = M.s[d], gd = gateAt(u, cs), on = gateOn(u, cs), ca = coreList[q + 1];
-      var sw = (REDUCED || u < CLOSE1 - 250 || u > UNGATE) ? 0 : 0.5 * Math.sin(PI * on);
-      var hr = 4.8 * (1 + sw), cr = 2.15 * (1 + sw);
-      var co = 1 - ease((gd - 0.55) / 0.45);
-      if (co > 0.01) {
-        g.fillStyle = css(M.coral, 0.13 * ca * co);
-        g.beginPath(); g.arc(M.x[d], M.y[d], hr, 0, TAU); g.fill();
-        g.fillStyle = css(M.coral, 0.95 * ca * co);
-        g.beginPath(); g.arc(M.x[d], M.y[d], cr, 0, TAU); g.fill();
-      }
-      if (gd > 0.01) {
-        g.fillStyle = css(M.mint, 0.2 * ca * gd);
-        g.beginPath(); g.arc(M.x[d], M.y[d], hr * Math.sqrt(gd), 0, TAU); g.fill();
-        g.fillStyle = css(M.mint7, 0.95 * ca);
-        g.beginPath(); g.arc(M.x[d], M.y[d], cr * Math.sqrt(gd), 0, TAU); g.fill();
-      }
-    }
-    var hub = mix(M.coral, M.mint7, G0);
-    g.fillStyle = css(hub, 1);
-    g.beginPath(); g.arc(0, 0, 3.8, 0, TAU); g.fill();
-    g.strokeStyle = css(hub, 0.42); g.lineWidth = 1.5;
-    g.beginPath(); g.arc(0, 0, 7.5, 0, TAU); g.stroke();
-
-    /* --- the blades ------------------------------------------------------ */
-    /* the opening's outline: one arc of each blade's edge, corner to corner */
-    var vx = [], vy = [], apc = [];
-    for (i = 0; i < NB; i++) { vx.push(vr * Math.cos(be[i] + HALF)); vy.push(vr * Math.sin(be[i] + HALF)); }
-    for (i = 0; i < NB; i++) {
-      var pi0 = (i + NB - 1) % NB;
-      apc.push([be[i] + wrap(Math.atan2(vy[pi0] - ey[i], vx[pi0] - ex[i]) - be[i]),
-                be[i] + wrap(Math.atan2(vy[i] - ey[i], vx[i] - ex[i]) - be[i])]);
-    }
-    function apArc(i, f0, f1, c) {
-      var c0 = apc[i][0], c1 = apc[i][1];
-      (c || g).arc(ex[i], ey[i], RHO, c0 + (c1 - c0) * f0, c0 + (c1 - c0) * f1, false);
-    }
-    function apPath(c) { for (var i4 = 0; i4 < NB; i4++) apArc(i4, 0, 1, c); c.closePath(); }
-    var shut = 0.35 + 0.65 * (R_OPEN - r) / (R_OPEN - R_CORE);
-    var fills = [], ang = [];
-    for (i = 0; i < NB; i++) {
-      var I = 0.5 + 0.5 * Math.cos(be[i] - LIGHT);
-      var gr = g.createLinearGradient(r * Math.cos(be[i]), r * Math.sin(be[i]),
-                                      RR * Math.cos(be[i]), RR * Math.sin(be[i]));
-      gr.addColorStop(0, css(mix(M.blue5, M.white, 0.16 + 0.34 * I), 1));
-      gr.addColorStop(0.09, css(mix(M.blue5, M.white, 0.04 + 0.16 * I), 1));
-      gr.addColorStop(0.45, css(mix(M.blue5, M.blue7, 0.36 * (1 - I)), 1));
-      gr.addColorStop(1, css(mix(M.blue5, M.blue7, 0.5 + 0.34 * (1 - I)), 1));
-      fills.push(gr);
-      /* where the edge circle meets the drawing rim, measured round its centre */
-      var bx = RR * Math.cos(be[i] + phh), by = RR * Math.sin(be[i] + phh);
-      var ax = RR * Math.cos(be[i] - phh), ay = RR * Math.sin(be[i] - phh);
-      ang.push([be[i] + wrap(Math.atan2(by - ey[i], bx - ex[i]) - be[i]),
-                be[i] + wrap(Math.atan2(ay - ey[i], ax - ex[i]) - be[i])]);
-    }
-    /* A blade lies under exactly the four behind it. Where it is covered, it
-       is inside one of their edge discs' complements; where it is visible, it
-       is inside all four discs. So each blade is painted once, clipped to
-       those four discs, and the nine painted regions never overlap: no
-       painting order is needed, and every boundary between two regions is a
-       blade edge, which is stroked on top. */
-    function under(i) {
-      g.save();
-      for (var m = 1; m <= 4; m++) {
-        var k = (i - m + NB) % NB;
-        g.beginPath(); g.arc(ex[k], ey[k], RHO, 0, TAU); g.clip();
-      }
-    }
-    for (i = 0; i < NB; i++) {
-      under(i);
-      g.fillStyle = fills[i];
-      g.beginPath();
-      g.arc(0, 0, RR, be[i] - phh, be[i] + phh, false);
-      g.arc(ex[i], ey[i], RHO, ang[i][0], ang[i][1], true);
-      g.closePath(); g.fill();
-      g.restore();
-    }
-    /* each edge, with the shadow it throws on whatever lies under it,
-       including the grants in the opening */
-    for (i = 0; i < NB; i++) {
-      var e0 = ang[i][0] + 0.004, e1 = ang[i][1] - 0.004;
-      under(i);
-      g.strokeStyle = css(M.blue7, 0.1 * shut); g.lineWidth = 16;
-      g.beginPath(); g.arc(ex[i], ey[i], RHO, e0, e1, true); g.stroke();
-      g.strokeStyle = css(M.blue7, 0.13 * shut); g.lineWidth = 6;
-      g.stroke();
-      g.strokeStyle = css(M.blue7, 0.7); g.lineWidth = 1;
-      g.stroke();
-      g.strokeStyle = css(M.white, 0.55); g.lineWidth = 1.1;
-      g.beginPath(); g.arc(ex[i], ey[i], RHO + 1.5, e0, e1, true); g.stroke();
-      g.restore();
-    }
-
-
-    /* the grants the blades now cover, still visible on them, dimmed */
-    for (b = 1; b <= 10; b++) {
-      if (!gh[b].length) continue;
-      g.fillStyle = css(mix(M.coral, M.white, 0.4), 0.26 * b / 10);
-      dots(gh[b], 1.75); g.fill();
-    }
-
-    /* the opening itself: mint while gated, and one sweep of light round it
-       when the blades lock */
-    if (G0 > 0.01) {
-      g.strokeStyle = css(M.mint, 0.8 * G0); g.lineWidth = 1.8;
-      g.beginPath();
-      for (i = 0; i < NB; i++) apArc(i, 0, 1);
-      g.closePath(); g.stroke();
-    }
-    var sk = (u - CLOSE1) / SWEEP;
-    if (!REDUCED && sk > 0 && sk < 1) {
-      var th = -PI / 2 + TAU * ease(sk), env = Math.sin(PI * sk);
-      for (i = 0; i < NB; i++) {
-        for (var f = 0; f < 4; f++) {
-          var w = wrap(be[i] + (f + 0.5 - 2) / 4 * 2 * HALF - th);
-          var al2 = env * Math.exp(-(w / 0.7) * (w / 0.7));
-          if (al2 < 0.02) continue;
-          g.strokeStyle = css(M.mint, 0.35 * al2); g.lineWidth = 9;
-          g.beginPath(); apArc(i, f / 4, (f + 1) / 4); g.stroke();
-          g.strokeStyle = css(M.white, 0.95 * al2); g.lineWidth = 2.6;
-          g.beginPath(); apArc(i, f / 4, (f + 1) / 4); g.stroke();
-        }
-      }
-    }
-
-    /* --- the housing ----------------------------------------------------- */
-    var sh = g.createRadialGradient(0, 0, RH - 16, 0, 0, RH);
-    sh.addColorStop(0, css(M.blue7, 0));
-    sh.addColorStop(1, css(M.blue7, 0.26 * shut));
-    g.fillStyle = sh;
-    g.beginPath(); g.arc(0, 0, RH, 0, TAU); g.arc(0, 0, RH - 16, 0, TAU, true); g.fill();
-    var bz = g.createLinearGradient(-RB, -RB, RB, RB);
-    bz.addColorStop(0, css(M.white, 1));
-    bz.addColorStop(0.5, css(mix(M.hair, M.white, 0.45), 1));
-    bz.addColorStop(1, css(mix(M.hair, M.muted, 0.18), 1));
-    g.fillStyle = bz;
-    g.beginPath(); g.arc(0, 0, RB, 0, TAU); g.arc(0, 0, RH, 0, TAU, true); g.fill();
-    var lip = g.createLinearGradient(-RH, -RH, RH, RH);
-    lip.addColorStop(0, css(M.muted, 0.7));
-    lip.addColorStop(1, css(M.white, 0.9));
-    g.strokeStyle = lip; g.lineWidth = 1.6;
-    g.beginPath(); g.arc(0, 0, RH + 0.6, 0, TAU); g.stroke();
-    g.strokeStyle = css(M.muted, 0.35); g.lineWidth = 1;
-    g.beginPath(); g.arc(0, 0, RB - 0.5, 0, TAU); g.stroke();
-    /* the drive ring's graduations turn with the opening; the pins do not */
-    g.strokeStyle = css(M.muted, 0.42); g.lineWidth = 1;
-    g.beginPath();
-    for (var k2 = 0; k2 < 72; k2++) {
-      var ta = goff + k2 * TAU / 72, r0 = k2 % 8 === 0 ? RB - 7 : RB - 4.2;
-      g.moveTo(r0 * Math.cos(ta), r0 * Math.sin(ta));
-      g.lineTo((RB - 1.8) * Math.cos(ta), (RB - 1.8) * Math.sin(ta));
-    }
-    g.stroke();
-    for (i = 0; i < NB; i++) {
-      var pa = A0 + i * TAU / NB, px = RP * Math.cos(pa), py = RP * Math.sin(pa);
-      g.fillStyle = css(mix(M.hair, M.muted, 0.55), 1);
-      g.beginPath(); g.arc(px, py, 2.7, 0, TAU); g.fill();
-      g.fillStyle = css(M.white, 0.95);
-      g.beginPath(); g.arc(px - 0.8, py - 0.8, 1.05, 0, TAU); g.fill();
-    }
-    g.restore();
-  }
-
-  /* ==================================================================== */
   /* link — tangle                                                       */
   /* ==================================================================== */
   function link(g, vb, t, st) {
@@ -8990,6 +8622,683 @@
     }
   }
 
+  /* ==================================================================== */
+  /* grant — topograph-432                                               */
+  /* ==================================================================== */
+  function grant(g, vb, t, st) {
+    /* A least privilege fix, drawn as a place. The cluster is a hall of glass
+       server blades standing in rows. Inside each blade its pods glow as small
+       lit blocks, and on top of each blade sits the one agent a daemonset puts
+       on every node. In front, on its own disc, is the chart install: a gem for
+       its ServiceAccount.
+
+       Before the change the ClusterRole rendered the same rules whatever the
+       engine and provider, so this install, one that never talks to the
+       Kubernetes API (provider test, engine slurm), could still list every pod,
+       get and list every node and get every daemonset, cluster wide. That reach
+       is drawn as light: one arc from the gem to every pod, every node and every
+       daemonset agent. Each rule leaves at its own elevation, so the three rules
+       form three canopies over the whole hall. The arcs are real trajectories,
+       z(d) = z0 + d tan(a) - K d^2 with K fixed by the target, and a bead of
+       light flies each one at constant horizontal speed, taking the time a
+       projectile would. Every arc starts at the gem, so they crowd there, and
+       that crowding is the bright plume. Nothing is painted to look bright.
+
+       Then the change: two glass walls, engine.name and provider.name, rise out
+       of the install's disc. Their rising edge is the test. When the outer
+       wall's edge reaches an arc, at the height that arc really crosses it,
+       the arc is withdrawn: its light pulls back out of the hall into the gem.
+       The low canopy (pods list) is met first, then nodes get/list, then
+       daemonsets get, because that is the order the edge meets them. The floor
+       goes calm, the gem turns mint, and for this install nothing reaches the
+       cluster. The cluster itself keeps running the whole time.
+
+       The hall (12 nodes, their pods, the layout) is illustrative, not measured.
+
+       Measured, in preview-grant.html (strict mode, DPR 2):
+       - A ballistic arc is a parabola and this view is orthographic, so every
+         arc, and every stretch of one, is drawn as one exact quadratic Bezier.
+         That replaced 26-point polylines and cut the mean frame from about 10
+         to about 7 ms with the raster forced (caustic, same harness: 4.4 ms).
+       - Worst frame 614 draw calls, mean 302. The widest two glows are one
+         path each; only the core is stroked arc by arc, so crowding still adds.
+       - The walls rise at constant speed through the canopies (zero speed at
+         both ends); with smootherstep the three rules were cut 200 ms apart and
+         read as one event. Now pods list ~8.2 s, nodes get/list ~8.7 s,
+         daemonsets get ~9.4 to 9.8 s into each 15.6 s cycle.
+       - A straight coral to mint mix turned the gem slate grey mid-way; it runs
+         along the site's ramp (coral, violet, blue, mint) instead.
+       - Darkest painted pixel luminance 0.064 (floor #3a3a3a is 0.042). */
+    var TAU = Math.PI * 2;
+    var W = vb[0], H = vb[1];
+    var P = 15600;                               /* one cycle */
+    var PHI0 = -0.62, SWAY = 0.07, SWP = 23000, EL = 0.6;
+    var GRAV = 1.5e-6;                           /* world units per ms^2 */
+    var HG = 1.45, R1 = 0.42, R2 = 0.56;         /* the two walls */
+    var UP0 = 6300, UP1 = 10500, RT = 1300, DN0 = 13700, DN1 = 14800;
+    var RA = 0.2;                                /* the rise: speeds up, holds, settles */
+    var YT = 70, YB = H - 104, XM = 12;
+    var ANG = [0.4, 0.74, 1.06];                 /* pods list, nodes get/list, daemonsets get */
+    var BL = 0.5, BT = 0.17, BH = 0.52;          /* a blade: length, thickness, height */
+
+    function rise(u) {
+      u = u < 0 ? 0 : u > 1 ? 1 : u;
+      var vm = 1 / (1 - RA);
+      if (u < RA) return vm * u * u / (2 * RA);
+      if (u > 1 - RA) return 1 - vm * (1 - u) * (1 - u) / (2 * RA);
+      return vm * (RA / 2 + u - RA);
+    }
+
+    var M = grant.cache;
+    if (!M) {
+      var o = {}, i, j, k;
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      o.c = {
+        coral: hex('--coral-500', '#d9376e'), coral7: hex('--coral-700', '#a01c3f'),
+        mint: hex('--mint-500', '#0b93ab'), mint7: hex('--mint-700', '#0a6b7c'),
+        blue: hex('--blue-500', '#2456dc'), blue7: hex('--blue-700', '#163d9a'),
+        violet: hex('--violet-500', '#a66cf0'), violet7: hex('--violet-700', '#6b35c4'),
+        amber: hex('--amber-500', '#d96a06'), amber7: hex('--amber-700', '#9a4906'),
+        raised: hex('--raised', '#ffffff'), hair: hex('--hair', '#e5e2da'),
+        hair2: hex('--hair2', '#cfcbc1'), muted: hex('--muted', '#5f5b53')
+      };
+      var hash = function (a, b) { var s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+
+      /* the install: a disc at the origin, the gem above a glass plinth */
+      o.src = [0, 0, 0.5];
+      o.disc = 0.8;
+      /* the hall: three rows of four blades */
+      var PX = 0.64, PY = 0.78, DC = 2.35;
+      var FW = 0.5 + 3 * PX + BL, FD = 0.56 + 2 * PY + BT;
+      var FX0 = -FW / 2, FY0 = DC - FD / 2;
+      o.floor = [FX0, FX0 + FW, FY0, FY0 + FD];
+      o.nodes = [];
+      var SL = [[-1, 0], [1, 0], [-1, 1], [1, 1]];
+      for (j = 0; j < 3; j++) {
+        for (i = 0; i < 4; i++) {
+          var cx = FX0 + 0.25 + BL / 2 + i * PX, cy = FY0 + 0.28 + BT / 2 + j * PY;
+          var nd = { cx: cx, cy: cy, x0: cx - BL / 2, x1: cx + BL / 2, y0: cy - BT / 2, y1: cy + BT / 2,
+                     pods: [], arcs: [] };
+          var np = 2 + Math.floor(hash(i + 7, j + 3) * 2.999);
+          var off = Math.floor(hash(i + 2, j + 11) * 4);
+          for (k = 0; k < np; k++) {
+            var s2 = SL[(off + k) % 4];
+            nd.pods.push({ x: cx + s2[0] * 0.115, y: cy, z: 0.09 + s2[1] * 0.2,
+                           ns: Math.floor(hash(i * 4 + j, k + 1) * 1.999), ph: hash(i + k, j + 9) });
+          }
+          nd.ag = [cx - 0.17, cy, BH + 0.045];
+          o.nodes.push(nd);
+        }
+      }
+
+      /* the arcs: every pod, every node, every daemonset agent */
+      var sx = o.src[0], sy = o.src[1], sz = o.src[2];
+      o.arcs = [];
+      var amin = 1e9, amax = -1e9;
+      var addArc = function (fam, nd, tx, ty, tz) {
+        var dx = tx - sx, dy = ty - sy, D = Math.hypot(dx, dy), az = Math.atan2(dy, dx);
+        var tn = Math.tan(ANG[fam]), Kc = (D * tn - (tz - sz)) / (D * D);
+        var a = { fam: fam, D: D, az: az, ca: Math.cos(az), sa: Math.sin(az), tn: tn, K: Kc,
+                  T: Math.sqrt(2 * Kc * D * D / GRAV) };
+        a.z1 = sz + R1 * tn - Kc * R1 * R1;
+        a.z2 = sz + R2 * tn - Kc * R2 * R2;
+        a.L = 250 + fam * 330 + 650 * hash(o.arcs.length, 3);
+        a.Pb = 2300 + 800 * hash(o.arcs.length, 7);
+        if (az < amin) amin = az;
+        if (az > amax) amax = az;
+        nd.arcs.push(a);
+        o.arcs.push(a);
+        return a;
+      };
+      for (i = 0; i < o.nodes.length; i++) {
+        var n2 = o.nodes[i];
+        for (k = 0; k < n2.pods.length; k++) {
+          var pp = n2.pods[k];
+          pp.arc = addArc(0, n2, pp.x, pp.y, pp.z + 0.11);
+        }
+        n2.arc = addArc(1, n2, n2.cx + 0.1, n2.cy, BH);
+        n2.agArc = addArc(2, n2, n2.ag[0], n2.ag[1], n2.ag[2]);
+      }
+      /* when each wall's rising edge meets each arc: invert the rise */
+      var riseInv = function (z) {
+        var lo = 0, hi = 1;
+        for (var q = 0; q < 40; q++) { var m = (lo + hi) / 2; if (HG * rise(m) < z) lo = m; else hi = m; }
+        return UP0 + (UP1 - UP0) * (lo + hi) / 2;
+      };
+      for (i = 0; i < o.arcs.length; i++) {
+        o.arcs[i].t1 = riseInv(o.arcs[i].z1);
+        o.arcs[i].cut = riseInv(o.arcs[i].z2);
+      }
+      o.A0 = amin - 0.6; o.A1 = amax + 0.6;
+      o.NW = 22;
+
+      /* fit the whole scene, at every sway, into the band between the labels */
+      var bx0 = 1e9, bx1 = -1e9, by0 = 1e9, by1 = -1e9;
+      var pts = [], f = o.floor;
+      pts.push([f[0], f[2], -0.12], [f[1], f[2], -0.12], [f[0], f[3], BH + 0.12], [f[1], f[3], BH + 0.12],
+               [f[1], f[2], BH + 0.12], [f[0], f[2], BH + 0.12]);
+      for (i = 0; i < 24; i++) pts.push([o.disc * Math.cos(i / 24 * TAU), o.disc * Math.sin(i / 24 * TAU), -0.1]);
+      for (i = 0; i <= 12; i++) {
+        var aa = o.A0 + (o.A1 - o.A0) * i / 12;
+        pts.push([R2 * Math.cos(aa), R2 * Math.sin(aa), HG + 0.05]);
+      }
+      for (i = 0; i < o.arcs.length; i++) {
+        var ar = o.arcs[i];
+        for (k = 0; k <= 24; k++) {
+          var dk = ar.D * k / 24;
+          pts.push([sx + dk * ar.ca, sy + dk * ar.sa, sz + dk * ar.tn - ar.K * dk * dk]);
+        }
+      }
+      pts.push([0, 0, sz + 0.55]);
+      for (k = 0; k <= 8; k++) {
+        var ph = PHI0 + SWAY * (k / 4 - 1), cp = Math.cos(ph), sp = Math.sin(ph);
+        for (i = 0; i < pts.length; i++) {
+          var X = pts[i][0] * cp - pts[i][1] * sp;
+          var Y = pts[i][2] * Math.cos(EL) + (pts[i][0] * sp + pts[i][1] * cp) * Math.sin(EL);
+          if (X < bx0) bx0 = X; if (X > bx1) bx1 = X;
+          if (Y < by0) by0 = Y; if (Y > by1) by1 = Y;
+        }
+      }
+      var PAD = 8;
+      o.S = Math.min((W - 2 * XM - 2 * PAD) / (bx1 - bx0), (YB - YT - 2 * PAD) / (by1 - by0));
+      o.CX = W / 2 - o.S * (bx0 + bx1) / 2;
+      o.CY = (YT + YB) / 2 + o.S * (by0 + by1) / 2;
+      grant.cache = M = o;
+    }
+
+    /* --- time ------------------------------------------------------------ */
+    var RED = REDUCED;
+    var c = RED ? 12500 : t % P;
+    var phi = PHI0 + (RED ? 0 : SWAY * Math.sin(TAU * t / SWP));
+    var cp = Math.cos(phi), sp = Math.sin(phi), ce = Math.cos(EL), se = Math.sin(EL);
+    var S = M.S, CX = M.CX, CY = M.CY, C = M.c;
+    var hgt = 0;                                 /* the walls' height */
+    if (c >= UP0 && c < DN0) hgt = HG * rise((c - UP0) / (UP1 - UP0));
+    else if (c >= DN0 && c < DN1) hgt = HG * (1 - ease((c - DN0) / (DN1 - DN0)));
+    var wv = ease(hgt / 0.3);
+    /* toward the viewer, for glass that brightens at grazing angles */
+    var vx = -sp * ce, vy = -cp * ce, vz = se;
+
+    function col(a, al) { return 'rgba(' + (a[0] | 0) + ',' + (a[1] | 0) + ',' + (a[2] | 0) + ',' + al + ')'; }
+    function mix(a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; }
+    var PX_ = 0, PY_ = 0;
+    function pj(x, y, z) {
+      PX_ = CX + S * (x * cp - y * sp);
+      PY_ = CY - S * (z * ce + (x * sp + y * cp) * se);
+    }
+    function dep(x, y, z) { return -(x * sp + y * cp) * ce + z * se; }
+    function poly(p) {
+      g.beginPath();
+      for (var q = 0; q < p.length; q += 3) {
+        pj(p[q], p[q + 1], p[q + 2]);
+        if (q === 0) g.moveTo(PX_, PY_); else g.lineTo(PX_, PY_);
+      }
+      g.closePath();
+    }
+    function floorGlow(x, y, r, colr, al) {
+      pj(x, y, 0);
+      g.save();
+      g.translate(PX_, PY_); g.scale(1, se);
+      var rg = g.createRadialGradient(0, 0, 0, 0, 0, r * S);
+      rg.addColorStop(0, col(colr, al)); rg.addColorStop(1, col(colr, 0));
+      g.fillStyle = rg;
+      g.beginPath(); g.arc(0, 0, r * S, 0, TAU); g.fill();
+      g.restore();
+    }
+    function halo(x, y, r, colr, al) {
+      var rg = g.createRadialGradient(x, y, 0, x, y, r);
+      rg.addColorStop(0, col(colr, al)); rg.addColorStop(1, col(colr, 0));
+      g.fillStyle = rg;
+      g.beginPath(); g.arc(x, y, r, 0, TAU); g.fill();
+    }
+
+    /* --- per-arc state ---------------------------------------------------- */
+    var arcs = M.arcs, NA = arcs.length, a, n, q;
+    var live = 0;
+    for (n = 0; n < NA; n++) {
+      a = arcs[n];
+      var v = a.D / a.T, dhi;
+      if (RED) dhi = 0;
+      else {
+        dhi = Math.max(0, Math.min(a.D, v * (c - a.L)));
+        if (c > a.cut) dhi = Math.min(dhi, a.D * (1 - ease((c - a.cut) / RT)));
+      }
+      a.dhi = dhi;
+      a.R = ease((dhi - (a.D - 0.3)) / 0.3);
+      /* a landing swells the target and never pops: (s e^(1-s))^2 */
+      var pulse = 0;
+      if (a.R > 0) {
+        var m0 = Math.floor((c - a.L - a.T) / a.Pb);
+        for (var m = m0; m >= Math.max(0, m0 - 1); m--) {
+          var ta = a.L + m * a.Pb + a.T;
+          if (ta > a.cut || ta > c) continue;
+          var s = (c - ta) / 240;
+          if (s < 6) pulse = Math.max(pulse, s * s * Math.exp(2 - 2 * s));
+        }
+      }
+      a.glow = a.R * (0.65 + 0.35 * pulse);
+      live += dhi / a.D;
+    }
+    live /= NA;
+    var warm = c < UP0 ? 1 : c < DN0 ? live : ease((c - DN0 - 200) / 1100);
+    if (RED) warm = 0;
+    /* coral to mint along the site's own ramp (mint, blue, violet, coral), so
+       the gem never passes through the grey a straight mix would give */
+    function ramp(L, w) {
+      var k = Math.max(0, Math.min(2.999, w * 3)), i = Math.floor(k);
+      return mix(L[i], L[i + 1], k - i);
+    }
+    var gemC = ramp([C.mint, C.blue, C.violet, C.coral], warm);
+    var gemC7 = ramp([C.mint7, C.blue7, C.violet7, C.coral7], warm);
+
+    g.clearRect(0, 0, W, H);
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.lineCap = 'round'; g.lineJoin = 'round';
+
+    /* --- the hall floor --------------------------------------------------- */
+    var f = M.floor, FT = 0.1;
+    g.fillStyle = col(mix(C.hair2, C.blue, 0.04), 1);
+    poly([f[1], f[2], 0, f[1], f[3], 0, f[1], f[3], -FT, f[1], f[2], -FT]); g.fill();
+    g.fillStyle = col(mix(C.hair, C.blue, 0.03), 1);
+    poly([f[0], f[2], 0, f[1], f[2], 0, f[1], f[2], -FT, f[0], f[2], -FT]); g.fill();
+    pj(f[0], f[3], 0); var gx0 = PX_, gy0 = PY_;
+    pj(f[1], f[2], 0);
+    var fg = g.createLinearGradient(gx0, gy0, PX_, PY_);
+    fg.addColorStop(0, col(C.raised, 1));
+    fg.addColorStop(1, col(mix(C.hair, C.blue, 0.04), 1));
+    g.fillStyle = fg;
+    poly([f[0], f[2], 0, f[1], f[2], 0, f[1], f[3], 0, f[0], f[3], 0]); g.fill();
+    g.strokeStyle = col(C.raised, 1); g.lineWidth = 1.5;
+    g.beginPath();
+    pj(f[0], f[2], 0); g.moveTo(PX_, PY_);
+    pj(f[1], f[2], 0); g.lineTo(PX_, PY_);
+    pj(f[1], f[3], 0); g.lineTo(PX_, PY_);
+    g.stroke();
+
+    /* coral light pooled on the floor wherever the reach lands */
+    var nodes = M.nodes, NN = nodes.length, nd, k2;
+    for (n = 0; n < NN; n++) {
+      nd = nodes[n];
+      var pool = 0;
+      for (k2 = 0; k2 < nd.arcs.length; k2++) pool += nd.arcs[k2].glow;
+      nd.pool = pool / nd.arcs.length;
+      nd.d = dep(nd.cx, nd.cy, 0);
+    }
+    /* the whole floor takes the coral light, as strongly as the reach lands */
+    var wash = 0;
+    for (n = 0; n < NN; n++) wash += nodes[n].pool / NN;
+    if (wash > 0.01) {
+      g.beginPath();
+      pj(f[0], f[2], 0); g.moveTo(PX_, PY_);
+      pj(f[1], f[2], 0); g.lineTo(PX_, PY_);
+      pj(f[1], f[3], 0); g.lineTo(PX_, PY_);
+      pj(f[0], f[3], 0); g.lineTo(PX_, PY_);
+      g.closePath();
+      /* the gradient is a circle on the floor, so it is laid in floor space */
+      pj((f[0] + f[1]) / 2, (f[2] + f[3]) / 2, 0);
+      var wr = 0.55 * S * Math.hypot(f[1] - f[0], f[3] - f[2]);
+      g.save();
+      g.translate(PX_, PY_); g.scale(1, se);
+      var wgr = g.createRadialGradient(0, 0, 0, 0, 0, wr);
+      wgr.addColorStop(0, col(C.coral, 0.24 * wash));
+      wgr.addColorStop(0.6, col(C.coral, 0.15 * wash));
+      wgr.addColorStop(1, col(C.coral, 0.03 * wash));
+      g.fillStyle = wgr;
+      g.fill();
+      g.restore();
+    }
+    /* contact shadows, all in one path: two soft rings, painted once each */
+    for (var sh = 0; sh < 2; sh++) {
+      g.fillStyle = col(C.muted, 0.05);
+      g.beginPath();
+      for (n = 0; n < NN; n++) {
+        nd = nodes[n];
+        pj(nd.cx + 0.05, nd.cy + 0.03, 0);
+        g.moveTo(PX_ + (0.36 - 0.1 * sh) * S, PY_);
+        g.ellipse(PX_, PY_, (0.36 - 0.1 * sh) * S, (0.36 - 0.1 * sh) * S * se * 0.7, 0, 0, TAU);
+      }
+      g.fill();
+    }
+
+    /* --- the blades, back to front --------------------------------------- */
+    var order = nodes.slice().sort(function (p1, p2) { return p1.d - p2.d; });
+    var tAbs = RED ? 1e9 : t;
+    var NSC = [C.blue, C.violet], NSC7 = [C.blue7, C.violet7];
+    for (n = 0; n < NN; n++) {
+      nd = order[n];
+      var x0 = nd.x0, x1 = nd.x1, y0 = nd.y0, y1 = nd.y1;
+      var reach = nd.arc.glow, tint = mix(C.blue, C.coral, 0.8 * reach);
+      /* back walls and base */
+      g.fillStyle = col(tint, 0.07 + 0.05 * reach);
+      poly([x0, y0, 0, x0, y1, 0, x1, y1, 0, x1, y1, BH, x0, y1, BH, x0, y0, BH]); g.fill();
+      /* pods, lit blocks inside the glass */
+      var pods = nd.pods;
+      for (k2 = 0; k2 < pods.length; k2++) pods[k2].d = dep(pods[k2].x, pods[k2].y, pods[k2].z);
+      var po = pods.slice().sort(function (p1, p2) { return p1.d - p2.d; });
+      for (k2 = 0; k2 < po.length; k2++) {
+        var pd = po[k2], hx = 0.065, hy = 0.05, z0 = pd.z, z1 = pd.z + 0.11;
+        var on = ease((tAbs - 120 - 70 * (n * 3 + k2)) / 520);
+        if (on <= 0) continue;
+        var br = RED ? 0.5 : 0.5 + 0.5 * Math.sin(TAU * (t / 3400 + pd.ph));
+        var pc = NSC[pd.ns], pc7 = NSC7[pd.ns], pr = pd.arc.glow;
+        var X0 = pd.x - hx, X1 = pd.x + hx, Y0 = pd.y - hy, Y1 = pd.y + hy;
+        pj(X0, Y0, z0); var xl = PX_;
+        pj(X1, Y1, z0); var xr = PX_;
+        pj(X1, Y0, z0);
+        var kk = Math.max(0, Math.min(1, (PX_ - xl) / (xr - xl)));
+        var sg = g.createLinearGradient(xl, 0, xr, 0);
+        var cf = col(mix(mix(pc, C.raised, 0.08 * br), C.coral, 0.6 * pr), on);
+        var cs2 = col(mix(mix(pc, pc7, 0.3), C.coral7, 0.55 * pr), on);
+        sg.addColorStop(0, cf); sg.addColorStop(kk, cf); sg.addColorStop(kk, cs2); sg.addColorStop(1, cs2);
+        g.fillStyle = sg;
+        poly([X0, Y0, z0, X1, Y0, z0, X1, Y1, z0, X1, Y1, z1, X1, Y0, z1, X0, Y0, z1]); g.fill();
+        g.fillStyle = col(mix(mix(pc, C.raised, 0.3 + 0.2 * br), C.coral, 0.5 * pr), on);
+        poly([X0, Y0, z1, X1, Y0, z1, X1, Y1, z1, X0, Y1, z1]); g.fill();
+      }
+      /* front walls and lid: glass, with a streak of light across the face */
+      pj(x0, y0, BH); var fyt = PY_;
+      pj(x0, y0, 0);
+      var gg = g.createLinearGradient(0, fyt, 0, PY_);
+      gg.addColorStop(0, col(mix(tint, C.raised, 0.4), 0.1 + 0.08 * reach));
+      gg.addColorStop(1, col(tint, 0.2 + 0.12 * reach));
+      g.fillStyle = gg;
+      poly([x0, y0, 0, x1, y0, 0, x1, y1, 0, x1, y1, BH, x1, y0, BH, x0, y0, BH]); g.fill();
+      g.fillStyle = col(C.raised, 0.32);
+      var sk = 0.18 + 0.05 * Math.sin(TAU * t / SWP + n);
+      poly([x0 + BL * (sk + 0.1), y0, BH, x0 + BL * (sk + 0.2), y0, BH, x0 + BL * (sk - 0.02), y0, 0, x0 + BL * (sk - 0.12), y0, 0]);
+      g.fill();
+      g.fillStyle = col(mix(C.raised, tint, 0.2 + 0.3 * reach), 0.7);
+      poly([x0, y0, BH, x1, y0, BH, x1, y1, BH, x0, y1, BH]); g.fill();
+      /* edges: a lit rim on the lid, tinted edges below */
+      g.lineWidth = 0.9;
+      g.strokeStyle = col(mix(C.blue7, C.coral7, reach), 0.3 + 0.4 * reach);
+      g.beginPath();
+      pj(x0, y0, 0); g.moveTo(PX_, PY_);
+      pj(x1, y0, 0); g.lineTo(PX_, PY_);
+      pj(x1, y1, 0); g.lineTo(PX_, PY_);
+      pj(x1, y0, 0); g.moveTo(PX_, PY_);
+      pj(x1, y0, BH); g.lineTo(PX_, PY_);
+      pj(x0, y0, 0); g.moveTo(PX_, PY_);
+      pj(x0, y0, BH); g.lineTo(PX_, PY_);
+      pj(x1, y1, 0); g.moveTo(PX_, PY_);
+      pj(x1, y1, BH); g.lineTo(PX_, PY_);
+      g.stroke();
+      g.strokeStyle = col(reach > 0.02 ? mix(C.raised, C.coral, reach) : C.raised, 0.95); g.lineWidth = 1.3;
+      poly([x0, y0, BH, x1, y0, BH, x1, y1, BH, x0, y1, BH]); g.stroke();
+      /* the daemonset's agent: one on every node, breathing in a wave */
+      pj(nd.ag[0], nd.ag[1], nd.ag[2]);
+      var ax = PX_, ay = PY_, ar = 0.045 * S;
+      var wave = RED ? 0.5 : 0.5 + 0.5 * Math.sin(TAU * (t / 4200 - (nd.cx + nd.cy) * 0.18));
+      var agR = nd.agArc.glow;
+      if (agR > 0.02) halo(ax, ay, ar * 3.2, C.coral, 0.4 * agR);
+      var ag = g.createRadialGradient(ax - ar * 0.35, ay - ar * 0.4, ar * 0.1, ax, ay, ar);
+      ag.addColorStop(0, col(mix(C.amber, C.raised, 0.35 + 0.35 * wave), 1));
+      ag.addColorStop(1, col(mix(C.amber, C.coral, agR), 1));
+      g.fillStyle = ag;
+      g.beginPath(); g.arc(ax, ay, ar, 0, TAU); g.fill();
+    }
+
+    /* --- the install's disc -------------------------------------------- */
+    var DR = M.disc, sx = M.src[0], sy = M.src[1], sz = M.src[2];
+    pj(sx, sy, 0);
+    var dcx = PX_, dcy = PY_;
+    g.save();
+    g.translate(dcx, dcy); g.scale(1, se);
+    g.fillStyle = col(mix(C.hair2, C.blue, 0.04), 1);
+    g.beginPath(); g.arc(0, 0.09 * S * ce / se, DR * S, 0, TAU); g.fill();
+    var dg = g.createLinearGradient(0, -DR * S, 0, DR * S);
+    dg.addColorStop(0, col(C.raised, 1)); dg.addColorStop(1, col(mix(C.hair, C.raised, 0.3), 1));
+    g.fillStyle = dg;
+    g.beginPath(); g.arc(0, 0, DR * S, 0, TAU); g.fill();
+    g.strokeStyle = col(C.raised, 1); g.lineWidth = 1.4 / se;
+    g.beginPath(); g.arc(0, 0, DR * S - 1, Math.PI * 1.05, Math.PI * 1.95); g.stroke();
+    g.restore();
+    /* the grooves the walls rise from */
+    g.lineWidth = 1;
+    for (var wI = 0; wI < 2; wI++) {
+      var RR = wI ? R2 : R1;
+      g.strokeStyle = col(C.mint7, 0.16 + 0.4 * wv);
+      g.beginPath();
+      for (q = 0; q <= 30; q++) {
+        var aq = M.A0 + (M.A1 - M.A0) * q / 30;
+        pj(sx + RR * Math.cos(aq), sy + RR * Math.sin(aq), 0);
+        if (q === 0) g.moveTo(PX_, PY_); else g.lineTo(PX_, PY_);
+      }
+      g.stroke();
+    }
+    floorGlow(sx, sy, 0.66, gemC, 0.24 + 0.12 * warm);
+
+    /* --- the reach ------------------------------------------------------ */
+    /* Any stretch of a parabola is a quadratic Bezier, and an orthographic
+       view is affine, so it stays one on screen: the control point is where
+       the tangent at d0, run for half the stretch, lands. One curve, exact. */
+    function trace(a, d0, d1) {
+      if (d1 <= d0) return false;
+      var z0 = sz + d0 * a.tn - a.K * d0 * d0, h = (d1 - d0) / 2;
+      pj(sx + d0 * a.ca, sy + d0 * a.sa, z0); g.moveTo(PX_, PY_);
+      pj(sx + (d0 + h) * a.ca, sy + (d0 + h) * a.sa, z0 + (a.tn - 2 * a.K * d0) * h);
+      var qx = PX_, qy = PY_;
+      pj(sx + d1 * a.ca, sy + d1 * a.sa, sz + d1 * a.tn - a.K * d1 * d1);
+      g.quadraticCurveTo(qx, qy, PX_, PY_);
+      return true;
+    }
+    /* the two glows are one path each, painted once; the core is stroked arc
+       by arc, so where arcs share a place their light adds up */
+    var BW = [7, 2.8, 1.25], BA = [0.07, 0.1, 0.5];
+    function beams() {
+      for (var b = 0; b < 3; b++) {
+        g.lineWidth = BW[b];
+        g.strokeStyle = col(b === 2 ? C.coral : mix(C.coral, C.raised, 0.1), BA[b]);
+        var any = false;
+        if (b < 2) g.beginPath();
+        for (var nn = 0; nn < NA; nn++) {
+          var aa = arcs[nn];
+          if (aa.dhi <= 0.001) continue;
+          if (b < 2) { any = trace(aa, 0, aa.dhi) || any; continue; }
+          g.beginPath();
+          if (trace(aa, 0, aa.dhi)) g.stroke();
+        }
+        if (b < 2 && any) g.stroke();
+      }
+    }
+    /* --- the two walls ---------------------------------------------------- */
+    function wall(RR, al) {
+      if (hgt <= 0.001) return;
+      var NW = M.NW, A0 = M.A0, A1 = M.A1;
+      pj(sx, sy, 0); var yb = PY_;
+      pj(sx, sy, hgt);
+      var wg = g.createLinearGradient(0, PY_ - S * RR * se, 0, yb + S * RR * se);
+      wg.addColorStop(0, col(C.mint, 0.3 * al * wv));
+      wg.addColorStop(0.3, col(C.mint, 0.09 * al * wv));
+      wg.addColorStop(1, col(C.mint, 0.2 * al * wv));
+      g.fillStyle = wg;
+      /* glass is clearer face on and denser at grazing angles; strips go in
+         groups of GS, each group one path at its mean angle's opacity */
+      var GS = 4;
+      for (var ww = 0; ww < NW; ww += GS) {
+        var we = Math.min(NW, ww + GS), am = A0 + (A1 - A0) * (ww + we) / 2 / NW;
+        var fr = 1 - Math.abs(Math.cos(am) * vx + Math.sin(am) * vy) / ce;
+        g.globalAlpha = 0.45 + 0.55 * fr * fr;
+        g.beginPath();
+        for (var w4 = ww; w4 <= we; w4++) {
+          var a4 = A0 + (A1 - A0) * w4 / NW;
+          pj(sx + RR * Math.cos(a4), sy + RR * Math.sin(a4), 0);
+          if (w4 === ww) g.moveTo(PX_, PY_); else g.lineTo(PX_, PY_);
+        }
+        for (w4 = we; w4 >= ww; w4--) {
+          var a5 = A0 + (A1 - A0) * w4 / NW;
+          pj(sx + RR * Math.cos(a5), sy + RR * Math.sin(a5), hgt);
+          g.lineTo(PX_, PY_);
+        }
+        g.closePath();
+        g.fill();
+      }
+      g.globalAlpha = 1;
+      /* end posts */
+      g.strokeStyle = col(C.mint7, 0.55 * wv); g.lineWidth = 1.1;
+      g.beginPath();
+      pj(sx + RR * Math.cos(A0), sy + RR * Math.sin(A0), 0); g.moveTo(PX_, PY_);
+      pj(sx + RR * Math.cos(A0), sy + RR * Math.sin(A0), hgt); g.lineTo(PX_, PY_);
+      pj(sx + RR * Math.cos(A1), sy + RR * Math.sin(A1), 0); g.moveTo(PX_, PY_);
+      pj(sx + RR * Math.cos(A1), sy + RR * Math.sin(A1), hgt); g.lineTo(PX_, PY_);
+      g.stroke();
+      g.strokeStyle = col(C.raised, 0.7 * wv); g.lineWidth = 1;
+      g.beginPath();
+      for (var w1 = 0; w1 <= NW; w1++) {
+        var au = A0 + (A1 - A0) * w1 / NW;
+        pj(sx + RR * Math.cos(au), sy + RR * Math.sin(au), Math.max(0, hgt - 0.035));
+        if (w1 === 0) g.moveTo(PX_, PY_); else g.lineTo(PX_, PY_);
+      }
+      g.stroke();
+      /* the rising edge: this is where the gate is evaluated */
+      for (var b = 0; b < 2; b++) {
+        g.strokeStyle = b ? col(C.mint7, 0.95 * wv) : col(C.mint, 0.22 * wv);
+        g.lineWidth = b ? 1.6 : 6;
+        g.beginPath();
+        for (var w2 = 0; w2 <= NW; w2++) {
+          var aw = A0 + (A1 - A0) * w2 / NW;
+          pj(sx + RR * Math.cos(aw), sy + RR * Math.sin(aw), hgt);
+          if (w2 === 0) g.moveTo(PX_, PY_); else g.lineTo(PX_, PY_);
+        }
+        g.stroke();
+      }
+    }
+    wall(R2, 1);
+    wall(R1, 0.85);
+
+    /* --- the install: plinth ---------------------------------------------- */
+    var PR = 0.2, PH = 0.24, hexp = [];
+    for (q = 0; q < 6; q++) {
+      var ah = q / 6 * TAU + 0.3;
+      hexp.push([sx + PR * Math.cos(ah), sy + PR * Math.sin(ah), ah + TAU / 12]);
+    }
+    for (q = 0; q < 6; q++) {
+      var h0 = hexp[q], h1 = hexp[(q + 1) % 6];
+      var nf = Math.cos(h0[2]) * vx + Math.sin(h0[2]) * vy;
+      if (nf <= 0) continue;
+      g.fillStyle = col(mix(C.hair2, C.raised, 0.25 + 0.5 * nf / ce), 1);
+      poly([h0[0], h0[1], 0, h1[0], h1[1], 0, h1[0], h1[1], PH, h0[0], h0[1], PH]); g.fill();
+    }
+    g.fillStyle = col(mix(C.raised, gemC, 0.12), 1);
+    poly([hexp[0][0], hexp[0][1], PH, hexp[1][0], hexp[1][1], PH, hexp[2][0], hexp[2][1], PH,
+          hexp[3][0], hexp[3][1], PH, hexp[4][0], hexp[4][1], PH, hexp[5][0], hexp[5][1], PH]);
+    g.fill();
+    g.strokeStyle = col(C.raised, 1); g.lineWidth = 1.2; g.stroke();
+
+    beams();
+
+    /* beads of light: each rule reading, flown at ballistic speed */
+    if (!RED) {
+      for (n = 0; n < NA; n++) {
+        a = arcs[n];
+        if (a.dhi <= 0.001) continue;
+        var vh = a.D / a.T;
+        var mm = Math.floor((c - a.L) / a.Pb);
+        for (var m2 = mm; m2 >= 0; m2--) {
+          var lm = a.L + m2 * a.Pb;
+          if (lm > a.cut) continue;
+          var db = vh * (c - lm);
+          if (db > a.D + 0.02) break;
+          if (db > a.dhi + 1e-6) continue;
+          var fade = ease(Math.min(db, a.D - db) / 0.18) * (c > a.cut ? ease((a.dhi - db) / 0.25) : 1);
+          if (fade <= 0.01) continue;
+          var dt0 = Math.max(0, db - 0.34);
+          g.beginPath();
+          if (!trace(a, dt0, db)) continue;
+          var zb = sz + db * a.tn - a.K * db * db;
+          pj(sx + db * a.ca, sy + db * a.sa, zb);
+          var bx = PX_, by = PY_;
+          var zt = sz + dt0 * a.tn - a.K * dt0 * dt0;
+          pj(sx + dt0 * a.ca, sy + dt0 * a.sa, zt);
+          var bg = g.createLinearGradient(PX_, PY_, bx, by);
+          bg.addColorStop(0, col(C.coral, 0));
+          bg.addColorStop(1, col(C.coral, 0.95 * fade));
+          g.strokeStyle = bg; g.lineWidth = 2.6; g.lineCap = 'butt';
+          g.stroke();
+          g.lineCap = 'round';
+          var hb = g.createRadialGradient(bx, by, 0, bx, by, 5.5);
+          hb.addColorStop(0, col(mix(C.coral, C.raised, 0.25), fade));
+          hb.addColorStop(0.36, col(C.coral, 0.85 * fade));
+          hb.addColorStop(0.42, col(C.coral, 0.22 * fade));
+          hb.addColorStop(1, col(C.coral, 0));
+          g.fillStyle = hb;
+          g.beginPath(); g.arc(bx, by, 5.5, 0, TAU); g.fill();
+        }
+        /* while a rule is withdrawn, its front is a bright point running home */
+        if (c > a.cut && a.dhi > 0.02) {
+          var zf = sz + a.dhi * a.tn - a.K * a.dhi * a.dhi;
+          pj(sx + a.dhi * a.ca, sy + a.dhi * a.sa, zf);
+          var fk = ease(a.dhi / 0.3);
+          g.fillStyle = col(C.coral, 0.22 * fk);
+          g.beginPath(); g.arc(PX_, PY_, 5, 0, TAU); g.fill();
+          g.fillStyle = col(C.coral, 0.9 * fk);
+          g.beginPath(); g.arc(PX_, PY_, 1.8, 0, TAU); g.fill();
+        }
+      }
+    } else {
+      /* reduced motion: the old reach, left as faint traces behind the gates */
+      g.strokeStyle = col(C.coral, 0.16); g.lineWidth = 1;
+      for (n = 0; n < NA; n++) {
+        g.beginPath(); if (trace(arcs[n], R2, arcs[n].D)) g.stroke();
+      }
+    }
+
+    /* sparks where a wall's edge meets an arc */
+    if (!RED && hgt > 0) {
+      for (n = 0; n < NA; n++) {
+        a = arcs[n];
+        for (var w3 = 0; w3 < 2; w3++) {
+          var tt = w3 ? a.cut : a.t1, s3 = (c - tt) / 180;
+          if (s3 <= 0 || s3 > 5) continue;
+          var e3 = s3 * s3 * Math.exp(2 - 2 * s3);
+          var RR3 = w3 ? R2 : R1, zz = w3 ? a.z2 : a.z1;
+          pj(sx + RR3 * a.ca, sy + RR3 * a.sa, zz);
+          g.fillStyle = col(C.mint, 0.3 * e3);
+          g.beginPath(); g.arc(PX_, PY_, 3 + 5 * e3, 0, TAU); g.fill();
+          g.fillStyle = col(mix(C.mint, C.raised, 0.5), 0.9 * e3);
+          g.beginPath(); g.arc(PX_, PY_, 1.8, 0, TAU); g.fill();
+        }
+      }
+    }
+
+    /* the gem: the install's ServiceAccount, coral while it holds the reach */
+    var bob = RED ? 0 : 0.025 * Math.sin(TAU * t / 3800);
+    var gz = sz + bob, rot = RED ? 0.4 : t / 9000 * TAU;
+    pj(sx, sy, gz);
+    halo(PX_, PY_, 34, gemC, 0.36);
+    var GR = 0.16, GHt = 0.21, GV = [];
+    for (q = 0; q < 4; q++) GV.push([sx + GR * Math.cos(rot + q * TAU / 4), sy + GR * Math.sin(rot + q * TAU / 4), gz]);
+    var top3 = [sx, sy, gz + GHt], bot3 = [sx, sy, gz - GHt];
+    var faces = [];
+    for (q = 0; q < 4; q++) {
+      var e0 = GV[q], e1 = GV[(q + 1) % 4];
+      for (var up = 0; up < 2; up++) {
+        var apx = up ? top3 : bot3;
+        var mx = (e0[0] + e1[0]) / 2 - sx, my = (e0[1] + e1[1]) / 2 - sy;
+        var ml = Math.hypot(mx, my);
+        var nz = up ? GR / GHt : -GR / GHt, nl = Math.hypot(1, nz);
+        var nx3 = mx / ml / nl, ny3 = my / ml / nl, nz3 = nz / nl;
+        faces.push({ p: [e0, e1, apx], v: nx3 * vx + ny3 * vy + nz3 * vz,
+                     l: Math.max(0, -0.45 * nx3 - 0.55 * ny3 + 0.7 * nz3) });
+      }
+    }
+    faces.sort(function (p1, p2) { return p1.v - p2.v; });
+    for (q = 0; q < faces.length; q++) {
+      var fc = faces[q], front = fc.v > 0;
+      g.fillStyle = col(mix(gemC7, mix(gemC, C.raised, 0.5), fc.l), front ? 0.88 : 0.45);
+      poly([fc.p[0][0], fc.p[0][1], fc.p[0][2], fc.p[1][0], fc.p[1][1], fc.p[1][2], fc.p[2][0], fc.p[2][1], fc.p[2][2]]);
+      g.fill();
+      if (front) { g.strokeStyle = col(C.raised, 0.55); g.lineWidth = 0.7; g.stroke(); }
+    }
+    g.globalAlpha = 1;
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
@@ -9002,10 +9311,10 @@
                  prune: prune,
                  schedule: schedule,
                  closure: closure,
-                 iris: iris,
                  link: link,
                  glass: glass,
-                 aether: aether };
+                 aether: aether,
+                 grant: grant };
 
   /* ------------------------------------------------------------------ */
   var live = [];
