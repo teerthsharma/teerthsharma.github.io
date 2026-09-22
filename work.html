@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=65">
-<link rel="stylesheet" href="motion.css?v=65">
-<link rel="stylesheet" href="art.css?v=65">
+<link rel="stylesheet" href="site.css?v=66">
+<link rel="stylesheet" href="motion.css?v=66">
+<link rel="stylesheet" href="art.css?v=66">
 
 <script type="application/ld+json">
 {
@@ -144,16 +144,15 @@
                 <canvas data-fig="smatrix" data-vb="470 540" aria-hidden="true"></canvas>
                 <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-resolvent-t p-resolvent-d">
                   <title id="p-resolvent-t">The hop series built as a solid of complex slices, and seen end on as their sum</title>
-                  <desc id="p-resolvent-d">An illustration of the series, not a measurement. Every hop of (I - gamma P) inverse = I + gamma P + gamma squared P squared + ... is one slice of a block, stacked in order from the in-state at the front, each fainter by one more factor of gamma. Inside the block stands the space the paths live in: a path of k hops is a point in a k-dimensional space, so one hypercube gains a dimension at a time, a line swept into a square, a cube, a four-dimensional tesseract, then five and six dimensions, and every edge takes the colour of the axis it runs along, so the colours count the dimensions. The camera orbits the block and once each turn looks straight down the stack: the slices land on their sum, the hypercube flattens onto it, and nothing is left of the path between the in-state and the out-state, as Wheeler put it in 1937. The lattice and the operator P are made up for the picture; the resolvent itself is proved in Lean 4 in 175 declarations with zero sorry.</desc>
+                  <desc id="p-resolvent-d">An illustration of the series, not a measurement. In (I - gamma P) inverse = I + gamma P + gamma squared P squared + ..., the term with k hops sums over every path of k hops, and a path of k hops is a point in a k-dimensional space. So one object stands in a turning block: a hypercube that gains a dimension at a time, a line swept into a square, a cube, a four-dimensional tesseract, then five and six dimensions. Every edge takes the colour of the axis it runs along, so the colours count the dimensions. The camera orbits the block and once each turn looks straight down it; there the object flattens onto the back of the block, and nothing is left of the path between the in-state and the out-state, as Wheeler put it in 1937. The resolvent is proved in Lean 4 in 175 declarations with zero sorry.</desc>
                   <text x="235" y="31" text-anchor="middle" font-size="18" font-weight="600" fill="var(--ink)">(I − γP)<tspan dy="-7" font-size="14">−1</tspan><tspan dy="7"> = I + γP + γ</tspan><tspan dy="-7" font-size="14">2</tspan><tspan dy="7">P</tspan><tspan dy="-7" font-size="14">2</tspan><tspan dy="7"> + …</tspan></text>
-                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">each slice is one more hop, shrinking while γ·ρ(P) &lt; 1</text>
-                  <text x="235" y="452" text-anchor="middle" font-size="15" fill="var(--muted)">each hop adds a dimension to the space of paths</text>
+                  <text x="235" y="54" text-anchor="middle" font-size="15" fill="var(--muted)">each hop adds a dimension to the space of paths</text>
                   <text x="235" y="476" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">no account of the path between them</text>
                   <text x="235" y="497" text-anchor="middle" font-size="15" fill="var(--muted)">Wheeler, 1937</text>
                   <text x="235" y="526" text-anchor="middle" font-size="16" fill="var(--muted)">175 declarations in Lean 4, zero sorry</text>
                 </svg>
               </div>
-            <figcaption class="fig__cap">Every hop of the series is one slice, and a path of k hops lives in k dimensions: one hypercube gains a dimension a hop at a time, coloured by axis. Look straight down the stack and everything lands on the sum, with no account of the path between them.</figcaption>
+            <figcaption class="fig__cap">A path of k hops lives in k dimensions: one hypercube gains a dimension a hop at a time, each new axis in its own colour. Look straight down the block and it flattens to where the paths end, with no account of the path between them.</figcaption>
           </figure>
         </div>
 </div>
@@ -630,7 +629,7 @@
 
 </main>
 
-<script src="fig.js?v=65" defer></script>
-<script src="site.js?v=65" defer></script>
+<script src="fig.js?v=66" defer></script>
+<script src="site.js?v=66" defer></script>
 </body>
 </html>
