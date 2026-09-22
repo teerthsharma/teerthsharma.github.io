@@ -20,80 +20,6 @@
 
 @media (prefers-reduced-motion: no-preference) {
 
-  /* --- Epsilon-Hollow --------------------------------------------------
-     OS state lives on the surface, so the surface turns. The longitude
-     arcs scale horizontally through a full cycle, which reads as rotation
-     without needing a projection or a single frame of script. */
-  @keyframes eh-spin { 0%,100% { transform:scaleX(1); } 50% { transform:scaleX(.28); } }
-  #p-epsilon-hollow svg ellipse{
-    transform-box: fill-box; transform-origin: center;
-    animation: eh-spin 2.3s ease-in-out infinite;
-  }
-  #p-epsilon-hollow svg ellipse:nth-of-type(2){ animation-delay:-0.58s; }
-  #p-epsilon-hollow svg ellipse:nth-of-type(3){ animation-delay:-1.16s; }
-
-  /* --- Aether-Lang -----------------------------------------------------
-     Asked for, in his words: show the line continuously, make the purple
-     circle, and break it, as waves of lines rather than one line.
-
-     Seven arcs chase each other round the settled loop. Together they close
-     it, and the gaps between them are the break, so the circle is continually
-     made and broken by the same motion rather than by two separate tricks.
-     It is also what the project does: each pass is another wave through the
-     same state, and the waves flatten as the shape settles.
-
-     The pale settled passes stay underneath the whole cycle, so the figure is
-     never blank and the resting state is always the correct drawing. */
-  @keyframes al-wave {
-    0%   { stroke-dashoffset: 0;  opacity: .30; }
-    50%  { opacity: 1; }
-    100% { stroke-dashoffset: -1; opacity: .30; }
-  }
-  #p-aether-lang .al-trace{
-    stroke-dasharray: .13 .87;
-    animation: al-wave 5.2s linear infinite;
-  }
-  #p-aether-lang .al-w1{ animation-delay: -0.74s; }
-  #p-aether-lang .al-w2{ animation-delay: -1.49s; }
-  #p-aether-lang .al-w3{ animation-delay: -2.23s; }
-  #p-aether-lang .al-w4{ animation-delay: -2.97s; }
-  #p-aether-lang .al-w5{ animation-delay: -3.71s; }
-  #p-aether-lang .al-w6{ animation-delay: -4.46s; }
-
-  @keyframes al-wobble { 0%, 100% { transform: rotate(-1.6deg) scale(.985); } 50% { transform: rotate(1.6deg) scale(1.015); } }
-  @keyframes al-flicker{ 0%, 100% { opacity: .26; } 50% { opacity: .62; } }
-  #p-aether-lang .al-wild{
-    transform-box: fill-box; transform-origin: center;
-    animation: al-wobble 4.4s ease-in-out infinite;
-  }
-  #p-aether-lang .al-bar-wild{ animation: al-flicker 3.6s ease-in-out infinite; }
-  #p-aether-lang .al-set,
-  #p-aether-lang .al-bar-set{ animation: none; }
-  #p-aether-lang:hover .al-wild,
-  #p-aether-lang:hover .al-bar-wild,
-  #p-aether-lang:hover .al-trace{ animation-play-state: paused; }
-
-  /* --- tangle ----------------------------------------------------------
-     What was asked for: two circles that keep rotating, one grey and one
-     black. The earlier rule selected child groups by position and caught a
-     label, which is why a word flew across the card. These select the two
-     stroked loops by their own colour, so no label can be picked up however
-     the figure is later redrawn.
-
-     They turn in opposite directions and never stop, because two loops that
-     are genuinely linked cannot be pulled apart however they are turned,
-     which is the whole certificate. */
-  @keyframes tg-turn     { from { transform: rotate(0deg); }   to { transform: rotate(360deg); } }
-  @keyframes tg-turn-rev { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
-  #p-tangle svg path[stroke="var(--ink)"]{
-    transform-box: fill-box; transform-origin: center;
-    animation: tg-turn 14s linear infinite;
-  }
-  #p-tangle svg path[stroke="var(--muted)"]{
-    transform-box: fill-box; transform-origin: center;
-    animation: tg-turn-rev 14s linear infinite;
-  }
-
   /* --- monodromy -------------------------------------------------------
      The result is that a frame comes back rotated, so the frames rotate. */
   @keyframes md-carry { from { transform: rotate(0); } to { transform: rotate(360deg); } }
@@ -102,23 +28,6 @@
     animation: md-carry 3s linear infinite;
   }
 
-  /* --- faraday ---------------------------------------------------------
-     The coupling appears where the two fields cross, so the crossings
-     pulse and the fields themselves stay still. */
-  @keyframes fd-couple { 0%,100% { r:6; opacity:1; } 50% { r:9; opacity:.6; } }
-  #p-faraday svg circle[fill*="violet"]{ animation: fd-couple 0.95s ease-in-out infinite; }
-  #p-faraday svg circle[fill*="violet"]:nth-of-type(2){ animation-delay:-0.31s; }
-  #p-faraday svg circle[fill*="violet"]:nth-of-type(3){ animation-delay:-0.63s; }
-
-  /* --- nerve -----------------------------------------------------------
-     Three of four hypotheses were withdrawn, so the strikes are drawn
-     rather than simply present, one after another, and the survivor is
-     left alone. */
-  @keyframes nv-strike { 0% { opacity:0; } 18%,100% { opacity:1; } }
-  #p-nerve svg line[stroke*="coral"]{ animation: nv-strike 2s ease-in-out infinite; }
-  #p-nerve svg line[stroke*="coral"]:nth-of-type(2){ animation-delay:.45s; }
-  #p-nerve svg line[stroke*="coral"]:nth-of-type(3){ animation-delay:.9s; }
-
   /* --- Pointing at a figure stops it, so it can be read ---------------- */
   .proj:hover .proj__art svg,
   .proj:hover .proj__art svg *,
@@ -126,5 +35,6 @@
   .proj:focus-within .proj__art svg *{
     animation-play-state: paused;
   }
+
 
 }
