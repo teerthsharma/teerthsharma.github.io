@@ -36,7 +36,12 @@
 /* ---------- base / reset ---------- */
 *,*::before,*::after{ box-sizing:border-box; }
 html{ -webkit-text-size-adjust:100%; }
+/* clip, not hidden: overflow-x:hidden makes the page itself a scroll
+   container, and then the sticky site nav never sticks. clip cuts the
+   same sideways overflow without that, so the nav follows the reader on
+   every page. hidden stays as the fallback for browsers without clip. */
 html,body{ max-width:100%; overflow-x:hidden; }
+@supports (overflow-x: clip){ html, body{ overflow-x:clip; } }
 body{
   margin:0;
   background:var(--ground);
