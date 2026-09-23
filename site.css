@@ -1203,3 +1203,26 @@ html:has(.psub) .nav{ border-bottom-color:transparent; }
    may break at its own hyphens rather than run past the tile */
 .pgal .pt--long .proj__name{ font-size:clamp(30px, 3.6vw, 46px); }
 /* ===================== end apple.py ===================== */
+
+/* ---------- Promo tiles and footer -----------------------------------------
+   The page used to end on a lone sentence pointing at the 3D portfolio (its
+   link text even named the wrong address) and a footer repeating the three
+   buttons just above it plus a line nobody needed. Now two matching tiles
+   sit side by side, the personal work and the 3D portfolio, and the footer
+   is one quiet line. */
+.promo{ display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap:20px; }
+.promo__tile{ display:flex; flex-direction:column; align-items:stretch; gap:12px; margin:0; text-align:left; min-width:0; }
+.promo__tile .card__link, .promo__cube{ align-self:flex-start; }
+.promo__tile h2{ margin:0; }
+.promo__tile p{ margin:0; color:var(--muted); }
+.promo__tile .card__link{ margin-top:auto; }
+.promo__tile--3d{ color:inherit; text-decoration:none; }
+.promo__tile--3d:hover .card__link{ text-decoration:underline; }
+.promo__cube{ width:72px; height:72px; }
+.foot{ padding:28px 0 36px; background:var(--ground); }
+.foot__row{ display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px 24px; }
+.foot__name{ font-weight:600; color:var(--ink); }
+.foot__links{ display:flex; gap:20px; }
+.foot__links a{ color:var(--blue-700); font-weight:500; }
+.foot__links a:hover{ text-decoration:underline; }
+

@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=74">
-<link rel="stylesheet" href="motion.css?v=74">
-<link rel="stylesheet" href="art.css?v=74">
+<link rel="stylesheet" href="site.css?v=75">
+<link rel="stylesheet" href="motion.css?v=75">
+<link rel="stylesheet" href="art.css?v=75">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -755,28 +755,39 @@
 </section>
 <section class="band band--tint">
   <div class="wrap">
-    <div class="card card--panel">
-      <h2>I also build my own.</h2>
-      <p>I keep fourteen public repositories. Some are topology, some are numerics, some are systems. What they share is that each one ends in a number I can measure.</p>
-      <a class="card__link" href="work.html">See the personal work</a>
+    <div class="promo">
+      <div class="card card--panel promo__tile">
+        <h2>I also build my own.</h2>
+        <p>I keep fourteen public repositories. Some are topology, some are numerics, some are systems. What they share is that each one ends in a number I can measure.</p>
+        <a class="card__link" href="work.html">See the personal work <span aria-hidden="true">&#8250;</span></a>
+      </div>
+      <a class="card card--panel promo__tile promo__tile--3d" href="https://teerthfolio.vercel.app">
+        <svg class="promo__cube" viewBox="0 0 120 120" aria-hidden="true">
+          <path d="M60 14 L102 38 L60 62 L18 38 Z" fill="var(--violet-500)" fill-opacity=".16"/>
+          <path d="M18 38 L60 62 L60 108 L18 84 Z" fill="var(--blue-500)" fill-opacity=".12"/>
+          <path d="M102 38 L60 62 L60 108 L102 84 Z" fill="var(--mint-500)" fill-opacity=".12"/>
+          <path d="M60 14 L102 38 L102 84 L60 108 L18 84 L18 38 Z M18 38 L60 62 L102 38 M60 62 L60 108" fill="none" stroke="var(--violet-700)" stroke-width="2" stroke-linejoin="round" stroke-opacity=".7"/>
+          <path d="M22 40 L60 18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" stroke-opacity=".9"/>
+        </svg>
+        <h2>Walk through it in 3D.</h2>
+        <p>The same work, as an interactive 3D portfolio.</p>
+        <span class="card__link">Open the 3D portfolio <span aria-hidden="true">&#8250;</span></span>
+      </a>
     </div>
   </div>
 </section>
-<section class="band">
-  <div class="wrap">
-    <p class="muted">There is an interactive 3D version of this at <a href="https://teerthfolio.vercel.app">teerthsharma.vercel.app</a>.</p>
-  </div>
-</section>
 </main>
-<footer class="band band--tint">
-  <div class="wrap">
-    <a class="btn--text" href="mailto:teerths57@gmail.com">Email</a>
-    <a class="btn--text" href="https://github.com/teerthsharma/teerthsharma/raw/main/Teerth_Sharma_Resume.pdf">Resume</a>
-    <a class="btn--text" href="https://github.com/teerthsharma">GitHub</a>
-    <p class="muted">I built this as plain HTML. No framework, no build step.</p>
+<footer class="foot">
+  <div class="wrap foot__row">
+    <span class="foot__name">Teerth Sharma</span>
+    <nav class="foot__links" aria-label="Contact">
+      <a href="mailto:teerths57@gmail.com">Email</a>
+      <a href="https://github.com/teerthsharma/teerthsharma/raw/main/Teerth_Sharma_Resume.pdf">Resume</a>
+      <a href="https://github.com/teerthsharma">GitHub</a>
+    </nav>
   </div>
 </footer>
-<script src="fig.js?v=74" defer></script>
-<script src="site.js?v=74" defer></script>
+<script src="fig.js?v=75" defer></script>
+<script src="site.js?v=75" defer></script>
 </body>
 </html>
