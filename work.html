@@ -18,9 +18,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=72">
-<link rel="stylesheet" href="motion.css?v=72">
-<link rel="stylesheet" href="art.css?v=72">
+<link rel="stylesheet" href="site.css?v=73">
+<link rel="stylesheet" href="motion.css?v=73">
+<link rel="stylesheet" href="art.css?v=73">
 
 <script type="application/ld+json">
 {
@@ -277,17 +277,17 @@
             <div class="figc" style="--figc-ar:470/540">
                 <canvas data-fig="caustic" data-vb="470 540" aria-hidden="true"></canvas>
                 <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-caustic-t p-caustic-d">
-                  <title id="p-caustic-t">The answer map as a sheet of light, folding where the model cannot reach the fact</title>
-                  <desc id="p-caustic-d">An illustration of what caustic measures. A model's answer map sends each entity to an answer, and the map is drawn as a sheet of light: each thread across it is one entity, and depth is the context, coherent at the front and incoherent at the back. At the front the sheet rises smoothly and every entity lands on an answer of its own. Further back it pleats and folds over itself, and distinct entities land on the same answer. Dropping the sheet onto the floor forgets which entity is which; the shadows of its threads crowd exactly where it folds, and that crowd is the caustic, the cusp where distinct preimages merge, found without knowing a single right answer. A plane sweeps the context and drops each entity onto its answer. Entities that land together form one class of the partition, and in a class of s entities at least s minus one are wrong whatever the truth is, so the drops certified wrong, drawn coral, number exactly n minus m. The fold drawn is the Whitney cusp standing in for a model's answer map, and the number of entities is illustrative. The detector reaches 0.995 AUROC, with five proved bounds and no ground truth used.</desc>
-                  <text x="235" y="30" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">a caustic is where a map folds</text>
-                  <text x="235" y="53" text-anchor="middle" font-size="15" fill="var(--muted)">and distinct entities merge onto one answer</text>
-                  <text x="235" y="452" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">found without the answer key</text>
-                  <text x="235" y="474" text-anchor="middle" font-size="15" fill="var(--muted)">at least n − m answers are provably wrong</text>
+                  <title id="p-caustic-t">Twenty entities reach twenty answers through coherent prose and collapse onto one through " the" repeated</title>
+                  <desc id="p-caustic-d">The project's measured result, drawn row by row. One model is asked the capital of each of 20 entities, with a prefix held at exactly 128 tokens in front of every question; only the character of those tokens changes. The tape at the top shows the 128 tokens: word shapes for coherent prose, nothing for no prefix, noise for random token ids, and one mark repeated for " the" 128 times. Each entity is a thread to the answer the model gives, and the column on the right is the answer key, each entity's true answer level with it. With coherent prose all 20 land on their own answers, accuracy 1.000 and 20 distinct answers. With no prefix, accuracy 0.550, 15 distinct answers and a largest class of 4. With random token ids, accuracy 0.100, 3 distinct answers and a largest class of 18. With " the" 128 times, accuracy 0.000: all 20 collapse onto one answer that is nobody's true answer. A green ring marks a correct answer. Coral marks what the certificate proves wrong without the answer key: in a class of s entities sharing an answer at least s minus one are wrong, so exactly n minus m threads are coral. Amber marks a wrong answer the certificate cannot see, because its precision is proved and its recall is not. Which entity lands where within a row is illustrative; the counts are the measured ones. The detector reaches 0.995 AUROC, with five proved bounds and no ground truth used.</desc>
+                  <text x="235" y="30" text-anchor="middle" font-size="16" font-weight="600" fill="var(--ink)">the same 128 tokens, only their character changes</text>
+                  <text x="235" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">coherent prose: 20 entities, 20 distinct answers</text>
+                  <text x="235" y="452" text-anchor="middle" font-size="17" font-weight="600" fill="var(--coral-700)">“ the” × 128: all 20 collapse onto one answer</text>
+                  <text x="235" y="474" text-anchor="middle" font-size="15" fill="var(--muted)">at least n − m provably wrong, no answer key used</text>
                   <text x="235" y="512" text-anchor="middle" font-size="30" font-weight="800" fill="var(--coral-700)">0.995 AUROC</text>
                   <text x="235" y="534" text-anchor="middle" font-size="15" fill="var(--muted)">five proved bounds, no ground truth used</text>
                 </svg>
               </div>
-            <figcaption class="fig__cap">When the model cannot reach a fact its answer map folds, distinct entities merge onto one answer, and the fold shows without knowing which answer is right.</figcaption>
+            <figcaption class="fig__cap">The same 128 tokens in front of every question: as coherent prose all 20 entities reach their own answers, as " the" repeated they all collapse onto one, and the certificate marks the collapse wrong without the answer key.</figcaption>
           </figure>
         </div>
 </div>
@@ -632,7 +632,7 @@
 
 </main>
 
-<script src="fig.js?v=72" defer></script>
-<script src="site.js?v=72" defer></script>
+<script src="fig.js?v=73" defer></script>
+<script src="site.js?v=73" defer></script>
 </body>
 </html>

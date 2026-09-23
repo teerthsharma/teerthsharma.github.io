@@ -82,41 +82,33 @@
   /* caustic — caustic                                                   */
   /* ==================================================================== */
   function caustic(g, vb, t, st) {
-    /* caustic. "A caustic is where a map folds and distinct preimages
-       merge." A model answers a question about an entity; the answer map f
-       sends entities to answers. When the model reaches the fact, f is one to
-       one: every entity lands on an answer of its own. When it cannot, f
-       folds, and distinct entities land on the same answer.
+    /* caustic, the measured result. The project's own table: one model,
+       the relation "capital" over 20 entities, a prefix held at exactly
+       128 tokens, and only the character of those tokens changing.
 
-       So the figure is the map itself, drawn as a sheet of light. Across the
-       sheet run the entities, one thread each; into depth runs the context,
-       from coherent at the front to incoherent at the back. The height of a
-       point on the sheet is which entity it is, and its place over the floor
-       is the answer it gets. This is the Whitney cusp, x = u^3 + v u: at the
-       front it rises smoothly and every entity has its own answer; past the
-       middle it pleats, three layers over one place, and the map folds.
+         coherent prose     accuracy 1.000   20 distinct answers   largest orbit 1
+         no prefix          accuracy 0.550   15 distinct answers   largest orbit 4
+         random token ids   accuracy 0.100    3 distinct answers   largest orbit 18
+         " the" x 128       accuracy 0.000    1 distinct answer    largest orbit 20
 
-       Forgetting which entity is which is dropping the sheet onto the floor.
-       The shadows of the threads pile up exactly where the sheet folds, and
-       the pile is the caustic, the cusp 27 x^2 = -4 v^3, bright only because
-       the shadows genuinely crowd there. It is found without knowing a single
-       right answer, which is the point of the project.
+       The tape along the top is the 128 tokens themselves, drawn by their
+       character: word shapes for prose, nothing for no prefix, noise for
+       random ids, one repeated mark for " the". Each of the 20 entities is a
+       thread to the answer the model gives, and the column on the right is
+       the answer key, each entity's true answer level with it. For every row
+       the threads reproduce the table exactly: how many land on their own
+       answer, how many distinct answers there are, how large the largest
+       pile is. Which entity lands where inside a row is illustrative.
 
-       A plane sweeps the context. Where it cuts the sheet, each entity drops
-       a line to its answer on the floor. Answers that land together form one
-       class of the partition, and in a class of s entities at least s - 1
-       are wrong whatever the truth is, so exactly n - m of the drops turn
-       coral: the certified lower bound, with no answer key. At the front the
-       count is zero; through the fold it climbs.
-
-       The map is the cusp standing in for a model's answer map, and the
-       entity count and binning are illustrative, as the desc says. */
+       Three colours carry the truth. A green ring is a correct answer. Coral
+       is what the certificate proves wrong with no answer key: in a class of
+       s entities sharing an answer, at least s - 1 are wrong, so exactly
+       n - m threads go coral. Amber is a wrong answer the certificate cannot
+       see, because precision is proved and recall is not. With " the" x 128
+       all 20 threads fold onto one point that is nobody's true answer. */
     var TAU = Math.PI * 2;
-    var S = 108, CX = 235, CY = 236;
-    var NE = 21, NSH = 150, NV = 48, NCL = 9;
-    var UA = 1.2, VA = 1.0;                        /* entity range, context range */
-    var HY = 0.72, FY = -1.02;                     /* sheet half-height, floor height */
-    var BIN = 0.02, SWP = 13000;                   /* answer resolution: the coherent front stays one to one */
+    var NE = 20, EX = 46, AX = 366, OX = 414, Y0 = 124, Y1 = 400, PILE = 262;
+    var HOLD = 4600, MORPH = 1300, COND = 4;
 
     var M = caustic.cache;
     if (!M) {
@@ -129,200 +121,220 @@
       };
       var mix = function (a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
       L.css = function (c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a + ')'; };
-      L.mix = mix;
-      /* an entity's colour is where it sits along the sheet: neighbours are
-         alike, and two colours landing on one answer are two entities */
-      var ramp = [hex('--mint-500', '#0b93ab'), hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'),
-                  hex('--coral-500', '#d9376e'), hex('--amber-500', '#d96a06')];
+      var cool = [hex('--mint-500', '#0b93ab'), hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0')];
       L.ent = [];
-      for (var i = 0; i < NE; i++) {
-        var f = i / (NE - 1) * (ramp.length - 1), fi = Math.min(ramp.length - 2, Math.floor(f));
-        L.ent.push(mix(ramp[fi], ramp[fi + 1], f - fi));
+      var i, k;
+      for (i = 0; i < NE; i++) {
+        var f = i / (NE - 1) * 2, fi = Math.min(1, Math.floor(f));
+        L.ent.push(mix(cool[fi], cool[fi + 1], f - fi));
       }
-      L.coral = hex('--coral-500', '#d9376e'); L.coral7 = hex('--coral-700', '#a0183f');
-      L.vio = hex('--violet-500', '#a66cf0'); L.vio7 = hex('--violet-700', '#6b35c4');
+      L.ok = hex('--green-500', '#146a32'); L.cert = hex('--coral-500', '#d9376e');
+      L.cert7 = hex('--coral-700', '#a0183f'); L.unc = hex('--amber-500', '#d96a06');
       L.hair = hex('--hair2', '#cfcbc1'); L.muted = hex('--muted', '#5f5b53');
-      L.white = [255, 255, 255];
-      /* the fold locus projected to the floor: v = -3u^2, x = -2u^3 */
-      L.cusp = [];
-      for (var q = 0; q <= 60; q++) {
-        var uu = -Math.sqrt(VA / 3) + 2 * Math.sqrt(VA / 3) * q / 60, vv2 = -3 * uu * uu;
-        L.cusp.push([(uu * uu * uu + vv2 * uu) / (UA * UA * UA + vv2 * UA), vv2]);
+      L.tape = [hex('--violet-500', '#a66cf0'), hex('--amber-500', '#d96a06'), hex('--mint-500', '#0b93ab')];
+      L.ys = [];
+      for (i = 0; i < NE; i++) L.ys.push(Y0 + (Y1 - Y0) * i / (NE - 1));
+
+      /* each row of the table as a map: where every entity's answer lands */
+      var capOf = function (e) { return { x: AX, y: L.ys[e], key: 'c' + e }; };
+      var out = function (y, key) { return { x: OX, y: y, key: key }; };
+      var rows = [];
+      /* coherent prose: 20 of 20 correct, 20 distinct */
+      var r0 = [];
+      for (i = 0; i < NE; i++) r0.push(capOf(i));
+      rows.push(r0);
+      /* no prefix: 11 correct, 15 distinct, largest class 4 */
+      var r1 = [];
+      for (i = 0; i < NE; i++) r1.push(capOf(i));
+      [5, 6, 7, 8].forEach(function (e) { r1[e] = capOf(6); });
+      [12, 13].forEach(function (e) { r1[e] = capOf(12); });
+      var y1617 = (L.ys[16] + L.ys[17]) / 2;
+      [16, 17].forEach(function (e) { r1[e] = out(y1617, 'o1617'); });
+      [3, 10, 18].forEach(function (e) { r1[e] = out(L.ys[e], 'o' + e); });
+      rows.push(r1);
+      /* random token ids: 2 correct, 3 distinct, largest class 18 */
+      var r2 = [];
+      for (i = 0; i < NE; i++) r2.push(out(PILE, 'pile'));
+      r2[4] = capOf(4); r2[15] = capOf(15);
+      rows.push(r2);
+      /* " the" x 128: 0 correct, 1 distinct, all 20 on one answer */
+      var r3 = [];
+      for (i = 0; i < NE; i++) r3.push(out(PILE, 'pile'));
+      rows.push(r3);
+
+      /* per row: each entity's status and each class's size. In a class the
+         one left uncertified is its correct member if it has one */
+      L.rows = rows.map(function (row) {
+        var cls = {}, stat = [], size = [], e, q;
+        for (e = 0; e < NE; e++) (cls[row[e].key] = cls[row[e].key] || []).push(e);
+        for (e = 0; e < NE; e++) {
+          var mem = cls[row[e].key], right = row[e].key === 'c' + e, keep = mem[0];
+          for (q = 0; q < mem.length; q++) if (row[mem[q]].key === 'c' + mem[q]) keep = mem[q];
+          stat.push(right ? 0 : e === keep ? 2 : 1);   /* 0 correct, 1 certified wrong, 2 wrong unseen */
+          size.push(mem.length);
+        }
+        return { t: row, stat: stat, size: size };
+      });
+
+      /* the 128 tokens of each prefix, two rows of 64 */
+      var rs = 91, rnd = function () { rs = (rs * 16807) % 2147483647; return (rs - 1) / 2147483646; };
+      L.tapes = [];
+      for (var c = 0; c < COND; c++) {
+        var toks = [];
+        for (k = 0; k < 128; k++) {
+          var tk;
+          if (c === 0) {                 /* prose: word shapes, a gap between words */
+            var inWord = rnd() > 0.28;
+            tk = { w: inWord ? 3.4 + 1.6 * rnd() : 1.2, h: 5, dy: 0, a: inWord ? 0.55 : 0.12, col: -1 };
+          } else if (c === 1) {          /* no prefix: nothing there */
+            tk = { w: 3.2, h: 5, dy: 0, a: 0.07, col: -1 };
+          } else if (c === 2) {          /* random ids: noise */
+            tk = { w: 1.2 + 4 * rnd(), h: 3 + 5 * rnd(), dy: (rnd() - 0.5) * 3, a: 0.6, col: Math.floor(rnd() * 3) };
+          } else {                       /* " the" x 128: one mark, over and over */
+            tk = { w: 3.2, h: 5, dy: 0, a: 0.6, col: 0 };
+          }
+          toks.push(tk);
+        }
+        L.tapes.push(toks);
       }
       caustic.cache = M = L;
     }
 
-    var T = REDUCED ? 7400 : t;
     var css = M.css;
-    var build = REDUCED ? 1 : ease(t / 1400);
-
-    /* camera: a slow drift round the sheet, always looking a little down */
-    var psi = 0.42 + 0.26 * Math.sin(T / 26000 * TAU), eps = 0.36 + 0.06 * Math.sin(T / 19000 * TAU + 1);
-    var cp = Math.cos(psi), sp = Math.sin(psi), ce = Math.cos(eps), se = Math.sin(eps);
-    function P(x, y, z, o) {
-      var x1 = x * cp + z * sp, z1 = -x * sp + z * cp;
-      o[0] = CX + S * x1; o[1] = CY - S * (y * ce - z1 * se); o[2] = y * se + z1 * ce;
-      return o;
-    }
-    /* the map: entity u, context v (front coherent, +VA), answer x. Each
-       context slice is scaled to the same width, UA^3 + v UA being where its
-       end lands; a monotone rescale per slice, so the fold and the partition
-       it makes are exactly those of the cusp */
-    function ans(u, v) { return (u * u * u + v * u) / (UA * UA * UA + v * UA); }
-    function zOf(v) { return v / VA; }                 /* depth: +1 front, -1 back */
-    var pa = [0, 0, 0], pb = [0, 0, 0];
+    var build = REDUCED ? 1 : ease(t / 1200);
+    var CYC = HOLD * COND;
+    var tc = REDUCED ? 3 * HOLD + 3000 : t % CYC;
+    var cur = Math.floor(tc / HOLD), prev = (cur + COND - 1) % COND, into = tc - cur * HOLD;
+    var mk = REDUCED ? 1 : ease(into / MORPH);                /* morph from the last row */
+    if (!REDUCED && t < HOLD) { mk = 1; prev = cur; }        /* the first row simply builds */
+    var A = M.rows[prev], B = M.rows[cur];
 
     g.globalCompositeOperation = 'source-over';
     g.globalAlpha = 1;
     g.lineJoin = 'round'; g.lineCap = 'round';
 
-    /* --- the floor: the answer plane ---------------------------------------- */
-    P(-1.18, FY, 1.12, pa);
-    var fl = [P(-1.18, FY, 1.12, [0, 0, 0]), P(1.18, FY, 1.12, [0, 0, 0]),
-              P(1.18, FY, -1.12, [0, 0, 0]), P(-1.18, FY, -1.12, [0, 0, 0])];
-    var fg = g.createLinearGradient(fl[3][0], fl[3][1], fl[0][0], fl[0][1]);
-    fg.addColorStop(0, css(M.hair, 0.05 * build));
-    fg.addColorStop(1, css(M.hair, 0.26 * build));
-    g.fillStyle = fg;
-    g.beginPath(); g.moveTo(fl[0][0], fl[0][1]);
-    for (var c = 1; c < 4; c++) g.lineTo(fl[c][0], fl[c][1]);
-    g.closePath(); g.fill();
-    g.strokeStyle = css(M.hair, 0.55 * build); g.lineWidth = 1;
-    g.stroke();
-
-    /* shadows: many threads dropped onto the floor. Each is faint; where the
-       sheet folds they crowd, and the crowd is the caustic */
-    var k, j, u, v;
-    g.lineWidth = 0.9;
-    for (k = 0; k < NSH; k++) {
-      u = -UA + 2 * UA * (k + 0.5) / NSH;
-      g.strokeStyle = css(M.vio7, 0.05 * build);
-      g.beginPath();
-      for (j = 0; j <= NV; j++) {
-        v = VA - 2 * VA * j / NV;
-        P(ans(u, v), FY, zOf(v), pa);
-        if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+    /* --- the tape: the 128 tokens of the prefix ------------------------------ */
+    var TX0 = 58, TW = (412 - TX0) / 64;
+    for (var side = 0; side < 2; side++) {
+      var tp = M.tapes[side ? cur : prev], wgt = side ? mk : 1 - mk;
+      if (wgt <= 0.01) continue;
+      for (var k2 = 0; k2 < 128; k2++) {
+        var tk2 = tp[k2], row2 = k2 >> 6, cx = TX0 + (k2 & 63) * TW + TW / 2;
+        var cy = 84 + row2 * 11 + tk2.dy;
+        var col = tk2.col < 0 ? M.muted : M.tape[tk2.col];
+        g.fillStyle = css(col, tk2.a * wgt * build);
+        g.fillRect(cx - tk2.w / 2, cy - tk2.h / 2, tk2.w, tk2.h);
       }
-      g.stroke();
     }
-    /* the caustic itself: the fold locus, burning */
-    var burn = REDUCED ? 1 : 0.8 + 0.2 * Math.sin(T / 3100 * TAU);
-    for (var pass = 0; pass < 2; pass++) {
-      g.strokeStyle = pass ? css(M.coral7, 0.85 * build) : css(M.coral, 0.18 * build * burn);
-      g.lineWidth = pass ? 1.4 : 6;
-      g.beginPath();
-      for (j = 0; j < M.cusp.length; j++) {
-        P(M.cusp[j][0], FY, zOf(M.cusp[j][1]), pa);
-        if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
-      }
-      g.stroke();
+    /* the tape's rail: always exactly 128 places */
+    g.strokeStyle = css(M.hair, 0.8 * build); g.lineWidth = 1;
+    g.beginPath(); g.moveTo(TX0, 104); g.lineTo(412, 104); g.stroke();
+
+    /* --- the answer key: each entity's true answer, level with it -------- */
+    var e;
+    for (e = 0; e < NE; e++) {
+      g.strokeStyle = css(M.hair, 0.9 * build); g.lineWidth = 1.2;
+      g.beginPath(); g.arc(AX, M.ys[e], 5, 0, TAU); g.stroke();
     }
 
-    /* --- the sweep: where the context plane is now -------------------------- */
-    var ph = REDUCED ? 0.72 : (T % SWP) / SWP;
-    var sw = ph < 0.5 ? ease(ph / 0.5) : 1 - ease((ph - 0.5) / 0.5);
-    var vs = VA - 2 * VA * (0.06 + 0.88 * sw);            /* front to back and back again */
-    var sa = REDUCED ? 1 : ease((T - 1400) / 900);
-
-    /* the answers at this context, binned; a class of s holds s - 1 certified wrong */
-    var xs = [], cls = {}, order = [];
-    for (i = 0; i < NE; i++) {
-      u = -UA + 2 * UA * i / (NE - 1);
-      xs.push(ans(u, vs));
-      var b = Math.round(xs[i] / BIN);
-      if (!cls[b]) { cls[b] = []; order.push(b); }
-      cls[b].push(i);
+    /* where each thread lands now */
+    function target(e2) {
+      var a = A.t[e2], b = B.t[e2];
+      return [a.x + (b.x - a.x) * mk, a.y + (b.y - a.y) * mk];
     }
-    var wrong = [];
-    for (i = 0; i < NE; i++) wrong.push(0);
-    for (j = 0; j < order.length; j++) {
-      var mem = cls[order[j]];
-      for (k = 1; k < mem.length; k++) wrong[mem[k]] = 1;   /* all but one in a class */
+    function bez(e2, s, tg, o) {
+      var x0 = EX, y0 = M.ys[e2], x3 = tg[0], y3 = tg[1];
+      var x1 = x0 + 150, y1 = y0, x2 = x3 - 120, y2 = y3, u = 1 - s;
+      o[0] = u * u * u * x0 + 3 * u * u * s * x1 + 3 * u * s * s * x2 + s * s * s * x3;
+      o[1] = u * u * u * y0 + 3 * u * u * s * y1 + 3 * u * s * s * y2 + s * s * s * y3;
+      return o;
+    }
+    var statCol = [M.ok, M.cert, M.unc];
+    var pt = [0, 0], i2, s2;
+
+    /* --- the pile's light, where many threads fold onto one answer -------- */
+    var pileA = 0, pileB = 0;
+    for (e = 0; e < NE; e++) { if (A.t[e].key === 'pile') pileA++; if (B.t[e].key === 'pile') pileB++; }
+    var pw = (pileA * (1 - mk) + pileB * mk) / NE;
+    if (pw > 0.01) {
+      var hg = g.createRadialGradient(OX, PILE, 0, OX, PILE, 34 + 18 * pw);
+      hg.addColorStop(0, css(M.cert, 0.34 * pw * build));
+      hg.addColorStop(1, css(M.cert, 0));
+      g.fillStyle = hg;
+      g.beginPath(); g.arc(OX, PILE, 34 + 18 * pw, 0, TAU); g.fill();
     }
 
-    /* the context plane, a pane of light across the sheet */
-    var zp = zOf(vs);
-    var pl = [P(-1.12, FY, zp, [0, 0, 0]), P(1.12, FY, zp, [0, 0, 0]), P(1.12, HY + 0.1, zp, [0, 0, 0]), P(-1.12, HY + 0.1, zp, [0, 0, 0])];
-    g.fillStyle = css(M.vio, 0.045 * sa);
-    g.beginPath(); g.moveTo(pl[0][0], pl[0][1]);
-    for (c = 1; c < 4; c++) g.lineTo(pl[c][0], pl[c][1]);
-    g.closePath(); g.fill();
-    g.strokeStyle = css(M.vio, 0.35 * sa); g.lineWidth = 1;
-    g.stroke();
-
-    /* --- the sheet: context lines across, entity threads along ------------- */
-    function sheetY(u2) { return u2 / UA * HY; }
-    for (j = 0; j < NCL; j++) {
-      v = VA - 2 * VA * j / (NCL - 1);
-      g.strokeStyle = css(M.vio7, 0.16 * build);
-      g.lineWidth = 0.8;
-      g.beginPath();
-      for (k = 0; k <= 40; k++) {
-        u = -UA + 2 * UA * k / 40;
-        P(ans(u, v), sheetY(u), zOf(v), pa);
-        if (k) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
-      }
-      g.stroke();
-    }
-    for (i = 0; i < NE; i++) {
-      u = -UA + 2 * UA * i / (NE - 1);
-      var cc = M.ent[i];
-      for (var ly = 0; ly < 2; ly++) {
-        g.strokeStyle = ly ? css(cc, 0.9 * build) : css(cc, 0.14 * build);
-        g.lineWidth = ly ? 1.3 : 4.5;
+    /* --- the threads: three strands each, in the entity's colour ----------- */
+    for (e = 0; e < NE; e++) {
+      var tg = target(e), ce = M.ent[e];
+      for (var sd = -1; sd <= 1; sd++) {
+        g.strokeStyle = css(ce, (sd ? 0.26 : 0.5) * build);
+        g.lineWidth = sd ? 0.9 : 1.2;
         g.beginPath();
-        for (j = 0; j <= NV; j++) {
-          v = VA - 2 * VA * j / NV;
-          P(ans(u, v), sheetY(u), zOf(v), pa);
-          if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+        for (i2 = 0; i2 <= 36; i2++) {
+          s2 = i2 / 36;
+          bez(e, s2, tg, pt);
+          var off = sd * 2.2 * (1 - s2);                  /* strands meet at the answer */
+          if (i2) g.lineTo(pt[0], pt[1] + off); else g.moveTo(pt[0], pt[1] + off);
         }
         g.stroke();
       }
-    }
-    /* the crease: where the sheet turns over, u = +-sqrt(-v/3) */
-    for (var sgn = -1; sgn <= 1; sgn += 2) {
-      for (var p2 = 0; p2 < 2; p2++) {
-        g.strokeStyle = p2 ? css(M.white, 0.9 * build) : css(M.coral, 0.25 * build);
-        g.lineWidth = p2 ? 1.1 : 5;
+      /* the last stretch of the thread takes the colour of its verdict */
+      for (var vv = 0; vv < 2; vv++) {
+        var wv = vv ? mk : 1 - mk, stc = statCol[vv ? B.stat[e] : A.stat[e]];
+        if (wv <= 0.01) continue;
+        g.strokeStyle = css(stc, 0.9 * wv * build);
+        g.lineWidth = 2.2;
         g.beginPath();
-        for (j = 0; j <= 30; j++) {
-          v = -VA * j / 30;
-          u = sgn * Math.sqrt(-v / 3);
-          P(ans(u, v), sheetY(u), zOf(v), pa);
-          if (j) g.lineTo(pa[0], pa[1]); else g.moveTo(pa[0], pa[1]);
+        for (i2 = 26; i2 <= 36; i2++) {
+          bez(e, i2 / 36, tg, pt);
+          if (i2 > 26) g.lineTo(pt[0], pt[1]); else g.moveTo(pt[0], pt[1]);
         }
         g.stroke();
       }
     }
 
-    /* --- the drops: each entity to its answer on the floor ----------------- */
-    if (sa > 0.01) {
-      for (i = 0; i < NE; i++) {
-        u = -UA + 2 * UA * i / (NE - 1);
-        var cw = wrong[i] ? M.coral : M.ent[i];
-        P(xs[i], sheetY(u), zp, pa); P(xs[i], FY, zp, pb);
-        g.strokeStyle = css(cw, (wrong[i] ? 0.7 : 0.45) * sa);
-        g.lineWidth = wrong[i] ? 1.3 : 0.9;
-        g.beginPath(); g.moveTo(pa[0], pa[1]); g.lineTo(pb[0], pb[1]); g.stroke();
-        /* the entity on the sheet */
-        g.fillStyle = css(M.ent[i], sa);
-        g.beginPath(); g.arc(pa[0], pa[1], 2.8, 0, TAU); g.fill();
+    /* --- beads: each entity keeps sending its question down its thread ---- */
+    if (!REDUCED) {
+      for (e = 0; e < NE; e++) {
+        var per = 2100 + 520 * ((e * 7) % 5), age = (t + e * 331) % per, u2 = age / 1700;
+        if (u2 > 1) continue;
+        bez(e, ease(u2), target(e), pt);
+        var ae = Math.sin(Math.PI * u2);
+        g.fillStyle = css(M.ent[e], 0.2 * ae * build);
+        g.beginPath(); g.arc(pt[0], pt[1], 6, 0, TAU); g.fill();
+        g.fillStyle = css(M.ent[e], ae * build);
+        g.beginPath(); g.arc(pt[0], pt[1], 2.4, 0, TAU); g.fill();
       }
-      /* the answers on the floor: one mark per class, a ring round each
-         class that holds more than one, as many coral as it certifies */
-      for (j = 0; j < order.length; j++) {
-        var mm = cls[order[j]], sx = 0;
-        for (k = 0; k < mm.length; k++) sx += xs[mm[k]];
-        P(sx / mm.length, FY, zp, pa);
-        var one = mm.length === 1;
-        g.fillStyle = css(one ? M.ent[mm[0]] : M.coral7, sa);
-        g.beginPath(); g.arc(pa[0], pa[1], one ? 3 : 3.4 + 0.9 * mm.length, 0, TAU); g.fill();
-        if (!one) {
-          g.strokeStyle = css(M.coral, 0.55 * sa);
-          g.lineWidth = 1.2;
-          g.beginPath(); g.arc(pa[0], pa[1], 7 + 1.6 * mm.length, 0, TAU); g.stroke();
-        }
-      }
+    }
+
+    /* --- where the answers land -------------------------------------------- */
+    for (e = 0; e < NE; e++) {
+      var right = mk > 0.5 ? B.stat[e] === 0 : A.stat[e] === 0;
+      if (!right) continue;                           /* a correct answer: a green ring */
+      var tg3 = target(e);
+      g.strokeStyle = css(M.ok, 0.95 * build); g.lineWidth = 1.8;
+      g.beginPath(); g.arc(tg3[0], tg3[1], 5, 0, TAU); g.stroke();
+    }
+    /* each class that holds more than one entity: a coral mark sized by it */
+    var seen = {};
+    for (e = 0; e < NE; e++) {
+      var bk = B.t[e].key, sz = B.size[e];
+      if (seen[bk] || sz < 2) continue;
+      seen[bk] = 1;
+      var tb = target(e), rr = 3 + 1.6 * Math.sqrt(sz);
+      g.fillStyle = css(M.cert7, mk * build);
+      g.beginPath(); g.arc(tb[0], tb[1], rr, 0, TAU); g.fill();
+      g.strokeStyle = css(M.cert, 0.5 * mk * build); g.lineWidth = 1.2;
+      g.beginPath(); g.arc(tb[0], tb[1], rr + 5, 0, TAU); g.stroke();
+    }
+
+    /* --- the entities ------------------------------------------------------ */
+    for (e = 0; e < NE; e++) {
+      g.fillStyle = css(M.ent[e], 0.22 * build);
+      g.beginPath(); g.arc(EX - 4, M.ys[e], 6.5, 0, TAU); g.fill();
+      g.fillStyle = css(M.ent[e], build);
+      g.beginPath(); g.arc(EX - 4, M.ys[e], 3.4, 0, TAU); g.fill();
     }
   }
 
