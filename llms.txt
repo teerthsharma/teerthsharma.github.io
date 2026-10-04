@@ -11,8 +11,8 @@ Email: teerths57@gmail.com
 
 Landed upstream contributions
 
-Eleven changes by Teerth Sharma are on the default branch of a major upstream project.
-Two of the eleven show "merged: false" on GitHub because Google and Meta import a pull
+Twelve changes by Teerth Sharma are on the default branch of a major upstream project.
+Two of the twelve show "merged: false" on GitHub because Google and Meta import a pull
 request into an internal monorepo, merge it there, and export it back as a commit. Those
 are marked "landed in" and the commit is named so the claim can be checked directly.
 
@@ -62,8 +62,13 @@ are marked "landed in" and the commit is named so the claim can be checked direc
     forced invalidation, and reach commit with that change still pending. A generated
     chain of 208 two-module SCCs pins the resulting failure in one Rust test.
     Language Rust.
+12. open2c/polychrom #79, merged. getLinkingNumber summed the signed crossings of
+    two closed chains into L and returned -L/2, the opposite sign to the Gauss linking
+    number on every linked pair. It now returns L/2. Against a Gauss-Legendre double
+    integral on 11 pairs, 1 of 11 agreed before and 11 of 11 after; pytest 64/64 to
+    65/65; valgrind mismatched free() contexts 16 to 0. Language C++.
 
-What the eleven cover, which is the point: memory that grew with the square of the
+What the twelve cover, which is the point: memory that grew with the square of the
 input, time spent on work already ruled out, space never reclaimed, results that were
 wrong or not reproducible, state and privilege that leaked, one capability added, and
 one regression pinned so it cannot return.

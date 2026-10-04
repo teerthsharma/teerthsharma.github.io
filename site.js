@@ -376,7 +376,8 @@
       { org: 'triton-lang/kernels #22', num: '804 lines', label: 'a sparse attention kernel, merged', sub: 'topology derived block schedule, 17 tests passing', shape: 'triangle' },
       { org: 'openxla/xla #46539', num: '5 lines', label: 'deterministic GPU codegen', sub: 'the same program stopped compiling two ways', shape: 'fork' },
       { org: 'dsx-ai-factory/topograph #432', num: '4 files', label: 'permissions gated to what applies', sub: 'cluster wide RBAC narrowed by engine and provider', shape: 'gate' },
-      { org: 'facebook/pyrefly #4180', num: '208 SCCs', label: 'a regression pinned so it cannot return', sub: 'capped recheck propagation, caught in one Rust test', shape: 'chainlong' }
+      { org: 'facebook/pyrefly #4180', num: '208 SCCs', label: 'a regression pinned so it cannot return', sub: 'capped recheck propagation, caught in one Rust test', shape: 'chainlong' },
+      { org: 'open2c/polychrom #79', num: '11 of 11', label: 'linking numbers with the right sign', sub: 'up from 1 of 11 against the Gauss integral', shape: 'hopf' }
     ];
 
     var CHAIN_NODES = [4, 14, 24, 34];
@@ -385,6 +386,12 @@
     var CHAINLONG_COLS = [2, 6, 10, 14, 18, 22, 26, 30, 34, 38];
 
     var SHAPES = {
+      // hopf: two ring outlines on the 40x10 grid, overlapping like a link.
+      hopf: function (col, row) {
+        var a = Math.pow((col - 15) / 8, 2) + Math.pow((row - 4.5) / 4.6, 2);
+        var b = Math.pow((col - 25) / 8, 2) + Math.pow((row - 4.5) / 4.6, 2);
+        return Math.abs(a - 1) < 0.32 || Math.abs(b - 1) < 0.32;
+      },
       quadratic: function (col, row) {
         return row >= 10 - Math.round(10 * Math.pow(col / 39, 2));
       },

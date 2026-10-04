@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teerth Sharma</title>
-<meta name="description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Eleven landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta name="description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Twelve landed contributions: memory, speed, determinism, correctness and least privilege.">
 <link rel="canonical" href="https://teerthsharma.github.io/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
-<meta property="og:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Eleven landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta property="og:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Twelve landed contributions: memory, speed, determinism, correctness and least privilege.">
 <meta property="og:url" content="https://teerthsharma.github.io/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
-<meta name="twitter:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Eleven landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta name="twitter:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Twelve landed contributions: memory, speed, determinism, correctness and least privilege.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=75">
-<link rel="stylesheet" href="motion.css?v=75">
-<link rel="stylesheet" href="art.css?v=75">
+<link rel="stylesheet" href="site.css?v=76">
+<link rel="stylesheet" href="motion.css?v=76">
+<link rel="stylesheet" href="art.css?v=76">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -263,6 +263,19 @@
             <img class="proofcell__org" src="assets/org/facebook.png" alt="" loading="lazy">
             <span class="proofcell__num mono">208 SCCs pinned</span>
           </a>
+          <a class="proofcell" href="#pr-polychrom-79" aria-label="open2c/polychrom pull request 79: 11 of 11 linking numbers agree">
+            <div class="proofcell__art">
+              <svg class="proofcell__mark" viewBox="0 0 120 48" role="img" aria-labelledby="hc12-t hc12-d">
+                <title id="hc12-t">Two linked rings and a sign put right</title>
+                <desc id="hc12-d">Two rings, one ink and one grey, pass through each other once, a Hopf link. A blue disc marks a crossing whose sign is minus one.</desc>
+                <circle class="pop" cx="48" cy="24" r="15" fill="none" stroke="var(--muted)" stroke-width="3"/>
+                <circle class="pop" cx="70" cy="24" r="15" fill="none" stroke="var(--ink)" stroke-width="3"/>
+                <circle class="pop" cx="59" cy="13.6" r="5" fill="var(--blue-500)"/>
+              </svg>
+            </div>
+            <img class="proofcell__org" src="assets/org/open2c.png" alt="" loading="lazy">
+            <span class="proofcell__num mono">11/11 signs agree</span>
+          </a>
         </div>
       </div>
     </div>
@@ -293,12 +306,13 @@
     <li>openxla/xla #46539: 5 lines, deterministic GPU codegen group order</li>
     <li>dsx-ai-factory/topograph #432: 145 lines, ClusterRole rules gated by engine and provider</li>
     <li>facebook/pyrefly #4180: 208 two-module SCC chain, recheck propagation panic pinned</li>
+    <li>open2c/polychrom #79: linking number sign fixed, 11 of 11 pairs agree with the Gauss integral, up from 1 of 11</li>
   </ul>
 </noscript>
 <section class="band" id="upstream">
   <div class="wrap">
     <h2>What I fixed, and where.</h2>
-    <p>Eleven landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
+    <p>Twelve landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
     <div class="grid grid--3">
       <article class="card" id="pr-mujoco-warp-1541">
 <div class="card__text">
@@ -744,6 +758,53 @@
         </div>
 </div>
 </article>
+
+<article class="card" id="pr-polychrom-79">
+<div class="card__text">
+        <div class="card__head">
+          <a href="https://github.com/open2c/polychrom/pull/79"><img src="assets/org/open2c.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into open2c/polychrom #79</span>
+        </div>
+        <h3 class="card__title">The sign of the linking number, put right</h3>
+        <p class="card__body">polychrom simulates chromosomes as polymers, and getLinkingNumber says whether two closed chains are linked and which way. It summed the signed crossings into L and returned -L/2, so every linked pair came back with the opposite sign to the Gauss linking number and to its own docstring. I made it return L/2, released the new[] buffers with delete[], freed a buffer that leaked, and added a test that pins the sign.</p>
+        
+        <p class="card__cap mono">11 of 11 pairs agree with a Gauss-Legendre integral, up from 1 of 11. pytest 64/64 to 65/65.</p>
+        <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">sign convention</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 3 ways</summary>
+            <ul class="ev__list">
+            <li>11 pairs against a Gauss-Legendre double integral: Hopf link in four orientations, T(2,2), T(2,4), T(2,6) in both chiralities, unlinked rings</li>
+            <li>test_hopf_link_sign: -1 for the test's Hopf link, +1 with one ring reversed, and it fails on master</li>
+            <li>valgrind on a 30-point Hopf link: 16 mismatched free() contexts to 0, definitely lost 3,192 bytes to 2,712</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/open2c/polychrom/pull/79">open2c/polychrom #79</a>
+</div>
+<div class="card__figure">
+<div class="card__art fig">
+      <div class="figc" style="--figc-ar:500/566">
+                <canvas data-fig="linking" data-vb="500 566" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 500 566" role="img" aria-labelledby="pr-polychrom-79-t pr-polychrom-79-d">
+                  <title id="pr-polychrom-79-t">Two linked polymer rings, their signed crossings, and the validation graph flipping about zero</title>
+                  <desc id="pr-polychrom-79-d">Two closed polymer chains, drawn monomer by monomer, form the Hopf link from test_hopf_link_sign, turning slowly. A lighter pulse runs along each chain in the direction it is oriented. Below them is their shadow on the z equals 0 plane, which is what getLinkingNumber reads, with the under strand broken at each of its two crossings and dashed plumb lines dropping from the strands that meet there. Each crossing carries its sign, over cross under dotted with z, and both are minus one, so L is minus 2 and the linking number L over 2 is minus 1, matching the Gauss integral. Underneath, a graph of 11 pairs: the Hopf link in four orientations, T(2,2), T(2,4) and T(2,6) in both chiralities, and unlinked rings. Ink rings mark the Gauss-Legendre linking numbers. master returned minus L over 2, drawn in coral as the mirror image of every ring, so only the unlinked pair agreed, 1 of 11. The change altered only the convention, so the whole graph flips about zero at once, turns mint, and lands in all 11 rings.</desc>
+                  <text x="250" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">two polymer rings, linked once</text>
+                  <text x="250" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">each shadow crossing signs <tspan fill="var(--blue-700)">(over × under) · z = -1</tspan></text>
+                  <text x="52" y="372" text-anchor="end" font-size="14" fill="var(--muted)">+3</text>
+                  <text x="52" y="414" text-anchor="end" font-size="14" fill="var(--muted)">0</text>
+                  <text x="52" y="456" text-anchor="end" font-size="14" fill="var(--muted)">-3</text>
+                  <text x="135" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">Hopf link ×4</text>
+                  <text x="243" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,2)</text>
+                  <text x="317" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,4)</text>
+                  <text x="391" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,6)</text>
+                  <text x="456" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">unlinked</text>
+                  <text x="250" y="508" text-anchor="middle" font-size="15" fill="var(--muted)">rings: the Gauss-Legendre linking number of each pair</text>
+                  <text x="250" y="532" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">master returned -L/2: 1 of 11 agree</text>
+                  <text x="250" y="556" text-anchor="middle" font-size="16" font-weight="600" fill="var(--mint-700)">#79 returns L/2: 11 of 11 agree</text>
+                </svg>
+              </div>
+        </div>
+</div>
+</article>
     </div>
     <p class="muted mono">Every number on this page is in a merged diff under my GitHub username.</p>
     <div class="cta-row">
@@ -787,7 +848,7 @@
     </nav>
   </div>
 </footer>
-<script src="fig.js?v=75" defer></script>
-<script src="site.js?v=75" defer></script>
+<script src="fig.js?v=76" defer></script>
+<script src="site.js?v=76" defer></script>
 </body>
 </html>
