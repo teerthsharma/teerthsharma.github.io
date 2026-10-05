@@ -16,9 +16,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=76">
-<link rel="stylesheet" href="motion.css?v=76">
-<link rel="stylesheet" href="art.css?v=76">
+<link rel="stylesheet" href="site.css?v=77">
+<link rel="stylesheet" href="motion.css?v=77">
+<link rel="stylesheet" href="art.css?v=77">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -782,24 +782,25 @@
 </div>
 <div class="card__figure">
 <div class="card__art fig">
-      <div class="figc" style="--figc-ar:500/566">
-                <canvas data-fig="linking" data-vb="500 566" aria-hidden="true"></canvas>
-                <svg class="figc__lab" viewBox="0 0 500 566" role="img" aria-labelledby="pr-polychrom-79-t pr-polychrom-79-d">
-                  <title id="pr-polychrom-79-t">Two linked polymer rings, their signed crossings, and the validation graph flipping about zero</title>
-                  <desc id="pr-polychrom-79-d">Two closed polymer chains, drawn monomer by monomer, form the Hopf link from test_hopf_link_sign, turning slowly. A lighter pulse runs along each chain in the direction it is oriented. Below them is their shadow on the z equals 0 plane, which is what getLinkingNumber reads, with the under strand broken at each of its two crossings and dashed plumb lines dropping from the strands that meet there. Each crossing carries its sign, over cross under dotted with z, and both are minus one, so L is minus 2 and the linking number L over 2 is minus 1, matching the Gauss integral. Underneath, a graph of 11 pairs: the Hopf link in four orientations, T(2,2), T(2,4) and T(2,6) in both chiralities, and unlinked rings. Ink rings mark the Gauss-Legendre linking numbers. master returned minus L over 2, drawn in coral as the mirror image of every ring, so only the unlinked pair agreed, 1 of 11. The change altered only the convention, so the whole graph flips about zero at once, turns mint, and lands in all 11 rings.</desc>
-                  <text x="250" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">two polymer rings, linked once</text>
-                  <text x="250" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">each shadow crossing signs <tspan fill="var(--blue-700)">(over × under) · z = -1</tspan></text>
-                  <text x="52" y="372" text-anchor="end" font-size="14" fill="var(--muted)">+3</text>
-                  <text x="52" y="414" text-anchor="end" font-size="14" fill="var(--muted)">0</text>
-                  <text x="52" y="456" text-anchor="end" font-size="14" fill="var(--muted)">-3</text>
-                  <text x="135" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">Hopf link ×4</text>
-                  <text x="243" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,2)</text>
-                  <text x="317" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,4)</text>
-                  <text x="391" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,6)</text>
-                  <text x="456" y="482" text-anchor="middle" font-size="14" fill="var(--ink)">unlinked</text>
-                  <text x="250" y="508" text-anchor="middle" font-size="15" fill="var(--muted)">rings: the Gauss-Legendre linking number of each pair</text>
-                  <text x="250" y="532" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">master returned -L/2: 1 of 11 agree</text>
-                  <text x="250" y="556" text-anchor="middle" font-size="16" font-weight="600" fill="var(--mint-700)">#79 returns L/2: 11 of 11 agree</text>
+      <div class="figc" style="--figc-ar:500/652">
+                <canvas data-fig="linking" data-vb="500 652" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 500 652" role="img" aria-labelledby="pr-polychrom-79-t pr-polychrom-79-d">
+                  <title id="pr-polychrom-79-t">Two linked polymer chains in motion, the signed crossings of their shadow, and the validation graph turning over about zero</title>
+                  <desc id="pr-polychrom-79-d">Two closed polymer chains of 110 monomers each, linked once like a pair of chromosome loops, keep moving and bending. Light falls straight down onto a floor, so their shadow is the projection getLinkingNumber reads. Wherever the shadows cross, the strand below is broken and a disc carries the sign of the crossing, over cross under dotted with z: blue for minus one, amber for plus one. As the chains move, crossings are born and die in pairs of opposite sign, so the shadow shows two, four, six or eight crossings, and the ledger beneath sets every plus one beside a minus one to cancel. Two minus ones are always left: L is minus 2 and the linking number L over 2 is minus 1, the Gauss value. Underneath, a graph of 11 pairs: the Hopf link in four orientations, T(2,2), T(2,4) and T(2,6) in both chiralities, and unlinked rings. Ink rings mark the Gauss-Legendre linking numbers. master returned minus L over 2, drawn in coral as the mirror image of every ring, so only the unlinked pair agreed, 1 of 11. The change altered only the convention, so the whole graph turns over about zero at once like a sheet hinged on the axis, turns mint, and lands in all 11 rings.</desc>
+                  <text x="250" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">two polymer chains, linked once, never at rest</text>
+                  <text x="250" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">the code reads their shadow, one crossing at a time</text>
+                  <text x="250" y="440" text-anchor="middle" font-size="14" fill="var(--ink)"><tspan fill="var(--amber-700)">+1</tspan> and <tspan fill="var(--blue-700)">-1</tspan> crossings cancel in pairs: L = <tspan fill="var(--blue-700)">-2</tspan>, lk = L/2 = <tspan fill="var(--blue-700)">-1</tspan></text>
+                  <text x="52" y="463" text-anchor="end" font-size="14" fill="var(--muted)">+3</text>
+                  <text x="52" y="505" text-anchor="end" font-size="14" fill="var(--muted)">0</text>
+                  <text x="52" y="547" text-anchor="end" font-size="14" fill="var(--muted)">-3</text>
+                  <text x="135" y="570" text-anchor="middle" font-size="14" fill="var(--ink)">Hopf link ×4</text>
+                  <text x="243" y="570" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,2)</text>
+                  <text x="317" y="570" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,4)</text>
+                  <text x="391" y="570" text-anchor="middle" font-size="14" fill="var(--ink)">T(2,6)</text>
+                  <text x="456" y="570" text-anchor="middle" font-size="14" fill="var(--ink)">unlinked</text>
+                  <text x="250" y="596" text-anchor="middle" font-size="15" fill="var(--muted)">rings: the Gauss-Legendre linking number of each pair</text>
+                  <text x="250" y="620" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">master returned -L/2: 1 of 11 agree</text>
+                  <text x="250" y="644" text-anchor="middle" font-size="16" font-weight="600" fill="var(--mint-700)">#79 returns L/2: 11 of 11 agree</text>
                 </svg>
               </div>
         </div>
@@ -848,7 +849,7 @@
     </nav>
   </div>
 </footer>
-<script src="fig.js?v=76" defer></script>
-<script src="site.js?v=76" defer></script>
+<script src="fig.js?v=77" defer></script>
+<script src="site.js?v=77" defer></script>
 </body>
 </html>

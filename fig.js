@@ -9270,218 +9270,266 @@
   }
 
   /* ==================================================================== */
-  /* linking — open2c/polychrom #79                                         */
+  /* linking — open2c/polychrom #79                                       */
   /* ==================================================================== */
   function linking(g, vb, t, st) {
-    /* Two closed polymer chains, the Hopf link of test_hopf_link_sign, drawn
-       as monomers the way polychrom simulates a chromosome. Chain A is the
-       unit circle in a plane, run counter-clockwise seen from +z. Chain B is
-       (0.5 + cos t, 0, sin t), here tipped 0.5 rad about its own x axis so
-       its shadow is not edge on; the tip moves no point through chain A, so
-       the link and its number are unchanged. B passes through A's disc once,
-       at x = -0.5, moving along -z: the Gauss linking number is -1, checked
-       for this exact pose by a midpoint double sum of
-       1/(4 pi) oint oint (x - y).(dx x dy)/|x - y|^3 over 400 x 400 points:
-       -1.0000.
+    /* Two closed polymer chains, 110 monomers each, linked once, the way
+       polychrom holds a pair of chromosome loops: never at rest. Chain A
+       starts as the unit circle run counter-clockwise from +z, chain B as
+       (1 + cos u, -sin 0.35 sin u, cos 0.35 sin u), so B passes once through
+       A's disc moving along -z and the Gauss linking number is -1. Both are
+       then bent by slow travelling modes m = 2, 3, 5 of amplitude 0.08 and
+       the pair is turned 0.5 rad about x and 0.8 about y, so the view down z
+       is oblique. Checked offline over 40 s at 25 ms steps with exactly this
+       discretisation: the chains never come closer than 0.42, the Gauss
+       double integral stays -1, and the signed crossing sum is -2 in all
+       1,600 frames while the number of crossings runs 2, 4, 6, 8 and back.
 
-       Below the chains is what getLinkingNumber actually reads: their shadow
-       on the z = 0 plane, with the under strand broken at each crossing. The
-       code finds both crossings and signs each one (over x under).z; both are
-       -1, so L = -2. Dashed plumb lines drop from the two strands that meet
-       at each crossing, so the over and under can be read off the chains.
+       Light falls straight down z, so the shadow on the floor IS the
+       projection getLinkingNumber reads. Every frame the shadows are
+       intersected segment by segment, as _getLinkingNumberCpp does; at each
+       crossing between the chains the strand nearer the light stays whole,
+       the one below it is broken, and a disc carries the sign
+       (over x under).z: blue -1, amber +1. A disc grows with the angle of its
+       crossing, so a new pair is born small, where two shadows first touch,
+       one of each sign. Self crossings of one chain break the shadow too but
+       carry no sign; the code does not count them.
+
+       The ledger under the floor is the same signs, tallied. Each +1 is set
+       beside a -1 and the pair dims: they cancel. Two blue discs are always
+       left: L = -2, and lk = L/2 = -1.
 
        The chart is the validation: 11 pairs (the Hopf link in four
        orientations, T(2,2), T(2,4), T(2,6) in both chiralities, unlinked
        rings). Ink rings are the Gauss-Legendre values. master returned -L/2,
-       the mirror image of every one of them, so only the unlinked pair
-       agreed. #79 changed only the convention, return L/2, so the whole graph
-       flips about zero at once and lands in every ring. The first column is
-       the link drawn above.
-
-       Colour is data: blue is a crossing of sign -1, coral is master, mint is
-       #79. The chains are neutral; a lighter pulse runs along each in the
-       direction it is oriented. Nothing painted is darker than #3a3a3a. */
+       the mirror image of each, so only the unlinked pair agreed. #79 changed
+       only the convention, so the whole graph turns over about zero at once,
+       a sheet hinged on the axis, and lands in every ring. The first column
+       is the link drawn above. Coral is master, mint is #79. */
     var TAU = Math.PI * 2;
-    var NB = 44, ND = 180, AL = 0.5, HZ = 1.6;
-    var S = 88, CX = 228, CY = 252, EL = 0.62;
-    var SE = Math.sin(EL), CE = Math.cos(EL), PX = 0.25;
-    var BR = 6.1;
+    var N = 110, AMP = 0.08, AL = 0.35, SPD = 2.5, ZF = -1.36, RP = 1.5;
+    var S = 88, CX = 250, CY = 206, EL = 0.4, PERSP = 0.07;
+    var SE = Math.sin(EL), CE = Math.cos(EL);
+    var BR = 4.4, GAP = 2.2;
     var COLS = [84, 118, 152, 186, 226, 260, 300, 334, 374, 408, 452];
     var GV = [-1, 1, 1, -1, 1, -1, 2, -2, 3, -3, 0];
-    var Y0 = 409, U = 14;
-    var CYC = 9000, F0 = 2200, FL = 1400, X0 = 8000, XL = 1000;
+    var Y0 = 500, U = 14, LY = 406;
+    var CYC = 9000, F0 = 2200, FL = 1600, X0 = 8000, XL = 1000;
+    var MODES = [[2, 0.00031, 0.00023, 0.00027], [3, 0.00041, 0.00029, 0.00037], [5, 0.00053, 0.00047, 0.00033]];
 
     var M = linking._m;
     if (!M) {
-      var C = {};
       var hex = function (name, fb) {
         var h = (token(name, fb) || fb).trim().replace('#', '');
         if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
         var n = parseInt(h, 16);
         return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
       };
-      C.ink = hex('--ink', '#1c1b19'); C.mut = hex('--muted', '#5f5b53');
-      C.wht = hex('--raised', '#ffffff'); C.hair = hex('--hair2', '#cfcbc1');
-      C.blue = hex('--blue-500', '#2456dc'); C.coral = hex('--coral-500', '#e8553f');
-      C.mint = hex('--mint-500', '#14b88a');
-      var curve = function (k, u) {
-        if (k === 0) return [Math.cos(u), Math.sin(u), HZ];
-        return [0.5 + Math.cos(u), -Math.sin(AL) * Math.sin(u), HZ + Math.cos(AL) * Math.sin(u)];
-      };
-      var tang = function (k, u) {
-        if (k === 0) return [-Math.sin(u), Math.cos(u), 0];
-        return [-Math.sin(u), -Math.sin(AL) * Math.cos(u), Math.cos(AL) * Math.cos(u)];
-      };
-      /* monomers, and a dense copy of each chain for the shadow */
-      var beads = [], dense = [[], []], k, i;
-      for (k = 0; k < 2; k++) {
-        for (i = 0; i < NB; i++) beads.push({ k: k, i: i, w: curve(k, TAU * i / NB), x: 0, y: 0, d: 0 });
-        for (i = 0; i <= ND; i++) dense[k].push(curve(k, TAU * i / ND));
-      }
-      /* shadow crossings, found as getLinkingNumber finds them */
-      var xs = [];
-      for (i = 0; i < ND; i++) {
-        var p = dense[0][i], v = [dense[0][i + 1][0] - p[0], dense[0][i + 1][1] - p[1]];
-        for (var j = 0; j < ND; j++) {
-          var q = dense[1][j], w = [dense[1][j + 1][0] - q[0], dense[1][j + 1][1] - q[1]];
-          var den = v[0] * w[1] - v[1] * w[0];
-          if (Math.abs(den) < 1e-12) continue;
-          var dx = q[0] - p[0], dy = q[1] - p[1];
-          var a = (dx * w[1] - dy * w[0]) / den, b = (dx * v[1] - dy * v[0]) / den;
-          if (a < 0 || a >= 1 || b < 0 || b >= 1) continue;
-          var ua = TAU * (i + a) / ND, ub = TAU * (j + b) / ND;
-          var pa = curve(0, ua), pb = curve(1, ub), ta = tang(0, ua), tb = tang(1, ub);
-          var aOver = pa[2] > pb[2];
-          var ov = aOver ? ta : tb, un = aOver ? tb : ta;
-          xs.push({ x: pa[0], y: pa[1], pa: pa, pb: pb, under: aOver ? 1 : 0,
-                    uu: aOver ? ub : ua, sg: Math.sign(ov[0] * un[1] - ov[1] * un[0]) });
-        }
-      }
-      M = { C: C, beads: beads, dense: dense, xs: xs, curve: curve, tang: tang };
-      var mix = function (a1, a2, f) {
+      var mix0 = function (a1, a2, f) {
         return [Math.round(a1[0] + (a2[0] - a1[0]) * f), Math.round(a1[1] + (a2[1] - a1[1]) * f), Math.round(a1[2] + (a2[2] - a1[2]) * f)];
       };
-      M.mix = mix;
-      M.base = [mix(C.ink, C.wht, 0.30), mix(C.mut, C.wht, 0.34)];
-      M.edge = [mix(C.ink, C.wht, 0.17), mix(C.mut, C.wht, 0.12)];
-      M.shadow = 'rgb(' + mix(C.mut, C.wht, 0.15).join(',') + ')';
-      linking._m = M;
+      var C0 = { ink: hex('--ink', '#1c1b19'), mut: hex('--muted', '#5f5b53'), wht: hex('--raised', '#ffffff'),
+                 hair: hex('--hair2', '#cfcbc1'), blue: hex('--blue-500', '#2456dc'), amber: hex('--amber-500', '#e8a317'),
+                 coral: hex('--coral-500', '#e8553f'), mint: hex('--mint-500', '#14b88a') };
+      var cx = Math.cos(0.5), sx = Math.sin(0.5), cyr = Math.cos(0.8), syr = Math.sin(0.8);
+      /* R = Ry(0.8) Rx(0.5) */
+      var R0 = [[cyr, syr * sx, syr * cx], [0, cx, -sx], [-syr, cyr * sx, cyr * cx]];
+      var base = [[], []], cu = [], su = [];
+      for (var i0 = 0; i0 < N; i0++) {
+        var u0 = TAU * i0 / N;
+        cu.push(u0); su.push(0);
+        base[0].push([Math.cos(u0), Math.sin(u0), 0]);
+        base[1].push([1 + Math.cos(u0), -Math.sin(AL) * Math.sin(u0), Math.cos(AL) * Math.sin(u0)]);
+      }
+      M = linking._m = {
+        C: C0, mix: mix0, R: R0, base: base, u: cu,
+        P: [[], []], beads: [],
+        baseC: [mix0(C0.ink, C0.wht, 0.32), mix0(C0.mut, C0.wht, 0.38)],
+        edgeC: [mix0(C0.ink, C0.wht, 0.17), mix0(C0.mut, C0.wht, 0.12)],
+        shadow: 'rgb(' + mix0(C0.mut, C0.wht, 0.3).join(',') + ')'
+      };
+      for (var k0 = 0; k0 < 2; k0++) for (i0 = 0; i0 < N; i0++) {
+        M.P[k0].push([0, 0, 0]);
+        M.beads.push({ k: k0, i: i0, x: 0, y: 0, d: 0, p: 1 });
+      }
+      M.order = M.beads.slice();
     }
-    var C = M.C, mixc = M.mix;
+    var C = M.C, mix = M.mix;
     var rgb = function (c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; };
 
-    var T = REDUCED ? 5000 : t;
-    var yaw = 0.3 + 0.38 * Math.sin(TAU * T / 16000);
-    var cy = Math.cos(yaw), sy = Math.sin(yaw);
-    /* world (x, y, z) to screen, and depth toward the eye */
-    var proj = function (w, out) {
-      var x = w[0] - PX, y = w[1];
-      var xr = x * cy - y * sy, yr = x * sy + y * cy;
-      out[0] = CX + S * (xr + PX);
-      out[1] = CY - S * (yr * SE + w[2] * CE);
-      out[2] = -yr * CE + w[2] * SE;
+    var T = REDUCED ? 4000 : t;
+    var tt = T * SPD;
+    var yaw = 0.25 * Math.sin(TAU * T / 26000);
+    var cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    var proj = function (x, y, z, out) {
+      var xr = x * cyw - y * syw, yr = x * syw + y * cyw;
+      var d = -yr * CE + z * SE, p = 1 / (1 - d * PERSP);
+      out[0] = CX + S * xr * p;
+      out[1] = CY - S * (yr * SE + z * CE) * p;
+      out[2] = d; out[3] = p;
       return out;
     };
-    var tmp = [0, 0, 0], tmp2 = [0, 0, 0], k, i, q;
+    var tmp = [0, 0, 0, 1], k, i, j, q;
 
-    /* --- the plane the code projects onto --------------------------- */
-    g.beginPath();
-    for (i = 0; i <= 72; i++) {
-      var an = TAU * i / 72;
-      proj([PX + 1.7 * Math.cos(an), 1.7 * Math.sin(an), 0], tmp);
-      if (i === 0) g.moveTo(tmp[0], tmp[1]); else g.lineTo(tmp[0], tmp[1]);
+    /* --- the conformation this instant -------------------------------- */
+    var R = M.R;
+    for (k = 0; k < 2; k++) {
+      for (i = 0; i < N; i++) {
+        var u = M.u[i], b0 = M.base[k][i];
+        var dx = 0, dy = 0, dz = 0;
+        for (q = 0; q < 3; q++) {
+          var mo = MODES[q], ph = k * 1.7 + mo[0];
+          dx += AMP * Math.cos(mo[0] * u + mo[1] * tt + ph);
+          dy += AMP * Math.sin(mo[0] * u + mo[2] * tt + 2 * ph);
+          dz += AMP * 1.3 * Math.cos(mo[0] * u - mo[3] * tt + 3 * ph);
+        }
+        var x0 = b0[0] + dx - 0.5, y0 = b0[1] + dy, z0 = b0[2] + dz, P = M.P[k][i];
+        P[0] = R[0][0] * x0 + R[0][1] * y0 + R[0][2] * z0;
+        P[1] = R[1][0] * x0 + R[1][1] * y0 + R[1][2] * z0;
+        P[2] = R[2][0] * x0 + R[2][1] * y0 + R[2][2] * z0;
+      }
     }
-    g.closePath();
-    g.fillStyle = rgb(C.ink, 0.035); g.fill();
-    g.strokeStyle = rgb(C.hair, 0.9); g.lineWidth = 1; g.stroke();
 
-    /* --- the shadow, under strands broken at each crossing ------------ */
-    var GAP = 0.13;
+    /* --- shadow crossings, segment by segment ------------------------- */
+    var xs = [], cuts = [[], []];
+    var crossPair = function (ka, kb) {
+      var A = M.P[ka], B = M.P[kb];
+      for (var ia = 0; ia < N; ia++) {
+        var pa = A[ia], na = A[(ia + 1) % N];
+        var vx = na[0] - pa[0], vy = na[1] - pa[1];
+        var minx = Math.min(pa[0], na[0]), maxx = Math.max(pa[0], na[0]);
+        var miny = Math.min(pa[1], na[1]), maxy = Math.max(pa[1], na[1]);
+        for (var ib = (ka === kb ? ia + 2 : 0); ib < N; ib++) {
+          if (ka === kb && ia === 0 && ib === N - 1) continue;
+          var pb = B[ib], nb = B[(ib + 1) % N];
+          if (Math.max(pb[0], nb[0]) < minx || Math.min(pb[0], nb[0]) > maxx ||
+              Math.max(pb[1], nb[1]) < miny || Math.min(pb[1], nb[1]) > maxy) continue;
+          var wx = nb[0] - pb[0], wy = nb[1] - pb[1];
+          var den = vx * wy - vy * wx;
+          if (Math.abs(den) < 1e-12) continue;
+          var ex = pb[0] - pa[0], ey = pb[1] - pa[1];
+          var s1 = (ex * wy - ey * wx) / den, s2 = (ex * vy - ey * vx) / den;
+          if (s1 < 0 || s1 >= 1 || s2 < 0 || s2 >= 1) continue;
+          var za = pa[2] + s1 * (na[2] - pa[2]), zb = pb[2] + s2 * (nb[2] - pb[2]);
+          var aOver = za > zb;
+          if (aOver) cuts[kb].push(ib + s2); else cuts[ka].push(ia + s1);
+          if (ka !== kb) {
+            var ox = aOver ? vx : wx, oy = aOver ? vy : wy, ux = aOver ? wx : vx, uy = aOver ? wy : vy;
+            var cr = ox * uy - oy * ux;
+            var sn = Math.abs(cr) / (Math.hypot(vx, vy) * Math.hypot(wx, wy));
+            xs.push({ x: pa[0] + s1 * vx, y: pa[1] + s1 * vy, sg: cr > 0 ? 1 : -1,
+                      f: ease(Math.min(1, sn / 0.45)) });
+          }
+        }
+      }
+    };
+    crossPair(0, 1); crossPair(0, 0); crossPair(1, 1);
+
+    /* --- the floor: a slab, its grid, and the light's projection ------- */
+    var ring = function (dy) {
+      g.beginPath();
+      for (i = 0; i <= 96; i++) {
+        var an = TAU * i / 96;
+        proj(RP * Math.cos(an), RP * Math.sin(an), ZF, tmp);
+        if (i === 0) g.moveTo(tmp[0], tmp[1] + dy); else g.lineTo(tmp[0], tmp[1] + dy);
+      }
+      g.closePath();
+    };
+    ring(4); g.fillStyle = rgb(C.ink, 0.05); g.fill();
+    ring(0);
+    proj(0, RP, ZF, tmp); var yFar = tmp[1];
+    proj(0, -RP, ZF, tmp); var yNear = tmp[1];
+    var fl = g.createLinearGradient(0, yFar, 0, yNear);
+    fl.addColorStop(0, rgb(mix(C.wht, C.ink, 0.035), 1));
+    fl.addColorStop(1, rgb(mix(C.wht, C.ink, 0.075), 1));
+    g.fillStyle = fl; g.fill();
+    g.save(); ring(0); g.clip();
+    g.beginPath();
+    for (q = -3; q <= 3; q++) {
+      proj(q * 0.5, -RP, ZF, tmp); g.moveTo(tmp[0], tmp[1]);
+      proj(q * 0.5, RP, ZF, tmp); g.lineTo(tmp[0], tmp[1]);
+      proj(-RP, q * 0.5, ZF, tmp); g.moveTo(tmp[0], tmp[1]);
+      proj(RP, q * 0.5, ZF, tmp); g.lineTo(tmp[0], tmp[1]);
+    }
+    g.strokeStyle = rgb(C.hair, 0.5); g.lineWidth = 0.8; g.stroke();
+    g.restore();
+    ring(0); g.strokeStyle = rgb(C.hair, 1); g.lineWidth = 1; g.stroke();
+
+    /* shadows, the under strand broken at every crossing */
     for (k = 0; k < 2; k++) {
       g.beginPath();
       var pen = false;
-      for (i = 0; i <= M.dense[k].length - 1; i++) {
-        var u = TAU * i / (M.dense[k].length - 1), cut = false;
-        for (q = 0; q < M.xs.length; q++) {
-          var X = M.xs[q];
-          if (X.under !== k) continue;
-          var du = Math.abs(((u - X.uu) % TAU + TAU + Math.PI) % TAU - Math.PI);
-          if (du < GAP) cut = true;
+      for (i = 0; i < N; i++) {
+        var mid = i + 0.5, cut = false;
+        for (q = 0; q < cuts[k].length; q++) {
+          var dd = Math.abs(mid - cuts[k][q]);
+          if (Math.min(dd, N - dd) < GAP) { cut = true; break; }
         }
-        var wd = M.dense[k][i];
-        proj([wd[0], wd[1], 0], tmp);
         if (cut) { pen = false; continue; }
-        if (!pen) { g.moveTo(tmp[0], tmp[1]); pen = true; } else g.lineTo(tmp[0], tmp[1]);
+        var Pa = M.P[k][i], Pb = M.P[k][(i + 1) % N];
+        if (!pen) { proj(Pa[0], Pa[1], ZF, tmp); g.moveTo(tmp[0], tmp[1]); pen = true; }
+        proj(Pb[0], Pb[1], ZF, tmp); g.lineTo(tmp[0], tmp[1]);
       }
-      g.strokeStyle = M.shadow; g.lineWidth = 1.6; g.lineCap = 'round'; g.stroke();
-      /* orientation, two arrowheads per shadow */
-      for (q = 0; q < 2; q++) {
-        var ua2 = TAU * (q + (k ? 0.25 : 0.6)) / 2;
-        var c0 = M.curve(k, ua2), c1 = M.curve(k, ua2 + 0.05);
-        proj([c0[0], c0[1], 0], tmp); proj([c1[0], c1[1], 0], tmp2);
-        var ax = tmp2[0] - tmp[0], ay = tmp2[1] - tmp[1], al = Math.hypot(ax, ay) || 1;
-        ax /= al; ay /= al;
-        g.beginPath();
-        g.moveTo(tmp[0] - 6 * ax + 4 * ay, tmp[1] - 6 * ay - 4 * ax);
-        g.lineTo(tmp[0], tmp[1]);
-        g.lineTo(tmp[0] - 6 * ax - 4 * ay, tmp[1] - 6 * ay + 4 * ax);
-        g.strokeStyle = M.shadow; g.lineWidth = 1.6; g.stroke();
-      }
+      g.lineCap = 'round'; g.lineJoin = 'round';
+      g.strokeStyle = rgb(C.ink, 0.06); g.lineWidth = 9; g.stroke();
+      g.strokeStyle = M.shadow; g.lineWidth = 3.2; g.stroke();
     }
 
-    /* --- plumb lines from the two strands that meet at each crossing -- */
-    g.setLineDash([3, 4]);
-    for (q = 0; q < M.xs.length; q++) {
-      var Xq = M.xs[q];
-      proj([Xq.x, Xq.y, 0], tmp2);
-      for (k = 0; k < 2; k++) {
-        proj(k ? Xq.pb : Xq.pa, tmp);
-        g.beginPath(); g.moveTo(tmp[0], tmp[1]); g.lineTo(tmp2[0], tmp2[1]);
-        g.strokeStyle = rgb(C.hair, 1); g.lineWidth = 1; g.stroke();
-      }
-    }
-    g.setLineDash([]);
-
-    /* --- each crossing's sign, read off the shadow -------------------- */
-    for (q = 0; q < M.xs.length; q++) {
-      var Xs = M.xs[q];
-      proj([Xs.x, Xs.y, 0], tmp);
-      g.beginPath(); g.arc(tmp[0], tmp[1], 8.5, 0, TAU);
-      g.fillStyle = rgb(Xs.sg < 0 ? C.blue : C.coral, 1); g.fill();
-      g.fillStyle = rgb(C.wht, 1);
-      g.fillRect(tmp[0] - 4.5, tmp[1] - 1.1, 9, 2.2);
-      if (Xs.sg > 0) g.fillRect(tmp[0] - 1.1, tmp[1] - 4.5, 2.2, 9);
+    /* each crossing's sign */
+    var glyph = function (x, y, r, sg, a) {
+      g.beginPath(); g.arc(x, y, r, 0, TAU);
+      g.fillStyle = rgb(sg < 0 ? C.blue : C.amber, a); g.fill();
+      var h = r * 0.55, w = Math.max(1, r * 0.26);
+      g.fillStyle = rgb(C.wht, a);
+      g.fillRect(x - h, y - w / 2, 2 * h, w);
+      if (sg > 0) g.fillRect(x - w / 2, y - h, w, 2 * h);
+    };
+    for (q = 0; q < xs.length; q++) {
+      proj(xs[q].x, xs[q].y, ZF, tmp);
+      glyph(tmp[0], tmp[1], 2.5 + 5.5 * xs[q].f, xs[q].sg, 1);
     }
 
     /* --- the chains, monomer by monomer, far to near ------------------- */
-    var B = M.beads;
+    var B = M.beads, ph0 = (T / 6500) % 1;
     for (q = 0; q < B.length; q++) {
-      proj(B[q].w, tmp);
-      B[q].x = tmp[0]; B[q].y = tmp[1]; B[q].d = tmp[2];
+      var Pq = M.P[B[q].k][B[q].i];
+      proj(Pq[0], Pq[1], Pq[2], tmp);
+      B[q].x = tmp[0]; B[q].y = tmp[1]; B[q].d = tmp[2]; B[q].p = tmp[3];
     }
-    var order = M.order || (M.order = B.slice());
+    var order = M.order;
     order.sort(function (b1, b2) { return b1.d - b2.d; });
-    var ph = (T / 7000) % 1;
     for (q = 0; q < order.length; q++) {
-      var b = order[q], nx = B[b.k * NB + (b.i + 1) % NB];
-      var pv = B[b.k * NB + (b.i + NB - 1) % NB];
-      /* bonds to both neighbours, so a nearer monomer covers its own */
-      g.beginPath();
-      g.moveTo((pv.x + b.x) / 2, (pv.y + b.y) / 2); g.lineTo(b.x, b.y);
-      g.lineTo((nx.x + b.x) / 2, (nx.y + b.y) / 2);
-      g.strokeStyle = rgb(M.edge[b.k], 1); g.lineWidth = 3; g.lineCap = 'round'; g.stroke();
-      var dp = ((b.i / NB - ph) % 1 + 1.5) % 1 - 0.5;
-      var lift = REDUCED ? 0 : Math.exp(-dp * dp / 0.0035);
-      var base = mixc(M.base[b.k], C.wht, 0.32 * lift);
-      var gr = g.createRadialGradient(b.x - 0.35 * BR, b.y - 0.4 * BR, 0.1 * BR, b.x, b.y, 1.05 * BR);
-      gr.addColorStop(0, rgb(mixc(base, C.wht, 0.72), 1));
-      gr.addColorStop(0.5, rgb(base, 1));
-      gr.addColorStop(1, rgb(M.edge[b.k], 1));
-      g.beginPath(); g.arc(b.x, b.y, BR, 0, TAU);
+      var bd = order[q], r = BR * bd.p;
+      var dp = ((bd.i / N - ph0) % 1 + 1.5) % 1 - 0.5;
+      var lift = REDUCED ? 0 : Math.exp(-dp * dp / 0.003);
+      var bc = mix(M.baseC[bd.k], C.wht, 0.3 * lift);
+      var gr = g.createRadialGradient(bd.x - 0.3 * r, bd.y - 0.45 * r, 0.1 * r, bd.x, bd.y, 1.05 * r);
+      gr.addColorStop(0, rgb(mix(bc, C.wht, 0.75), 1));
+      gr.addColorStop(0.45, rgb(bc, 1));
+      gr.addColorStop(1, rgb(M.edgeC[bd.k], 1));
+      g.beginPath(); g.arc(bd.x, bd.y, r, 0, TAU);
       g.fillStyle = gr; g.fill();
     }
 
-    /* --- the 11 pairs: master's mirror, flipped once ------------------ */
+    /* --- the ledger: +1 beside -1 cancels, two -1 remain --------------- */
+    var neg = [], pos = [];
+    for (q = 0; q < xs.length; q++) (xs[q].sg < 0 ? neg : pos).push(xs[q].f);
+    neg.sort(function (a1, a2) { return a2 - a1; });
+    pos.sort(function (a1, a2) { return a2 - a1; });
+    var left = neg.length - pos.length;
+    for (q = 0; q < Math.max(0, left); q++) glyph(250 + (q - (left - 1) / 2) * 24, LY, 8, -1, 1);
+    for (q = 0; q < pos.length; q++) {
+      var side = q % 2 ? 1 : -1, slot = Math.floor(q / 2);
+      var px = 250 + side * (66 + slot * 56);
+      var fr = Math.min(pos[q], neg[left + q] == null ? 1 : neg[left + q]);
+      var rr = 3 + 5 * fr;
+      g.beginPath(); g.moveTo(px - 11, LY - rr - 2); g.quadraticCurveTo(px, LY - rr - 9, px + 11, LY - rr - 2);
+      g.strokeStyle = rgb(C.hair, fr); g.lineWidth = 1.2; g.stroke();
+      glyph(px - 11, LY, rr, -1, 0.45);
+      glyph(px + 11, LY, rr, 1, 0.45);
+    }
+
+    /* --- the 11 pairs: master's mirror, turned over once --------------- */
     g.fillStyle = rgb(C.ink, 0.045);
     g.fillRect(COLS[0] - 14, Y0 - 3 * U - 10, 28, 6 * U + 20);
     for (q = -3; q <= 3; q++) {
@@ -9489,29 +9537,38 @@
       g.strokeStyle = rgb(C.hair, q === 0 ? 1 : 0.45); g.lineWidth = q === 0 ? 1.4 : 1; g.stroke();
     }
     var p = ((T % CYC) + CYC) % CYC;
-    var f = ease((p - F0) / FL);                  /* 0 master, 1 #79 */
+    var f = ease((p - F0) / FL);
     var fade = p < X0 ? 1 : 1 - ease((p - X0) / XL);
     var fin = p < X0 ? 0 : ease((p - X0) / XL);
-    var drawSeries = function (cs, sgn, alpha) {
+    var series = function (cs, sgn, alpha) {
       if (alpha <= 0.01) return;
+      var c;
+      /* the sheet between the graph and its hinge */
+      g.beginPath(); g.moveTo(COLS[0], Y0);
+      for (c = 0; c < COLS.length; c++) g.lineTo(COLS[c], Y0 - GV[c] * sgn * U);
+      g.lineTo(COLS[COLS.length - 1], Y0); g.closePath();
+      g.fillStyle = rgb(cs, 0.12 * alpha); g.fill();
+      for (c = 0; c < COLS.length; c++) {
+        g.beginPath(); g.moveTo(COLS[c], Y0); g.lineTo(COLS[c], Y0 - GV[c] * sgn * U);
+        g.strokeStyle = rgb(cs, 0.55 * alpha); g.lineWidth = 2; g.stroke();
+      }
       g.beginPath();
-      for (var c = 0; c < COLS.length; c++) {
+      for (c = 0; c < COLS.length; c++) {
         var yy = Y0 - GV[c] * sgn * U;
         if (c === 0) g.moveTo(COLS[c], yy); else g.lineTo(COLS[c], yy);
       }
       g.strokeStyle = rgb(cs, 0.5 * alpha); g.lineWidth = 1.5; g.stroke();
       for (c = 0; c < COLS.length; c++) {
-        g.beginPath(); g.arc(COLS[c], Y0 - GV[c] * sgn * U, 3.7, 0, TAU);
+        g.beginPath(); g.arc(COLS[c], Y0 - GV[c] * sgn * U, 3.8, 0, TAU);
         g.fillStyle = rgb(cs, alpha); g.fill();
       }
     };
-    /* the flip: every value passes zero together, so the colour changes there */
-    var sgn = -Math.cos(Math.PI * f);
-    drawSeries(f < 0.5 ? C.coral : C.mint, sgn, fade);
-    drawSeries(C.coral, -1, fin);                 /* the next cycle's master */
+    /* every value passes zero together, so the colour changes there */
+    series(f < 0.5 ? C.coral : C.mint, -Math.cos(Math.PI * f), fade);
+    series(C.coral, -1, fin);
     for (q = 0; q < COLS.length; q++) {
-      g.beginPath(); g.arc(COLS[q], Y0 - GV[q] * U, 5.6, 0, TAU);
-      g.strokeStyle = rgb(mixc(C.ink, C.wht, 0.2), 1); g.lineWidth = 1.6; g.stroke();
+      g.beginPath(); g.arc(COLS[q], Y0 - GV[q] * U, 5.7, 0, TAU);
+      g.strokeStyle = rgb(mix(C.ink, C.wht, 0.2), 1); g.lineWidth = 1.6; g.stroke();
     }
   }
 
