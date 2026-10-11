@@ -1,5 +1,5 @@
 /*
- * site.js — teerthsharma.github.io
+ * site.js — teerth.dev
  * One IIFE, four behaviours, no imports, no external requests, no eval.
  * Every function guards its own DOM lookups so this file is safe to include
  * on both index.html and work.html unchanged.
