@@ -9572,6 +9572,243 @@
     }
   }
 
+  /* ==================================================================== */
+  /* asmodeus — Asmodeus                                                 */
+  /* ==================================================================== */
+  function asmodeus(g, vb, t, st) {
+    /* The time traveller, drawn from the project's own filter.
+
+       The stream is made up: four laws, eight stretches of it, and three of
+       the laws come back. The weight under it is not. Every token is run
+       through the project's MOM decider (zero/research/e0/deciders.py,
+       Soft.step lines 24-29 and Momentum.share lines 44-63): the weight is
+       moved, multiplied by each era's likelihood of the token that arrived,
+       and normalised. alpha is 0.003, the value the tournament picked
+       (zero/research/e0/RESULTS_E0e.md line 3). The kernel Q that moves it is
+       the Dirichlet(1)-smoothed count of the era switches seen so far, as in
+       the code, and it is what the matrix at the foot shows.
+
+       Two things stand in for parts of the project. An era's table is given
+       rather than learned, and a new era is born a fixed 12 tokens into a
+       law it has not met, in place of the Ville-bounded change detector. The
+       stretches are 34 to 44 tokens, where the project's beds run to hundreds.
+
+       Colour is the law and nothing else: the same hue for a stretch of the
+       stream, the era that holds that law, the arc that goes back to it and
+       its column of the kernel. */
+    var TAU = Math.PI * 2;
+    var V = 6, ALPHA = 0.003, TOK = 42, BORN_AFTER = 12;
+    var X0 = 84, X1 = 440, YS = 118, SH = 16, H = 40, YB0 = 196, DYB = 58, YQ = 388, QC = 12, QG = 14;
+    var SEG = [[0, 44], [1, 36], [0, 42], [2, 38], [1, 34], [0, 40], [3, 44], [2, 42]];
+    var FAV = [[1, 2, 3, 4, 5, 0], [3, 0, 5, 1, 2, 4], [2, 4, 0, 5, 1, 3], [5, 3, 1, 0, 4, 2]];
+    var NL = 4;
+
+    var M = asmodeus.cache;
+    if (!M) {
+      var L = {};
+      var hex = function (name, fb) {
+        var h0 = (token(name, fb) || fb).trim().replace('#', '');
+        if (h0.length === 3) h0 = h0[0] + h0[0] + h0[1] + h0[1] + h0[2] + h0[2];
+        var nn = parseInt(h0, 16);
+        return [(nn >> 16) & 255, (nn >> 8) & 255, nn & 255];
+      };
+      L.css = function (c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + a + ')'; };
+      L.law = [hex('--blue-500', '#2456dc'), hex('--violet-500', '#a66cf0'),
+               hex('--mint-500', '#0b93ab'), hex('--amber-500', '#d96a06')];
+      L.ink = hex('--ink', '#1a1814'); L.hair = hex('--hair2', '#cfcbc1'); L.muted = hex('--muted', '#5f5b53');
+
+      var i, k, s;
+      /* the stream: each token follows its predecessor by its law's table */
+      var rs = 7, rnd = function () { rs = (rs * 16807) % 2147483647; return (rs - 1) / 2147483646; };
+      var seg = [], x = [], lawAt = [], T = 0;
+      for (s = 0; s < SEG.length; s++) {
+        seg.push({ law: SEG[s][0], a: T, b: T + SEG[s][1] });
+        for (k = 0; k < SEG[s][1]; k++) {
+          var pr = x.length ? x[x.length - 1] : 0, sym;
+          if (rnd() < 0.7) sym = FAV[SEG[s][0]][pr];
+          else { do { sym = Math.floor(rnd() * V); } while (sym === FAV[SEG[s][0]][pr]); }
+          x.push(sym); lawAt.push(s);
+        }
+        T += SEG[s][1];
+      }
+      var P = function (law, pr, sym) { return sym === FAV[law][pr] ? 0.7 : 0.06; };
+
+      /* the decider */
+      var lawOf = [0], w = [1], S = [[0]];
+      var Wk = [], Qk = [], birthK = [0, -1, -1, -1], events = [];
+      var landed = {}, lastEra = 0;
+      var Qmat = function () {
+        var n = w.length, q = [], r, c, sum;
+        for (r = 0; r < NL; r++) { q.push([]); for (c = 0; c < NL; c++) q[r].push(r < n && c < n ? (r === c ? 0 : S[r][c] + 1) : -1); }
+        for (r = 0; r < n; r++) {
+          sum = 0; for (c = 0; c < n; c++) sum += q[r][c];
+          for (c = 0; c < n; c++) q[r][c] = sum > 0 ? q[r][c] / sum : 0;
+        }
+        return q;
+      };
+      for (k = 0; k < T; k++) {
+        var sg = seg[lawAt[k]], n = w.length, e, j;
+        /* birth: a law no era holds, BORN_AFTER tokens in */
+        if (lawOf.indexOf(sg.law) < 0 && k - sg.a === BORN_AFTER) {
+          var nw = [], sum0 = 0;
+          for (e = 0; e < n; e++) nw.push(w[e] * (1 - ALPHA));
+          nw.push(ALPHA);
+          for (e = 0; e <= n; e++) sum0 += nw[e];
+          w = nw.map(function (v) { return v / sum0; });
+          for (e = 0; e < n; e++) S[e].push(0);
+          S.push(new Array(n + 1).fill(0));
+          lawOf.push(sg.law); birthK[lawOf.length - 1] = k;
+          events.push({ type: 'birth', era: lawOf.length - 1, k: k });
+          n = w.length;
+        }
+        Qk.push(Qmat());
+        /* v = share(w), p = v . Y, w = normalise(v * Y) */
+        var Q = Qk[k], v = [], mv = [];
+        for (e = 0; e < n; e++) { v.push((1 - ALPHA) * w[e] + 0.5 * ALPHA / n); mv.push(0.5 * ALPHA * w[e]); }
+        if (n > 1) { for (j = 0; j < n; j++) for (e = 0; e < n; e++) v[j] += mv[e] * Q[e][j]; }
+        else v[0] += mv[0];
+        var pr2 = k ? x[k - 1] : 0, tot = 0;
+        for (e = 0; e < n; e++) { v[e] *= P(lawOf[e], pr2, x[k]); tot += v[e]; }
+        w = v.map(function (q) { return q / tot; });
+        var row = [0, 0, 0, 0]; for (e = 0; e < n; e++) row[e] = w[e];
+        Wk.push(row);
+        /* the traveller lands on an era it already held: a jump back */
+        var era = lawOf.indexOf(sg.law);
+        if (era >= 0 && !landed[lawAt[k]] && w[era] >= 0.5) {
+          landed[lawAt[k]] = 1;
+          if (birthK[era] >= 0 && birthK[era] < sg.a) {
+            if (lastEra !== era) S[lastEra][era] += 1;
+            var old = -1;
+            for (s = lawAt[k] - 1; s >= 0; s--) if (seg[s].law === sg.law) { old = s; break; }
+            events.push({ type: 'jump', from: lastEra, to: era, k: k, seg: lawAt[k], old: old });
+          }
+          lastEra = era;
+        }
+      }
+      L.T = T; L.seg = seg; L.W = Wk; L.Q = Qk; L.birthK = birthK; L.events = events;
+      asmodeus.cache = M = L;
+    }
+
+    var css = M.css, T2 = M.T;
+    var LEAD = 700, TAIL = 2600, CYC = LEAD + T2 * TOK + TAIL;
+    var tc = REDUCED ? CYC - 1200 : t % CYC;
+    var kp = REDUCED ? T2 : Math.max(0, Math.min(T2, (tc - LEAD) / TOK));
+    var fade = REDUCED ? 1 : ease(Math.min(1, tc / 500)) * (1 - ease(Math.max(0, (tc - (CYC - 450)) / 450)));
+    if (!REDUCED && t < CYC) fade = ease(t / 900);
+    var xOf = function (kk) { return X0 + (X1 - X0) * kk / T2; };
+    var xp = xOf(kp), ki = Math.min(T2 - 1, Math.floor(kp));
+    var yb = function (i) { return YB0 + DYB * i; };
+    var i, k2, s, ev;
+
+    g.globalCompositeOperation = 'source-over';
+    g.globalAlpha = 1;
+    g.lineJoin = 'round'; g.lineCap = 'round';
+
+    /* --- era baselines ------------------------------------------------------ */
+    g.strokeStyle = css(M.hair, 0.9 * fade); g.lineWidth = 1;
+    for (i = 0; i < NL; i++) { g.beginPath(); g.moveTo(X0, yb(i) + 0.5); g.lineTo(X1, yb(i) + 0.5); g.stroke(); }
+
+    /* --- the stream: all of it faint, what has passed solid -------------------- */
+    for (s = 0; s < M.seg.length; s++) {
+      var sg2 = M.seg[s], xa = xOf(sg2.a) + 0.8, xb = xOf(sg2.b) - 0.8, col = M.law[sg2.law];
+      g.fillStyle = css(col, 0.16 * fade);
+      g.fillRect(xa, YS, xb - xa, SH);
+      var xe = Math.min(xb, xp);
+      if (xe > xa) { g.fillStyle = css(col, 0.88 * fade); g.fillRect(xa, YS, xe - xa, SH); }
+    }
+
+    /* --- each era's share of the weight, as a filled trace in time ------------- */
+    for (i = 0; i < NL; i++) {
+      var bk = M.birthK[i];
+      if (bk < 0 || bk > kp) continue;
+      var c0 = M.law[i];
+      g.beginPath(); g.moveTo(xOf(bk), yb(i));
+      for (k2 = bk; k2 <= ki; k2++) g.lineTo(xOf(k2 + 1), yb(i) - H * M.W[k2][i]);
+      g.lineTo(xp, yb(i) - H * M.W[ki][i]);
+      g.lineTo(xp, yb(i)); g.closePath();
+      g.fillStyle = css(c0, 0.28 * fade); g.fill();
+      g.beginPath(); g.moveTo(xOf(bk), yb(i));
+      for (k2 = bk; k2 <= ki; k2++) g.lineTo(xOf(k2 + 1), yb(i) - H * M.W[k2][i]);
+      g.lineTo(xp, yb(i) - H * M.W[ki][i]);
+      g.strokeStyle = css(c0, 0.95 * fade); g.lineWidth = 1.5; g.stroke();
+    }
+
+    /* --- births and jumps back --------------------------------------------------- */
+    for (var q = 0; q < M.events.length; q++) {
+      ev = M.events[q];
+      if (ev.k > kp) continue;
+      var evt = LEAD + ev.k * TOK, age = REDUCED ? 99999 : tc - evt;
+      if (ev.type === 'birth') {
+        var u0 = Math.min(1, age / 800);
+        if (u0 < 1) {
+          g.strokeStyle = css(M.law[ev.era], 0.8 * (1 - u0) * fade); g.lineWidth = 1.5;
+          g.beginPath(); g.arc(xOf(ev.k), yb(ev.era), 3 + 14 * ease(u0), 0, TAU); g.stroke();
+        }
+        continue;
+      }
+      /* the arc runs from where the traveller is now back to the stretch it is going to */
+      var xs = xOf(ev.k), xt = (xOf(M.seg[ev.old].a) + xOf(M.seg[ev.old].b)) / 2;
+      var pk = Math.min(44, 12 + 0.15 * Math.abs(xs - xt)), cy = YS - 2 * pk, cx = (xs + xt) / 2;
+      var u = Math.min(1, age / 320), eu = ease(u), cj = M.law[ev.to];
+      var rest = REDUCED ? 0.5 : 0.5 + 0.5 * (1 - ease(Math.min(1, Math.max(0, age - 320) / 1800)));
+      g.strokeStyle = css(cj, rest * fade); g.lineWidth = 1.7;
+      g.beginPath();
+      var bx = 0, by = 0, sN = 28;
+      for (var z = 0; z <= sN; z++) {
+        var sz = eu * z / sN, uz = 1 - sz;
+        bx = uz * uz * xs + 2 * uz * sz * cx + sz * sz * xt;
+        by = uz * uz * YS + 2 * uz * sz * cy + sz * sz * YS;
+        if (z) g.lineTo(bx, by); else g.moveTo(bx, by);
+      }
+      g.stroke();
+      g.fillStyle = css(cj, fade); g.beginPath(); g.arc(xs, YS, 2.6, 0, TAU); g.fill();
+      if (u < 1) {
+        g.fillStyle = css(cj, 0.25 * fade); g.beginPath(); g.arc(bx, by, 7, 0, TAU); g.fill();
+        g.fillStyle = css(cj, fade); g.beginPath(); g.arc(bx, by, 3, 0, TAU); g.fill();
+      } else {
+        g.fillStyle = css(cj, rest * fade); g.beginPath(); g.arc(xt, YS, 2.6, 0, TAU); g.fill();
+        var ur = Math.min(1, (age - 320) / 700);
+        if (ur < 1 && ur >= 0) {
+          g.strokeStyle = css(cj, 0.8 * (1 - ur) * fade); g.lineWidth = 1.5;
+          g.beginPath(); g.arc(xt, YS + SH / 2, 4 + 14 * ease(ur), 0, TAU); g.stroke();
+        }
+      }
+    }
+
+    /* --- the traveller: a bead on each era at the weight it holds now ---------- */
+    if (kp > 0) {
+      g.strokeStyle = css(M.muted, 0.4 * fade); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(xp, YS - 4); g.lineTo(xp, yb(NL - 1) + 4); g.stroke();
+      for (i = 0; i < NL; i++) {
+        var wv = M.W[ki][i];
+        if (wv <= 0 || M.birthK[i] > kp) continue;
+        var by2 = yb(i) - H * wv, rr = 2.2 + 3.4 * Math.sqrt(wv);
+        g.fillStyle = css(M.law[i], 0.22 * fade); g.beginPath(); g.arc(xp, by2, rr + 3.5, 0, TAU); g.fill();
+        g.fillStyle = css(M.law[i], fade); g.beginPath(); g.arc(xp, by2, rr, 0, TAU); g.fill();
+        if (wv >= 0.5) {
+          g.strokeStyle = css(M.ink, 0.9 * fade); g.lineWidth = 1.4;
+          g.beginPath(); g.arc(xp, by2, rr + 3, 0, TAU); g.stroke();
+        }
+      }
+      g.fillStyle = css(M.ink, fade); g.beginPath(); g.arc(xp, YS + SH / 2, 3.2, 0, TAU); g.fill();
+    }
+
+    /* --- the learned kernel Q: the order in which the laws have come back ------- */
+    var Qn = M.Q[Math.min(T2 - 1, Math.max(0, ki))], r, c;
+    for (r = 0; r < NL; r++) {
+      for (c = 0; c < NL; c++) {
+        var cxq = X0 + c * QG, cyq = YQ + r * QG, qv = Qn[r][c];
+        if (qv < 0 || kp <= 0 || r === c) {
+          g.strokeStyle = css(M.hair, (qv < 0 ? 0.5 : 0.9) * fade); g.lineWidth = 1;
+          g.strokeRect(cxq + 0.5, cyq + 0.5, QC - 1, QC - 1);
+        } else {
+          g.fillStyle = css(M.law[c], (0.1 + 0.9 * qv) * fade);
+          g.fillRect(cxq, cyq, QC, QC);
+        }
+      }
+    }
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
@@ -9588,7 +9825,8 @@
                  glass: glass,
                  aether: aether,
                  grant: grant,
-                 linking: linking };
+                 linking: linking,
+                 asmodeus: asmodeus };
 
   /* ------------------------------------------------------------------ */
   var live = [];

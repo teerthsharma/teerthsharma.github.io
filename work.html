@@ -24,9 +24,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=77">
-<link rel="stylesheet" href="motion.css?v=77">
-<link rel="stylesheet" href="art.css?v=77">
+<link rel="stylesheet" href="site.css?v=78">
+<link rel="stylesheet" href="motion.css?v=78">
+<link rel="stylesheet" href="art.css?v=78">
 
 <script type="application/ld+json">
 {
@@ -56,6 +56,12 @@
       "codeRepository": "https://github.com/teerthsharma/caustic",
       "programmingLanguage": "Python",
       "identifier": "https://doi.org/10.5281/zenodo.21997746"
+    },
+    {
+      "@type": "SoftwareSourceCode",
+      "name": "Asmodeus",
+      "codeRepository": "https://github.com/teerthsharma/Asmodeus",
+      "programmingLanguage": "Python"
     },
     {
       "@type": "SoftwareSourceCode",
@@ -108,6 +114,7 @@
       <li><a class="psub__link" href="#p-epsilon-hollow">Epsilon-Hollow</a></li>
       <li><a class="psub__link" href="#p-aether-lang">Aether-Lang</a></li>
       <li><a class="psub__link" href="#p-caustic">caustic</a></li>
+      <li><a class="psub__link" href="#p-asmodeus">Asmodeus</a></li>
       <li><a class="psub__link" href="#p-monodromy">monodromy</a></li>
       <li class="psub__sep" aria-hidden="true"></li>
       <li><a class="psub__link" href="#p-topological-ml-toolkit">topological-ml-toolkit</a></li>
@@ -125,7 +132,7 @@
 <header class="hero hero--product">
   <div class="wrap">
     <h1 class="hero__h1">The work nobody asked me to do.</h1>
-    <p class="hero__sub">Eleven of my fourteen public repositories are below. Some are topology, some are numerics, some are systems. Each one ends in a number I can measure, which is the only way I know to tell whether an idea worked.</p>
+    <p class="hero__sub">Twelve of my fourteen public repositories are below. Some are topology, some are numerics, some are systems. Each one ends in a number I can measure, which is the only way I know to tell whether an idea worked.</p>
   </div>
 </header>
 
@@ -307,6 +314,73 @@
           <li class="tag tag--lang">Python</li>
           <li class="tag tag--class">0.995 AUROC</li>
           <li><a class="tag tag--doi" href="https://doi.org/10.5281/zenodo.21997746">DOI</a></li>
+        </ul>
+</div>
+</article>
+
+<article class="proj pt" id="p-asmodeus" data-lang="Python" data-doi="false">
+<!-- Every number in this section, with its source in the repo teerthsharma/Asmodeus @ 4b768f7:
+     11x lower regret: 0.0277 (SOFT+BMX) vs 0.3056 (BOCPD, best owned learner), nats/token, REC bed, seeds 20-29:
+       zero/research/e0/RESULTS_E0c.md:13-14 (table), :45 (B1', 10/10 seeds PASS); 0.3056 / 0.0277 = 11.03.
+     10/10 fresh seeds: zero/research/e0/RESULTS_E0c.md:45.
+     0.084 vs 0.693 re-entry excess over the oracle: zero/research/e0/RESULTS_E0c.md:14 and :13.
+     45.8% of steps answered by one era (HARD, theta 0.99, alpha 0.003): zero/research/e0/RESULTS_E0e.md:16,
+       also zero/research/VERDICT_TOURNAMENT.md:21 and per-seed "single" fields in zero/research/e0/results_e0e.json.
+     alpha 0.003 and the filter drawn in the figure: zero/research/e0/RESULTS_E0e.md:3; Soft.step and Momentum.share in
+       zero/research/e0/deciders.py:24-29 and :44-63.
+     Lean 4, zero sorry: python zero/lean/check_no_sorry.py prints "0 sorry, 0 cited-sorry" (zero/lean/check_no_sorry.py,
+       run on 4b768f7); L38-L41 PROVED: zero/lean/ERA_LEMMAS.md:12-16.
+     Left out on purpose: the README's "15x lower regret than a transformer" (zero/research/e1/out/RESULTS_E1.md:7,11 give
+       0.0272 vs 0.4626, 17x on the mean; 15x is the worst seed), the README's "40 Lean files" (the folder now holds 43,
+       zero/lean/FCPA/), and any CUDA claim (the repo holds no CUDA source; the GPU engine is stage 6, "in build"). -->
+<div class="pt__head">
+        <div class="pt__titles">
+          <h2 class="proj__name">Asmodeus</h2>
+          <p class="pt__tagline">A time traveller on a chronal fluid.</p>
+        </div>
+        <div class="pt__ctas">
+          <a class="pt__cta" href="https://github.com/teerthsharma/Asmodeus">View on GitHub<span class="sr-only">: Asmodeus</span></a>
+          <a class="pt__more" href="https://blog.teerth.dev/asmodeus/">Project page<span class="sr-only"> for Asmodeus</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
+          <a class="pt__more" href="https://teerth.blog/asmodeus">Read the essay<span class="sr-only"> on Asmodeus</span> <span class="pt__chev" aria-hidden="true">&#8250;</span></a>
+        </div>
+</div>
+<div class="proj__figure">
+<div class="proj__art">
+          <figure class="fig">
+            <div class="figc" style="--figc-ar:470/540">
+                <canvas data-fig="asmodeus" data-vb="470 540" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="p-asmodeus-t p-asmodeus-d">
+                  <title id="p-asmodeus-t">A softmax weight moves between eras as a stream changes law, and goes back to an era when its law returns</title>
+                  <desc id="p-asmodeus-d">An illustration of the mechanism with the weight computed live. Along the top runs a stream, made up for the picture: eight stretches of it, each following one of four laws, drawn in four colours, and three of the laws come back. Under it, one row for each era, the small model that holds one law, in the colour of that law. A bead walks along the stream, and in each row it stands at the share of the weight that era holds. That weight is not drawn from a formula: every token is run through the project's momentum decider. The weight is moved a little, multiplied by each era's likelihood of the token that arrived, and normalised, with alpha set to 0.003, the value the project's tournament picked. A law the bank has not met gets a new era, drawn as a ring where it appears. When a law returns, the weight lands on the era that already holds it, and an arc is drawn from the present back to the earlier stretch of that law: the traveller goes back to the era instead of relearning it. At the foot, a small matrix shows the kernel that carries the weight from one era to another, built from the era switches seen so far, so the order in which the laws have come back shapes where the weight goes next. The stream, the tables behind each law and the moment a new era is born are illustrative: each table is given rather than learned, and a new era appears a fixed number of tokens into a new law in place of the project's change detector. The project's measured result is on the synthetic beds of its research folder, where re-entering a law it has already seen costs 0.084 nats per token over an oracle that knows the true law, against 0.693 for the best online learner it was compared with. It is phase 1: the reference is Python, the proofs are in Lean 4, and the GPU engine and a real-text pilot are not built yet.</desc>
+                  <text x="235" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">the stream changes law, and laws come back</text>
+                  <text x="235" y="50" text-anchor="middle" font-size="15" fill="var(--muted)">one softmax weight over a bank of eras</text>
+                  <text x="16" y="131" font-size="14" fill="var(--muted)">stream</text>
+                  <text x="16" y="190" font-size="14" font-weight="600" fill="var(--blue-700)">era 1</text>
+                  <text x="16" y="248" font-size="14" font-weight="600" fill="var(--violet-700)">era 2</text>
+                  <text x="16" y="306" font-size="14" font-weight="600" fill="var(--mint-700)">era 3</text>
+                  <text x="16" y="364" font-size="14" font-weight="600" fill="var(--amber-700)">era 4</text>
+                  <text x="154" y="403" font-size="14" font-weight="600" fill="var(--ink)">learned kernel Q</text>
+                  <text x="154" y="423" font-size="14" fill="var(--muted)">row from, column to</text>
+                  <text x="235" y="466" text-anchor="middle" font-size="17" font-weight="600" fill="var(--violet-700)">it returns to the era, it does not relearn</text>
+                  <text x="235" y="489" text-anchor="middle" font-size="15" fill="var(--muted)">re-entry costs 0.084 nats; BOCPD pays 0.693</text>
+                  <text x="235" y="524" text-anchor="middle" font-size="15" fill="var(--muted)">Python reference, Lean 4 proofs with zero sorry</text>
+                </svg>
+              </div>
+            <figcaption class="fig__cap">The weight is the project's own filter run on a made-up stream. When a law returns, it lands on the era that already holds it, and the arc goes back to the stretch where that law was last seen.</figcaption>
+          </figure>
+        </div>
+</div>
+<div class="pt__body">
+        <p class="proj__claim">Asmodeus is inspired by Laplace's demon, the intellect that, knowing the present state, could read any past or future from it. The code is narrower: a softmax weight over a bank of small models, one for each stretch of time, that answers from a single one while the stream's law holds and moves to an earlier one when that law returns.</p>
+        <div class="proj__nums pt__specs">
+          <span class="spec"><b class="spec__n">11&times;</b> <span class="spec__l">lower regret than the best baseline</span></span>
+          <span class="spec"><b class="spec__n">10/10</b> <span class="spec__l">fresh seeds</span></span>
+          <span class="spec"><b class="spec__n">45.8%</b> <span class="spec__l">of steps answered by one era</span></span>
+          <span class="spec spec--t">Lean 4, zero sorry</span>
+        </div>
+        <ul class="tags proj__tags">
+          <li class="tag tag--lang">Python</li>
+          <li class="tag tag--class">11&times; lower regret</li>
         </ul>
 </div>
 </article>
@@ -638,8 +712,8 @@
 
 </main>
 
-<script src="fig.js?v=77" defer></script>
-<script src="site.js?v=77" defer></script>
+<script src="fig.js?v=78" defer></script>
+<script src="site.js?v=78" defer></script>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0e66bc9d7e424aa18b1cb68291aeebe8"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

@@ -92,6 +92,10 @@ planimeter, Python, on PyPI. Three integers for any geometry file: pieces, enclo
   drawings. shapely.polygonize_full returns 336 wrong on the same files and refuses none.
 resolvent, Python and Lean 4. Softmax attention and Markov path composition are the same
   operator. 134 theorems, 41 lemmas, 0 sorry, 69 corner tests passing.
+Asmodeus, Python reference and Lean 4 proofs, phase 1. A softmax weight over a bank of eras,
+  one small model per stretch of time, that answers from a single era and moves to an earlier one
+  when its law returns. 11x lower regret than the best baseline on recurring regimes (0.028 vs
+  0.305 nats per token), 10 of 10 fresh seeds, Lean 4 with zero sorry. Inspired by Laplace's demon.
 caustic, Python. DOI 10.5281/zenodo.21997746. Hallucination detection and repair from
   the orbit partition of a relation. 0.995 AUROC, five proved bounds.
 nerve, Rust. Topological witnesses for polymer chains. 224 tests passing. Three of its
