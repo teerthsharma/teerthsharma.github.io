@@ -1225,4 +1225,6 @@ html:has(.psub) .nav{ border-bottom-color:transparent; }
 .foot__links{ display:flex; gap:20px; }
 .foot__links a{ color:var(--blue-700); font-weight:500; }
 .foot__links a:hover{ text-decoration:underline; }
-
+/* plain-language headline as the h2; the project name sits under it as the subtitle */
+.pt .proj__name, .pgal .pt .proj__name, .pgal .pt--long .proj__name { font-size:clamp(26px, 3.2vw, 42px); line-height:1.12; letter-spacing:-0.02em; text-wrap:balance; }
+.pt__sub{ margin:6px 0 0; font-family:'JetBrains Mono', ui-monospace, monospace; font-size:14px; letter-spacing:.02em; color:var(--muted); }
