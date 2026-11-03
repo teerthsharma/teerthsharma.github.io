@@ -9809,6 +9809,168 @@
     }
   }
 
+  /* ==================================================================== */
+  /* spikes — boykopovar/AnyPS5 #12609                                    */
+  /* ==================================================================== */
+  function spikes(g, vb, t, st) {
+    /* 24 presents of a 60 fps capture, in milliseconds: a four-frame stall
+       (44.1, 47.8, 46.2, 45.0), a 29.4 ms frame on the shoulder of a 33.5 ms
+       one with a 24.0 ms frame between them, and a lone 23.8 ms frame.
+
+       slowest_frames ranks frames one by one, so its top five are frames
+       7, 8, 9, 6 and 16: four lines for one stall, and the shoulder and the
+       lone frame are not on the list at all. That row is drawn in coral from
+       the start, because it is what the digest printed before #12609.
+
+       persistent_peaks is the 0-dimensional persistence of the series under a
+       falling threshold. A level line drops from 50 ms to 15 ms. Every bar at
+       or above it is lit, and each lit run is one component. A component is
+       born at its tallest frame; when two runs touch, the one with the lower
+       peak dies there, at the frame that joined them, and its persistence is
+       peak minus that frame. The tallest peak dies last, against the series
+       minimum. The union-find below is the one in tools/trace_digest.py,
+       elder rule and tie-break included, and on this series it returns
+       (7, 31.2) (16, 16.9) (21, 7.2) (14, 5.4) and five frames of noise under
+       0.7 ms, checked offline against a port that passes the PR's own tests.
+
+       Each peak's bar carries its persistence in mint, from the peak down to
+       the level or, once dead, to the saddle, with a dashed hairline across
+       to the frame where it merged. The mint row fills in as each component
+       dies: one chip per stall, its area proportional to persistence. */
+    var TAU = Math.PI * 2;
+    var V = [16.9, 16.6, 17.2, 16.7, 17.0, 16.6, 44.1, 47.8, 46.2, 45.0, 17.3, 16.8,
+             16.6, 17.1, 29.4, 24.0, 33.5, 16.9, 16.7, 17.0, 16.6, 23.8, 16.8, 17.1];
+    var SLOW = [7, 8, 9, 6, 16];
+    var X0 = 66, PITCH = 17, BW = 12, YB = 300, K = 4;
+    var ROW1 = 346, ROW2 = 394;
+    var CYC = 11000, D0 = 900, DL = 6200, HOLD = 10100, TOP = 50, BOT = 15;
+
+    var M = spikes._m;
+    if (!M) {
+      var n = V.length, parent = [], peak = [], on = [], ord = [], i0, j0;
+      for (i0 = 0; i0 < n; i0++) { parent.push(i0); peak.push(i0); on.push(false); ord.push(i0); }
+      var find = function (x) {
+        while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; }
+        return x;
+      };
+      /* (-value, position): the earlier of two equal frames is the elder */
+      var elder = function (a, b) {
+        var pa = peak[a], pb = peak[b];
+        return V[pa] !== V[pb] ? V[pa] > V[pb] : pa < pb;
+      };
+      ord.sort(function (a, b) { return V[b] - V[a] || a - b; });
+      var died = {};
+      for (i0 = 0; i0 < n; i0++) {
+        var ix = ord[i0];
+        on[ix] = true;
+        for (j0 = -1; j0 <= 1; j0 += 2) {
+          var nb = ix + j0;
+          if (nb < 0 || nb >= n || !on[nb]) continue;
+          var a = find(ix), b = find(nb);
+          if (a === b) continue;
+          var hi = elder(a, b) ? a : b, lo = hi === a ? b : a;
+          died[peak[lo]] = { death: V[ix], at: ix };
+          parent[lo] = hi;
+        }
+      }
+      var vmin = Math.min.apply(null, V), top = peak[find(0)];
+      died[top] = { death: vmin, at: -1 };
+      var P = [];
+      for (var key in died) {
+        var pk = +key, pers = V[pk] - died[key].death;
+        if (pers > 0) P.push({ i: pk, birth: V[pk], death: died[key].death, at: died[key].at, p: pers });
+      }
+      P.sort(function (x, y) { return y.p - x.p || x.i - y.i; });
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var v = parseInt(h, 16);
+        return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
+      };
+      M = spikes._m = { P: P, C: {
+        ink: hex('--ink', '#1c1b19'), hair: hex('--hair2', '#cfcbc1'), wht: hex('--raised', '#ffffff'),
+        blue: hex('--blue-500', '#2456dc'), mint: hex('--mint-500', '#0b93ab'),
+        mintD: hex('--mint-700', '#0a6b7c'), coral: hex('--coral-500', '#d9376e') } };
+    }
+    var C = M.C;
+    var rgb = function (c, al) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + al + ')'; };
+    var Y = function (ms) { return YB - K * ms; };
+    var cx = function (i) { return X0 + i * PITCH + BW / 2; };
+
+    var T = REDUCED ? 9000 : t;
+    var p = ((T % CYC) + CYC) % CYC;
+    var drop = ease((p - D0) / DL);
+    var L = TOP - (TOP - BOT) * drop;
+    var fade = p < HOLD ? 1 : 1 - ease((p - HOLD) / (CYC - HOLD));
+    if (p >= HOLD) L = BOT;
+    var i, q;
+
+    /* --- grid: 60 fps and 30 fps ------------------------------------- */
+    var lines = [16.7, 33.3];
+    for (q = 0; q < lines.length; q++) {
+      g.beginPath(); g.moveTo(X0 - 6, Y(lines[q])); g.lineTo(X0 + 23 * PITCH + BW + 4, Y(lines[q]));
+      g.strokeStyle = rgb(C.hair, 0.6); g.lineWidth = 1; g.setLineDash([3, 4]); g.stroke();
+    }
+    g.setLineDash([]);
+    g.beginPath(); g.moveTo(X0 - 6, YB + 0.5); g.lineTo(X0 + 23 * PITCH + BW + 4, YB + 0.5);
+    g.strokeStyle = rgb(C.hair, 1); g.lineWidth = 1; g.stroke();
+
+    /* --- bars, lit where they stand at or above the level ------------- */
+    for (i = 0; i < V.length; i++) {
+      var x = X0 + i * PITCH, yt = Y(V[i]);
+      g.fillStyle = rgb(C.hair, 0.55);
+      g.fillRect(x, yt, BW, YB - yt);
+      if (V[i] >= L) {
+        g.fillStyle = rgb(C.blue, 0.78 * fade + 0.1);
+        g.fillRect(x, yt, BW, Y(L) - yt);
+      }
+    }
+
+    /* --- persistence: peak to level, or peak to saddle once dead ------ */
+    for (q = 0; q < M.P.length; q++) {
+      var e = M.P[q];
+      if (L > e.birth) continue;
+      var dead = L <= e.death;
+      var lo = dead ? e.death : L;
+      var xs = X0 + e.i * PITCH;
+      var minor = e.p < 1;
+      g.fillStyle = rgb(C.mint, (minor ? 0.45 : 1) * fade);
+      g.fillRect(xs, Y(e.birth), BW, Math.max(1.5, Y(lo) - Y(e.birth)));
+      if (dead && e.at >= 0 && !minor) {
+        g.beginPath(); g.moveTo(cx(e.i), Y(e.death)); g.lineTo(cx(e.at), Y(e.death));
+        g.strokeStyle = rgb(C.mintD, 0.9 * fade); g.lineWidth = 1.2; g.setLineDash([2, 3]); g.stroke();
+        g.setLineDash([]);
+        g.beginPath(); g.arc(cx(e.at), Y(e.death), 2.6, 0, TAU);
+        g.fillStyle = rgb(C.mintD, fade); g.fill();
+      }
+    }
+
+    /* --- the level ----------------------------------------------------- */
+    if (p < HOLD) {
+      g.beginPath(); g.moveTo(X0 - 10, Y(L)); g.lineTo(X0 + 23 * PITCH + BW + 8, Y(L));
+      g.strokeStyle = rgb(C.ink, 0.7); g.lineWidth = 1.4; g.stroke();
+    }
+
+    /* --- slowest_frames: what the digest printed before ---------------- */
+    for (q = 0; q < SLOW.length; q++) {
+      g.beginPath(); g.arc(cx(SLOW[q]), ROW1, 5.2, 0, TAU);
+      g.fillStyle = rgb(C.coral, 0.9); g.fill();
+    }
+    g.beginPath(); g.moveTo(cx(6) - 7, ROW1 + 10); g.lineTo(cx(9) + 7, ROW1 + 10);
+    g.strokeStyle = rgb(C.coral, 0.55); g.lineWidth = 1.4; g.stroke();
+
+    /* --- persistent_spikes: one chip per stall, as each one dies ------- */
+    for (q = 0; q < M.P.length; q++) {
+      var s = M.P[q];
+      var age = (s.death - L) / 2.5;
+      if (age <= 0 && !(p >= HOLD)) continue;
+      var k = p >= HOLD ? 1 : ease(age);
+      var r = Math.max(1.6, 1.9 * Math.sqrt(s.p)) * (0.4 + 0.6 * k);
+      g.beginPath(); g.arc(cx(s.i), ROW2, r, 0, TAU);
+      g.fillStyle = rgb(C.mint, (s.p < 1 ? 0.45 : 1) * k * fade); g.fill();
+    }
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
@@ -9826,7 +9988,8 @@
                  aether: aether,
                  grant: grant,
                  linking: linking,
-                 asmodeus: asmodeus };
+                 asmodeus: asmodeus,
+                 spikes: spikes };
 
   /* ------------------------------------------------------------------ */
   var live = [];
