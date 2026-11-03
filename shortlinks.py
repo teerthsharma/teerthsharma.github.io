@@ -53,8 +53,13 @@ def sections():
         for m in re.finditer(rf'<article[^>]*\bid="({prefix}[a-z0-9-]+)"', src):
             anchor = m.group(1)
             body = src[m.end():m.end() + 4000]
-            head = re.search(r"<h[23][^>]*>(.*?)</h[23]>", body, re.S)
-            para = re.search(r"<p[^>]*>(.*?)</p>", body, re.S)
+            # work.html cards lead with a plain-language headline and carry the
+            # project name in .pt__sub and its one-liner in .pt__tagline; a
+            # short link is named after the project, so prefer those two.
+            sub = re.search(r'<p class="pt__sub"[^>]*>(.*?)</p>', body, re.S)
+            tag = re.search(r'<p class="pt__tagline"[^>]*>(.*?)</p>', body, re.S)
+            head = sub or re.search(r"<h[23][^>]*>(.*?)</h[23]>", body, re.S)
+            para = (tag if sub else None) or re.search(r"<p[^>]*>(.*?)</p>", body, re.S)
             assert head and para, f"{page}#{anchor}: no heading or summary"
             desc = html.unescape(text(para.group(1)))
             if len(desc) > 200:
