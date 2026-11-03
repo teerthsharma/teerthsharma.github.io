@@ -675,6 +675,7 @@ img,svg{ max-width:100%; display:block; }
 }
 .ev__list li{
   position:relative;
+  overflow-wrap:anywhere;   /* file paths have no break points */
   font-family:var(--font-mono);
   font-size:var(--fs-0);
   line-height:1.65;
@@ -706,6 +707,13 @@ img,svg{ max-width:100%; display:block; }
   word-break:normal;
 }
 .proofcell__num{ font-size:var(--fs-1); line-height:1.3; }
+/* With breaking off, the longest word sets the cell's minimum width, and at
+   three columns from 900 to ~1200px "deterministic" and "comparisons" ran
+   past the card edge. The cell is a size container, so the figure shrinks
+   with the cell instead: 13 mono characters at 0.6em fit in 12cqi * 13 *
+   0.6 = 93.6% of its content box. */
+.proofcell{ container-type:inline-size; }
+.proofcell__num{ font-size:min(var(--fs-1), 12cqi); }
 
 /* ---------- Figures stop looking like terminal output ------------------
    Every label in every figure was monospace, because the site's captions
@@ -910,6 +918,13 @@ html:has(.psub), html:has(.psub) body{ overflow-x:clip; }
   }
 }
 .psub__scroll{ overflow-x:auto; scrollbar-width:none; overscroll-behavior-x:contain; }
+/* The strip scrolls sideways below ~1100px with its scrollbar hidden, so
+   nothing said more projects were off the edge. A soft fade at both ends
+   says it; at widths where the list fits, it fades only the empty padding. */
+.psub__scroll{
+  -webkit-mask-image:linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+  mask-image:linear-gradient(90deg, transparent 0, #000 20px, #000 calc(100% - 20px), transparent 100%);
+}
 .psub__scroll::-webkit-scrollbar{ display:none; }
 .psub__list{
   display:flex; align-items:center;
