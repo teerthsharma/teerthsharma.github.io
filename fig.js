@@ -9813,59 +9813,67 @@
   /* spikes — boykopovar/AnyPS5 #12609                                    */
   /* ==================================================================== */
   function spikes(g, vb, t, st) {
-    /* 24 presents of a 60 fps capture, in milliseconds: a four-frame stall
+    /* A frame-time landscape in a glass tank, flooded and drained: the
+       superlevel filtration that persistent_peaks computes, drawn as water.
+
+       24 presents of a 60 fps capture, in milliseconds: a four-frame stall
        (44.1, 47.8, 46.2, 45.0), a 29.4 ms frame on the shoulder of a 33.5 ms
-       one with a 24.0 ms frame between them, and a lone 23.8 ms frame.
+       one with a 24.0 ms frame between them, and a lone 23.8 ms frame. Each
+       present is a prism standing on the tank floor, its height its frame
+       time, and the camera swings slowly around the tank.
 
-       slowest_frames ranks frames one by one, so its top five are frames
-       7, 8, 9, 6 and 16: four lines for one stall, and the shoulder and the
-       lone frame are not on the list at all. That row is drawn in coral from
-       the start, because it is what the digest printed before #12609.
+       The water level L is the threshold. It starts at 49.5 ms, above every frame, and
+       drains to 15 ms, holds, and refills. Everything drawn is a function of
+       L alone, so the refill runs the same filtration backwards. Prisms
+       below the surface are grey through the glass. Above it they are lit,
+       and each lit run is one island: one component, born the moment its
+       tallest frame breaks the surface, with a ring where it does. When two
+       islands touch, the one with the lower peak dies at the frame that
+       joined them, the elder rule, and a dashed line marks that saddle on
+       the prisms' faces. The part of a peak's prism between its peak and the
+       saddle (or the water, while it lives) is mint: that height is its
+       persistence.
 
-       persistent_peaks is the 0-dimensional persistence of the series under a
-       falling threshold. A level line drops from 50 ms to 15 ms. Every bar at
-       or above it is lit, and each lit run is one component. A component is
-       born at its tallest frame; when two runs touch, the one with the lower
-       peak dies there, at the frame that joined them, and its persistence is
-       peak minus that frame. The tallest peak dies last, against the series
-       minimum. The union-find below is the one in tools/trace_digest.py,
-       elder rule and tie-break included, and on this series it returns
-       (7, 31.2) (16, 16.9) (21, 7.2) (14, 5.4) and five frames of noise under
-       0.7 ms, checked offline against a port that passes the PR's own tests.
-
-       Each peak's bar carries its persistence in mint, from the peak down to
-       the level or, once dead, to the saddle, with a dashed hairline across
-       to the frame where it merged. The mint row fills in as each component
-       dies: one chip per stall, its area proportional to persistence. */
+       The barcode under the tank is the same thing on a millisecond axis.
+       Each bar runs from its birth leftwards to the level, so it grows as
+       the water drains, and stops at its death: (7, 31.2) (16, 16.9)
+       (21, 7.2) (14, 5.4), plus five frames of noise under 0.7 ms. The
+       union-find below is the one in tools/trace_digest.py, elder rule and
+       tie-break included, checked offline against a port that passes the
+       PR's own tests. The coral row is what slowest_frames printed before
+       #12609: frames 7, 8, 9, 6 and 16, four of them the same stall. */
     var TAU = Math.PI * 2;
     var V = [16.9, 16.6, 17.2, 16.7, 17.0, 16.6, 44.1, 47.8, 46.2, 45.0, 17.3, 16.8,
              16.6, 17.1, 29.4, 24.0, 33.5, 16.9, 16.7, 17.0, 16.6, 23.8, 16.8, 17.1];
-    var SLOW = [7, 8, 9, 6, 16];
-    var X0 = 66, PITCH = 17, BW = 12, YB = 300, K = 4;
-    var ROW1 = 346, ROW2 = 394;
-    var CYC = 11000, D0 = 900, DL = 6200, HOLD = 10100, TOP = 50, BOT = 15;
+    var N = V.length;
+    var DX = 0.1, HW = 0.034, HD = 0.15, ZK = 0.0215, FX = 1.32, FY = 0.36;
+    var S = 172, CX = 250, CY = 276, EL = 0.52, PERSP = 0.09;
+    var SE = Math.sin(EL), CE = Math.cos(EL);
+    var CYC = 12500, D0 = 900, DL = 7000, H0 = 10600, RL = 1900, TOP = 49.5, BOT = 15, XMAX = 50;
+    var BX0 = 150, BX1 = 470, ROWS = [370, 392, 414, 436], NROW = 458, AXY = 474;
+    var SLOWX = [162, 186, 210, 234, 270], SLOWY = 512;
 
     var M = spikes._m;
     if (!M) {
-      var n = V.length, parent = [], peak = [], on = [], ord = [], i0, j0;
-      for (i0 = 0; i0 < n; i0++) { parent.push(i0); peak.push(i0); on.push(false); ord.push(i0); }
+      var parent = [], peak = [], on = [], ord = [], i0, j0;
+      for (i0 = 0; i0 < N; i0++) { parent.push(i0); peak.push(i0); on.push(false); ord.push(i0); }
       var find = function (x) {
         while (parent[x] !== x) { parent[x] = parent[parent[x]]; x = parent[x]; }
         return x;
       };
-      /* (-value, position): the earlier of two equal frames is the elder */
+      /* (-value, position): of two equal peaks the earlier is the elder */
       var elder = function (a, b) {
         var pa = peak[a], pb = peak[b];
         return V[pa] !== V[pb] ? V[pa] > V[pb] : pa < pb;
       };
       ord.sort(function (a, b) { return V[b] - V[a] || a - b; });
       var died = {};
-      for (i0 = 0; i0 < n; i0++) {
+      for (i0 = 0; i0 < N; i0++) {
         var ix = ord[i0];
         on[ix] = true;
         for (j0 = -1; j0 <= 1; j0 += 2) {
           var nb = ix + j0;
-          if (nb < 0 || nb >= n || !on[nb]) continue;
+          if (nb < 0 || nb >= N || !on[nb]) continue;
           var a = find(ix), b = find(nb);
           if (a === b) continue;
           var hi = elder(a, b) ? a : b, lo = hi === a ? b : a;
@@ -9873,102 +9881,227 @@
           parent[lo] = hi;
         }
       }
-      var vmin = Math.min.apply(null, V), top = peak[find(0)];
-      died[top] = { death: vmin, at: -1 };
-      var P = [];
+      var vmin = Math.min.apply(null, V);
+      died[peak[find(0)]] = { death: vmin, at: -1 };
+      var P = [], byI = {};
       for (var key in died) {
         var pk = +key, pers = V[pk] - died[key].death;
         if (pers > 0) P.push({ i: pk, birth: V[pk], death: died[key].death, at: died[key].at, p: pers });
       }
       P.sort(function (x, y) { return y.p - x.p || x.i - y.i; });
+      for (i0 = 0; i0 < P.length; i0++) byI[P[i0].i] = P[i0];
       var hex = function (name, fb) {
         var h = (token(name, fb) || fb).trim().replace('#', '');
         if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
         var v = parseInt(h, 16);
         return [(v >> 16) & 255, (v >> 8) & 255, v & 255];
       };
-      M = spikes._m = { P: P, C: {
-        ink: hex('--ink', '#1c1b19'), hair: hex('--hair2', '#cfcbc1'), wht: hex('--raised', '#ffffff'),
-        blue: hex('--blue-500', '#2456dc'), mint: hex('--mint-500', '#0b93ab'),
-        mintD: hex('--mint-700', '#0a6b7c'), coral: hex('--coral-500', '#d9376e') } };
+      var C0 = { ink: hex('--ink', '#1c1b19'), mut: hex('--muted', '#5f5b53'), hair: hex('--hair2', '#cfcbc1'),
+                 wht: hex('--raised', '#ffffff'), blue: hex('--blue-500', '#2456dc'), blueD: hex('--blue-700', '#163d9a'),
+                 mint: hex('--mint-500', '#0b93ab'), mintD: hex('--mint-700', '#0a6b7c'),
+                 coral: hex('--coral-500', '#d9376e') };
+      var mix0 = function (a1, a2, f) {
+        return [Math.round(a1[0] + (a2[0] - a1[0]) * f), Math.round(a1[1] + (a2[1] - a1[1]) * f), Math.round(a1[2] + (a2[2] - a1[2]) * f)];
+      };
+      var bars = [];
+      for (i0 = 0; i0 < N; i0++) bars.push({ i: i0, x: (i0 - (N - 1) / 2) * DX, d: 0 });
+      M = spikes._m = { P: P, byI: byI, C: C0, mix: mix0, bars: bars, grey: mix0(C0.hair, C0.wht, 0.15) };
     }
-    var C = M.C;
+    var C = M.C, mix = M.mix;
     var rgb = function (c, al) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + al + ')'; };
-    var Y = function (ms) { return YB - K * ms; };
-    var cx = function (i) { return X0 + i * PITCH + BW / 2; };
 
-    var T = REDUCED ? 9000 : t;
+    var T = REDUCED ? 9500 : t;
     var p = ((T % CYC) + CYC) % CYC;
-    var drop = ease((p - D0) / DL);
-    var L = TOP - (TOP - BOT) * drop;
-    var fade = p < HOLD ? 1 : 1 - ease((p - HOLD) / (CYC - HOLD));
-    if (p >= HOLD) L = BOT;
-    var i, q;
+    var L;
+    if (p < D0) L = TOP;
+    else if (p < D0 + DL) L = TOP - (TOP - BOT) * ease((p - D0) / DL);
+    else if (p < H0) L = BOT;
+    else L = BOT + (TOP - BOT) * ease((p - H0) / RL);
 
-    /* --- grid: 60 fps and 30 fps ------------------------------------- */
-    var lines = [16.7, 33.3];
-    for (q = 0; q < lines.length; q++) {
-      g.beginPath(); g.moveTo(X0 - 6, Y(lines[q])); g.lineTo(X0 + 23 * PITCH + BW + 4, Y(lines[q]));
-      g.strokeStyle = rgb(C.hair, 0.6); g.lineWidth = 1; g.setLineDash([3, 4]); g.stroke();
-    }
-    g.setLineDash([]);
-    g.beginPath(); g.moveTo(X0 - 6, YB + 0.5); g.lineTo(X0 + 23 * PITCH + BW + 4, YB + 0.5);
+    var yaw = -0.34 + (REDUCED ? 0 : 0.13 * Math.sin(TAU * T / 21000));
+    var cyw = Math.cos(yaw), syw = Math.sin(yaw);
+    var tmp = [0, 0, 0, 1];
+    var proj = function (x, y, z, out) {
+      var xr = x * cyw - y * syw, yr = x * syw + y * cyw;
+      var d = -yr * CE + z * SE, pp = 1 / (1 - d * PERSP);
+      out[0] = CX + S * xr * pp;
+      out[1] = CY - S * (yr * SE + z * CE) * pp;
+      out[2] = d; out[3] = pp;
+      return out;
+    };
+    var poly = function (pts) {
+      g.beginPath();
+      for (var k = 0; k < pts.length; k++) {
+        proj(pts[k][0], pts[k][1], pts[k][2], tmp);
+        if (k === 0) g.moveTo(tmp[0], tmp[1]); else g.lineTo(tmp[0], tmp[1]);
+      }
+      g.closePath();
+    };
+    /* the +x or -x wall faces the camera, whichever the yaw turns toward it */
+    var sideX = syw < 0 ? 1 : -1;
+    var prism = function (x, z0, z1, col, al) {
+      if (z1 - z0 < 1e-4) return;
+      var xs = x + sideX * HW;
+      poly([[xs, -HD, z0], [xs, HD, z0], [xs, HD, z1], [xs, -HD, z1]]);
+      g.fillStyle = rgb(mix(col, C.ink, 0.28), al); g.fill();
+      poly([[x - HW, -HD, z0], [x + HW, -HD, z0], [x + HW, -HD, z1], [x - HW, -HD, z1]]);
+      g.fillStyle = rgb(col, al); g.fill();
+      poly([[x - HW, -HD, z1], [x + HW, -HD, z1], [x + HW, HD, z1], [x - HW, HD, z1]]);
+      g.fillStyle = rgb(mix(col, C.wht, 0.42), al); g.fill();
+    };
+    var i, q, k;
+    var Z = function (ms) { return ms * ZK; };
+    var zL = Z(L);
+
+    /* painter's order: far prisms first */
+    var bars = M.bars;
+    for (i = 0; i < N; i++) { proj(bars[i].x, 0, 0, tmp); bars[i].d = tmp[2]; }
+    var order = bars.slice().sort(function (b1, b2) { return b1.d - b2.d; });
+
+    /* --- tank floor ---------------------------------------------------- */
+    poly([[-FX, -FY, -0.03], [FX, -FY, -0.03], [FX, FY, -0.03], [-FX, FY, -0.03]]);
+    g.fillStyle = rgb(C.ink, 0.06); g.fill();
+    poly([[-FX, -FY, 0], [FX, -FY, 0], [FX, FY, 0], [-FX, FY, 0]]);
+    var fg = g.createLinearGradient(0, CY - 40, 0, CY + 40);
+    fg.addColorStop(0, rgb(mix(C.wht, C.ink, 0.03), 1));
+    fg.addColorStop(1, rgb(mix(C.wht, C.ink, 0.08), 1));
+    g.fillStyle = fg; g.fill();
     g.strokeStyle = rgb(C.hair, 1); g.lineWidth = 1; g.stroke();
+    /* 60 fps and 30 fps gauges on the back wall */
+    var gauges = [16.7, 33.3];
+    for (q = 0; q < gauges.length; q++) {
+      g.beginPath();
+      proj(-FX, FY, Z(gauges[q]), tmp); g.moveTo(tmp[0], tmp[1]);
+      proj(FX, FY, Z(gauges[q]), tmp); g.lineTo(tmp[0], tmp[1]);
+      g.strokeStyle = rgb(C.hair, 0.9); g.setLineDash([3, 4]); g.lineWidth = 1; g.stroke();
+      g.setLineDash([]);
+    }
 
-    /* --- bars, lit where they stand at or above the level ------------- */
-    for (i = 0; i < V.length; i++) {
-      var x = X0 + i * PITCH, yt = Y(V[i]);
-      g.fillStyle = rgb(C.hair, 0.55);
-      g.fillRect(x, yt, BW, YB - yt);
-      if (V[i] >= L) {
-        g.fillStyle = rgb(C.blue, 0.78 * fade + 0.1);
-        g.fillRect(x, yt, BW, Y(L) - yt);
+    /* --- what the water covers ---------------------------------------- */
+    for (k = 0; k < N; k++) {
+      var bk = order[k];
+      prism(bk.x, 0, Math.min(Z(V[bk.i]), zL), M.grey, 1);
+    }
+
+    /* --- the water: a translucent body with a moving surface ----------- */
+    {
+      var wz = Math.min(zL, Z(TOP));
+      /* front and side glass of the water body */
+      poly([[-FX, -FY, 0], [FX, -FY, 0], [FX, -FY, wz], [-FX, -FY, wz]]);
+      g.fillStyle = rgb(C.blue, 0.07); g.fill();
+      var sx = sideX * FX;
+      poly([[sx, -FY, 0], [sx, FY, 0], [sx, FY, wz], [sx, -FY, wz]]);
+      g.fillStyle = rgb(C.blue, 0.1); g.fill();
+      /* surface */
+      poly([[-FX, -FY, wz], [FX, -FY, wz], [FX, FY, wz], [-FX, FY, wz]]);
+      g.fillStyle = rgb(C.blue, 0.13); g.fill();
+      g.strokeStyle = rgb(C.blue, 0.45); g.lineWidth = 1.2; g.stroke();
+      /* ripples travelling toward the camera */
+      for (q = 0; q < 6; q++) {
+        var yy = FY - (((q / 6) + (REDUCED ? 0 : T / 9000)) % 1) * 2 * FY;
+        var fadeR = Math.sin(Math.PI * (FY - yy) / (2 * FY));
+        g.beginPath();
+        for (k = 0; k <= 40; k++) {
+          var xx = -FX + 2 * FX * k / 40;
+          proj(xx, yy + 0.012 * Math.sin(xx * 9 + T / 700 + q), wz, tmp);
+          if (k === 0) g.moveTo(tmp[0], tmp[1]); else g.lineTo(tmp[0], tmp[1]);
+        }
+        g.strokeStyle = rgb(C.wht, 0.55 * fadeR); g.lineWidth = 1; g.stroke();
       }
     }
 
-    /* --- persistence: peak to level, or peak to saddle once dead ------ */
+    /* --- islands: what stands above the water -------------------------- */
+    for (k = 0; k < N; k++) {
+      var bo = order[k], v = V[bo.i];
+      if (v <= L) continue;
+      var e = M.byI[bo.i], cap = v;
+      if (e && e.p >= 1) cap = Math.max(L, e.death);
+      prism(bo.x, zL, Z(cap), C.blue, 1);
+      if (cap < v) prism(bo.x, Z(cap), Z(v), C.mint, 1);
+    }
+
+    /* births: a ring where each peak breaks the surface */
     for (q = 0; q < M.P.length; q++) {
-      var e = M.P[q];
-      if (L > e.birth) continue;
-      var dead = L <= e.death;
-      var lo = dead ? e.death : L;
-      var xs = X0 + e.i * PITCH;
-      var minor = e.p < 1;
-      g.fillStyle = rgb(C.mint, (minor ? 0.45 : 1) * fade);
-      g.fillRect(xs, Y(e.birth), BW, Math.max(1.5, Y(lo) - Y(e.birth)));
-      if (dead && e.at >= 0 && !minor) {
-        g.beginPath(); g.moveTo(cx(e.i), Y(e.death)); g.lineTo(cx(e.at), Y(e.death));
-        g.strokeStyle = rgb(C.mintD, 0.9 * fade); g.lineWidth = 1.2; g.setLineDash([2, 3]); g.stroke();
-        g.setLineDash([]);
-        g.beginPath(); g.arc(cx(e.at), Y(e.death), 2.6, 0, TAU);
-        g.fillStyle = rgb(C.mintD, fade); g.fill();
-      }
+      var eb = M.P[q];
+      if (eb.p < 1) continue;
+      var age = (eb.birth - L) / 4;
+      if (age <= 0 || age >= 1) continue;
+      proj(bars[eb.i].x, 0, Z(eb.birth), tmp);
+      g.beginPath(); g.ellipse(tmp[0], tmp[1], 6 + 26 * age, (6 + 26 * age) * SE, 0, 0, TAU);
+      g.strokeStyle = rgb(C.mint, 0.8 * (1 - age)); g.lineWidth = 1.6; g.stroke();
     }
 
-    /* --- the level ----------------------------------------------------- */
-    if (p < HOLD) {
-      g.beginPath(); g.moveTo(X0 - 10, Y(L)); g.lineTo(X0 + 23 * PITCH + BW + 8, Y(L));
-      g.strokeStyle = rgb(C.ink, 0.7); g.lineWidth = 1.4; g.stroke();
+    /* deaths: the saddle each island merged at, on the prisms' faces */
+    for (q = 0; q < M.P.length; q++) {
+      var ed = M.P[q];
+      if (ed.p < 1 || ed.at < 0 || L > ed.death) continue;
+      g.beginPath();
+      proj(bars[ed.i].x, -HD, Z(ed.death), tmp); g.moveTo(tmp[0], tmp[1]);
+      proj(bars[ed.at].x, -HD, Z(ed.death), tmp); g.lineTo(tmp[0], tmp[1]);
+      g.strokeStyle = rgb(C.mintD, 0.95); g.lineWidth = 1.3; g.setLineDash([2, 3]); g.stroke();
+      g.setLineDash([]);
+      g.beginPath(); g.arc(tmp[0], tmp[1], 3, 0, TAU);
+      g.fillStyle = rgb(C.mintD, 1); g.fill();
+      g.strokeStyle = rgb(C.wht, 1); g.lineWidth = 1; g.stroke();
+    }
+
+    /* --- the barcode: birth to the level, then to death ---------------- */
+    var X = function (ms) { return BX0 + (Math.max(BOT, Math.min(XMAX, ms)) - BOT) / (XMAX - BOT) * (BX1 - BX0); };
+    var bar = function (y, birth, death, h, alpha) {
+      g.beginPath(); g.moveTo(X(BOT), y); g.lineTo(X(XMAX), y);
+      g.strokeStyle = rgb(C.hair, 0.5 * alpha + 0.2); g.lineWidth = 1; g.stroke();
+      if (L >= birth) return;
+      var lo = Math.max(L, death), x0 = X(lo), x1 = X(birth);
+      var r = h / 2;
+      g.beginPath();
+      if (g.roundRect) g.roundRect(x0, y - r, Math.max(h, x1 - x0), h, r);
+      else g.rect(x0, y - r, Math.max(h, x1 - x0), h);
+      g.fillStyle = rgb(C.mint, alpha); g.fill();
+      if (L <= death) {
+        g.beginPath(); g.arc(x0 + r, y, r * 0.45, 0, TAU);
+        g.fillStyle = rgb(C.wht, alpha); g.fill();
+      } else {
+        g.beginPath(); g.arc(x0, y, r + 2.5, 0, TAU);
+        g.fillStyle = rgb(C.mint, 0.25 * alpha); g.fill();
+      }
+    };
+    var row = 0;
+    for (q = 0; q < M.P.length; q++) {
+      var eq = M.P[q];
+      if (eq.p >= 1 && row < ROWS.length) bar(ROWS[row++], eq.birth, eq.death, 10, 1);
+    }
+    g.beginPath(); g.moveTo(X(BOT), NROW); g.lineTo(X(XMAX), NROW);
+    g.strokeStyle = rgb(C.hair, 0.4); g.lineWidth = 1; g.stroke();
+    for (q = 0; q < M.P.length; q++) {
+      var en = M.P[q];
+      if (en.p >= 1 || L >= en.birth) continue;
+      var xa = X(Math.max(L, en.death)), xb = X(en.birth);
+      g.fillStyle = rgb(C.mint, 0.5);
+      g.fillRect(xa, NROW - 3 + (q % 3 - 1) * 2, Math.max(1.5, xb - xa), 3);
+    }
+    /* axis */
+    g.beginPath(); g.moveTo(X(BOT), AXY); g.lineTo(X(XMAX), AXY);
+    g.strokeStyle = rgb(C.hair, 1); g.lineWidth = 1; g.stroke();
+    var ticks = [20, 30, 40, 50];
+    for (q = 0; q < ticks.length; q++) {
+      g.beginPath(); g.moveTo(X(ticks[q]), AXY); g.lineTo(X(ticks[q]), AXY + 4); g.stroke();
+    }
+    /* the level, the same water line, on the axis */
+    if (L < TOP - 0.01) {
+      var xl = X(L);
+      g.beginPath(); g.moveTo(xl, ROWS[0] - 12); g.lineTo(xl, AXY);
+      g.strokeStyle = rgb(C.blue, 0.75); g.lineWidth = 1.4; g.stroke();
+      g.beginPath(); g.moveTo(xl - 4, AXY + 1); g.lineTo(xl + 4, AXY + 1); g.lineTo(xl, AXY - 5); g.closePath();
+      g.fillStyle = rgb(C.blue, 0.9); g.fill();
     }
 
     /* --- slowest_frames: what the digest printed before ---------------- */
-    for (q = 0; q < SLOW.length; q++) {
-      g.beginPath(); g.arc(cx(SLOW[q]), ROW1, 5.2, 0, TAU);
-      g.fillStyle = rgb(C.coral, 0.9); g.fill();
+    for (q = 0; q < SLOWX.length; q++) {
+      g.beginPath(); g.arc(SLOWX[q], SLOWY, 5.4, 0, TAU);
+      g.fillStyle = rgb(C.coral, 0.92); g.fill();
     }
-    g.beginPath(); g.moveTo(cx(6) - 7, ROW1 + 10); g.lineTo(cx(9) + 7, ROW1 + 10);
-    g.strokeStyle = rgb(C.coral, 0.55); g.lineWidth = 1.4; g.stroke();
-
-    /* --- persistent_spikes: one chip per stall, as each one dies ------- */
-    for (q = 0; q < M.P.length; q++) {
-      var s = M.P[q];
-      var age = (s.death - L) / 2.5;
-      if (age <= 0 && !(p >= HOLD)) continue;
-      var k = p >= HOLD ? 1 : ease(age);
-      var r = Math.max(1.6, 1.9 * Math.sqrt(s.p)) * (0.4 + 0.6 * k);
-      g.beginPath(); g.arc(cx(s.i), ROW2, r, 0, TAU);
-      g.fillStyle = rgb(C.mint, (s.p < 1 ? 0.45 : 1) * k * fade); g.fill();
-    }
+    g.beginPath(); g.moveTo(SLOWX[0] - 7, SLOWY + 11); g.lineTo(SLOWX[3] + 7, SLOWY + 11);
+    g.strokeStyle = rgb(C.coral, 0.6); g.lineWidth = 1.4; g.stroke();
   }
 
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
