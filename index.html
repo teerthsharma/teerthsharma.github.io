@@ -4,27 +4,27 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teerth Sharma</title>
-<meta name="description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Twelve landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta name="description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Thirteen landed contributions: memory, speed, determinism, correctness and least privilege.">
 <link rel="canonical" href="https://teerth.dev/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
-<meta property="og:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Twelve landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta property="og:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Thirteen landed contributions: memory, speed, determinism, correctness and least privilege.">
 <meta property="og:url" content="https://teerth.dev/">
 <meta property="og:image" content="https://teerth.dev/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Teerth Sharma: performance engineer, GPU kernels, ML infrastructure. 12 contributions landed upstream.">
+<meta property="og:image:alt" content="Teerth Sharma: performance engineer, GPU kernels, ML infrastructure. 13 contributions landed upstream.">
 <meta property="og:site_name" content="Teerth Sharma">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://teerth.dev/assets/og.png">
 <meta name="twitter:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
-<meta name="twitter:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Twelve landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta name="twitter:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Thirteen landed contributions: memory, speed, determinism, correctness and least privilege.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site.css?v=78">
-<link rel="stylesheet" href="motion.css?v=78">
-<link rel="stylesheet" href="art.css?v=78">
+<link rel="stylesheet" href="site.css?v=79">
+<link rel="stylesheet" href="motion.css?v=79">
+<link rel="stylesheet" href="art.css?v=79">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -282,6 +282,25 @@
             <img class="proofcell__org" src="assets/org/open2c.png" alt="" loading="lazy">
             <span class="proofcell__num mono">11/11 signs agree</span>
           </a>
+          <a class="proofcell" href="#pr-anyps5-12609" aria-label="boykopovar/AnyPS5 pull request 12609: one entry per stall">
+            <div class="proofcell__art">
+              <svg class="proofcell__mark" viewBox="0 0 120 48" role="img" aria-labelledby="hc13-t hc13-d">
+                <title id="hc13-t">A four-frame stall reported once</title>
+                <desc id="hc13-d">Short grey bars of frame time, then four tall blue bars side by side, a stall. One mint cap sits on the tallest of the four: the stall is one entry, its height its persistence.</desc>
+                <rect class="pop" x="14" y="32" width="8" height="10" fill="var(--hair2)"/>
+                <rect class="pop" x="26" y="31" width="8" height="11" fill="var(--hair2)"/>
+                <rect class="pop" x="38" y="12" width="8" height="30" fill="var(--blue-500)"/>
+                <rect class="pop" x="50" y="8" width="8" height="34" fill="var(--blue-500)"/>
+                <rect class="pop" x="62" y="10" width="8" height="32" fill="var(--blue-500)"/>
+                <rect class="pop" x="74" y="12" width="8" height="30" fill="var(--blue-500)"/>
+                <rect class="pop" x="86" y="32" width="8" height="10" fill="var(--hair2)"/>
+                <rect class="pop" x="98" y="31" width="8" height="11" fill="var(--hair2)"/>
+                <rect class="pop" x="50" y="8" width="8" height="22" fill="var(--mint-500)"/>
+              </svg>
+            </div>
+            <img class="proofcell__org" src="assets/org/anyps5.png" alt="" loading="lazy">
+            <span class="proofcell__num mono">1 entry per stall</span>
+          </a>
         </div>
       </div>
     </div>
@@ -313,12 +332,13 @@
     <li>dsx-ai-factory/topograph #432: 145 lines, ClusterRole rules gated by engine and provider</li>
     <li>facebook/pyrefly #4180: 208 two-module SCC chain, recheck propagation panic pinned</li>
     <li>open2c/polychrom #79: linking number sign fixed, 11 of 11 pairs agree with the Gauss integral, up from 1 of 11</li>
+    <li>boykopovar/AnyPS5 #12609: persistent frame-time spikes, one entry per stall, 0 differences from a brute-force oracle on 60,000 series</li>
   </ul>
 </noscript>
 <section class="band" id="upstream">
   <div class="wrap">
     <h2>What I fixed, and where.</h2>
-    <p>Twelve landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
+    <p>Thirteen landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
     <div class="grid grid--3">
       <article class="card" id="pr-mujoco-warp-1541">
 <div class="card__text">
@@ -812,6 +832,52 @@
         </div>
 </div>
 </article>
+
+<article class="card" id="pr-anyps5-12609">
+<div class="card__text">
+        <div class="card__head">
+          <a href="https://github.com/boykopovar/AnyPS5/pull/12609"><img src="assets/org/anyps5.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into boykopovar/AnyPS5 #12609</span>
+        </div>
+        <h3 class="card__title">A stall reported once, not once per frame</h3>
+        <p class="card__body">AnyPS5 ports PS5 executables to Linux and Windows, and trace_digest.py turns a frame trace into the digest an issue or a pull request carries. Its slowest frames were ranked one frame at a time, so a stall several frames long took several lines and pushed the next stall off the list. I added persistent spikes: the 0-dimensional persistence of the frame-time series under a falling threshold, one union-find pass. Each stall is listed once, with its height above the fastest frame that separates it from a longer one.</p>
+        
+        <p class="card__cap mono">Reviewers measured 0 differences from a brute-force oracle on 60,000 random series, and 10^6 frames in 2.1 s. 79 tests passing.</p>
+        <ul class="tags"><li class="tag tag--lang">Python</li><li class="tag tag--class">persistent homology</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 4 ways</summary>
+            <ul class="ev__list">
+            <li>79 tests in tools/tests/test_trace_digest.py and tools/check_conventions.py, passing on Linux, macOS arm64 and Windows 11, Python 3.9 to 3.15, across four reviewers</li>
+            <li>a brute-force oracle on 60,000 random series: 0 differences; every series of length 0 to 8 over values 0 to 3, 87,381 of them, agrees</li>
+            <li>a public capture, 167,752 events and 177 presents: the 2,400.9 ms stall at present 755 is listed once, and all 55 peaks match the oracle</li>
+            <li>plateaus, shoulders, ties, flat and empty series pinned in five tests, including a plateau merged into one stall and a shoulder measured against its saddle</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/boykopovar/AnyPS5/pull/12609">boykopovar/AnyPS5 #12609</a>
+</div>
+<div class="card__figure">
+<div class="card__art fig">
+      <div class="figc" style="--figc-ar:500/510">
+                <canvas data-fig="spikes" data-vb="500 510" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 500 510" role="img" aria-labelledby="pr-anyps5-12609-t pr-anyps5-12609-d">
+                  <title id="pr-anyps5-12609-t">Frame times under a falling threshold, each stall counted once by its persistence</title>
+                  <desc id="pr-anyps5-12609-d">Twenty four bars, one per present of a 60 fps capture. Most sit near 16.7 milliseconds. Frames 6 to 9 are a four-frame stall at 44.1, 47.8, 46.2 and 45.0 milliseconds; frame 14 is a 29.4 millisecond shoulder beside a 33.5 millisecond frame, with a 24.0 millisecond frame between them; frame 21 is a lone 23.8 milliseconds. A level line falls from 50 to 15 milliseconds and lights every bar at or above it in blue. Each lit run is one component, born at its tallest frame. When two runs touch, the one with the lower peak dies at the frame that joined them, a dashed line marks that saddle, and the peak bar keeps its persistence in mint, from its peak down to the saddle. Below, a coral row shows what slowest_frames listed before the change: frames 7, 8, 9, 6 and 16, four of them the same stall. A mint row fills in as each component dies, one chip per stall, sized by persistence: 31.2 milliseconds for the stall, 16.9 for the 33.5 millisecond frame, 7.2 for the lone frame and 5.4 for the shoulder, measured from its 24.0 millisecond saddle, plus faint chips for noise under a millisecond.</desc>
+                  <text x="250" y="28" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)">24 frames, one bar per present</text>
+                  <text x="250" y="52" text-anchor="middle" font-size="15" fill="var(--muted)">a level falls; each stall dies <tspan fill="var(--mint-700)">where it joins a longer one</tspan></text>
+                  <text x="58" y="104" text-anchor="end" font-size="13" fill="var(--muted)">50</text>
+                  <text x="58" y="171" text-anchor="end" font-size="13" fill="var(--muted)">33.3</text>
+                  <text x="58" y="237" text-anchor="end" font-size="13" fill="var(--muted)">16.7</text>
+                  <text x="58" y="304" text-anchor="end" font-size="13" fill="var(--muted)">0 ms</text>
+                  <text x="66" y="330" font-size="13" fill="var(--coral-700)">slowest_frames, top 5</text>
+                  <text x="66" y="378" font-size="13" fill="var(--mint-700)">persistent_spikes</text>
+                  <text x="250" y="438" text-anchor="middle" font-size="16" font-weight="600" fill="var(--coral-700)">before: 4 of the 5 slowest frames are one stall</text>
+                  <text x="250" y="462" text-anchor="middle" font-size="16" font-weight="600" fill="var(--mint-700)">#12609: one entry per stall, by persistence</text>
+                  <text x="250" y="488" text-anchor="middle" font-size="14" fill="var(--muted)">the 29.4 ms shoulder counts 5.4 ms: 24.0 ms separates it from 33.5</text>
+                </svg>
+              </div>
+        </div>
+</div>
+</article>
     </div>
     <p class="muted mono">Every number on this page is in a merged diff under my GitHub username.</p>
     <div class="cta-row">
@@ -855,8 +921,8 @@
     </nav>
   </div>
 </footer>
-<script src="fig.js?v=78" defer></script>
-<script src="site.js?v=78" defer></script>
+<script src="fig.js?v=79" defer></script>
+<script src="site.js?v=79" defer></script>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0e66bc9d7e424aa18b1cb68291aeebe8"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

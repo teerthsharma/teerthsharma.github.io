@@ -17,8 +17,8 @@ Email: teerths57@gmail.com
 
 Landed upstream contributions
 
-Twelve changes by Teerth Sharma are on the default branch of a major upstream project.
-Two of the twelve show "merged: false" on GitHub because Google and Meta import a pull
+Thirteen changes by Teerth Sharma are on the default branch of a major upstream project.
+Two of the thirteen show "merged: false" on GitHub because Google and Meta import a pull
 request into an internal monorepo, merge it there, and export it back as a commit. Those
 are marked "landed in" and the commit is named so the claim can be checked directly.
 
@@ -73,10 +73,17 @@ are marked "landed in" and the commit is named so the claim can be checked direc
     number on every linked pair. It now returns L/2. Against a Gauss-Legendre double
     integral on 11 pairs, 1 of 11 agreed before and 11 of 11 after; pytest 64/64 to
     65/65; valgrind mismatched free() contexts 16 to 0. Language C++.
+13. boykopovar/AnyPS5 #12609, merged. tools/trace_digest.py ranked slowest frames one
+    at a time, so a stall several frames long filled several lines. It now also lists
+    persistent spikes: the 0-dimensional persistence of the frame-time series under a
+    falling threshold, one union-find pass, so each stall appears once with its height
+    above the fastest frame separating it from a longer one. Reviewers found 0
+    differences from a brute-force oracle on 60,000 random series and on all 87,381
+    series of length 0 to 8 over values 0 to 3; 79 tests passing. Language Python.
 
-What the twelve cover, which is the point: memory that grew with the square of the
+What the thirteen cover, which is the point: memory that grew with the square of the
 input, time spent on work already ruled out, space never reclaimed, results that were
-wrong or not reproducible, state and privilege that leaked, one capability added, and
+wrong or not reproducible, state and privilege that leaked, two capabilities added, and
 one regression pinned so it cannot return.
 
 Teerth Sharma is not employed by, affiliated with, or endorsed by any of these
