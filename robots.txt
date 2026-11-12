@@ -7,6 +7,9 @@
 User-agent: *
 Allow: /
 Sitemap: https://teerth.dev/sitemap.xml
+Sitemap: https://teerth.dev/topological-ml-toolkit/sitemap.xml
+Sitemap: https://teerth.dev/Aether-Lang/sitemap.xml
+Sitemap: https://teerth.dev/resolvent/sitemap.xml
 
 User-agent: GPTBot
 Allow: /
