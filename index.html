@@ -4,21 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Teerth Sharma</title>
-<meta name="description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Thirteen landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta name="description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Fourteen landed contributions: memory, speed, determinism, correctness and least privilege.">
 <link rel="canonical" href="https://teerth.dev/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
-<meta property="og:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Thirteen landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta property="og:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Fourteen landed contributions: memory, speed, determinism, correctness and least privilege.">
 <meta property="og:url" content="https://teerth.dev/">
 <meta property="og:image" content="https://teerth.dev/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="Teerth Sharma: performance engineer, GPU kernels, ML infrastructure. 13 contributions landed upstream.">
+<meta property="og:image:alt" content="Teerth Sharma: performance engineer, GPU kernels, ML infrastructure. 14 contributions landed upstream.">
 <meta property="og:site_name" content="Teerth Sharma">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:image" content="https://teerth.dev/assets/og.png">
 <meta name="twitter:title" content="Teerth Sharma: Performance Engineer, GPU Kernels and ML Infrastructure">
-<meta name="twitter:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Thirteen landed contributions: memory, speed, determinism, correctness and least privilege.">
+<meta name="twitter:description" content="Teerth Sharma is a twenty year old programmer whose work is running in production at Google DeepMind, Google, TensorFlow, OpenXLA, NVIDIA, OpenAI's Triton and Meta. Fourteen landed contributions: memory, speed, determinism, correctness and least privilege.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -339,7 +339,7 @@
 <section class="band" id="upstream">
   <div class="wrap">
     <h2>What I fixed, and where.</h2>
-    <p>Thirteen landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
+    <p>Fourteen landed contributions. Every number below was measured on a named machine against a control, and every one of them sits in a merged diff or on the default branch it targets.</p>
     <div class="grid grid--3">
       <article class="card" id="pr-mujoco-warp-1541">
 <div class="card__text">
@@ -546,6 +546,57 @@
                   <text x="235" y="478" text-anchor="middle" font-size="16" font-weight="600" fill="var(--blue-700)">back-propagated, the prune removes 4 → 1</text>
                   <text x="235" y="504" text-anchor="middle" font-size="15" fill="var(--muted)">the extra edge over-serializes the collectives</text>
                   <text x="235" y="526" text-anchor="middle" font-size="15" fill="var(--muted)">+362/-26 across 4 files</text>
+                </svg>
+              </div>
+        </div>
+</div>
+</article>
+
+<article class="card" id="pr-tensorflow-128930">
+<div class="card__text">
+        <div class="card__head">
+          <a href="https://github.com/tensorflow/tensorflow/pull/128930"><img src="assets/org/tensorflow.png" class="card__mark" alt=""></a>
+          <span class="card__repo mono">merged into tensorflow/tensorflow #128930</span>
+        </div>
+        <h3 class="card__title">Padding that outranked real detections</h3>
+        <p class="card__body">Combined NMS prefilled its output with padding at score -1.0, then sorted by score alone, so any real detection scoring below -1.0 lost its slot to the padding and ties came back in heap order. I made the order total: real before padding, then score, class and box index. Packing candidates into 64-bit heap keys and sorting only the emitted prefix paid for it.</p>
+        
+        <p class="card__cap mono">Scores [-2, -3, -4] with b2 suppressed returned [-1.0, -2] instead of [-2, -3].</p>
+        <ul class="tags"><li class="tag tag--lang">C++</li><li class="tag tag--class">correctness</li><li class="tag tag--class">performance</li></ul>
+                  <details class="ev">
+            <summary class="ev__sum">How it was checked, 4 ways</summary>
+            <ul class="ev__list">
+            <li>an O(n²) oracle: all 35,018 cases match, where master missed 10,302 (10 of 18 named cases, 1,459 of 5,000 tie-rich, 8,833 of 30,000 inputs with NaN, ±inf, ±0.0 and zero-area boxes)</li>
+            <li>median of 61 runs × 3 on a pinned core: 22% faster on detection-like inputs, 24% on 4000×90, 25% padding-heavy; all-equal scores 41% slower</li>
+            <li>ASan and UBSan clean on g++ 15 and clang 21</li>
+            <li>four new CombinedNonMaxSuppressionOpTest cases, 19 CI checks passed</li>
+            </ul>
+          </details>
+          <a class="card__link" href="https://github.com/tensorflow/tensorflow/pull/128930">tensorflow/tensorflow #128930</a>
+</div>
+<div class="card__figure">
+<div class="card__art fig">
+      <div class="figc" style="--figc-ar:470/540">
+                <canvas data-fig="nms" data-vb="470 540" aria-hidden="true"></canvas>
+                <svg class="figc__lab" viewBox="0 0 470 540" role="img" aria-labelledby="pr-tensorflow-128930-t pr-tensorflow-128930-d">
+                  <title id="pr-tensorflow-128930-t">The same detections sorted two ways: padding outranks real boxes, then a total order puts it back</title>
+                  <desc id="pr-tensorflow-128930-d">An illustration of the change using the issue's own example, not a benchmark. Three detections on an image score -2, -3 and -4; box b2 overlaps b0, so non-max suppression dissolves it. Each detection falls into two glass columns at the height of its score. The op keeps the top two, and its result is prefilled with padding at score -1.0, drawn as a glass shelf holding a hollow ghost. On the left, the old order ranks by score alone: the ghost on the -1.0 shelf sits above every real score, so it rises into the first slot, b0 takes the second, and b1 at -3 is left behind and falls away. On the right, the new total order puts real results before padding, then score, class and box index: b0 and b1 rise into the two slots and the ghost sinks through its shelf. The change is 194 lines added and 29 removed across 2 files.</desc>
+                  <text x="235" y="32" text-anchor="middle" font-size="17" font-weight="600" fill="var(--ink)"><tspan class="mono">CombinedNonMaxSuppression</tspan>, top 2</text>
+                  <text x="235" y="56" text-anchor="middle" font-size="15" fill="var(--muted)">output prefilled with padding at score -1.0</text>
+                  <text x="133" y="96" font-size="13" font-weight="600" fill="var(--blue-700)" class="mono">b0 -2</text>
+                  <text x="265" y="94" font-size="13" font-weight="600" fill="var(--mint-700)" class="mono">b1 -3</text>
+                  <text x="232" y="183" font-size="12" fill="var(--violet-700)" class="mono">b2 -4, suppressed</text>
+                  <text x="90" y="232" text-anchor="end" font-size="13" fill="var(--muted)">top 2</text>
+                  <text x="80" y="280" text-anchor="end" font-size="13" fill="var(--muted)" class="mono">pad -1.0</text>
+                  <text x="80" y="314" text-anchor="end" font-size="13" fill="var(--muted)" class="mono">-2</text>
+                  <text x="80" y="348" text-anchor="end" font-size="13" fill="var(--muted)" class="mono">-3</text>
+                  <text x="80" y="382" text-anchor="end" font-size="13" fill="var(--muted)" class="mono">-4</text>
+                  <text x="132" y="428" text-anchor="middle" font-size="15" font-weight="700" fill="var(--coral-700)">before: score only</text>
+                  <text x="340" y="428" text-anchor="middle" font-size="15" font-weight="700" fill="var(--blue-700)">after: total order</text>
+                  <text x="235" y="458" text-anchor="middle" font-size="18" font-weight="700" fill="var(--coral-700)">[-1.0, -2] returned where the answer is [-2, -3]</text>
+                  <text x="235" y="481" text-anchor="middle" font-size="15" font-weight="600" fill="var(--blue-700)">real, then score, class, box index: all 35,018 oracle cases</text>
+                  <text x="235" y="504" text-anchor="middle" font-size="14" fill="var(--muted)">22% faster on detection-like inputs</text>
+                  <text x="235" y="526" text-anchor="middle" font-size="14" fill="var(--muted)">+194/-29 across 2 files</text>
                 </svg>
               </div>
         </div>
@@ -932,7 +983,7 @@
     </nav>
   </div>
 </footer>
-<script src="fig.js?v=80" defer></script>
+<script src="fig.js?v=81" defer></script>
 <script src="site.js?v=80" defer></script>
   <script src="track.js?v=2" defer></script>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "0e66bc9d7e424aa18b1cb68291aeebe8"}'></script><!-- End Cloudflare Web Analytics -->

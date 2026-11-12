@@ -10104,6 +10104,217 @@
     g.strokeStyle = rgb(C.coral, 0.6); g.lineWidth = 1.4; g.stroke();
   }
 
+  function nms(g, vb, t, st) {
+    /* tensorflow #128930, CombinedNonMaxSuppression made a total order.
+
+       The issue's own example. Three detections on an image score -2, -3
+       and -4; b2 overlaps b0, so non-max suppression dissolves it. The op
+       keeps the top two, and its result buffer is prefilled with padding at
+       score -1.0, drawn as a glass shelf with a hollow ghost resting on it.
+
+       Both glass columns hold the same detections at the height of their
+       score. The left one ranks by score alone: the ghost on the -1.0 shelf
+       sits above every real score, so it is lifted into the first slot, b0
+       takes the second, and b1 at -3 is left behind and falls away coral.
+       The right one ranks by the new total order, real before padding and
+       then score, class and box index: b0 and b1 rise into the two slots
+       and the ghost sinks through its shelf. Output [-1.0, -2] on the left,
+       [-2, -3] on the right, which is the bug and the fix exactly.
+
+       Words live in the overlay. Only the spheres, the light and the glass
+       move. */
+    var TAU = Math.PI * 2;
+    var P = 11600;
+    var COL = [132, 340];
+    var SLOT = [212, 244];
+    var SY = function (s) { return 276 + (-s - 1) * 34; };   /* score -> height */
+    var M = nms.cache;
+    if (!M) {
+      var hex = function (name, fb) {
+        var h = (token(name, fb) || fb).trim().replace('#', '');
+        if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+        var n = parseInt(h, 16);
+        return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+      };
+      var C = {};
+      C.rgb = function (c, a) { return 'rgba(' + (c[0] | 0) + ',' + (c[1] | 0) + ',' + (c[2] | 0) + ',' + (a == null ? 1 : a) + ')'; };
+      C.mix = function (a, b, k) { return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k]; };
+      C.WH = [255, 255, 255];
+      C.b5 = hex('--blue-500', '#2456dc'); C.b7 = hex('--blue-700', '#163a9a');
+      C.m5 = hex('--mint-500', '#0b93ab'); C.m7 = hex('--mint-700', '#0a6b7c');
+      C.v5 = hex('--violet-500', '#a66cf0'); C.v7 = hex('--violet-700', '#6b35c4');
+      C.c5 = hex('--coral-500', '#d9376e'); C.c7 = hex('--coral-700', '#a0183f');
+      C.mu = hex('--muted', '#5f5b53');
+      /* the image plane, a gently foreshortened sheet */
+      C.uv = function (u, v) {
+        var xl = 120 + (54 - 120) * v, xr = 350 + (416 - 350) * v;
+        return [xl + (xr - xl) * u, 84 + 104 * v];
+      };
+      M = nms.cache = C;
+    }
+    var rgb = M.rgb, mix = M.mix;
+    var tc = REDUCED ? 7600 : t % P;
+    var clamp = function (v) { return v < 0 ? 0 : v > 1 ? 1 : v; };
+    var seg = function (a, d) { return REDUCED ? 1 : ease(clamp((tc - a) / d)); };
+    var fade = REDUCED ? 1 : 1 - seg(10600, 900);
+    var breathe = REDUCED ? 0 : Math.sin(t / 900);
+    var spin = REDUCED ? 0.6 : t / 2600;
+
+    function ball(x, y, r, c5, c7, a) {
+      if (a <= 0) return;
+      g.beginPath(); g.ellipse(x, y + r + 3, r * 0.9, r * 0.28, 0, 0, TAU);
+      g.fillStyle = rgb(M.mu, 0.12 * a); g.fill();
+      var gr = g.createRadialGradient(x - r * 0.38, y - r * 0.42, r * 0.08, x, y, r);
+      gr.addColorStop(0, rgb(mix(c5, M.WH, 0.78), a));
+      gr.addColorStop(0.42, rgb(c5, a));
+      gr.addColorStop(1, rgb(c7, a));
+      g.beginPath(); g.arc(x, y, r, 0, TAU); g.fillStyle = gr; g.fill();
+    }
+    function ghost(x, y, r, a) {
+      if (a <= 0) return;
+      var gr = g.createRadialGradient(x - r * 0.35, y - r * 0.4, r * 0.1, x, y, r);
+      gr.addColorStop(0, rgb(M.WH, 0.55 * a));
+      gr.addColorStop(1, rgb(M.mu, 0.10 * a));
+      g.beginPath(); g.arc(x, y, r, 0, TAU); g.fillStyle = gr; g.fill();
+      g.setLineDash([3, 3]); g.strokeStyle = rgb(M.mu, 0.75 * a); g.lineWidth = 1.4; g.stroke(); g.setLineDash([]);
+    }
+    function halo(x, y, r, c, a) {
+      if (a <= 0) return;
+      var gr = g.createRadialGradient(x, y, r * 0.2, x, y, r);
+      gr.addColorStop(0, rgb(c, 0.32 * a)); gr.addColorStop(1, rgb(c, 0));
+      g.beginPath(); g.arc(x, y, r, 0, TAU); g.fillStyle = gr; g.fill();
+    }
+    function ring(cx, cy, rx, ry, c, a, w, ph) {
+      /* a tilted ring: the near half drawn stronger than the far half */
+      g.lineWidth = w;
+      g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, Math.PI, TAU);
+      g.strokeStyle = rgb(c, 0.35 * a); g.stroke();
+      g.beginPath(); g.ellipse(cx, cy, rx, ry, 0, 0, Math.PI);
+      g.strokeStyle = rgb(c, 0.85 * a); g.stroke();
+      /* a bead of light running round it */
+      var th = ph % TAU;
+      halo(cx + rx * Math.cos(th), cy + ry * Math.sin(th), 7, c, a * (Math.sin(th) > 0 ? 1 : 0.4));
+    }
+    function quad(u0, v0, u1, v1) {
+      var a = M.uv(u0, v0), b = M.uv(u1, v0), c = M.uv(u1, v1), d = M.uv(u0, v1);
+      g.beginPath(); g.moveTo(a[0], a[1]); g.lineTo(b[0], b[1]); g.lineTo(c[0], c[1]); g.lineTo(d[0], d[1]); g.closePath();
+    }
+
+    /* --- the image plane and its detections --------------------------- */
+    quad(0, 0, 1, 1);
+    var sheet = g.createLinearGradient(0, 84, 0, 188);
+    sheet.addColorStop(0, rgb(M.mu, 0.03)); sheet.addColorStop(1, rgb(M.mu, 0.10));
+    g.fillStyle = sheet; g.fill();
+    g.strokeStyle = rgb(M.mu, 0.28); g.lineWidth = 1; g.stroke();
+    for (var gl = 1; gl < 6; gl++) {                      /* faint pixel grid */
+      var p0 = M.uv(gl / 6, 0), p1 = M.uv(gl / 6, 1);
+      g.beginPath(); g.moveTo(p0[0], p0[1]); g.lineTo(p1[0], p1[1]);
+      g.strokeStyle = rgb(M.mu, 0.06); g.stroke();
+    }
+    var sup = seg(700, 1000);
+    var DET = [
+      { u0: 0.10, v0: 0.18, u1: 0.40, v1: 0.82, c5: M.b5, c7: M.b7 },   /* b0 -2 */
+      { u0: 0.62, v0: 0.14, u1: 0.88, v1: 0.78, c5: M.m5, c7: M.m7 },   /* b1 -3 */
+      { u0: 0.22, v0: 0.30, u1: 0.50, v1: 0.96, c5: M.v5, c7: M.v7 }    /* b2 -4 */
+    ];
+    for (var i = 0; i < 3; i++) {
+      var d = DET[i], al = i === 2 ? 1 - 0.85 * sup : 1;
+      quad(d.u0, d.v0, d.u1, d.v1);
+      g.fillStyle = rgb(d.c5, 0.10 * al); g.fill();
+      g.setLineDash(i === 2 && sup > 0.05 ? [5, 4] : []);
+      g.strokeStyle = rgb(d.c5, 0.95 * al); g.lineWidth = 2.2; g.stroke();
+      g.setLineDash([]);
+    }
+    /* the overlap that suppresses b2 flashes, then b2's sphere dissolves */
+    var flash = sup * (1 - seg(1700, 700));
+    if (flash > 0) {
+      quad(0.22, 0.30, 0.40, 0.82);
+      g.fillStyle = rgb(M.c5, 0.28 * flash); g.fill();
+    }
+    var cen = function (k) { var dd = DET[k]; return M.uv((dd.u0 + dd.u1) / 2, (dd.v0 + dd.v1) / 2); };
+    var c0 = cen(0), c1 = cen(1), c2 = cen(2);
+    var appear = seg(0, 600);
+    if (sup < 1) ball(c2[0], c2[1], 9 * (1 - sup), M.v5, M.v7, appear * (1 - sup));
+    for (var pz = 0; pz < 9 && sup > 0 && sup < 1; pz++) {   /* dissolving */
+      var ang = pz * TAU / 9 + 0.3, rr0 = 6 + 26 * sup;
+      g.beginPath(); g.arc(c2[0] + rr0 * Math.cos(ang), c2[1] + rr0 * 0.6 * Math.sin(ang), 1.8 * (1 - sup), 0, TAU);
+      g.fillStyle = rgb(M.v5, 0.8 * (1 - sup)); g.fill();
+    }
+
+    /* --- the two glass columns ---------------------------------------- */
+    for (var k = 0; k < 2; k++) {
+      var x = COL[k], hue = k ? M.b5 : M.c5, hue7 = k ? M.b7 : M.c7;
+      /* glass body */
+      var body = g.createLinearGradient(x - 34, 0, x + 34, 0);
+      body.addColorStop(0, rgb(hue, 0.02)); body.addColorStop(0.3, rgb(M.WH, 0.35));
+      body.addColorStop(0.7, rgb(hue, 0.05)); body.addColorStop(1, rgb(hue, 0.10));
+      g.fillStyle = body; g.fillRect(x - 34, 262, 68, 138);
+      g.beginPath(); g.moveTo(x - 34, 262); g.lineTo(x - 34, 400); g.moveTo(x + 34, 262); g.lineTo(x + 34, 400);
+      g.strokeStyle = rgb(hue7, 0.22); g.lineWidth = 1; g.stroke();
+      g.beginPath(); g.ellipse(x, 400, 34, 8, 0, 0, TAU);
+      g.fillStyle = rgb(hue, 0.07); g.fill(); g.strokeStyle = rgb(hue7, 0.25); g.stroke();
+      /* score ticks */
+      for (var s = 1; s <= 4; s++) {
+        g.beginPath(); g.ellipse(x, SY(-s), 34, 6, 0, 0, Math.PI);
+        g.strokeStyle = rgb(M.mu, s === 1 ? 0 : 0.14); g.lineWidth = 1; g.stroke();
+      }
+      /* the padding shelf at -1.0 */
+      g.beginPath(); g.ellipse(x, SY(-1), 46, 11, 0, 0, TAU);
+      var shelf = g.createRadialGradient(x - 14, SY(-1) - 4, 2, x, SY(-1), 46);
+      shelf.addColorStop(0, rgb(M.WH, 0.75)); shelf.addColorStop(1, rgb(M.mu, 0.16));
+      g.fillStyle = shelf; g.fill();
+      g.strokeStyle = rgb(M.mu, 0.45); g.lineWidth = 1.2; g.stroke();
+      /* the two output slots, rings that turn */
+      ring(x, SLOT[0], 30, 8, hue, 1, 2, spin + k);
+      ring(x, SLOT[1], 30, 8, hue, 1, 2, spin + k + 2.1);
+    }
+
+    /* --- the spheres -------------------------------------------------- */
+    var fall = function (from, tx, ty, a, d) {
+      var kk = seg(a, d);
+      var x = from[0] + (tx - from[0]) * kk;
+      var y = from[1] + (ty - from[1]) * kk - Math.sin(Math.PI * kk) * 26;   /* a small arc */
+      return [x, y, kk];
+    };
+    var lift = seg(4400, 1300);
+    var bob = 1.4 * breathe;
+    var R = 10;
+
+    /* left: score only */
+    var L = COL[0];
+    var pL = [L, SY(-1) - R + 1];                                   /* ghost on its shelf */
+    var gL = [pL[0], pL[1] + (SLOT[0] - pL[1]) * lift];
+    ghost(gL[0], gL[1] + bob * lift, R, appear * fade);
+    var b0L = fall(c0, L - 6, SY(-2), 1800, 1100);
+    var b0Ly = b0L[1] + (SLOT[1] - b0L[1]) * lift;
+    var b1L = fall(c1, L + 8, SY(-3), 2200, 1100);
+    var drop = seg(5900, 1400);                                    /* b1 left behind, falls away */
+    var b1Ly = b1L[1] + drop * 46, b1La = (1 - 0.65 * drop) * fade;
+    if (drop > 0) halo(b1L[0], b1Ly, 22, M.c5, drop * fade * (0.7 + 0.3 * breathe));
+    ball(b1L[0], b1Ly, R, drop > 0 ? mix(M.m5, M.c5, drop) : M.m5, drop > 0 ? mix(M.m7, M.c7, drop) : M.m7, b1La * Math.min(1, b1L[2] * 4));
+    ball(b0L[0] + 6 * lift, b0Ly + bob * lift, R, M.b5, M.b7, fade * Math.min(1, b0L[2] * 4));
+
+    /* right: real before padding, then score, class, box index */
+    var Rx = COL[1];
+    var sink = seg(4400, 1500);
+    ghost(Rx, SY(-1) - R + 1 + sink * 70, R, appear * fade * (1 - 0.8 * sink));
+    var b0R = fall(c0, Rx - 6, SY(-2), 1800, 1100);
+    var b1R = fall(c1, Rx + 8, SY(-3), 2200, 1100);
+    var liftR = seg(4700, 1300);
+    ball(b1R[0] - 8 * liftR, b1R[1] + (SLOT[1] - b1R[1]) * liftR + bob * liftR, R, M.m5, M.m7, fade * Math.min(1, b1R[2] * 4));
+    ball(b0R[0] + 6 * liftR, b0R[1] + (SLOT[0] - b0R[1]) * liftR + bob * liftR, R, M.b5, M.b7, fade * Math.min(1, b0R[2] * 4));
+    var win = seg(6200, 800) * fade;
+    if (win > 0) {
+      halo(Rx, SLOT[0], 30, M.b5, win * (0.6 + 0.4 * breathe));
+      halo(Rx, SLOT[1], 30, M.b5, win * (0.6 - 0.4 * breathe));
+    }
+
+    /* the source spheres on the image fade as their copies fall */
+    var src = 1 - seg(1800, 900);
+    ball(c0[0], c0[1], 9, M.b5, M.b7, appear * src);
+    ball(c1[0], c1[1], 9, M.m5, M.m7, appear * (1 - seg(2200, 900)));
+  }
+
   var RENDER = { caustic: caustic, units: units, funnel: funnel,
                  transport: transport, collapse: collapse,
                  witness: witness, gather: gather,
@@ -10116,6 +10327,7 @@
                  prune: prune,
                  schedule: schedule,
                  closure: closure,
+                 nms: nms,
                  link: link,
                  glass: glass,
                  aether: aether,
